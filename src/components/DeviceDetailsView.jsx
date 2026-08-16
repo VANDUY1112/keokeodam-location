@@ -12,7 +12,10 @@ import {
   Route, 
   Calendar,
   AlertCircle,
-  Truck
+  Truck,
+  Plus,
+  Printer,
+  Calculator
 } from 'lucide-react';
 
 export default function DeviceDetailsView({ 
@@ -20,9 +23,15 @@ export default function DeviceDetailsView({
   selectedSpeakerId, 
   onSelectSpeaker, 
   onOpenCheckinModal, 
+  onOpenAddSpeakerModal,
+  onOpenReceiptModal,
   searchTerm 
 }) {
   const [now, setNow] = useState(Date.now());
+
+  // Quick price calculator state
+  const [calcHours, setCalcHours] = useState(4);
+  const [calcDistance, setCalcDistance] = useState(5);
 
   // Ticker for live rental clock
   useEffect(() => {
@@ -54,6 +63,10 @@ export default function DeviceDetailsView({
     liveRentalAmount = Math.round(elapsedHoursDecimal * selectedSpeaker.hourlyRate) + (selectedSpeaker.currentRental.shippingFee || 0);
   }
 
+  // Quick estimate calculation
+  const calcShipFee = calcDistance > 2 ? Math.round((calcDistance - 2) * 5000 + 15000) : 0;
+  const calcTotalEstimate = Math.round(calcHours * (selectedSpeaker?.hourlyRate || 80000)) + calcShipFee;
+
   return (
     <div className="p-6 max-w-[1600px] mx-auto select-none space-y-6">
       
@@ -81,7 +94,15 @@ export default function DeviceDetailsView({
         </div>
 
         {/* Quick Check-in Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={onOpenAddSpeakerModal}
+            className="px-3.5 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright border border-outline-variant/30 text-on-surface text-[12px] font-bold flex items-center gap-1.5 transition-all"
+          >
+            <Plus className="w-4 h-4 text-primary" />
+            <span>+ Thêm Loa Mới</span>
+          </button>
+
           {selectedSpeaker.status === 'available' ? (
             <button
               onClick={() => onOpenCheckinModal('delivery', selectedSpeaker.id)}
@@ -252,13 +273,37 @@ export default function DeviceDetailsView({
                   <p className="text-[12px] text-on-surface-variant font-mono mt-0.5">Khách đã nhận loa và đang tính tiền theo giờ</p>
                 </div>
 
-                <a
-                  href={`tel:${selectedSpeaker.currentRental.customerPhone}`}
-                  className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright border border-outline-variant/30 text-on-surface text-[13px] font-mono flex items-center gap-2 transition-all w-fit"
-                >
-                  <Phone className="w-4 h-4 text-primary" />
-                  <span>Gọi Cho Khách: {selectedSpeaker.currentRental.customerPhone}</span>
-                </a>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`tel:${selectedSpeaker.currentRental.customerPhone}`}
+                    className="px-3.5 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright border border-outline-variant/30 text-on-surface text-[12px] font-mono flex items-center gap-1.5 transition-all"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-primary" />
+                    <span>Gọi Khách</span>
+                  </a>
+
+                  <button
+                    onClick={() => {
+                      onOpenReceiptModal({
+                        id: 'HD-' + selectedSpeaker.id + '-' + Date.now().toString().slice(-4),
+                        customerName: selectedSpeaker.currentRental.customerName,
+                        customerPhone: selectedSpeaker.currentRental.customerPhone,
+                        address: selectedSpeaker.currentRental.address,
+                        speakerId: selectedSpeaker.id,
+                        speakerName: selectedSpeaker.name,
+                        rentHours: elapsedHoursDecimal,
+                        hourlyRate: selectedSpeaker.hourlyRate,
+                        distanceKm: selectedSpeaker.currentRental.distanceKm,
+                        shippingFee: selectedSpeaker.currentRental.shippingFee,
+                        totalAmount: liveRentalAmount
+                      });
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright border border-outline-variant/30 text-primary text-[12px] font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>In Phiếu Thu Tạm Tính</span>
+                  </button>
+                </div>
               </div>
 
               {/* Live Rental Stopwatch Display */}
@@ -342,6 +387,48 @@ export default function DeviceDetailsView({
               </button>
             </div>
           )}
+
+          {/* Quick Price Calculator Widget (Báo giá nhanh cho khách gọi hỏi) */}
+          <div className="bg-surface-container/80 backdrop-blur-xl border border-outline-variant/20 p-5 rounded-2xl space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Calculator className="w-4 h-4 text-primary" />
+                <h3 className="text-[14px] font-bold text-on-surface">Công Cụ Báo Giá Nhanh Cho Khách Hỏi Thuê</h3>
+              </div>
+              <span className="text-[11px] font-mono text-on-surface-variant">Áp dụng cho {selectedSpeaker.name}</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[11px] font-mono text-on-surface-variant mb-1">Số giờ dự kiến thuê</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="24"
+                  value={calcHours}
+                  onChange={(e) => setCalcHours(parseFloat(e.target.value) || 1)}
+                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2 text-on-surface text-[13px] font-mono focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-mono text-on-surface-variant mb-1">Khoảng cách ship (km)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="50"
+                  value={calcDistance}
+                  onChange={(e) => setCalcDistance(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2 text-on-surface text-[13px] font-mono focus:outline-none"
+                />
+              </div>
+
+              <div className="bg-primary/10 border border-primary/30 p-2 rounded-xl flex flex-col justify-center text-center">
+                <span className="text-[10px] font-mono text-on-surface-variant uppercase">Tổng tiền báo khách:</span>
+                <span className="text-[18px] font-black text-primary font-mono">{calcTotalEstimate.toLocaleString('vi-VN')} đ</span>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>
