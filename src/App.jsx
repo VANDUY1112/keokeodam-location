@@ -186,6 +186,27 @@ export default function App() {
     setTrips((prev) => prev.filter((t) => t.id !== tripId));
   };
 
+  const [userAvatar, setUserAvatar] = useState(() => {
+    return localStorage.getItem('expensely_user_avatar') || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+  });
+
+  const [userName, setUserName] = useState(() => {
+    return localStorage.getItem('expensely_user_name') || 'Alex Johnson';
+  });
+
+  const AVATAR_PRESETS = [
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+  ];
+
+  const handleSelectAvatar = (url) => {
+    setUserAvatar(url);
+    localStorage.setItem('expensely_user_avatar', url);
+  };
+
   return (
     <div className="bg-background font-body-md text-on-background min-h-screen">
       {/* ═══════════════ SIDEBAR NAVIGATION (W-72) ═══════════════ */}
@@ -193,10 +214,10 @@ export default function App() {
         <div className="h-16 flex items-center px-lg mb-sm gap-sm">
           <img
             alt="Expensely Logo"
-            className="h-8 w-auto object-contain"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZEe91jxMChIOPJ3a-L96MEXUG-c7UsjTsrXMkxi1DBCJpqAJSz4mYT2omTyPr6xFzZHkMBbxOSAEe2MWd5pZ9EaEp7g1MxrUZes9pYY6rwCPvRKk1h0-pifo7Q5QXf-_Rkz0IwJxMqU9FIZG0Hk9swkKW_T-YXFx5q3cddoXIRLgbuhxogquJxzUXZYgSRCShRp3FTLrzPWvXtiT6B_zQiPwNl0uNirrxuUjCfhXcpfYgScQ71Iqh"
+            className="h-8 w-8 rounded-xl shadow-xs object-cover"
+            src="/favicon.svg"
           />
-          <span className="font-headline-md text-primary tracking-tight">Expensely</span>
+          <span className="font-headline-md text-primary tracking-tight font-bold">Expensely</span>
         </div>
 
         <nav className="flex-1 flex flex-col gap-1.5 px-3">
@@ -309,33 +330,33 @@ export default function App() {
             <div className="relative" ref={profileMenuRef}>
               <div
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-md cursor-pointer hover:bg-surface-container-high p-1.5 pr-3 rounded-full transition-all group border border-outline-variant/20"
+                className="flex items-center gap-3 cursor-pointer hover:bg-surface-container-high p-1.5 pr-3 rounded-full transition-all group border border-outline-variant/30 bg-white/60 shadow-xs"
               >
                 <img
                   alt="Profile"
-                  className="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-highest group-hover:ring-primary-fixed-dim"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPd2lm08x1AlkyTD2a7EAyfL0w3g6wLf-ks695bcDug3eBb3dY7M-IYqblxUBUJkM_1JLpS-oe2ETxX133ifwVSaKDBPAoUyTnh9m2K6JGZaAXpocLvkSW-pPgCzBOCNm7rypqZsPJjCJ7JkHe9e7WnEQhZ3jdjhuV30XXIgz2jC82hw8CKQ4KGLrargMZ6FzYKrKBFWjpHswjzqdRYHAue-PJetCwtSUpvGnzOmaRO_Dz82T-AYn-"
+                  className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-primary shadow-xs"
+                  src={userAvatar}
                 />
-                <span className="font-body-md font-medium text-on-surface">Alex Johnson</span>
-                <span className={`material-symbols-outlined text-[18px] text-on-surface-variant transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
+                <span className="font-semibold text-slate-800 text-sm">{userName}</span>
+                <span className={`material-symbols-outlined text-[18px] text-slate-500 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
                   expand_more
                 </span>
               </div>
 
               {/* Profile Dropdown Menu */}
               {showProfileMenu && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-surface-container-lowest/95 backdrop-blur-xl border border-outline-variant/25 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="p-3 border-b border-outline-variant/15 flex items-center gap-3">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-surface-container-lowest/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-3 border-b border-slate-100 flex items-center gap-3">
                     <img
                       alt="Profile"
-                      className="w-10 h-10 rounded-full object-cover ring-2 ring-primary"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPd2lm08x1AlkyTD2a7EAyfL0w3g6wLf-ks695bcDug3eBb3dY7M-IYqblxUBUJkM_1JLpS-oe2ETxX133ifwVSaKDBPAoUyTnh9m2K6JGZaAXpocLvkSW-pPgCzBOCNm7rypqZsPJjCJ7JkHe9e7WnEQhZ3jdjhuV30XXIgz2jC82hw8CKQ4KGLrargMZ6FzYKrKBFWjpHswjzqdRYHAue-PJetCwtSUpvGnzOmaRO_Dz82T-AYn-"
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-primary shadow-sm"
+                      src={userAvatar}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-sm text-on-surface truncate">Alex Johnson</div>
-                      <div className="text-xs text-on-surface-variant truncate">Lead Field Engineer</div>
-                      <span className="inline-block px-1.5 py-0.5 rounded bg-secondary/10 text-secondary text-[10px] font-semibold mt-1">
-                        Online • GPS Live
+                      <div className="font-bold text-sm text-on-surface truncate">{userName}</div>
+                      <div className="text-xs text-on-surface-variant truncate">Kỹ Sư Trưởng Thực Địa</div>
+                      <span className="inline-block px-2 py-0.5 rounded bg-secondary/10 text-secondary text-[11px] font-semibold mt-1">
+                        GPS Trực Tuyến
                       </span>
                     </div>
                   </div>
@@ -468,22 +489,88 @@ export default function App() {
 
             {/* TAB 6: CÀI ĐẶT (SETTINGS) */}
             {activeTab === 'settings' && (
-              <div className="space-y-6 max-w-2xl">
+              <div className="space-y-6 max-w-3xl">
                 <div>
                   <h2 className="font-headline-lg text-on-surface">Cài Đặt & Tùy Chọn</h2>
                   <p className="text-on-surface-variant text-sm mt-1">
-                    Cấu hình phương tiện di chuyển, định mức hoàn ứng và thông tin tài khoản.
+                    Cấu hình ảnh đại diện, phương tiện di chuyển, định mức hoàn ứng và thông tin tài khoản.
                   </p>
                 </div>
+
+                {/* Avatar & Profile Card */}
+                <div className="p-6 bg-surface-container-lowest border border-slate-200 rounded-3xl shadow-sm space-y-5">
+                  <div className="font-bold text-slate-900 text-base">Ảnh Đại Diện & Hồ Sơ Cá Nhân</div>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-5">
+                    <img
+                      alt="Current Avatar"
+                      src={userAvatar}
+                      className="w-20 h-20 rounded-full object-cover ring-4 ring-primary/20 shadow-md"
+                    />
+                    <div className="space-y-2 flex-1 w-full">
+                      <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
+                        Chọn Avatar Có Sẵn
+                      </label>
+                      <div className="flex flex-wrap gap-3">
+                        {AVATAR_PRESETS.map((preset, idx) => (
+                          <img
+                            key={idx}
+                            src={preset}
+                            alt={`Avatar option ${idx + 1}`}
+                            onClick={() => handleSelectAvatar(preset)}
+                            className={`w-12 h-12 rounded-full object-cover cursor-pointer transition-all hover:scale-110 ${
+                              userAvatar === preset
+                                ? 'ring-4 ring-primary shadow-lg scale-105'
+                                : 'ring-2 ring-slate-200 opacity-70 hover:opacity-100'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold uppercase text-slate-500 tracking-wider mb-1">
+                        Tên Hiển Thị
+                      </label>
+                      <input
+                        type="text"
+                        value={userName}
+                        onChange={(e) => {
+                          setUserName(e.target.value);
+                          localStorage.setItem('expensely_user_name', e.target.value);
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold uppercase text-slate-500 tracking-wider mb-1">
+                        Hoặc Dán Link Avatar Riêng
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        onBlur={(e) => {
+                          if (e.target.value.trim()) {
+                            handleSelectAvatar(e.target.value.trim());
+                          }
+                        }}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-4">
-                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-xl flex items-center justify-between shadow-sm">
+                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
                     <div>
                       <div className="font-semibold text-on-surface text-sm">Tự động kích hoạt GPS định vị</div>
                       <div className="text-xs text-on-surface-variant mt-0.5">Ghi nhận tọa độ vi mô khi bắt đầu chuyến đi</div>
                     </div>
                     <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary cursor-pointer" />
                   </div>
-                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-xl flex items-center justify-between shadow-sm">
+                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
                     <div>
                       <div className="font-semibold text-on-surface text-sm">Thông báo phê duyệt chi phí tức thì</div>
                       <div className="text-xs text-on-surface-variant mt-0.5">Gửi thông báo đến phòng kế toán ngay khi kết thúc lộ trình</div>
