@@ -1,363 +1,243 @@
 import React, { useState } from 'react';
 import { 
   X, 
-  Send
+  Send, 
+  Clock, 
+  Phone, 
+  AlertTriangle, 
+  CheckCircle2, 
+  Speaker, 
+  BatteryWarning, 
+  Moon,
+  Truck
 } from 'lucide-react';
 
 export default function AlertsView({ 
-  alerts, 
-  setAlerts, 
-  onSelectUnit, 
-  setActiveTab,
+  speakers, 
+  onOpenCheckinModal, 
+  onSelectSpeaker, 
+  setActiveTab, 
   setToast 
 }) {
-  const [selectedCategory, setSelectedCategory] = useState('Tất cả'); // 'Tất cả' | 'Ranh giới' | 'Tốc độ'
-  const [engagedIncident, setEngagedIncident] = useState(null);
-  const [tacticalNote, setTacticalNote] = useState('');
+  const [filterType, setFilterType] = useState('all'); // 'all' | 'time' | 'battery'
 
-  // Filter alerts by category
-  const filteredAlerts = alerts.filter((alert) => {
-    if (selectedCategory === 'Tất cả') return true;
-    if (selectedCategory === 'Ranh giới') return alert.category === 'geofence';
-    if (selectedCategory === 'Tốc độ') return alert.category === 'speed';
+  const rentalAlerts = [
+    {
+      id: "ALT-01",
+      speakerId: "LKK-04",
+      speakerName: "Loa Kéo Bass 40 Dalton 600W",
+      customerName: "Anh Dũng (Khai Trương Cửa Hàng)",
+      customerPhone: "0933 888 999",
+      severity: "critical",
+      type: "time",
+      title: "Khách Đã Thuê Quá 4 Tiếng (Hiện tại: 4h 40m)",
+      desc: "Loa check-in giao từ lúc 10:15 sáng. Hãy gọi điện hỏi khách có nhu cầu gia hạn thêm không hoặc xếp lịch đi chở về.",
+      timeFormatted: "10:15 - Hiện tại",
+      action: "call"
+    },
+    {
+      id: "ALT-02",
+      speakerId: "LKK-01",
+      speakerName: "Loa Kéo Bass 40 Nanomax 800W",
+      customerName: "Anh Tuấn (Tiệc Sinh Nhật)",
+      customerPhone: "0908 123 456",
+      severity: "warning",
+      type: "time",
+      title: "Loa Đang Thuê 3 Tiếng 25 Phút",
+      desc: "Giao lúc 11:30 tại 128 Đường Số 5 Linh Trung. Cần chú ý thời gian tiệc kết thúc để đi lấy loa.",
+      timeFormatted: "11:30 - Hiện tại",
+      action: "call"
+    },
+    {
+      id: "ALT-03",
+      speakerId: "LKK-06",
+      speakerName: "Loa Kéo 4 Tấc Đôi Sân Khấu",
+      customerName: "Bác Hùng (Đám Giỗ)",
+      customerPhone: "0977 654 321",
+      severity: "info",
+      type: "shipping",
+      title: "Loa Đang Trên Đường Chở Về Nhà",
+      desc: "Shipper đang chở loa từ Quận 9 về kho Số 45 Đường Số 8. Chuẩn bị cắm sạc pin ắc quy.",
+      timeFormatted: "Cách nhà 6.4 km",
+      action: "return"
+    },
+    {
+      id: "ALT-04",
+      speakerId: "LKK-02",
+      speakerName: "Loa Bass 50 Đôi Khủng 1200W",
+      customerName: "Chị Lan (Tiệc Tất Niên)",
+      customerPhone: "0912 345 678",
+      severity: "warning",
+      type: "night",
+      title: "Nhắc Nhở Thu Hồi Loa Đêm Trước 22:00",
+      desc: "Quy định khu dân cư giới hạn âm thanh sau 22:00 đêm. Chủ động liên hệ khách lúc 21:30 để thu hồi loa đúng giờ.",
+      timeFormatted: "Hạn thu: 21:45",
+      action: "call"
+    }
+  ];
+
+  const filteredAlerts = rentalAlerts.filter(a => {
+    if (filterType === 'all') return true;
+    if (filterType === 'time') return a.type === 'time';
+    if (filterType === 'battery') return a.type === 'battery';
     return true;
   });
 
-  const criticalCount = alerts.filter(a => a.severity === 'critical' && a.status === 'active').length;
-  const warningCount = alerts.filter(a => a.severity === 'warning' && a.status === 'active').length;
-
-  const handleEngage = (incident) => {
-    setEngagedIncident(incident);
-  };
-
-  const handleConfirmEngagement = (e) => {
-    e.preventDefault();
-    if (!engagedIncident) return;
-
-    setAlerts(alerts.map(a => 
-      a.id === engagedIncident.id 
-        ? { ...a, severity: 'resolved', status: 'resolved', actionLabel: 'Đã tự động xóa', eventTitle: `${a.eventTitle} (Đã can thiệp & Xử lý)` } 
-        : a
-    ));
-
-    setToast({
-      title: `Đã Kích Hoạt Can Thiệp Khẩn Cấp: ${engagedIncident.assetId}`,
-      desc: `Đội phản ứng nhanh đã được triển khai. Chỉ thị: "${tacticalNote || 'Áp dụng quy trình tiêu chuẩn'}"`,
-      type: 'success'
-    });
-
-    setTacticalNote('');
-    setEngagedIncident(null);
-  };
-
-  const handleReview = (incident) => {
-    onSelectUnit(incident.assetId);
-    setActiveTab('device-details');
-  };
-
   return (
-    <div className="flex flex-col w-full relative select-none min-h-[calc(100vh-64px)]">
+    <div className="p-6 max-w-[1600px] mx-auto select-none space-y-6">
       
-      {/* Ambient Map Background Overlay */}
-      <div className="fixed inset-0 top-[64px] left-[280px] z-0 pointer-events-none overflow-hidden">
-        <div 
-          className="w-full h-full opacity-20 mix-blend-luminosity bg-cover bg-center"
-          style={{ backgroundImage: `url('https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg')` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
-        {/* Decorative glowing orb behind critical items */}
-        <div className="absolute top-20 left-10 w-96 h-96 bg-error/10 blur-[100px] rounded-full animate-pulse pointer-events-none"></div>
-      </div>
-
-      <div className="flex flex-col w-full px-lg py-lg gap-lg relative z-10 max-w-[1600px] mx-auto">
+      {/* Top Banner KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         
-        {/* Command Panel / Filters Header */}
-        <div className="w-full bg-surface-container/90 backdrop-blur-xl shadow-lg rounded-xl p-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-lg relative overflow-hidden group border border-outline-variant/15">
-          {/* Animated Background Gradient in Header */}
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700 pointer-events-none"></div>
-          
-          <div className="flex items-center gap-md z-10">
-            <div className="relative w-12 h-12 bg-surface-bright rounded-full flex items-center justify-center shadow-md border border-outline-variant/30">
-              <span className="material-symbols-outlined text-on-surface text-[24px]">radar</span>
-              {criticalCount > 0 && (
-                <>
-                  <div className="absolute top-0 right-0 w-3 h-3 bg-error rounded-full animate-ping"></div>
-                  <div className="absolute top-0 right-0 w-3 h-3 bg-error rounded-full"></div>
-                </>
-              )}
-            </div>
-            
-            <div className="flex flex-col">
-              <h1 className="font-headline-md text-headline-md text-on-surface font-bold">Cảnh Báo Viễn Thông</h1>
-              <div className="flex items-center gap-sm mt-xs">
-                <span className="w-2 h-2 rounded-full bg-error"></span>
-                <span className="font-mono-data text-mono-data text-error font-bold">{criticalCount} KHẨN CẤP</span>
-                <span className="w-1 h-1 rounded-full bg-on-surface-variant/50 mx-xs"></span>
-                <span className="w-2 h-2 rounded-full bg-tertiary"></span>
-                <span className="font-mono-data text-mono-data text-tertiary font-bold">{warningCount} CẢNH BÁO</span>
-              </div>
-            </div>
+        <div className="bg-surface-container/80 backdrop-blur-xl border border-error/30 p-5 rounded-2xl flex items-center justify-between">
+          <div>
+            <div className="text-[12px] font-mono text-error uppercase font-bold">Thuê Quá 4 Tiếng</div>
+            <div className="text-[28px] font-black text-on-surface font-mono mt-0.5">1 Loa</div>
+            <div className="text-[11px] text-on-surface-variant font-medium">Cần gọi điện xác nhận gia hạn</div>
           </div>
-
-          {/* Trend Chart (24h Event Frequency) */}
-          <div className="hidden md:flex flex-col items-end z-10">
-            <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-sm font-semibold">
-              Tần Suất Sự Cố 24H
-            </span>
-            <svg className="w-32 h-8 text-tertiary" preserveAspectRatio="none" viewBox="0 0 100 20">
-              <path 
-                d="M0,20 L0,15 L10,12 L20,18 L30,5 L40,10 L50,8 L60,15 L70,2 L80,10 L90,14 L100,6 L100,20 Z" 
-                fill="currentColor" 
-                fillOpacity="0.2"
-              ></path>
-              <path 
-                d="M0,15 L10,12 L20,18 L30,5 L40,10 L50,8 L60,15 L70,2 L80,10 L90,14 L100,6" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeLinecap="round" 
-                strokeWidth="2"
-              ></path>
-            </svg>
+          <div className="w-12 h-12 rounded-2xl bg-error/15 flex items-center justify-center text-error">
+            <Clock className="w-6 h-6 animate-pulse" />
           </div>
-
-          {/* Filter Pills */}
-          <div className="flex items-center gap-sm w-full sm:w-auto z-10">
-            <div className="bg-surface-container-high rounded-full px-xs py-xs flex shadow-inner border border-outline-variant/20">
-              {['Tất cả', 'Ranh giới', 'Tốc độ'].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={`px-md py-sm rounded-full font-label-md text-label-md transition-all ${
-                    selectedCategory === cat
-                      ? 'bg-surface-bright text-on-surface shadow-sm font-semibold'
-                      : 'text-on-surface-variant hover:bg-surface-bright/50'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={() => {
-                setToast({
-                  title: 'Bộ lọc Sự Cố Đã Áp Dụng',
-                  desc: 'Hiển thị dữ liệu viễn thông tương ứng.',
-                  type: 'info'
-                });
-              }}
-              className="w-10 h-10 bg-surface-container-high hover:bg-surface-bright rounded-full flex items-center justify-center text-on-surface shadow-sm transition-transform hover:scale-105 border border-outline-variant/20"
-              title="Bộ lọc nâng cao"
-            >
-              <span className="material-symbols-outlined text-[20px]">filter_list</span>
-            </button>
-          </div>
-
         </div>
 
-        {/* Alert List Container */}
-        <div className="flex flex-col w-full gap-sm">
-          
-          {/* Column Headers (Hidden on Mobile) */}
-          <div className="hidden md:grid grid-cols-[120px_160px_1fr_2fr_120px] gap-md px-lg py-sm text-on-surface-variant font-label-sm text-label-sm uppercase tracking-[0.15em] opacity-70">
-            <div>Mức độ</div>
-            <div>Thời gian</div>
-            <div>Mã xe</div>
-            <div>Chi tiết sự cố</div>
-            <div className="text-right">Thao tác</div>
+        <div className="bg-surface-container/80 backdrop-blur-xl border border-tertiary/30 p-5 rounded-2xl flex items-center justify-between">
+          <div>
+            <div className="text-[12px] font-mono text-tertiary uppercase font-bold">Đang Cho Thuê</div>
+            <div className="text-[28px] font-black text-on-surface font-mono mt-0.5">3 Loa</div>
+            <div className="text-[11px] text-on-surface-variant font-medium">Đang tính tiền trực tiếp theo giờ</div>
           </div>
+          <div className="w-12 h-12 rounded-2xl bg-tertiary/15 flex items-center justify-center text-tertiary">
+            <Speaker className="w-6 h-6" />
+          </div>
+        </div>
 
-          {/* Alert Items */}
-          {filteredAlerts.map((alert) => {
-            const isCritical = alert.severity === 'critical';
-            const isWarning = alert.severity === 'warning';
-
-            if (isCritical) {
-              return (
-                <div
-                  key={alert.id}
-                  className="group grid grid-cols-1 md:grid-cols-[120px_160px_1fr_2fr_120px] items-center gap-md bg-surface-container-low/80 hover:bg-surface-container/90 backdrop-blur-md p-md rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer relative overflow-hidden border border-outline-variant/10"
-                >
-                  {/* Status Indicator Rail */}
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-error opacity-80"></div>
-                  
-                  <div className="flex items-center gap-sm">
-                    <div className="w-8 h-8 rounded-full bg-error-container flex items-center justify-center shadow-inner">
-                      <span className="material-symbols-outlined text-on-error-container text-[16px]">priority_high</span>
-                    </div>
-                    <span className="font-label-sm text-label-sm text-error uppercase tracking-widest font-bold">Khẩn cấp</span>
-                  </div>
-
-                  <div className="font-mono-data text-mono-data text-on-surface-variant text-[13px]">
-                    {alert.timestamp}
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="font-label-md text-label-md text-on-surface font-mono font-bold">{alert.assetId}</span>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">{alert.unitGroup}</span>
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="font-label-md text-label-md text-on-surface font-semibold">{alert.eventTitle}</span>
-                    <span className="font-mono-data text-label-sm text-error/70 font-mono">{alert.coordinates}</span>
-                  </div>
-
-                  <div className="flex justify-end w-full md:w-auto mt-sm md:mt-0">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEngage(alert);
-                      }}
-                      className="px-md py-sm bg-error hover:bg-error/90 text-on-error rounded-full font-label-md text-label-md shadow-md transition-all hover:-translate-y-0.5 font-bold"
-                    >
-                      Can Thiệp
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            if (isWarning) {
-              return (
-                <div
-                  key={alert.id}
-                  className="group grid grid-cols-1 md:grid-cols-[120px_160px_1fr_2fr_120px] items-center gap-md bg-surface-container-low/80 hover:bg-surface-container/90 backdrop-blur-md p-md rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer relative overflow-hidden border border-outline-variant/10"
-                >
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-tertiary opacity-80"></div>
-                  
-                  <div className="flex items-center gap-sm">
-                    <div className="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center shadow-inner">
-                      <span className="material-symbols-outlined text-on-tertiary-container text-[16px]">speed</span>
-                    </div>
-                    <span className="font-label-sm text-label-sm text-tertiary uppercase tracking-widest font-bold">Cảnh báo</span>
-                  </div>
-
-                  <div className="font-mono-data text-mono-data text-on-surface-variant text-[13px]">
-                    {alert.timestamp}
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="font-label-md text-label-md text-on-surface font-mono font-bold">{alert.assetId}</span>
-                    <span className="font-label-sm text-label-sm text-on-surface-variant">{alert.unitGroup}</span>
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="font-label-md text-label-md text-on-surface font-semibold">{alert.eventTitle}</span>
-                    <span className="font-mono-data text-label-sm text-tertiary/70 font-mono">{alert.coordinates}</span>
-                  </div>
-
-                  <div className="flex justify-end w-full md:w-auto mt-sm md:mt-0">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReview(alert);
-                      }}
-                      className="px-md py-sm bg-surface-bright hover:bg-surface-container-highest text-on-surface rounded-full font-label-md text-label-md shadow-sm transition-all hover:-translate-y-0.5 font-medium border border-outline-variant/20"
-                    >
-                      Kiểm Tra
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            // Resolved items
-            return (
-              <div
-                key={alert.id}
-                className="group grid grid-cols-1 md:grid-cols-[120px_160px_1fr_2fr_120px] items-center gap-md bg-surface-container-lowest/40 hover:bg-surface-container-lowest/80 backdrop-blur-sm p-md rounded-xl transition-all cursor-pointer relative overflow-hidden opacity-80 hover:opacity-100 border border-outline-variant/10"
-              >
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/50 group-hover:bg-primary transition-colors"></div>
-                
-                <div className="flex items-center gap-sm">
-                  <div className="w-8 h-8 rounded-full bg-primary-container/50 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-on-primary-container text-[16px]">check_circle</span>
-                  </div>
-                  <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">Đã xử lý</span>
-                </div>
-
-                <div className="font-mono-data text-mono-data text-on-surface-variant text-[13px]">
-                  {alert.timestamp}
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-label-md text-label-md text-on-surface font-mono font-semibold">{alert.assetId}</span>
-                  <span className="font-label-sm text-label-sm text-on-surface-variant">{alert.unitGroup}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-label-md text-label-md text-on-surface font-medium">{alert.eventTitle}</span>
-                  <span className="font-mono-data text-label-sm text-on-surface-variant font-mono">{alert.coordinates}</span>
-                </div>
-
-                <div className="flex justify-end w-full md:w-auto mt-sm md:mt-0">
-                  <span className="font-label-sm text-label-sm text-on-surface-variant px-md py-sm font-mono">
-                    {alert.actionLabel || 'Đã tự động xóa'}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-
+        <div className="bg-surface-container/80 backdrop-blur-xl border border-primary/30 p-5 rounded-2xl flex items-center justify-between">
+          <div>
+            <div className="text-[12px] font-mono text-primary uppercase font-bold">Có Sẵn Tại Nhà</div>
+            <div className="text-[28px] font-black text-primary font-mono mt-0.5">2 Loa</div>
+            <div className="text-[11px] text-on-surface-variant font-medium">Pin 100%, sẵn sàng giao ngay</div>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center text-primary">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
         </div>
 
       </div>
 
-      {/* ENGAGE EMERGENCY PROTOCOL MODAL */}
-      {engagedIncident && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-surface-container border border-error/50 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center text-error">
-                  <span className="material-symbols-outlined text-[20px]">priority_high</span>
-                </div>
-                <h3 className="text-[17px] font-bold text-on-surface">Ứng Phó Khẩn Cấp: {engagedIncident.assetId}</h3>
-              </div>
-              <button onClick={() => setEngagedIncident(null)} className="text-on-surface-variant hover:text-on-surface">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Filter Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-surface-container/70 border border-outline-variant/20 p-4 rounded-2xl">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-mono text-on-surface-variant uppercase mr-2 font-bold">Phân Loại:</span>
+          
+          <button
+            onClick={() => setFilterType('all')}
+            className={`px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
+              filterType === 'all'
+                ? 'bg-primary text-surface-dim shadow-md'
+                : 'bg-surface-container-high text-on-surface hover:bg-surface-bright'
+            }`}
+          >
+            Tất Cả Cảnh Báo ({rentalAlerts.length})
+          </button>
 
-            <div className="bg-error/10 border border-error/30 rounded-xl p-3.5 space-y-1">
-              <div className="text-[14px] font-bold text-error">{engagedIncident.eventTitle}</div>
-              <div className="text-[12px] font-mono text-on-surface-variant">Tọa độ: {engagedIncident.coordinates}</div>
-              <div className="text-[12px] text-on-surface">Đoàn xe / Phương tiện: <strong>{engagedIncident.unitGroup}</strong></div>
-            </div>
-
-            <form onSubmit={handleConfirmEngagement} className="space-y-4">
-              <div>
-                <label className="text-[12px] font-mono text-on-surface-variant uppercase font-semibold">Chỉ Thị Can Thiệp & Ghi Chú Tác Chiến</label>
-                <textarea
-                  value={tacticalNote}
-                  onChange={(e) => setTacticalNote(e.target.value)}
-                  placeholder="Nhập mệnh lệnh điều chuyển lộ trình, cử đội hỗ trợ kỹ thuật..."
-                  rows="3"
-                  className="w-full mt-1 bg-surface-container-high border border-outline-variant/30 rounded-xl p-3 text-on-surface text-[14px] focus:outline-none focus:border-error font-mono"
-                  autoFocus
-                ></textarea>
-              </div>
-
-              <div className="flex justify-end gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setEngagedIncident(null)}
-                  className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px]"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-error hover:bg-error/90 text-on-error font-bold text-[13px] flex items-center gap-2 shadow-lg"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Thực Thi Can Thiệp</span>
-                </button>
-              </div>
-            </form>
-          </div>
+          <button
+            onClick={() => setFilterType('time')}
+            className={`px-3.5 py-1.5 rounded-xl text-[12px] font-bold transition-all ${
+              filterType === 'time'
+                ? 'bg-tertiary text-surface-dim shadow-md'
+                : 'bg-surface-container-high text-tertiary hover:bg-surface-bright'
+            }`}
+          >
+            Thời Gian Thuê Dài
+          </button>
         </div>
-      )}
+
+        <div className="text-[12px] font-mono text-on-surface-variant">
+          Giờ giới nghiêm âm thanh khu dân cư: <strong className="text-tertiary">22:00 Đêm</strong>
+        </div>
+      </div>
+
+      {/* Alert Cards Stream */}
+      <div className="space-y-3.5">
+        {filteredAlerts.map((alt) => {
+          const isCritical = alt.severity === 'critical';
+          const isWarning = alt.severity === 'warning';
+
+          return (
+            <div
+              key={alt.id}
+              className={`p-5 rounded-2xl border transition-all ${
+                isCritical
+                  ? 'bg-surface-container-high/90 border-error/50 shadow-[0_0_20px_rgba(255,180,171,0.15)] ring-1 ring-error/30'
+                  : isWarning
+                  ? 'bg-surface-container/80 border-tertiary/40'
+                  : 'bg-surface-container/80 border-outline-variant/20'
+              }`}
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                
+                {/* Left info */}
+                <div className="flex items-start gap-4">
+                  <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-inner ${
+                    isCritical
+                      ? 'bg-error/20 text-error'
+                      : isWarning
+                      ? 'bg-tertiary/20 text-tertiary'
+                      : 'bg-secondary-container/20 text-secondary'
+                  }`}>
+                    {isCritical ? <AlertTriangle className="w-6 h-6 animate-pulse" /> : <Clock className="w-6 h-6" />}
+                  </div>
+
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="font-mono font-bold text-[15px] text-primary">{alt.speakerId}</span>
+                      <span className="text-[13px] text-on-surface-variant font-medium">({alt.speakerName})</span>
+                      <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full uppercase font-bold ${
+                        isCritical
+                          ? 'bg-error text-surface-dim'
+                          : isWarning
+                          ? 'bg-tertiary text-surface-dim'
+                          : 'bg-secondary/20 text-secondary'
+                      }`}>
+                        {isCritical ? 'Khẩn Cấp' : isWarning ? 'Cần Chú Ý' : 'Thông Tin'}
+                      </span>
+                    </div>
+
+                    <h3 className="text-[16px] font-bold text-on-surface mt-1">{alt.title}</h3>
+                    <p className="text-[13px] text-on-surface-variant mt-0.5">{alt.desc}</p>
+
+                    <div className="flex flex-wrap items-center gap-4 mt-2.5 text-[12px] font-mono text-on-surface-variant">
+                      <span>Khách: <strong className="text-on-surface">{alt.customerName}</strong></span>
+                      <span>SĐT: <strong className="text-primary">{alt.customerPhone}</strong></span>
+                      <span>Thời gian: <strong className="text-on-surface">{alt.timeFormatted}</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Actions */}
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <a
+                    href={`tel:${alt.customerPhone}`}
+                    className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-surface-dim font-bold text-[13px] flex items-center gap-1.5 shadow-[0_0_12px_rgba(75,226,119,0.2)] transition-all"
+                  >
+                    <Phone className="w-4 h-4" />
+                    <span>Gọi Khách Ngay</span>
+                  </a>
+
+                  <button
+                    onClick={() => onOpenCheckinModal('return', alt.speakerId)}
+                    className="px-4 py-2.5 rounded-xl bg-secondary-container hover:bg-secondary-container/90 text-on-secondary-container font-bold text-[13px] flex items-center gap-1.5 transition-all shadow-md"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Check-in Loa Đã Về</span>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
     </div>
   );

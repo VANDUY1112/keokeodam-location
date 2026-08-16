@@ -5,75 +5,81 @@ import OverviewView from './components/OverviewView';
 import DeviceDetailsView from './components/DeviceDetailsView';
 import AlertsView from './components/AlertsView';
 import ReportsView from './components/ReportsView';
-import { INITIAL_FLEET, INITIAL_ALERTS, FLEET_SUMMARY_STATS } from './data/fleetData';
+import CheckinModal from './components/CheckinModal';
+import { INITIAL_SPEAKERS, HOME_LOCATION, RECENT_RENTAL_LOGS } from './data/speakersData';
 import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'device-details' | 'alerts' | 'reports'
-  const [fleet, setFleet] = useState(INITIAL_FLEET);
-  const [alerts, setAlerts] = useState(INITIAL_ALERTS);
-  const [stats, setStats] = useState(FLEET_SUMMARY_STATS);
-  const [selectedUnitId, setSelectedUnitId] = useState('TRK-102');
+  const [speakers, setSpeakers] = useState(INITIAL_SPEAKERS);
+  const [selectedSpeakerId, setSelectedSpeakerId] = useState('LKK-01');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [isSimulating, setIsSimulating] = useState(true);
   const [toast, setToast] = useState(null);
 
-  // Live GPS & Telemetry Simulator ticker
-  useEffect(() => {
-    if (!isSimulating) return;
+  // Checkin Modal State
+  const [checkinModalOpen, setCheckinModalOpen] = useState(false);
+  const [checkinModalMode, setCheckinModalMode] = useState('delivery'); // 'delivery' | 'return'
+  const [preSelectedSpeakerId, setPreSelectedSpeakerId] = useState(null);
 
-    const interval = setInterval(() => {
-      setFleet((prevFleet) =>
-        prevFleet.map((vehicle) => {
-          if (vehicle.status !== 'active') return vehicle;
+  const handleOpenCheckinModal = (mode = 'delivery', speakerId = null) => {
+    setCheckinModalMode(mode);
+    setPreSelectedSpeakerId(speakerId);
+    setCheckinModalOpen(true);
+  };
 
-          // Micro-fluctuate speed and coordinates
-          const speedDelta = (Math.random() - 0.48) * 2;
-          const newSpeed = Math.max(45, Math.min(75, Math.round(vehicle.speed + speedDelta)));
-          
-          // Subtle GPS drift along heading
-          const deltaX = (Math.random() - 0.4) * 0.15;
-          const deltaY = (Math.random() - 0.45) * 0.15;
-          
-          return {
-            ...vehicle,
-            speed: newSpeed,
-            coords: {
-              x: Math.max(10, Math.min(85, +(vehicle.coords.x + deltaX).toFixed(2))),
-              y: Math.max(10, Math.min(85, +(vehicle.coords.y + deltaY).toFixed(2)))
-            }
-          };
-        })
-      );
-    }, 2500);
-
-    return () => clearInterval(interval);
-  }, [isSimulating]);
-
-  // Filtered fleet by search
-  const searchedFleet = fleet.filter((v) => {
-    if (!searchTerm) return true;
-    const query = searchTerm.toLowerCase();
-    return (
-      v.id.toLowerCase().includes(query) ||
-      v.name.toLowerCase().includes(query) ||
-      v.driver.name.toLowerCase().includes(query) ||
-      v.destination.toLowerCase().includes(query) ||
-      v.vin.toLowerCase().includes(query)
+  // Check-in Giao loa đến khách
+  const handleCheckinDelivery = (speakerId, rentalData, hourlyRate) => {
+    setSpeakers((prevSpeakers) =>
+      prevSpeakers.map((spk) => {
+        if (spk.id !== speakerId) return spk;
+        return {
+          ...spk,
+          status: 'renting',
+          statusLabel: 'Khách đang thuê',
+          hourlyRate: hourlyRate || spk.hourlyRate,
+          currentRental: rentalData
+        };
+      })
     );
-  });
 
-  const unreadAlertsCount = alerts.filter(a => a.status === 'unacknowledged').length;
+    setSelectedSpeakerId(speakerId);
+    setToast({
+      title: `Check-in Giao Loa Thành Công (${speakerId})`,
+      desc: `Đã giao tới: ${rentalData.customerName} (${rentalData.address}). Đã kích hoạt đồng hồ tính tiền theo giờ!`,
+      type: 'success'
+    });
+  };
 
-  const handleSelectUnit = (unitId) => {
-    setSelectedUnitId(unitId);
+  // Check-in Đã chở loa về nhà
+  const handleCheckinReturn = (speakerId, returnData) => {
+    const speakerToReturn = speakers.find(s => s.id === speakerId);
+
+    setSpeakers((prevSpeakers) =>
+      prevSpeakers.map((spk) => {
+        if (spk.id !== speakerId) return spk;
+        return {
+          ...spk,
+          status: 'available',
+          statusLabel: 'Tại nhà / Sẵn sàng',
+          totalRentalsCount: spk.totalRentalsCount + 1,
+          totalRevenue: spk.totalRevenue + returnData.totalAmount,
+          currentRental: null
+        };
+      })
+    );
+
+    setToast({
+      title: `Loa Đã Về Nhà (${speakerId})`,
+      desc: `Đã thu tiền khách: ${returnData.totalAmount.toLocaleString('vi-VN')} đ (Thời gian: ${returnData.rentHours} tiếng). Loa đã sẵn sàng cho ca thuê tiếp theo!`,
+      type: 'success'
+    });
   };
 
   // Toast Auto-dismiss
   useEffect(() => {
     if (toast) {
-      const t = setTimeout(() => setToast(null), 4500);
+      const t = setTimeout(() => setToast(null), 5000);
       return () => clearTimeout(t);
     }
   }, [toast]);
@@ -85,8 +91,8 @@ export default function App() {
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        unreadAlertsCount={unreadAlertsCount}
-        fleetCount={fleet.length}
+        speakers={speakers}
+        onOpenCheckinModal={handleOpenCheckinModal}
       />
 
       {/* Main Content Area */}
@@ -96,46 +102,49 @@ export default function App() {
         <Header
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
-          isSimulating={isSimulating}
-          setIsSimulating={setIsSimulating}
-          unreadAlertsCount={unreadAlertsCount}
-          alerts={alerts}
-          onSelectUnit={(id) => {
-            handleSelectUnit(id);
+          speakers={speakers}
+          onOpenCheckinModal={handleOpenCheckinModal}
+          setActiveTab={setActiveTab}
+          onSelectSpeaker={(id) => {
+            setSelectedSpeakerId(id);
             setActiveTab('device-details');
           }}
-          setActiveTab={setActiveTab}
         />
 
         {/* Dynamic View Router */}
         <main className="flex-1 pt-[64px] bg-background relative overflow-y-auto">
           {activeTab === 'overview' && (
             <OverviewView
-              fleet={searchedFleet}
-              stats={stats}
-              onSelectUnit={handleSelectUnit}
+              speakers={speakers}
+              onSelectSpeaker={(id) => {
+                setSelectedSpeakerId(id);
+                setActiveTab('device-details');
+              }}
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
-              selectedUnit={fleet.find(v => v.id === selectedUnitId)}
+              onOpenCheckinModal={handleOpenCheckinModal}
               setActiveTab={setActiveTab}
             />
           )}
 
           {activeTab === 'device-details' && (
             <DeviceDetailsView
-              fleet={searchedFleet}
-              selectedUnitId={selectedUnitId}
-              onSelectUnit={handleSelectUnit}
+              speakers={speakers}
+              selectedSpeakerId={selectedSpeakerId}
+              onSelectSpeaker={setSelectedSpeakerId}
+              onOpenCheckinModal={handleOpenCheckinModal}
               searchTerm={searchTerm}
-              setToast={setToast}
             />
           )}
 
           {activeTab === 'alerts' && (
             <AlertsView
-              alerts={alerts}
-              setAlerts={setAlerts}
-              onSelectUnit={handleSelectUnit}
+              speakers={speakers}
+              onOpenCheckinModal={handleOpenCheckinModal}
+              onSelectSpeaker={(id) => {
+                setSelectedSpeakerId(id);
+                setActiveTab('device-details');
+              }}
               setActiveTab={setActiveTab}
               setToast={setToast}
             />
@@ -143,9 +152,11 @@ export default function App() {
 
           {activeTab === 'reports' && (
             <ReportsView
-              fleet={fleet}
-              stats={stats}
-              onSelectUnit={handleSelectUnit}
+              speakers={speakers}
+              onSelectSpeaker={(id) => {
+                setSelectedSpeakerId(id);
+                setActiveTab('device-details');
+              }}
               setActiveTab={setActiveTab}
               setToast={setToast}
             />
@@ -153,9 +164,21 @@ export default function App() {
         </main>
       </div>
 
+      {/* Manual Check-in Modal */}
+      <CheckinModal
+        isOpen={checkinModalOpen}
+        onClose={() => setCheckinModalOpen(false)}
+        mode={checkinModalMode}
+        speakers={speakers}
+        preSelectedSpeakerId={preSelectedSpeakerId}
+        onCheckinDelivery={handleCheckinDelivery}
+        onCheckinReturn={handleCheckinReturn}
+        homeLocation={HOME_LOCATION}
+      />
+
       {/* Floating Global Toast Notification */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-md bg-surface-container/95 backdrop-blur-2xl border border-primary/40 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.6)] p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-6 right-6 z-50 max-w-md bg-surface-container/95 backdrop-blur-2xl border border-primary/40 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.7)] p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className={`p-2 rounded-xl shrink-0 ${
             toast.type === 'success' 
               ? 'bg-primary/20 text-primary' 

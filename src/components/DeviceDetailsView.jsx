@@ -1,498 +1,350 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Search, 
-  Gauge, 
-  Radio, 
-  Send,
-  X
+  Speaker, 
+  Battery, 
+  Mic2, 
+  MapPin, 
+  Clock, 
+  Phone, 
+  DollarSign, 
+  CheckCircle2, 
+  PlusCircle, 
+  Route, 
+  Calendar,
+  AlertCircle,
+  Truck
 } from 'lucide-react';
 
 export default function DeviceDetailsView({ 
-  fleet, 
-  selectedUnitId, 
-  onSelectUnit, 
-  searchTerm: globalSearchTerm,
-  setToast 
+  speakers, 
+  selectedSpeakerId, 
+  onSelectSpeaker, 
+  onOpenCheckinModal, 
+  searchTerm 
 }) {
-  const [localSearch, setLocalSearch] = useState('');
-  const [showDispatchModal, setShowDispatchModal] = useState(false);
-  const [showLogsModal, setShowLogsModal] = useState(false);
-  const [dispatchMessage, setDispatchMessage] = useState('');
+  const [now, setNow] = useState(Date.now());
 
-  const effectiveSearch = localSearch || globalSearchTerm;
-  const filteredList = fleet.filter(v => 
-    !effectiveSearch || 
-    v.id.toLowerCase().includes(effectiveSearch.toLowerCase()) || 
-    v.type.toLowerCase().includes(effectiveSearch.toLowerCase())
-  );
+  // Ticker for live rental clock
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const selectedVehicle = fleet.find(v => v.id === selectedUnitId) || fleet[0];
+  const filteredSpeakers = speakers.filter(s => {
+    if (!searchTerm) return true;
+    const q = searchTerm.toLowerCase();
+    return s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || s.type.toLowerCase().includes(q);
+  });
 
-  const handleSendDispatch = (e) => {
-    e.preventDefault();
-    if (!dispatchMessage.trim()) return;
-    setToast({
-      title: `Đã Gửi Lệnh Điều Phối Đến ${selectedVehicle.id}`,
-      desc: `Tài xế ${selectedVehicle.driver.name} đã nhận chỉ thị: "${dispatchMessage}"`,
-      type: 'success'
-    });
-    setDispatchMessage('');
-    setShowDispatchModal(false);
-  };
+  const selectedSpeaker = speakers.find(s => s.id === selectedSpeakerId) || speakers[0];
 
-  const powerCellVal = selectedVehicle.powerCell || 85;
-  const strokeDashoffset = 251.2 - (251.2 * powerCellVal) / 100;
+  // Calculate live rental timer
+  let elapsedFormatted = "0h 00m 00s";
+  let elapsedHoursDecimal = 0;
+  let liveRentalAmount = 0;
+
+  if (selectedSpeaker?.currentRental) {
+    const elapsedMs = now - selectedSpeaker.currentRental.startTimestamp;
+    const hrs = Math.floor(elapsedMs / (3600 * 1000));
+    const mins = Math.floor((elapsedMs % (3600 * 1000)) / (60 * 1000));
+    const secs = Math.floor((elapsedMs % (60 * 1000)) / 1000);
+    elapsedFormatted = `${hrs}h ${mins < 10 ? '0' : ''}${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+    
+    elapsedHoursDecimal = Math.max(1, +(elapsedMs / (3600 * 1000)).toFixed(2));
+    liveRentalAmount = Math.round(elapsedHoursDecimal * selectedSpeaker.hourlyRate) + (selectedSpeaker.currentRental.shippingFee || 0);
+  }
 
   return (
-    <div className="flex flex-col w-full select-none">
-      <div className="flex flex-col lg:flex-row gap-lg p-lg w-full max-w-[1600px] mx-auto">
-        
-        {/* LEFT PANEL: DEVICE LIST (340px) */}
-        <div className="w-full lg:w-[340px] flex-shrink-0 flex flex-col gap-lg">
-          
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Đội Xe Trực Tuyến</h2>
-            <div className="font-mono-data text-mono-data text-primary bg-primary/10 px-sm py-xs rounded-full border border-primary/20 font-bold">
-              24 Đang Kết Nối
+    <div className="p-6 max-w-[1600px] mx-auto select-none space-y-6">
+      
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-container/80 backdrop-blur-xl border border-outline-variant/20 p-5 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shadow-[0_0_15px_rgba(75,226,119,0.2)]">
+            <Speaker className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-[20px] font-bold text-on-surface font-mono">{selectedSpeaker.id}</h1>
+              <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold ${
+                selectedSpeaker.status === 'renting'
+                  ? 'bg-tertiary/20 text-tertiary border border-tertiary/30 animate-pulse'
+                  : selectedSpeaker.status === 'returning'
+                  ? 'bg-secondary/20 text-secondary border border-secondary/30'
+                  : 'bg-primary/20 text-primary border border-primary/30'
+              }`}>
+                {selectedSpeaker.statusLabel}
+              </span>
             </div>
+            <p className="text-[13px] text-on-surface-variant mt-0.5">{selectedSpeaker.name} • Loại: <span className="text-on-surface font-semibold">{selectedSpeaker.type}</span></p>
+          </div>
+        </div>
+
+        {/* Quick Check-in Actions */}
+        <div className="flex items-center gap-2.5">
+          {selectedSpeaker.status === 'available' ? (
+            <button
+              onClick={() => onOpenCheckinModal('delivery', selectedSpeaker.id)}
+              className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-surface-dim font-bold text-[13px] flex items-center gap-2 shadow-[0_0_12px_rgba(75,226,119,0.25)] transition-all"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Giao Loa Này Đến Khách</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => onOpenCheckinModal('return', selectedSpeaker.id)}
+              className="px-4 py-2 rounded-xl bg-secondary-container hover:bg-secondary-container/90 text-on-secondary-container font-bold text-[13px] flex items-center gap-2 shadow-lg transition-all"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Check-in: Đã Chở Loa Về Nhà</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Main Grid: Left Speaker List / Right Deep Details */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left Column: Speaker Directory (4 Cols) */}
+        <div className="lg:col-span-4 space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-[14px] font-bold text-on-surface uppercase tracking-wider font-mono">
+              Danh Sách Loa ({speakers.length} Loa)
+            </h2>
+            <span className="text-[11px] text-primary font-mono font-bold">
+              {speakers.filter(s => s.status === 'available').length} Có Sẵn Tại Nhà
+            </span>
           </div>
 
-          {/* Search Box */}
-          <div className="bg-surface-container-high rounded-xl px-md py-sm flex items-center gap-sm shadow-sm transition-all focus-within:shadow-primary/10 border border-outline-variant/20">
-            <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
-            <input
-              type="text"
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              placeholder="Tìm mã xe..."
-              className="bg-transparent text-on-surface font-body-md w-full outline-none placeholder:text-on-surface-variant/50 text-[14px]"
-            />
-            {localSearch && (
-              <button onClick={() => setLocalSearch('')} className="text-on-surface-variant hover:text-on-surface text-[12px]">
-                ✕
-              </button>
-            )}
-          </div>
-
-          {/* Vehicle List */}
-          <div className="flex flex-col gap-sm overflow-y-auto h-[calc(100vh-250px)] pr-xs">
-            {filteredList.map((unit) => {
-              const isSelected = unit.id === selectedVehicle.id;
-              const isLive = unit.status === 'active';
-              const isIdle = unit.status === 'idle';
-              const isOffline = unit.status === 'offline' || unit.status === 'maintenance';
-
-              if (isSelected) {
-                return (
-                  <div
-                    key={unit.id}
-                    className="bg-primary/10 border border-primary/40 rounded-[16px] p-md shadow-lg relative overflow-hidden cursor-default group transition-all"
-                  >
-                    <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary rounded-l-[16px]"></div>
-                    <div className="absolute -right-8 -top-8 w-24 h-24 bg-primary/15 rounded-full blur-xl pointer-events-none"></div>
-                    
-                    <div className="flex justify-between items-start mb-md relative">
-                      <div>
-                        <span className="font-headline-md text-headline-md text-primary tracking-tight font-mono font-bold">
-                          {unit.id}
-                        </span>
-                        <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-xs">
-                          {unit.type}
-                        </div>
-                      </div>
-                      
-                      <span className="flex items-center gap-xs bg-primary/20 px-sm py-xs rounded-full border border-primary/30">
-                        <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                        <span className="font-label-sm text-label-sm text-primary font-bold">Trực Tiếp</span>
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between font-mono-data text-mono-data text-on-surface relative text-[13px]">
-                      <span className="flex items-center gap-1.5 font-bold">
-                        <span className="material-symbols-outlined text-[16px] text-primary">speed</span> 
-                        {unit.speed} mph
-                      </span>
-                      <span className="text-on-surface-variant font-medium">Dự kiến: {unit.eta}</span>
-                    </div>
-                  </div>
-                );
-              }
+          <div className="space-y-2.5 max-h-[750px] overflow-y-auto pr-1">
+            {filteredSpeakers.map((spk) => {
+              const isSelected = spk.id === selectedSpeaker.id;
+              const isRenting = spk.status === 'renting';
 
               return (
                 <div
-                  key={unit.id}
-                  onClick={() => onSelectUnit(unit.id)}
-                  className="bg-surface-container hover:bg-surface-container-high border border-outline-variant/10 transition-all rounded-[16px] p-md shadow-sm cursor-pointer group"
+                  key={spk.id}
+                  onClick={() => onSelectSpeaker(spk.id)}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-surface-container-high border-primary/60 shadow-[0_0_20px_rgba(75,226,119,0.15)] ring-1 ring-primary/40'
+                      : 'bg-surface-container/60 hover:bg-surface-container-high border-outline-variant/20'
+                  }`}
                 >
-                  <div className="flex justify-between items-start mb-sm">
-                    <div>
-                      <span className="font-label-md text-label-md text-on-surface font-bold font-mono group-hover:text-primary transition-colors">
-                        {unit.id}
-                      </span>
-                      <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-xs">
-                        {unit.type}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        isRenting ? 'bg-tertiary animate-ping' : spk.status === 'returning' ? 'bg-secondary' : 'bg-primary'
+                      }`} />
+                      <div>
+                        <span className="font-mono text-[15px] font-bold text-on-surface">{spk.id}</span>
+                        <div className="text-[12px] text-on-surface-variant font-medium line-clamp-1">{spk.name}</div>
                       </div>
                     </div>
-
-                    <span className="flex items-center gap-xs">
-                      <div className={`w-2 h-2 rounded-full ${
-                        isLive ? 'bg-primary-fixed-dim' : isIdle ? 'bg-tertiary' : 'bg-surface-variant'
-                      }`}></div>
-                      <span className="font-label-sm text-label-sm text-on-surface-variant capitalize font-medium">
-                        {unit.statusLabel || unit.status}
-                      </span>
-                    </span>
+                    <span className="font-mono text-[13px] font-bold text-primary">{spk.hourlyRate.toLocaleString('vi-VN')}đ/h</span>
                   </div>
 
-                  <div className="flex items-center justify-between font-mono-data text-mono-data text-on-surface-variant text-[13px]">
-                    {isLive ? (
-                      <span className="flex items-center gap-xs">
-                        <span className="material-symbols-outlined text-[16px]">speed</span> {unit.speed} mph
+                  <div className="grid grid-cols-3 gap-2 mt-3 pt-2.5 border-t border-outline-variant/10 text-[11px] font-mono">
+                    <div>
+                      <span className="text-on-surface-variant">Pin:</span>{' '}
+                      <span className="text-on-surface font-semibold">{spk.battery}%</span>
+                    </div>
+                    <div>
+                      <span className="text-on-surface-variant">Micro:</span>{' '}
+                      <span className="text-primary font-bold">{spk.mics} mic</span>
+                    </div>
+                    <div className="text-right">
+                      <span className={`${isRenting ? 'text-tertiary font-bold' : 'text-on-surface-variant'}`}>
+                        {isRenting ? 'Đang thuê' : 'Tại nhà'}
                       </span>
-                    ) : isIdle ? (
-                      <span className="flex items-center gap-xs">
-                        <span className="material-symbols-outlined text-[16px]">speed</span> 0 mph
-                      </span>
-                    ) : (
-                      <span>Lần cuối: 4 giờ trước</span>
-                    )}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-
         </div>
 
-        {/* RIGHT PANEL: DETAILED VIEW (Bento Grid) */}
-        <div className="flex-1 flex flex-col gap-lg min-w-0">
+        {/* Right Column: Deep Speaker Telemetry & Live Rental Clock (8 Cols) */}
+        <div className="lg:col-span-8 space-y-6">
           
-          {/* Quick Action Header */}
-          <div className="flex justify-between items-center bg-surface-container-low border border-outline-variant/15 rounded-xl p-sm shadow-sm backdrop-blur-md">
-            <div className="flex gap-md px-md">
-              <button 
-                onClick={() => setShowDispatchModal(true)}
-                className="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-surface-container"
-              >
-                <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
-                <span className="font-label-sm text-label-sm font-semibold">Điều Phối</span>
-              </button>
-              
-              <button 
-                onClick={() => setShowLogsModal(true)}
-                className="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-surface-container"
-              >
-                <span className="material-symbols-outlined text-[20px] text-secondary">history</span>
-                <span className="font-label-sm text-label-sm font-semibold">Nhật Ký</span>
-              </button>
+          {/* Hardware Status Gauges (Pin, Micro, Đơn giá, Quãng đường) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            
+            {/* Battery Level */}
+            <div className="bg-surface-container/80 backdrop-blur-xl border border-outline-variant/20 p-4 rounded-2xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span className="text-[11px] font-mono uppercase font-semibold">Ắc Quy / Pin Loa</span>
+                <Battery className="w-4 h-4 text-primary" />
+              </div>
+              <div className="my-2">
+                <div className="text-[28px] font-black text-on-surface font-mono">{selectedSpeaker.battery}%</div>
+                <div className="text-[11px] text-on-surface-variant font-mono">Hát liên tục ~6-8 tiếng</div>
+              </div>
+              <div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${selectedSpeaker.battery < 30 ? 'bg-error' : 'bg-primary'}`}
+                  style={{ width: `${selectedSpeaker.battery}%` }}
+                />
+              </div>
             </div>
 
-            <div className="font-mono-data text-mono-data text-on-surface-variant flex items-center gap-sm pr-md text-[13px]">
-              <span className="material-symbols-outlined text-[18px] text-primary animate-pulse">satellite_alt</span>
-              Định vị GPS: {selectedVehicle.gpsFix || '3ms trước'}
+            {/* Micro kèm theo */}
+            <div className="bg-surface-container/80 backdrop-blur-xl border border-outline-variant/20 p-4 rounded-2xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span className="text-[11px] font-mono uppercase font-semibold">Phụ Kiện Kèm</span>
+                <Mic2 className="w-4 h-4 text-secondary" />
+              </div>
+              <div className="my-2">
+                <div className="text-[28px] font-black text-secondary font-mono">{selectedSpeaker.mics} Micro</div>
+                <div className="text-[11px] text-on-surface-variant font-mono">Đủ dây sạc nguồn</div>
+              </div>
+              <div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                <div className="bg-secondary h-full rounded-full" style={{ width: '100%' }} />
+              </div>
             </div>
+
+            {/* Đơn giá thuê */}
+            <div className="bg-surface-container/80 backdrop-blur-xl border border-outline-variant/20 p-4 rounded-2xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span className="text-[11px] font-mono uppercase font-semibold">Đơn Giá Thuê</span>
+                <DollarSign className="w-4 h-4 text-primary" />
+              </div>
+              <div className="my-2">
+                <div className="text-[24px] font-black text-primary font-mono">
+                  {selectedSpeaker.hourlyRate.toLocaleString('vi-VN')}
+                </div>
+                <div className="text-[11px] text-on-surface-variant font-mono">VNĐ / mỗi tiếng</div>
+              </div>
+              <div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                <div className="bg-primary h-full rounded-full" style={{ width: '100%' }} />
+              </div>
+            </div>
+
+            {/* Tổng doanh thu tích lũy của loa */}
+            <div className="bg-surface-container/80 backdrop-blur-xl border border-outline-variant/20 p-4 rounded-2xl flex flex-col justify-between">
+              <div className="flex items-center justify-between text-on-surface-variant">
+                <span className="text-[11px] font-mono uppercase font-semibold">Tổng Ca Thuê</span>
+                <Clock className="w-4 h-4 text-tertiary" />
+              </div>
+              <div className="my-2">
+                <div className="text-[28px] font-black text-on-surface font-mono">{selectedSpeaker.totalRentalsCount} ca</div>
+                <div className="text-[11px] text-primary font-mono font-bold">{(selectedSpeaker.totalRevenue / 1000000).toFixed(1)} triệu VNĐ</div>
+              </div>
+              <div className="w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+                <div className="bg-tertiary h-full rounded-full" style={{ width: '85%' }} />
+              </div>
+            </div>
+
           </div>
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-lg">
-            
-            {/* Map (Spans 2 cols) */}
-            <div className="xl:col-span-2 h-[420px] rounded-[24px] bg-surface-container shadow-2xl relative overflow-hidden group isolate border border-outline-variant/20">
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-[2s] group-hover:scale-105" 
-                style={{ backgroundImage: `url('${selectedVehicle.mapImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDtcavSoNsAn1Xzk4EhQq3XtqzGIejY_svNcX4n4C3o-qsWyqAh5FgLE5Mgs2G4QtJZwPvIxJxScXuUuzf5nWHJXyBqI20qaqeRyQog1NC1njdZaNtznX7U_6tK9CbO77k4aetcEkFq2gVDqZzlmnvok-BGRq4_VDunSrZxRzX3MSssi5wxt7kmZWCJWS6qQQV--SZznptq_ZGR_aSGUilf68HvWm05JHRbauZbpxYg2oMa7u6FPA-N'}')` }}
-              />
+          {/* RENTAL ACTIVE DETAILS & LIVE CLOCK (Nếu đang cho thuê) */}
+          {selectedSpeaker.currentRental ? (
+            <div className="bg-surface-container/90 backdrop-blur-xl border border-tertiary/40 rounded-2xl p-6 space-y-5 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-tertiary/5 rounded-full blur-3xl pointer-events-none"></div>
 
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-surface/95 via-surface/30 to-transparent pointer-events-none"></div>
-
-              {/* Breadcrumb pathing visual overlay */}
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div className="relative">
-                  <div className="w-4 h-4 rounded-full bg-primary animate-ping opacity-75"></div>
-                  <div className="absolute inset-0.5 rounded-full bg-primary border-2 border-white shadow-[0_0_15px_#4be277]"></div>
-                </div>
-              </div>
-
-              {/* HUD Overlay */}
-              <div className="absolute bottom-md left-md right-md flex justify-between items-end">
-                <div className="bg-surface-container/90 backdrop-blur-xl rounded-xl p-md shadow-2xl border border-outline-variant/30">
-                  <div className="font-label-sm text-label-sm text-primary uppercase tracking-widest mb-xs flex items-center gap-xs font-bold">
-                    <span className="material-symbols-outlined text-[16px]">navigation</span> Hướng Di Chuyển
-                  </div>
-                  <div className="font-display-lg text-display-lg text-on-surface leading-none font-mono">
-                    {selectedVehicle.heading || 'NNE'} <span className="text-headline-md font-headline-md text-on-surface-variant">{selectedVehicle.headingDeg || 32}°</span>
-                  </div>
-                  <div className="text-[11px] text-on-surface-variant font-mono mt-1">Vị trí: {selectedVehicle.hub}</div>
-                </div>
-
-                <div className="bg-primary text-on-primary rounded-xl p-md shadow-2xl shadow-primary/30 flex flex-col items-end border border-primary-fixed">
-                  <div className="font-label-sm text-label-sm uppercase tracking-widest opacity-90 mb-xs font-bold">Vận Tốc</div>
-                  <div className="font-display-lg text-display-lg leading-none font-mono font-black">
-                    {selectedVehicle.speed}<span className="text-headline-md font-headline-md opacity-80 ml-xs">mph</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Sidebar (3 cards) */}
-            <div className="flex flex-col gap-lg h-[420px]">
-              
-              {/* Battery / Power Cell */}
-              <div className="bg-surface-container border border-outline-variant/20 rounded-[24px] p-lg flex-1 shadow-md flex items-center justify-between relative overflow-hidden">
-                <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
-                <div className="z-10">
-                  <div className="flex items-center gap-xs text-primary mb-sm font-semibold">
-                    <span className="material-symbols-outlined text-[20px]">electric_bolt</span>
-                    <span className="font-label-sm text-label-sm uppercase tracking-wider">Khối Năng Lượng</span>
-                  </div>
-                  <div className="font-headline-lg text-headline-lg text-on-surface font-mono font-black">
-                    {selectedVehicle.powerCell || 85}%
-                  </div>
-                  <div className="font-mono-data text-mono-data text-on-surface-variant mt-xs text-[12px]">
-                    Mức xả {selectedVehicle.powerDischarge || '-2.4kW'}
-                  </div>
-                </div>
-
-                {/* SVG Ring */}
-                <div className="w-24 h-24 relative z-10">
-                  <svg className="w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 100 100">
-                    <circle className="stroke-surface-variant" cx="50" cy="50" fill="transparent" r="40" strokeWidth="8"></circle>
-                    <circle 
-                      className="stroke-primary" 
-                      cx="50" 
-                      cy="50" 
-                      fill="transparent" 
-                      r="40" 
-                      strokeDasharray="251.2" 
-                      strokeDashoffset={strokeDashoffset} 
-                      strokeLinecap="round" 
-                      strokeWidth="8"
-                      style={{ transition: 'stroke-dashoffset 1s ease' }}
-                    ></circle>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center font-label-sm text-label-sm text-on-surface font-mono font-bold">
-                    TỐT
-                  </div>
-                </div>
-              </div>
-
-              {/* Fuel / Energy */}
-              <div className="bg-surface-container border border-outline-variant/20 rounded-[24px] p-lg flex-1 shadow-md flex flex-col justify-center relative">
-                <div className="flex justify-between items-end mb-md">
-                  <div className="flex items-center gap-xs text-on-surface font-semibold">
-                    <span className="material-symbols-outlined text-[20px] text-secondary">local_gas_station</span>
-                    <span className="font-label-sm text-label-sm uppercase tracking-wider">Nhiên Liệu Dự Phòng</span>
-                  </div>
-                  <div className="font-mono-data text-mono-data text-on-surface font-bold">{selectedVehicle.fuel}%</div>
-                </div>
-                <div className="w-full h-3 bg-surface-variant rounded-full overflow-hidden shadow-inner">
-                  <div 
-                    className="h-full bg-secondary-fixed rounded-full relative transition-all duration-700" 
-                    style={{ width: `${selectedVehicle.fuel}%` }}
-                  >
-                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/30 to-transparent"></div>
-                  </div>
-                </div>
-                <div className="font-label-sm text-label-sm text-on-surface-variant mt-sm text-right font-mono">
-                  Tầm hoạt động: {selectedVehicle.fuelRange || '675 km'}
-                </div>
-              </div>
-
-              {/* Signal / Telemetry Link */}
-              <div className="bg-surface-container border border-outline-variant/20 rounded-[24px] p-lg flex-1 shadow-md flex items-center gap-md">
-                <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-inner shrink-0">
-                  <span className="material-symbols-outlined text-[28px]">network_cell</span>
-                </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-outline-variant/20 relative z-10">
                 <div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Kết Nối Viễn Thông</div>
-                  <div className="font-headline-md text-headline-md text-on-surface mt-xs tracking-tight font-bold">
-                    {selectedVehicle.signalStrength || 'Rất mạnh'}
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-tertiary animate-pulse"></span>
+                    <h3 className="text-[17px] font-bold text-on-surface">Ca Thuê Đang Hoạt Động (Trực Tiếp)</h3>
                   </div>
-                  <div className="font-mono-data text-mono-data text-primary mt-xs text-[12px]">
-                    Độ trễ: {selectedVehicle.ping || '24ms (LTE-M)'}
+                  <p className="text-[12px] text-on-surface-variant font-mono mt-0.5">Khách đã nhận loa và đang tính tiền theo giờ</p>
+                </div>
+
+                <a
+                  href={`tel:${selectedSpeaker.currentRental.customerPhone}`}
+                  className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright border border-outline-variant/30 text-on-surface text-[13px] font-mono flex items-center gap-2 transition-all w-fit"
+                >
+                  <Phone className="w-4 h-4 text-primary" />
+                  <span>Gọi Cho Khách: {selectedSpeaker.currentRental.customerPhone}</span>
+                </a>
+              </div>
+
+              {/* Live Rental Stopwatch Display */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                
+                {/* Timer Clock */}
+                <div className="bg-surface-container-high/80 border border-outline-variant/20 p-4 rounded-xl flex flex-col justify-center items-center text-center">
+                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider font-semibold">
+                    Thời Gian Khách Đã Thuê (Live Timer)
+                  </span>
+                  <div className="text-[32px] font-black text-primary font-mono my-1 tracking-wider">
+                    {elapsedFormatted}
+                  </div>
+                  <div className="text-[11px] text-on-surface-variant font-mono">
+                    Check-in giao lúc: <strong className="text-on-surface">{selectedSpeaker.currentRental.startTime}</strong>
                   </div>
                 </div>
-              </div>
 
-            </div>
-          </div>
-
-          {/* Chart Section: Velocity Profile */}
-          <div className="bg-surface-container border border-outline-variant/20 rounded-[24px] p-lg shadow-2xl relative overflow-hidden mt-md">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-            
-            <div className="flex justify-between items-center mb-xl relative z-10">
-              <div className="flex items-center gap-md">
-                <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Biểu Đồ Vận Tốc</h3>
-                <span className="bg-surface-variant text-on-surface-variant px-sm py-xs rounded-md font-label-sm text-label-sm font-mono">
-                  6 Giờ Qua
-                </span>
-              </div>
-              <div className="flex items-center gap-md font-mono-data text-mono-data text-on-surface-variant text-[12px]">
-                <div className="flex items-center gap-xs">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div> Vận tốc (mph)
+                {/* Amount Accumulator */}
+                <div className="bg-surface-container-high/80 border border-outline-variant/20 p-4 rounded-xl flex flex-col justify-center items-center text-center">
+                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider font-semibold">
+                    Tiền Thuê Tạm Tính Hiện Tại
+                  </span>
+                  <div className="text-[32px] font-black text-tertiary font-mono my-1 tracking-wider">
+                    {liveRentalAmount.toLocaleString('vi-VN')} đ
+                  </div>
+                  <div className="text-[11px] text-on-surface-variant font-mono">
+                    ({elapsedHoursDecimal}h × {selectedSpeaker.hourlyRate.toLocaleString('vi-VN')}đ) + Ship {selectedSpeaker.currentRental.shippingFee.toLocaleString('vi-VN')}đ
+                  </div>
                 </div>
-                <div className="flex items-center gap-xs">
-                  <div className="w-2 h-2 rounded-full bg-surface-variant"></div> Giới hạn
+
+              </div>
+
+              {/* Customer & Location Dossier */}
+              <div className="bg-surface-container-low/80 p-4 rounded-xl border border-outline-variant/15 space-y-2 text-[13px] relative z-10">
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">Khách thuê:</span>
+                  <strong className="text-on-surface">{selectedSpeaker.currentRental.customerName}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">Địa chỉ giao loa:</span>
+                  <span className="font-medium text-on-surface text-right">{selectedSpeaker.currentRental.address}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">Quãng đường chở từ nhà:</span>
+                  <span className="font-mono text-secondary font-bold">{selectedSpeaker.currentRental.distanceKm} km</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-on-surface-variant">Ghi chú phụ kiện:</span>
+                  <span className="text-on-surface-variant">{selectedSpeaker.currentRental.notes}</span>
                 </div>
               </div>
-            </div>
 
-            <div className="h-56 w-full relative z-10">
-              <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 200">
-                <defs>
-                  <linearGradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
-                    <stop className="text-primary" offset="0%" stopColor="#4be277" stopOpacity="0.25"></stop>
-                    <stop className="text-primary" offset="100%" stopColor="#4be277" stopOpacity="0.0"></stop>
-                  </linearGradient>
-                </defs>
-                
-                {/* Grid lines */}
-                <line className="stroke-surface-variant/50" strokeWidth="1" x1="0" x2="1000" y1="40" y2="40"></line>
-                <line className="stroke-surface-variant/50" strokeWidth="1" x1="0" x2="1000" y1="100" y2="100"></line>
-                <line className="stroke-surface-variant/50" strokeWidth="1" x1="0" x2="1000" y1="160" y2="160"></line>
-                
-                {/* Speed Limit Line (dashed) */}
-                <line className="stroke-outline/40" strokeDasharray="8,8" strokeWidth="2" x1="0" x2="1000" y1="60" y2="60"></line>
-                
-                {/* Area Fill */}
-                <path d="M0,200 L0,140 C150,130 250,50 400,65 C550,80 650,45 800,55 C900,60 950,40 1000,45 L1000,200 Z" fill="url(#areaGradient)"></path>
-                
-                {/* Line */}
-                <path 
-                  className="stroke-primary" 
-                  d="M0,140 C150,130 250,50 400,65 C550,80 650,45 800,55 C900,60 950,40 1000,45" 
-                  fill="none" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth="3.5" 
-                  style={{ filter: 'drop-shadow(0 4px 10px rgba(75, 226, 119, 0.4))' }}
-                ></path>
-                
-                {/* Data Point (Current) */}
-                <circle className="fill-surface stroke-primary" cx="1000" cy="45" r="6" strokeWidth="3"></circle>
-                <circle className="fill-primary/20 animate-ping" cx="1000" cy="45" r="14"></circle>
-              </svg>
-
-              {/* X-Axis Labels */}
-              <div className="absolute bottom-0 left-0 right-0 flex justify-between font-mono-data text-mono-data text-on-surface-variant text-[11px] transform translate-y-full pt-sm">
-                <span>08:00</span>
-                <span>09:00</span>
-                <span>10:00</span>
-                <span>11:00</span>
-                <span>12:00</span>
-                <span>13:00</span>
-                <span className="text-primary font-bold">Hiện tại ({selectedVehicle.speed} mph)</span>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* DISPATCH POPUP MODAL */}
-      {showDispatchModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-surface-container border border-primary/40 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary">chat</span>
-                <h3 className="text-[16px] font-bold text-on-surface">Phát Lệnh Điều Phối: {selectedVehicle.id}</h3>
-              </div>
-              <button onClick={() => setShowDispatchModal(false)} className="text-on-surface-variant hover:text-on-surface">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="text-[13px] text-on-surface-variant">
-              Người nhận: <strong className="text-on-surface">{selectedVehicle.driver.name}</strong> • Kênh: Vệ tinh Mã hóa LTE-M
-            </div>
-
-            <form onSubmit={handleSendDispatch} className="space-y-4">
-              <textarea
-                value={dispatchMessage}
-                onChange={(e) => setDispatchMessage(e.target.value)}
-                placeholder="Nhập chỉ thị điều phối lộ trình, điểm bốc dỡ mới..."
-                rows="3"
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-3 text-on-surface text-[14px] focus:outline-none focus:border-primary font-mono"
-                autoFocus
-              ></textarea>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowDispatchModal(false)}
-                  className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px]"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-surface-dim font-bold text-[13px] flex items-center gap-2 shadow-lg"
-                >
-                  <Send className="w-4 h-4" />
-                  <span>Truyền Tín Hiệu</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* LOGS POPUP MODAL */}
-      {showLogsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-surface-container border border-outline-variant/30 rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-secondary">history</span>
-                <h3 className="text-[16px] font-bold text-on-surface">Nhật Ký Sự Kiện Viễn Thông ({selectedVehicle.id})</h3>
-              </div>
-              <button onClick={() => setShowLogsModal(false)} className="text-on-surface-variant hover:text-on-surface">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-2.5 max-h-80 overflow-y-auto font-mono text-[12px]">
-              <div className="p-2.5 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div className="flex justify-between text-primary">
-                  <span>Gói Tin GPS Đã Truyền</span>
-                  <span>13:58:12 CST</span>
-                </div>
-                <div className="text-on-surface-variant mt-0.5">Vĩ độ: {selectedVehicle.lat}, Kinh độ: {selectedVehicle.lng}, Tốc độ: {selectedVehicle.speed} mph</div>
-              </div>
-              <div className="p-2.5 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div className="flex justify-between text-on-surface">
-                  <span>Gói CAN-Bus Hộp Đen Động Cơ</span>
-                  <span>13:55:00 CST</span>
-                </div>
-                <div className="text-on-surface-variant mt-0.5">Nhiệt độ Nước làm mát: {selectedVehicle.engineTemp}°F, Mức pin: {selectedVehicle.powerCell}%</div>
-              </div>
-              <div className="p-2.5 rounded-xl bg-surface-container-high border border-outline-variant/10">
-                <div className="flex justify-between text-secondary">
-                  <span>Đã Đến Trạm Checkpoint</span>
-                  <span>13:30:15 CST</span>
-                </div>
-                <div className="text-on-surface-variant mt-0.5">Vượt qua Trạm Mojave Checkpoint 04 đúng theo lịch trình.</div>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
+              {/* Return Button Trigger */}
               <button
-                onClick={() => setShowLogsModal(false)}
-                className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px] font-mono"
+                onClick={() => onOpenCheckinModal('return', selectedSpeaker.id)}
+                className="w-full py-3 bg-secondary-container hover:bg-secondary-container/90 text-on-secondary-container font-bold rounded-xl flex items-center justify-center gap-2 text-[14px] shadow-lg transition-all relative z-10"
               >
-                Đóng Nhật Ký
+                <CheckCircle2 className="w-5 h-5" />
+                <span>Check-in: Khách Đã Trả & Đã Chở Loa Về Nhà (Chốt Tiền)</span>
+              </button>
+
+            </div>
+          ) : (
+            <div className="bg-surface-container/80 backdrop-blur-xl border border-outline-variant/20 p-8 rounded-2xl text-center space-y-4 shadow-xl">
+              <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary mx-auto">
+                <Speaker className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-[18px] font-bold text-on-surface">Loa Hiện Đang Ở Nhà / Kho Sẵn Sàng</h3>
+                <p className="text-[13px] text-on-surface-variant max-w-md mx-auto mt-1">
+                  Loa đã được sạc đầy pin ắc quy ({selectedSpeaker.battery}%), đầy đủ 2 micro không dây và dây sạc. Sẵn sàng chở đi giao khách bất cứ lúc nào!
+                </p>
+              </div>
+              <button
+                onClick={() => onOpenCheckinModal('delivery', selectedSpeaker.id)}
+                className="px-6 py-3 bg-primary hover:bg-primary/90 text-surface-dim font-bold rounded-xl inline-flex items-center gap-2 text-[14px] shadow-[0_0_15px_rgba(75,226,119,0.3)] transition-all"
+              >
+                <PlusCircle className="w-5 h-5" />
+                <span>+ Check-in Chở Loa Này Đi Giao Khách</span>
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
+        </div>
+      </div>
     </div>
   );
 }

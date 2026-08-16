@@ -1,43 +1,56 @@
 import React from 'react';
 import { 
   Radio, 
-  LayoutDashboard, 
-  Truck, 
+  MapPin, 
+  Speaker, 
   BellRing, 
-  BarChart3
+  BarChart3, 
+  PlusCircle, 
+  CheckCircle2, 
+  Home
 } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fleetCount }) {
+export default function Sidebar({ 
+  activeTab, 
+  setActiveTab, 
+  speakers, 
+  onOpenCheckinModal 
+}) {
+  const rentingCount = speakers.filter(s => s.status === 'renting').length;
+  const availableCount = speakers.filter(s => s.status === 'available').length;
+
   const navItems = [
     {
       id: 'overview',
-      label: 'Tổng quan',
-      icon: LayoutDashboard,
-      badge: null,
-      desc: 'Bản đồ Tác chiến & HUD'
+      label: 'Bản Đồ Vị Trí Loa',
+      icon: MapPin,
+      badge: `${rentingCount} Đang Thuê`,
+      badgeColor: 'bg-tertiary/20 text-tertiary font-bold',
+      desc: 'Định vị Loa ở đâu & Quãng đường'
     },
     {
       id: 'device-details',
-      label: 'Chi tiết Thiết bị',
-      icon: Truck,
-      badge: `${fleetCount}`,
-      desc: 'Viễn thông & Lộ trình'
+      label: 'Quản Lý Từng Chiếc Loa',
+      icon: Speaker,
+      badge: `${speakers.length} Loa`,
+      badgeColor: 'bg-primary/20 text-primary',
+      desc: 'Đồng hồ đếm giờ & Tình trạng Pin/Mic'
     },
     {
       id: 'alerts',
-      label: 'Cảnh báo & Sự cố',
+      label: 'Cảnh Báo Giờ Thuê',
       icon: BellRing,
-      badge: unreadAlertsCount > 0 ? `${unreadAlertsCount}` : null,
+      badge: rentingCount > 0 ? 'Cần Chú Ý' : null,
       badgeColor: 'bg-error text-surface-dim font-bold animate-pulse',
-      desc: 'Xử lý Khẩn cấp Thời gian thực'
+      desc: 'Nhắc quá giờ & Thu hồi loa đêm'
     },
     {
       id: 'reports',
-      label: 'Báo cáo & Thống kê',
+      label: 'Doanh Thu & Lịch Sử',
       icon: BarChart3,
-      badge: 'Trực tiếp',
-      badgeColor: 'bg-primary/20 text-primary',
-      desc: 'Chỉ số KPI & Nhật ký xe'
+      badge: 'Sổ Sách',
+      badgeColor: 'bg-secondary-container/20 text-secondary',
+      desc: 'Tính tiền theo tiếng & Lịch sử ca thuê'
     }
   ];
 
@@ -46,24 +59,35 @@ export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fl
       {/* Brand Header */}
       <div className="h-[64px] flex items-center justify-between px-6 border-b border-outline-variant/10">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-primary/15 border border-primary/40 rounded-xl flex items-center justify-center shadow-[0_0_12px_rgba(75,226,119,0.3)]">
-            <Radio className="w-5 h-5 text-primary animate-pulse" />
+          <div className="w-10 h-10 bg-primary/15 border border-primary/40 rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(75,226,119,0.3)]">
+            <Speaker className="w-5 h-5 text-primary animate-pulse" />
           </div>
           <div>
-            <div className="font-headline-md text-[14px] text-primary tracking-[0.2em] font-bold uppercase">
-              Kinetic Core
+            <div className="font-headline-md text-[15px] text-primary tracking-[0.15em] font-extrabold uppercase">
+              KeoKeoDam Pro
             </div>
             <div className="text-[11px] text-on-surface-variant font-mono">
-              v3.8 • Giám sát Định vị IoT
+              Cho Thuê Loa Kẹo Kéo Theo Tiếng
             </div>
           </div>
         </div>
       </div>
 
+      {/* Quick Check-in Button on Sidebar */}
+      <div className="p-4 border-b border-outline-variant/10">
+        <button
+          onClick={() => onOpenCheckinModal('delivery')}
+          className="w-full py-2.5 px-4 bg-primary hover:bg-primary/90 text-surface-dim font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(75,226,119,0.25)] transition-all text-[13px]"
+        >
+          <PlusCircle className="w-4 h-4" />
+          <span>+ Check-in Giao Loa Mới</span>
+        </button>
+      </div>
+
       {/* Navigation Links */}
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        <div className="px-3 pb-2 text-[11px] font-mono uppercase tracking-wider text-on-surface-variant/60 font-semibold">
-          Điều Hướng Hệ Thống
+      <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
+        <div className="px-3 pb-1 text-[11px] font-mono uppercase tracking-wider text-on-surface-variant/60 font-semibold">
+          Menu Điều Hành
         </div>
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -81,13 +105,13 @@ export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fl
               <div className="flex items-center gap-3">
                 <Icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-primary' : 'text-on-surface-variant group-hover:text-primary'}`} />
                 <div>
-                  <div className="text-[14px] leading-tight">{item.label}</div>
+                  <div className="text-[14px] leading-tight font-bold">{item.label}</div>
                   <div className="text-[11px] text-on-surface-variant/70 font-normal leading-normal">{item.desc}</div>
                 </div>
               </div>
 
               {item.badge && (
-                <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${item.badgeColor || 'bg-surface-container-highest text-on-surface'}`}>
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${item.badgeColor || 'bg-surface-container-highest text-on-surface'}`}>
                   {item.badge}
                 </span>
               )}
@@ -96,23 +120,20 @@ export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fl
         })}
       </nav>
 
-      {/* Live System Telemetry Status Footer */}
+      {/* Home Base Status Footer */}
       <div className="p-4 border-t border-outline-variant/10 bg-surface-dim/50">
-        <div className="bg-surface-container/90 border border-outline-variant/20 p-3 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+        <div className="bg-surface-container/90 border border-outline-variant/20 p-3 rounded-xl space-y-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Home className="w-4 h-4 text-primary" />
+              <span className="text-[12px] font-bold text-on-surface">Kho Loa Tại Nhà</span>
             </div>
-            <div>
-              <div className="text-[12px] font-semibold text-on-surface">Hệ thống: Ổn định</div>
-              <div className="text-[10px] font-mono text-on-surface-variant">Trạm: Trung tâm Điều hành</div>
-            </div>
-          </div>
-          <div className="text-right">
-            <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold">
-              99.98%
+            <span className="text-[11px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold">
+              {availableCount} loa có sẵn
             </span>
+          </div>
+          <div className="text-[10px] text-on-surface-variant font-mono truncate">
+            Số 45 Đường Số 8, Linh Xuân, Thủ Đức
           </div>
         </div>
       </div>
