@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #031427;
+    color: #d3e4fe;
+  }
+}
+
+/* Glassmorphism & High-tech HUD styles */
+.glass-panel {
+  background: rgba(16, 32, 52, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(61, 74, 61, 0.35);
+}
+
+.glass-panel-subtle {
+  background: rgba(11, 28, 48, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(61, 74, 61, 0.2);
+}
+
+.hud-border-glow {
+  box-shadow: 0 0 15px rgba(75, 226, 119, 0.15), inset 0 0 15px rgba(75, 226, 119, 0.05);
+}
+
+.radar-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(137, 206, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(137, 206, 255, 0.04) 1px, transparent 1px);
+}
