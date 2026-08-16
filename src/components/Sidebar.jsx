@@ -4,43 +4,40 @@ import {
   LayoutDashboard, 
   Truck, 
   BellRing, 
-  BarChart3, 
-  ShieldCheck, 
-  Cpu, 
-  Layers
+  BarChart3
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fleetCount }) {
   const navItems = [
     {
       id: 'overview',
-      label: 'Overview',
+      label: 'Tổng quan',
       icon: LayoutDashboard,
       badge: null,
-      desc: 'Live Command Map & HUD'
+      desc: 'Bản đồ Tác chiến & HUD'
     },
     {
       id: 'device-details',
-      label: 'Device Details',
+      label: 'Chi tiết Thiết bị',
       icon: Truck,
       badge: `${fleetCount}`,
-      desc: 'Telemetry & Route Playback'
+      desc: 'Viễn thông & Lộ trình'
     },
     {
       id: 'alerts',
-      label: 'Alerts & Events',
+      label: 'Cảnh báo & Sự cố',
       icon: BellRing,
       badge: unreadAlertsCount > 0 ? `${unreadAlertsCount}` : null,
       badgeColor: 'bg-error text-surface-dim font-bold animate-pulse',
-      desc: 'Real-time Incident Center'
+      desc: 'Xử lý Khẩn cấp Thời gian thực'
     },
     {
       id: 'reports',
-      label: 'Analytics & Reports',
+      label: 'Báo cáo & Thống kê',
       icon: BarChart3,
-      badge: 'Live',
+      badge: 'Trực tiếp',
       badgeColor: 'bg-primary/20 text-primary',
-      desc: 'Fleet KPI & Scorecards'
+      desc: 'Chỉ số KPI & Nhật ký xe'
     }
   ];
 
@@ -57,7 +54,7 @@ export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fl
               Kinetic Core
             </div>
             <div className="text-[11px] text-on-surface-variant font-mono">
-              v3.8 • IoT Telematics
+              v3.8 • Giám sát Định vị IoT
             </div>
           </div>
         </div>
@@ -65,8 +62,8 @@ export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fl
 
       {/* Navigation Links */}
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        <div className="px-3 pb-2 text-[11px] font-mono uppercase tracking-wider text-on-surface-variant/60">
-          Command Navigation
+        <div className="px-3 pb-2 text-[11px] font-mono uppercase tracking-wider text-on-surface-variant/60 font-semibold">
+          Điều Hướng Hệ Thống
         </div>
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -108,12 +105,12 @@ export default function Sidebar({ activeTab, setActiveTab, unreadAlertsCount, fl
               <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
             </div>
             <div>
-              <div className="text-[12px] font-semibold text-on-surface">System: Nominal</div>
-              <div className="text-[10px] font-mono text-on-surface-variant">Hub: Chicago Gateway</div>
+              <div className="text-[12px] font-semibold text-on-surface">Hệ thống: Ổn định</div>
+              <div className="text-[10px] font-mono text-on-surface-variant">Trạm: Trung tâm Điều hành</div>
             </div>
           </div>
           <div className="text-right">
-            <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">
+            <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded font-bold">
               99.98%
             </span>
           </div>

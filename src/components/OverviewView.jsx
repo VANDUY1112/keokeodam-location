@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Layers, 
   Crosshair, 
   MoreHorizontal, 
   Route, 
   Zap, 
   AlertTriangle, 
-  Gauge, 
-  Fuel, 
-  Thermometer, 
   Radio, 
-  Eye, 
   ArrowUpRight, 
-  ShieldAlert,
-  Navigation,
-  Compass,
-  CheckCircle2
+  Navigation
 } from 'lucide-react';
 
 export default function OverviewView({ 
@@ -52,12 +44,6 @@ export default function OverviewView({
   const filteredFleet = statusFilter === 'all' 
     ? fleet 
     : fleet.filter(v => v.status === statusFilter);
-
-  // Donut Arc geometry calculation
-  const total = stats.totalUnits || 31;
-  const activeCount = fleet.filter(v => v.status === 'active').length + 18; // 24
-  const warningCount = fleet.filter(v => v.status === 'warning').length + 3; // 5
-  const idleCount = fleet.filter(v => v.status === 'idle' || v.status === 'maintenance').length; // 2
 
   return (
     <div className="flex flex-col w-full relative select-none">
@@ -107,7 +93,6 @@ export default function OverviewView({
             </linearGradient>
           </defs>
 
-          {/* Draw active lines connecting waypoints */}
           {filteredFleet.map((unit) => {
             if (!unit.route || unit.route.length < 2) return null;
             const pointsStr = unit.route.map(pt => `${pt.x}%,${pt.y}%`).join(' ');
@@ -141,7 +126,7 @@ export default function OverviewView({
         <div className="absolute inset-0 z-20 pointer-events-none">
           {filteredFleet.map((unit) => {
             const isWarning = unit.status === 'warning';
-            const isIdle = unit.status === 'idle' || unit.status === 'maintenance';
+            const isIdle = unit.status === 'idle' || unit.status === 'maintenance' || unit.status === 'offline';
             const isFocused = focusedVehicle?.id === unit.id;
 
             return (
@@ -199,7 +184,7 @@ export default function OverviewView({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[16px] font-bold text-primary">{focusedVehicle.id}</span>
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-semibold ${
                       focusedVehicle.status === 'warning' ? 'bg-error/20 text-error' : 'bg-primary/20 text-primary'
                     }`}>
                       {focusedVehicle.statusLabel}
@@ -219,15 +204,15 @@ export default function OverviewView({
             {/* Quick Metrics Grid */}
             <div className="grid grid-cols-3 gap-2 py-3.5 text-center">
               <div className="bg-surface-container-high/60 p-2.5 rounded-xl border border-outline-variant/10">
-                <div className="text-[10px] text-on-surface-variant font-mono uppercase">Velocity</div>
+                <div className="text-[10px] text-on-surface-variant font-mono uppercase">Vận Tốc</div>
                 <div className="font-mono text-[16px] font-bold text-on-surface mt-0.5">{focusedVehicle.speed} <span className="text-[11px] text-on-surface-variant">mph</span></div>
               </div>
               <div className="bg-surface-container-high/60 p-2.5 rounded-xl border border-outline-variant/10">
-                <div className="text-[10px] text-on-surface-variant font-mono uppercase">Energy / Fuel</div>
+                <div className="text-[10px] text-on-surface-variant font-mono uppercase">Năng Lượng</div>
                 <div className="font-mono text-[16px] font-bold text-primary mt-0.5">{focusedVehicle.fuel}%</div>
               </div>
               <div className="bg-surface-container-high/60 p-2.5 rounded-xl border border-outline-variant/10">
-                <div className="text-[10px] text-on-surface-variant font-mono uppercase">Engine Temp</div>
+                <div className="text-[10px] text-on-surface-variant font-mono uppercase">Nhiệt Động Cơ</div>
                 <div className={`font-mono text-[16px] font-bold mt-0.5 ${
                   focusedVehicle.engineTemp > 220 ? 'text-error' : 'text-on-surface'
                 }`}>
@@ -239,15 +224,15 @@ export default function OverviewView({
             {/* Destination & Driver */}
             <div className="space-y-1.5 text-[12px] bg-surface-container-low/80 p-3 rounded-xl border border-outline-variant/10 mb-3">
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Destination:</span>
+                <span className="text-on-surface-variant">Điểm đến:</span>
                 <span className="font-semibold text-on-surface">{focusedVehicle.destination}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Driver:</span>
-                <span className="font-mono text-primary">{focusedVehicle.driver.name}</span>
+                <span className="text-on-surface-variant">Tài xế:</span>
+                <span className="font-mono text-primary font-bold">{focusedVehicle.driver.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">ETA:</span>
+                <span className="text-on-surface-variant">Dự kiến đến (ETA):</span>
                 <span className="font-mono text-on-surface">{focusedVehicle.eta}</span>
               </div>
             </div>
@@ -260,7 +245,7 @@ export default function OverviewView({
               }}
               className="w-full py-2.5 bg-primary hover:bg-primary/90 text-surface-dim font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(75,226,119,0.3)] text-[13px]"
             >
-              <span>Launch Detailed Telematics Hub</span>
+              <span>Mở Trung Tâm Giám Sát Chi Tiết</span>
               <ArrowUpRight className="w-4 h-4" />
             </button>
           </div>
@@ -281,7 +266,7 @@ export default function OverviewView({
                     mapMode === 'dark' ? 'bg-primary text-surface-dim font-bold shadow-md' : 'text-on-surface hover:bg-surface-container-high'
                   }`}
                 >
-                  Dark Ops
+                  Bản Đồ Tối
                 </button>
                 <button
                   onClick={() => setMapMode('satellite')}
@@ -289,7 +274,7 @@ export default function OverviewView({
                     mapMode === 'satellite' ? 'bg-primary text-surface-dim font-bold shadow-md' : 'text-on-surface hover:bg-surface-container-high'
                   }`}
                 >
-                  Satellite
+                  Vệ Tinh
                 </button>
               </div>
 
@@ -297,11 +282,11 @@ export default function OverviewView({
               <button
                 onClick={() => setShowRadar(!showRadar)}
                 className={`bg-surface/90 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-outline-variant/30 shadow-xl flex items-center gap-2 text-[12px] transition-all ${
-                  showRadar ? 'text-primary border-primary/40' : 'text-on-surface-variant'
+                  showRadar ? 'text-primary border-primary/40 font-semibold' : 'text-on-surface-variant'
                 }`}
               >
                 <Radio className="w-3.5 h-3.5 text-primary" />
-                <span>{showRadar ? 'Radar Sweep Active' : 'Radar Off'}</span>
+                <span>{showRadar ? 'Quét Radar: Đang Bật' : 'Radar Tắt'}</span>
               </button>
 
               {/* Reset Center */}
@@ -313,7 +298,7 @@ export default function OverviewView({
                 className="bg-primary/15 hover:bg-primary/25 text-primary border border-primary/40 backdrop-blur-xl px-3.5 py-1.5 rounded-full shadow-xl flex items-center gap-2 text-[12px] font-semibold transition-all"
               >
                 <Crosshair className="w-3.5 h-3.5" />
-                <span>Center Fleet</span>
+                <span>Căn Giữa Đội Xe</span>
               </button>
             </div>
 
@@ -321,8 +306,8 @@ export default function OverviewView({
             <div className="w-[340px] bg-surface-container/90 backdrop-blur-2xl rounded-2xl border border-outline-variant/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-5 pointer-events-auto flex flex-col gap-4 transform transition-transform hover:-translate-y-0.5">
               <div className="flex justify-between items-center pb-1">
                 <div>
-                  <h2 className="text-[17px] font-bold text-on-surface">Fleet Status</h2>
-                  <div className="text-[11px] font-mono text-on-surface-variant">Real-time Telemetry Hub</div>
+                  <h2 className="text-[17px] font-bold text-on-surface">Trạng Thái Đội Xe</h2>
+                  <div className="text-[11px] font-mono text-on-surface-variant">Giám sát Viễn thông Trực tiếp</div>
                 </div>
                 <button 
                   onClick={() => setActiveTab('device-details')}
@@ -335,7 +320,6 @@ export default function OverviewView({
               {/* Donut Chart & Total Counter */}
               <div className="relative w-full aspect-[2/1] flex items-center justify-center my-1">
                 <svg className="w-full h-full overflow-visible" viewBox="0 0 100 50">
-                  {/* Background Arc */}
                   <path
                     className="text-surface-container-highest"
                     d="M 10 50 A 40 40 0 0 1 90 50"
@@ -344,7 +328,6 @@ export default function OverviewView({
                     strokeLinecap="round"
                     strokeWidth="11"
                   />
-                  {/* Primary (Online/Active) Arc */}
                   <path
                     className="text-primary drop-shadow-[0_0_10px_rgba(75,226,119,0.6)] transition-all duration-1000"
                     d="M 10 50 A 40 40 0 0 1 70 15"
@@ -355,7 +338,6 @@ export default function OverviewView({
                     strokeLinecap="round"
                     strokeWidth="11"
                   />
-                  {/* Tertiary (Warning / Idle) Arc */}
                   <path
                     className="text-tertiary drop-shadow-[0_0_8px_rgba(255,186,97,0.5)] transition-all duration-1000"
                     d="M 70 15 A 40 40 0 0 1 85 30"
@@ -374,7 +356,7 @@ export default function OverviewView({
                     {stats.totalUnits}
                   </span>
                   <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-widest mt-1">
-                    Total Units
+                    Tổng Số Xe
                   </span>
                 </div>
               </div>
@@ -391,7 +373,7 @@ export default function OverviewView({
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(75,226,119,0.8)] animate-pulse" />
-                    <span className="text-[13px] font-medium text-on-surface">Active / Routing</span>
+                    <span className="text-[13px] font-medium text-on-surface">Đang chạy / Lộ trình</span>
                   </div>
                   <span className="font-mono text-[13px] font-bold text-primary">24</span>
                 </div>
@@ -406,22 +388,22 @@ export default function OverviewView({
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(255,186,97,0.6)]" />
-                    <span className="text-[13px] font-medium text-on-surface">Idle / Loading</span>
+                    <span className="text-[13px] font-medium text-on-surface">Tạm dừng / Bốc dỡ</span>
                   </div>
                   <span className="font-mono text-[13px] font-bold text-tertiary">05</span>
                 </div>
 
                 <div
-                  onClick={() => setStatusFilter(statusFilter === 'maintenance' ? 'all' : 'maintenance')}
+                  onClick={() => setStatusFilter(statusFilter === 'offline' ? 'all' : 'offline')}
                   className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
-                    statusFilter === 'maintenance' 
+                    statusFilter === 'offline' 
                       ? 'bg-secondary/20 border-secondary' 
                       : 'bg-surface-container-high/40 hover:bg-surface-container-high border-outline-variant/10'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-secondary" />
-                    <span className="text-[13px] font-medium text-on-surface-variant">Offline / Maintenance</span>
+                    <span className="text-[13px] font-medium text-on-surface-variant">Ngoại tuyến / Bảo dưỡng</span>
                   </div>
                   <span className="font-mono text-[13px] font-bold text-on-surface-variant">02</span>
                 </div>
@@ -439,14 +421,14 @@ export default function OverviewView({
                   <Route className="w-5 h-5 text-secondary" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider">
-                    Distance Today
+                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider font-semibold">
+                    Quãng Đường Hôm Nay
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-[22px] font-extrabold text-on-surface font-mono">
                       {animatedDistance.toLocaleString()}
                     </span>
-                    <span className="font-mono text-[13px] text-secondary">mi</span>
+                    <span className="font-mono text-[13px] text-secondary">km (mi)</span>
                   </div>
                 </div>
               </div>
@@ -460,14 +442,14 @@ export default function OverviewView({
                   <Zap className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider">
-                    Avg Efficiency
+                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider font-semibold">
+                    Hiệu Suất Trung Bình
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-[22px] font-extrabold text-on-surface font-mono">
                       {stats.avgEfficiency}
                     </span>
-                    <span className="font-mono text-[13px] text-primary">mpg</span>
+                    <span className="font-mono text-[13px] text-primary">mpg (14.2 L/100km)</span>
                   </div>
                 </div>
               </div>
@@ -484,14 +466,14 @@ export default function OverviewView({
                   <AlertTriangle className="w-5 h-5 text-error animate-pulse" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider group-hover:text-error transition-colors">
-                    Active Alerts
+                  <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider group-hover:text-error transition-colors font-semibold">
+                    Cảnh Báo Đang Mở
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-[22px] font-extrabold text-error font-mono">
                       {stats.activeAlerts}
                     </span>
-                    <span className="font-mono text-[12px] text-error/80 uppercase font-semibold">Critical Event</span>
+                    <span className="font-mono text-[12px] text-error/80 uppercase font-semibold">Khẩn Cấp</span>
                   </div>
                 </div>
               </div>

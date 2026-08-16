@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
 import { 
   X, 
-  Send, 
-  ShieldAlert, 
-  Radio, 
-  ArrowRight,
-  Download
+  Send
 } from 'lucide-react';
 
 export default function AlertsView({ 
@@ -15,15 +11,15 @@ export default function AlertsView({
   setActiveTab,
   setToast 
 }) {
-  const [selectedCategory, setSelectedCategory] = useState('All'); // 'All' | 'Geofence' | 'Speed'
+  const [selectedCategory, setSelectedCategory] = useState('Tất cả'); // 'Tất cả' | 'Ranh giới' | 'Tốc độ'
   const [engagedIncident, setEngagedIncident] = useState(null);
   const [tacticalNote, setTacticalNote] = useState('');
 
   // Filter alerts by category
   const filteredAlerts = alerts.filter((alert) => {
-    if (selectedCategory === 'All') return true;
-    if (selectedCategory === 'Geofence') return alert.category === 'geofence';
-    if (selectedCategory === 'Speed') return alert.category === 'speed';
+    if (selectedCategory === 'Tất cả') return true;
+    if (selectedCategory === 'Ranh giới') return alert.category === 'geofence';
+    if (selectedCategory === 'Tốc độ') return alert.category === 'speed';
     return true;
   });
 
@@ -40,13 +36,13 @@ export default function AlertsView({
 
     setAlerts(alerts.map(a => 
       a.id === engagedIncident.id 
-        ? { ...a, severity: 'resolved', status: 'resolved', actionLabel: 'Auto-Cleared', eventTitle: `${a.eventTitle} (Engaged & Mitigated)` } 
+        ? { ...a, severity: 'resolved', status: 'resolved', actionLabel: 'Đã tự động xóa', eventTitle: `${a.eventTitle} (Đã can thiệp & Xử lý)` } 
         : a
     ));
 
     setToast({
-      title: `Emergency Protocol Engaged for ${engagedIncident.assetId}`,
-      desc: `Tactical team deployed. Note: "${tacticalNote || 'Standard containment protocol applied'}"`,
+      title: `Đã Kích Hoạt Can Thiệp Khẩn Cấp: ${engagedIncident.assetId}`,
+      desc: `Đội phản ứng nhanh đã được triển khai. Chỉ thị: "${tacticalNote || 'Áp dụng quy trình tiêu chuẩn'}"`,
       type: 'success'
     });
 
@@ -92,13 +88,13 @@ export default function AlertsView({
             </div>
             
             <div className="flex flex-col">
-              <h1 className="font-headline-md text-headline-md text-on-surface font-bold">Telemetry Alerts</h1>
+              <h1 className="font-headline-md text-headline-md text-on-surface font-bold">Cảnh Báo Viễn Thông</h1>
               <div className="flex items-center gap-sm mt-xs">
                 <span className="w-2 h-2 rounded-full bg-error"></span>
-                <span className="font-mono-data text-mono-data text-error font-bold">{criticalCount} CRITICAL</span>
+                <span className="font-mono-data text-mono-data text-error font-bold">{criticalCount} KHẨN CẤP</span>
                 <span className="w-1 h-1 rounded-full bg-on-surface-variant/50 mx-xs"></span>
                 <span className="w-2 h-2 rounded-full bg-tertiary"></span>
-                <span className="font-mono-data text-mono-data text-tertiary font-bold">{warningCount} WARNINGS</span>
+                <span className="font-mono-data text-mono-data text-tertiary font-bold">{warningCount} CẢNH BÁO</span>
               </div>
             </div>
           </div>
@@ -106,7 +102,7 @@ export default function AlertsView({
           {/* Trend Chart (24h Event Frequency) */}
           <div className="hidden md:flex flex-col items-end z-10">
             <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-sm font-semibold">
-              24h Event Frequency
+              Tần Suất Sự Cố 24H
             </span>
             <svg className="w-32 h-8 text-tertiary" preserveAspectRatio="none" viewBox="0 0 100 20">
               <path 
@@ -127,7 +123,7 @@ export default function AlertsView({
           {/* Filter Pills */}
           <div className="flex items-center gap-sm w-full sm:w-auto z-10">
             <div className="bg-surface-container-high rounded-full px-xs py-xs flex shadow-inner border border-outline-variant/20">
-              {['All', 'Geofence', 'Speed'].map((cat) => (
+              {['Tất cả', 'Ranh giới', 'Tốc độ'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
@@ -145,13 +141,13 @@ export default function AlertsView({
             <button
               onClick={() => {
                 setToast({
-                  title: 'Incident Filters Applied',
-                  desc: 'Showing verified telematics telemetry streams.',
+                  title: 'Bộ lọc Sự Cố Đã Áp Dụng',
+                  desc: 'Hiển thị dữ liệu viễn thông tương ứng.',
                   type: 'info'
                 });
               }}
               className="w-10 h-10 bg-surface-container-high hover:bg-surface-bright rounded-full flex items-center justify-center text-on-surface shadow-sm transition-transform hover:scale-105 border border-outline-variant/20"
-              title="Filter list"
+              title="Bộ lọc nâng cao"
             >
               <span className="material-symbols-outlined text-[20px]">filter_list</span>
             </button>
@@ -164,18 +160,17 @@ export default function AlertsView({
           
           {/* Column Headers (Hidden on Mobile) */}
           <div className="hidden md:grid grid-cols-[120px_160px_1fr_2fr_120px] gap-md px-lg py-sm text-on-surface-variant font-label-sm text-label-sm uppercase tracking-[0.15em] opacity-70">
-            <div>Severity</div>
-            <div>Timestamp</div>
-            <div>Asset ID</div>
-            <div>Event Signature</div>
-            <div className="text-right">Action</div>
+            <div>Mức độ</div>
+            <div>Thời gian</div>
+            <div>Mã xe</div>
+            <div>Chi tiết sự cố</div>
+            <div className="text-right">Thao tác</div>
           </div>
 
           {/* Alert Items */}
           {filteredAlerts.map((alert) => {
             const isCritical = alert.severity === 'critical';
             const isWarning = alert.severity === 'warning';
-            const isResolved = alert.severity === 'resolved' || alert.status === 'resolved';
 
             if (isCritical) {
               return (
@@ -190,7 +185,7 @@ export default function AlertsView({
                     <div className="w-8 h-8 rounded-full bg-error-container flex items-center justify-center shadow-inner">
                       <span className="material-symbols-outlined text-on-error-container text-[16px]">priority_high</span>
                     </div>
-                    <span className="font-label-sm text-label-sm text-error uppercase tracking-widest font-bold">Critical</span>
+                    <span className="font-label-sm text-label-sm text-error uppercase tracking-widest font-bold">Khẩn cấp</span>
                   </div>
 
                   <div className="font-mono-data text-mono-data text-on-surface-variant text-[13px]">
@@ -215,7 +210,7 @@ export default function AlertsView({
                       }}
                       className="px-md py-sm bg-error hover:bg-error/90 text-on-error rounded-full font-label-md text-label-md shadow-md transition-all hover:-translate-y-0.5 font-bold"
                     >
-                      Engage
+                      Can Thiệp
                     </button>
                   </div>
                 </div>
@@ -234,7 +229,7 @@ export default function AlertsView({
                     <div className="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center shadow-inner">
                       <span className="material-symbols-outlined text-on-tertiary-container text-[16px]">speed</span>
                     </div>
-                    <span className="font-label-sm text-label-sm text-tertiary uppercase tracking-widest font-bold">Warning</span>
+                    <span className="font-label-sm text-label-sm text-tertiary uppercase tracking-widest font-bold">Cảnh báo</span>
                   </div>
 
                   <div className="font-mono-data text-mono-data text-on-surface-variant text-[13px]">
@@ -259,7 +254,7 @@ export default function AlertsView({
                       }}
                       className="px-md py-sm bg-surface-bright hover:bg-surface-container-highest text-on-surface rounded-full font-label-md text-label-md shadow-sm transition-all hover:-translate-y-0.5 font-medium border border-outline-variant/20"
                     >
-                      Review
+                      Kiểm Tra
                     </button>
                   </div>
                 </div>
@@ -278,7 +273,7 @@ export default function AlertsView({
                   <div className="w-8 h-8 rounded-full bg-primary-container/50 flex items-center justify-center">
                     <span className="material-symbols-outlined text-on-primary-container text-[16px]">check_circle</span>
                   </div>
-                  <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">Resolved</span>
+                  <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest font-bold">Đã xử lý</span>
                 </div>
 
                 <div className="font-mono-data text-mono-data text-on-surface-variant text-[13px]">
@@ -297,7 +292,7 @@ export default function AlertsView({
 
                 <div className="flex justify-end w-full md:w-auto mt-sm md:mt-0">
                   <span className="font-label-sm text-label-sm text-on-surface-variant px-md py-sm font-mono">
-                    {alert.actionLabel || 'Auto-Cleared'}
+                    {alert.actionLabel || 'Đã tự động xóa'}
                   </span>
                 </div>
               </div>
@@ -317,7 +312,7 @@ export default function AlertsView({
                 <div className="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center text-error">
                   <span className="material-symbols-outlined text-[20px]">priority_high</span>
                 </div>
-                <h3 className="text-[17px] font-bold text-on-surface">Emergency Response: {engagedIncident.assetId}</h3>
+                <h3 className="text-[17px] font-bold text-on-surface">Ứng Phó Khẩn Cấp: {engagedIncident.assetId}</h3>
               </div>
               <button onClick={() => setEngagedIncident(null)} className="text-on-surface-variant hover:text-on-surface">
                 <X className="w-5 h-5" />
@@ -326,17 +321,17 @@ export default function AlertsView({
 
             <div className="bg-error/10 border border-error/30 rounded-xl p-3.5 space-y-1">
               <div className="text-[14px] font-bold text-error">{engagedIncident.eventTitle}</div>
-              <div className="text-[12px] font-mono text-on-surface-variant">Signature: {engagedIncident.coordinates}</div>
-              <div className="text-[12px] text-on-surface">Convoy / Asset: <strong>{engagedIncident.unitGroup}</strong></div>
+              <div className="text-[12px] font-mono text-on-surface-variant">Tọa độ: {engagedIncident.coordinates}</div>
+              <div className="text-[12px] text-on-surface">Đoàn xe / Phương tiện: <strong>{engagedIncident.unitGroup}</strong></div>
             </div>
 
             <form onSubmit={handleConfirmEngagement} className="space-y-4">
               <div>
-                <label className="text-[12px] font-mono text-on-surface-variant uppercase">Command Directives & Notes</label>
+                <label className="text-[12px] font-mono text-on-surface-variant uppercase font-semibold">Chỉ Thị Can Thiệp & Ghi Chú Tác Chiến</label>
                 <textarea
                   value={tacticalNote}
                   onChange={(e) => setTacticalNote(e.target.value)}
-                  placeholder="Issue tactical containment directive or route override..."
+                  placeholder="Nhập mệnh lệnh điều chuyển lộ trình, cử đội hỗ trợ kỹ thuật..."
                   rows="3"
                   className="w-full mt-1 bg-surface-container-high border border-outline-variant/30 rounded-xl p-3 text-on-surface text-[14px] focus:outline-none focus:border-error font-mono"
                   autoFocus
@@ -349,14 +344,14 @@ export default function AlertsView({
                   onClick={() => setEngagedIncident(null)}
                   className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px]"
                 >
-                  Cancel
+                  Hủy
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-error hover:bg-error/90 text-on-error font-bold text-[13px] flex items-center gap-2 shadow-lg"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Execute Intervention</span>
+                  <span>Thực Thi Can Thiệp</span>
                 </button>
               </div>
             </form>

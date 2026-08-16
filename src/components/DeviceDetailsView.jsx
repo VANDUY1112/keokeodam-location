@@ -3,16 +3,6 @@ import {
   Search, 
   Gauge, 
   Radio, 
-  MessageSquare, 
-  History, 
-  Satellite, 
-  Zap, 
-  Fuel, 
-  Signal, 
-  Navigation, 
-  CheckCircle2, 
-  Clock, 
-  Truck,
   Send,
   X
 } from 'lucide-react';
@@ -42,15 +32,14 @@ export default function DeviceDetailsView({
     e.preventDefault();
     if (!dispatchMessage.trim()) return;
     setToast({
-      title: `Dispatch Message Sent to ${selectedVehicle.id}`,
-      desc: `Driver ${selectedVehicle.driver.name} received instruction: "${dispatchMessage}"`,
+      title: `Đã Gửi Lệnh Điều Phối Đến ${selectedVehicle.id}`,
+      desc: `Tài xế ${selectedVehicle.driver.name} đã nhận chỉ thị: "${dispatchMessage}"`,
       type: 'success'
     });
     setDispatchMessage('');
     setShowDispatchModal(false);
   };
 
-  // SVG Progress Ring calculation for Power Cell (circumference = 2 * PI * 40 ≈ 251.2)
   const powerCellVal = selectedVehicle.powerCell || 85;
   const strokeDashoffset = 251.2 - (251.2 * powerCellVal) / 100;
 
@@ -63,9 +52,9 @@ export default function DeviceDetailsView({
           
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h2 className="font-headline-md text-headline-md text-on-surface">Active Fleet</h2>
-            <div className="font-mono-data text-mono-data text-primary bg-primary/10 px-sm py-xs rounded-full border border-primary/20">
-              {fleet.filter(v => v.status === 'active').length + 22} Online
+            <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Đội Xe Trực Tuyến</h2>
+            <div className="font-mono-data text-mono-data text-primary bg-primary/10 px-sm py-xs rounded-full border border-primary/20 font-bold">
+              24 Đang Kết Nối
             </div>
           </div>
 
@@ -76,7 +65,7 @@ export default function DeviceDetailsView({
               type="text"
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
-              placeholder="Search vehicle ID..."
+              placeholder="Tìm mã xe..."
               className="bg-transparent text-on-surface font-body-md w-full outline-none placeholder:text-on-surface-variant/50 text-[14px]"
             />
             {localSearch && (
@@ -115,7 +104,7 @@ export default function DeviceDetailsView({
                       
                       <span className="flex items-center gap-xs bg-primary/20 px-sm py-xs rounded-full border border-primary/30">
                         <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                        <span className="font-label-sm text-label-sm text-primary font-bold">Live</span>
+                        <span className="font-label-sm text-label-sm text-primary font-bold">Trực Tiếp</span>
                       </span>
                     </div>
 
@@ -124,7 +113,7 @@ export default function DeviceDetailsView({
                         <span className="material-symbols-outlined text-[16px] text-primary">speed</span> 
                         {unit.speed} mph
                       </span>
-                      <span className="text-on-surface-variant font-medium">ETA: {unit.eta}</span>
+                      <span className="text-on-surface-variant font-medium">Dự kiến: {unit.eta}</span>
                     </div>
                   </div>
                 );
@@ -150,7 +139,7 @@ export default function DeviceDetailsView({
                       <div className={`w-2 h-2 rounded-full ${
                         isLive ? 'bg-primary-fixed-dim' : isIdle ? 'bg-tertiary' : 'bg-surface-variant'
                       }`}></div>
-                      <span className="font-label-sm text-label-sm text-on-surface-variant capitalize">
+                      <span className="font-label-sm text-label-sm text-on-surface-variant capitalize font-medium">
                         {unit.statusLabel || unit.status}
                       </span>
                     </span>
@@ -166,7 +155,7 @@ export default function DeviceDetailsView({
                         <span className="material-symbols-outlined text-[16px]">speed</span> 0 mph
                       </span>
                     ) : (
-                      <span>Last seen: 4h ago</span>
+                      <span>Lần cuối: 4 giờ trước</span>
                     )}
                   </div>
                 </div>
@@ -187,7 +176,7 @@ export default function DeviceDetailsView({
                 className="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-surface-container"
               >
                 <span className="material-symbols-outlined text-[20px] text-primary">chat</span>
-                <span className="font-label-sm text-label-sm font-semibold">Dispatch</span>
+                <span className="font-label-sm text-label-sm font-semibold">Điều Phối</span>
               </button>
               
               <button 
@@ -195,13 +184,13 @@ export default function DeviceDetailsView({
                 className="flex items-center gap-xs text-on-surface-variant hover:text-primary transition-colors py-1 px-2 rounded-lg hover:bg-surface-container"
               >
                 <span className="material-symbols-outlined text-[20px] text-secondary">history</span>
-                <span className="font-label-sm text-label-sm font-semibold">Logs</span>
+                <span className="font-label-sm text-label-sm font-semibold">Nhật Ký</span>
               </button>
             </div>
 
             <div className="font-mono-data text-mono-data text-on-surface-variant flex items-center gap-sm pr-md text-[13px]">
               <span className="material-symbols-outlined text-[18px] text-primary animate-pulse">satellite_alt</span>
-              GPS Fix: {selectedVehicle.gpsFix || '3ms ago'}
+              Định vị GPS: {selectedVehicle.gpsFix || '3ms trước'}
             </div>
           </div>
 
@@ -215,7 +204,7 @@ export default function DeviceDetailsView({
                 style={{ backgroundImage: `url('${selectedVehicle.mapImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDtcavSoNsAn1Xzk4EhQq3XtqzGIejY_svNcX4n4C3o-qsWyqAh5FgLE5Mgs2G4QtJZwPvIxJxScXuUuzf5nWHJXyBqI20qaqeRyQog1NC1njdZaNtznX7U_6tK9CbO77k4aetcEkFq2gVDqZzlmnvok-BGRq4_VDunSrZxRzX3MSssi5wxt7kmZWCJWS6qQQV--SZznptq_ZGR_aSGUilf68HvWm05JHRbauZbpxYg2oMa7u6FPA-N'}')` }}
               />
 
-              {/* Gradient overlay for text readability */}
+              {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-surface/95 via-surface/30 to-transparent pointer-events-none"></div>
 
               {/* Breadcrumb pathing visual overlay */}
@@ -230,16 +219,16 @@ export default function DeviceDetailsView({
               <div className="absolute bottom-md left-md right-md flex justify-between items-end">
                 <div className="bg-surface-container/90 backdrop-blur-xl rounded-xl p-md shadow-2xl border border-outline-variant/30">
                   <div className="font-label-sm text-label-sm text-primary uppercase tracking-widest mb-xs flex items-center gap-xs font-bold">
-                    <span className="material-symbols-outlined text-[16px]">navigation</span> Current Heading
+                    <span className="material-symbols-outlined text-[16px]">navigation</span> Hướng Di Chuyển
                   </div>
                   <div className="font-display-lg text-display-lg text-on-surface leading-none font-mono">
                     {selectedVehicle.heading || 'NNE'} <span className="text-headline-md font-headline-md text-on-surface-variant">{selectedVehicle.headingDeg || 32}°</span>
                   </div>
-                  <div className="text-[11px] text-on-surface-variant font-mono mt-1">Location: {selectedVehicle.hub}</div>
+                  <div className="text-[11px] text-on-surface-variant font-mono mt-1">Vị trí: {selectedVehicle.hub}</div>
                 </div>
 
                 <div className="bg-primary text-on-primary rounded-xl p-md shadow-2xl shadow-primary/30 flex flex-col items-end border border-primary-fixed">
-                  <div className="font-label-sm text-label-sm uppercase tracking-widest opacity-90 mb-xs font-bold">Speed</div>
+                  <div className="font-label-sm text-label-sm uppercase tracking-widest opacity-90 mb-xs font-bold">Vận Tốc</div>
                   <div className="font-display-lg text-display-lg leading-none font-mono font-black">
                     {selectedVehicle.speed}<span className="text-headline-md font-headline-md opacity-80 ml-xs">mph</span>
                   </div>
@@ -256,13 +245,13 @@ export default function DeviceDetailsView({
                 <div className="z-10">
                   <div className="flex items-center gap-xs text-primary mb-sm font-semibold">
                     <span className="material-symbols-outlined text-[20px]">electric_bolt</span>
-                    <span className="font-label-sm text-label-sm uppercase tracking-wider">Power Cell</span>
+                    <span className="font-label-sm text-label-sm uppercase tracking-wider">Khối Năng Lượng</span>
                   </div>
                   <div className="font-headline-lg text-headline-lg text-on-surface font-mono font-black">
                     {selectedVehicle.powerCell || 85}%
                   </div>
                   <div className="font-mono-data text-mono-data text-on-surface-variant mt-xs text-[12px]">
-                    Discharging {selectedVehicle.powerDischarge || '-2.4kW'}
+                    Mức xả {selectedVehicle.powerDischarge || '-2.4kW'}
                   </div>
                 </div>
 
@@ -284,7 +273,7 @@ export default function DeviceDetailsView({
                     ></circle>
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center font-label-sm text-label-sm text-on-surface font-mono font-bold">
-                    OK
+                    TỐT
                   </div>
                 </div>
               </div>
@@ -294,7 +283,7 @@ export default function DeviceDetailsView({
                 <div className="flex justify-between items-end mb-md">
                   <div className="flex items-center gap-xs text-on-surface font-semibold">
                     <span className="material-symbols-outlined text-[20px] text-secondary">local_gas_station</span>
-                    <span className="font-label-sm text-label-sm uppercase tracking-wider">Auxiliary Fuel</span>
+                    <span className="font-label-sm text-label-sm uppercase tracking-wider">Nhiên Liệu Dự Phòng</span>
                   </div>
                   <div className="font-mono-data text-mono-data text-on-surface font-bold">{selectedVehicle.fuel}%</div>
                 </div>
@@ -307,7 +296,7 @@ export default function DeviceDetailsView({
                   </div>
                 </div>
                 <div className="font-label-sm text-label-sm text-on-surface-variant mt-sm text-right font-mono">
-                  Est. Range: {selectedVehicle.fuelRange || '420 mi'}
+                  Tầm hoạt động: {selectedVehicle.fuelRange || '675 km'}
                 </div>
               </div>
 
@@ -317,12 +306,12 @@ export default function DeviceDetailsView({
                   <span className="material-symbols-outlined text-[28px]">network_cell</span>
                 </div>
                 <div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Telemetry Link</div>
+                  <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Kết Nối Viễn Thông</div>
                   <div className="font-headline-md text-headline-md text-on-surface mt-xs tracking-tight font-bold">
-                    {selectedVehicle.signalStrength || 'Strong'}
+                    {selectedVehicle.signalStrength || 'Rất mạnh'}
                   </div>
                   <div className="font-mono-data text-mono-data text-primary mt-xs text-[12px]">
-                    Ping: {selectedVehicle.ping || '24ms (LTE-M)'}
+                    Độ trễ: {selectedVehicle.ping || '24ms (LTE-M)'}
                   </div>
                 </div>
               </div>
@@ -336,23 +325,22 @@ export default function DeviceDetailsView({
             
             <div className="flex justify-between items-center mb-xl relative z-10">
               <div className="flex items-center gap-md">
-                <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Velocity Profile</h3>
+                <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Biểu Đồ Vận Tốc</h3>
                 <span className="bg-surface-variant text-on-surface-variant px-sm py-xs rounded-md font-label-sm text-label-sm font-mono">
-                  Last 6 Hours
+                  6 Giờ Qua
                 </span>
               </div>
               <div className="flex items-center gap-md font-mono-data text-mono-data text-on-surface-variant text-[12px]">
                 <div className="flex items-center gap-xs">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div> Speed (mph)
+                  <div className="w-2 h-2 rounded-full bg-primary"></div> Vận tốc (mph)
                 </div>
                 <div className="flex items-center gap-xs">
-                  <div className="w-2 h-2 rounded-full bg-surface-variant"></div> Limit
+                  <div className="w-2 h-2 rounded-full bg-surface-variant"></div> Giới hạn
                 </div>
               </div>
             </div>
 
             <div className="h-56 w-full relative z-10">
-              {/* Inline SVG Chart */}
               <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 200">
                 <defs>
                   <linearGradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
@@ -396,7 +384,7 @@ export default function DeviceDetailsView({
                 <span>11:00</span>
                 <span>12:00</span>
                 <span>13:00</span>
-                <span className="text-primary font-bold">Now ({selectedVehicle.speed} mph)</span>
+                <span className="text-primary font-bold">Hiện tại ({selectedVehicle.speed} mph)</span>
               </div>
             </div>
 
@@ -413,7 +401,7 @@ export default function DeviceDetailsView({
             <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">chat</span>
-                <h3 className="text-[16px] font-bold text-on-surface">Dispatch Radio to {selectedVehicle.id}</h3>
+                <h3 className="text-[16px] font-bold text-on-surface">Phát Lệnh Điều Phối: {selectedVehicle.id}</h3>
               </div>
               <button onClick={() => setShowDispatchModal(false)} className="text-on-surface-variant hover:text-on-surface">
                 <X className="w-5 h-5" />
@@ -421,14 +409,14 @@ export default function DeviceDetailsView({
             </div>
 
             <div className="text-[13px] text-on-surface-variant">
-              Recipient: <strong className="text-on-surface">{selectedVehicle.driver.name}</strong> • Channel: LTE-M Satellite Encrypted
+              Người nhận: <strong className="text-on-surface">{selectedVehicle.driver.name}</strong> • Kênh: Vệ tinh Mã hóa LTE-M
             </div>
 
             <form onSubmit={handleSendDispatch} className="space-y-4">
               <textarea
                 value={dispatchMessage}
                 onChange={(e) => setDispatchMessage(e.target.value)}
-                placeholder="Enter dispatch instructions or route redirection..."
+                placeholder="Nhập chỉ thị điều phối lộ trình, điểm bốc dỡ mới..."
                 rows="3"
                 className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-3 text-on-surface text-[14px] focus:outline-none focus:border-primary font-mono"
                 autoFocus
@@ -440,14 +428,14 @@ export default function DeviceDetailsView({
                   onClick={() => setShowDispatchModal(false)}
                   className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px]"
                 >
-                  Cancel
+                  Hủy
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-surface-dim font-bold text-[13px] flex items-center gap-2 shadow-lg"
                 >
                   <Send className="w-4 h-4" />
-                  <span>Transmit</span>
+                  <span>Truyền Tín Hiệu</span>
                 </button>
               </div>
             </form>
@@ -462,7 +450,7 @@ export default function DeviceDetailsView({
             <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-secondary">history</span>
-                <h3 className="text-[16px] font-bold text-on-surface">Telemetry Event Logs ({selectedVehicle.id})</h3>
+                <h3 className="text-[16px] font-bold text-on-surface">Nhật Ký Sự Kiện Viễn Thông ({selectedVehicle.id})</h3>
               </div>
               <button onClick={() => setShowLogsModal(false)} className="text-on-surface-variant hover:text-on-surface">
                 <X className="w-5 h-5" />
@@ -472,24 +460,24 @@ export default function DeviceDetailsView({
             <div className="space-y-2.5 max-h-80 overflow-y-auto font-mono text-[12px]">
               <div className="p-2.5 rounded-xl bg-surface-container-high border border-outline-variant/10">
                 <div className="flex justify-between text-primary">
-                  <span>GPS Ping Transmitted</span>
+                  <span>Gói Tin GPS Đã Truyền</span>
                   <span>13:58:12 CST</span>
                 </div>
-                <div className="text-on-surface-variant mt-0.5">Lat: {selectedVehicle.lat}, Lng: {selectedVehicle.lng}, Speed: {selectedVehicle.speed} mph</div>
+                <div className="text-on-surface-variant mt-0.5">Vĩ độ: {selectedVehicle.lat}, Kinh độ: {selectedVehicle.lng}, Tốc độ: {selectedVehicle.speed} mph</div>
               </div>
               <div className="p-2.5 rounded-xl bg-surface-container-high border border-outline-variant/10">
                 <div className="flex justify-between text-on-surface">
-                  <span>CAN-Bus Engine Packet</span>
+                  <span>Gói CAN-Bus Hộp Đen Động Cơ</span>
                   <span>13:55:00 CST</span>
                 </div>
-                <div className="text-on-surface-variant mt-0.5">Coolant Temp: {selectedVehicle.engineTemp}°F, Battery: {selectedVehicle.powerCell}%</div>
+                <div className="text-on-surface-variant mt-0.5">Nhiệt độ Nước làm mát: {selectedVehicle.engineTemp}°F, Mức pin: {selectedVehicle.powerCell}%</div>
               </div>
               <div className="p-2.5 rounded-xl bg-surface-container-high border border-outline-variant/10">
                 <div className="flex justify-between text-secondary">
-                  <span>Checkpoint Reached</span>
+                  <span>Đã Đến Trạm Checkpoint</span>
                   <span>13:30:15 CST</span>
                 </div>
-                <div className="text-on-surface-variant mt-0.5">Passed Mojave Corridor Checkpoint 04 on schedule.</div>
+                <div className="text-on-surface-variant mt-0.5">Vượt qua Trạm Mojave Checkpoint 04 đúng theo lịch trình.</div>
               </div>
             </div>
 
@@ -498,7 +486,7 @@ export default function DeviceDetailsView({
                 onClick={() => setShowLogsModal(false)}
                 className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px] font-mono"
               >
-                Close Logs
+                Đóng Nhật Ký
               </button>
             </div>
           </div>
