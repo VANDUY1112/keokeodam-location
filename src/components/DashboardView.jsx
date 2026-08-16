@@ -1,12 +1,23 @@
 import React from 'react';
 
 export default function DashboardView({
-  expenses,
-  trips,
+  expenses = [],
+  trips = [],
   onOpenLogExpense,
   onOpenItinerary,
   onNavigateToTab,
 }) {
+  // Compute dynamic stats from actual data
+  const totalDistanceNum = trips.reduce((acc, t) => {
+    const d = parseFloat(t.distanceKm) || (t.subtitle?.match(/(\d+([\.,]\d+)?)\s*km/) ? parseFloat(t.subtitle.match(/(\d+([\.,]\d+)?)\s*km/)[1]) : 0);
+    return acc + d;
+  }, 0);
+
+  const totalExpenseNum = expenses.reduce((acc, e) => {
+    const raw = e.amount?.toString().replace(/[^0-9.]/g, '');
+    return acc + (parseFloat(raw) || 0);
+  }, 0);
+
   return (
     <div className="flex flex-col w-full gap-xl">
       {/* ══════════ 4 TOP STAT CARDS ══════════ */}
@@ -18,13 +29,15 @@ export default function DashboardView({
             <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
               Tổng Quãng Đường
             </span>
-            <span className="material-symbols-outlined text-primary text-[22px] p-1 bg-primary/5 rounded-lg">
-              route
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-white border border-slate-200/90 shadow-xs flex items-center justify-center text-slate-700">
+              <span className="material-symbols-outlined text-[18px]">
+                near_me
+              </span>
+            </div>
           </div>
           <div className="flex items-end gap-xs z-10 mt-sm">
             <span className="font-display text-on-surface text-[34px] leading-none">
-              1.245
+              {totalDistanceNum > 0 ? totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '1.245'}
             </span>
             <span className="font-body-md text-on-surface-variant mb-1 font-medium">km</span>
           </div>
@@ -38,14 +51,16 @@ export default function DashboardView({
 
         {/* Metric 2: Avg Speed */}
         <div className="bg-surface-container-lowest rounded-2xl p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group">
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-tertiary/5 rounded-full blur-xl group-hover:bg-tertiary/10 transition-colors duration-500"></div>
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
           <div className="flex items-center justify-between z-10">
             <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
               Tốc Độ Trung Bình
             </span>
-            <span className="material-symbols-outlined text-tertiary text-[22px] p-1 bg-tertiary/5 rounded-lg">
-              speed
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-white border border-slate-200/90 shadow-xs flex items-center justify-center text-slate-700">
+              <span className="material-symbols-outlined text-[18px]">
+                speed
+              </span>
+            </div>
           </div>
           <div className="flex items-end gap-xs z-10 mt-sm">
             <span className="font-display text-on-surface text-[34px] leading-none">
@@ -63,20 +78,21 @@ export default function DashboardView({
 
         {/* Metric 3: Monthly Expenses */}
         <div className="bg-surface-container-lowest rounded-2xl p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group">
-          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-error/5 rounded-full blur-xl group-hover:bg-error/10 transition-colors duration-500"></div>
+          <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
           <div className="flex items-center justify-between z-10">
             <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
               Chi Phí Trong Tháng
             </span>
-            <span className="material-symbols-outlined text-error text-[22px] p-1 bg-error/5 rounded-lg">
-              receipt_long
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-white border border-slate-200/90 shadow-xs flex items-center justify-center text-slate-700">
+              <span className="material-symbols-outlined text-[18px]">
+                receipt_long
+              </span>
+            </div>
           </div>
           <div className="flex items-end gap-xs z-10 mt-sm">
             <span className="font-display text-on-surface text-[34px] leading-none">
-              $4,320
+              ${totalExpenseNum > 0 ? totalExpenseNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '4,320.00'}
             </span>
-            <span className="font-body-md text-on-surface-variant mb-1 font-medium">.00</span>
           </div>
           <div className="flex items-center gap-xs z-10 mt-xs">
             <span className="material-symbols-outlined text-error text-[16px] p-0.5 bg-error/10 rounded-full">

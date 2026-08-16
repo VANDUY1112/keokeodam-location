@@ -2,7 +2,79 @@ import React, { useState, useRef, useEffect } from 'react';
 import DashboardView from './components/DashboardView';
 import TrackingView from './components/TrackingView';
 import ExpensesView from './components/ExpensesView';
+import HistoryView from './components/HistoryView';
 import CustomDropdown from './components/CustomDropdown';
+
+const INITIAL_EXPENSES = [
+  {
+    id: 1,
+    title: 'Ăn tối tiếp khách - Nhà hàng',
+    subtitle: '26 Th10 • Dự án Phoenix',
+    amount: '$245.50',
+    status: 'Chờ duyệt',
+    statusColor: 'text-surface-tint',
+    icon: 'local_dining',
+    hoverColor: 'group-hover:bg-error/10 group-hover:text-error',
+  },
+  {
+    id: 2,
+    title: 'Đổ xăng xe - Trạm Shell',
+    subtitle: '24 Th10 • Chuyến công tác Hamburg',
+    amount: '$85.00',
+    status: 'Đã duyệt',
+    statusColor: 'text-secondary',
+    icon: 'local_gas_station',
+    hoverColor: 'group-hover:bg-tertiary/10 group-hover:text-tertiary',
+  },
+  {
+    id: 3,
+    title: 'Khách sạn Marriott - 2 Đêm',
+    subtitle: '18 Th10 • Hội nghị London Tech',
+    amount: '$540.00',
+    status: 'Đã duyệt',
+    statusColor: 'text-secondary',
+    icon: 'hotel',
+    hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
+  },
+];
+
+const INITIAL_TRIPS = [
+  {
+    id: 1,
+    title: 'Thăm văn phòng Hamburg',
+    subtitle: '24 Th10 • 280 km',
+    distanceKm: 280,
+    duration: '03:45:00',
+    status: 'Hoàn thành',
+    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+    icon: 'near_me',
+    pathCoordinates: [
+      { lat: 10.7769, lng: 106.7009 },
+      { lat: 10.7801, lng: 106.7052 },
+      { lat: 10.7845, lng: 106.7112 },
+    ],
+  },
+  {
+    id: 2,
+    title: 'Hội nghị công nghệ London',
+    subtitle: '18-20 Th10 • 950 km',
+    distanceKm: 950,
+    duration: '12:30:00',
+    status: 'Đã thanh toán',
+    statusBadge: 'bg-surface-container-high text-on-surface-variant',
+    icon: 'flight',
+  },
+  {
+    id: 3,
+    title: 'Họp nhà cung cấp - Cologne',
+    subtitle: '12 Th10 • 145 km',
+    distanceKm: 145,
+    duration: '02:15:00',
+    status: 'Hoàn thành',
+    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+    icon: 'near_me',
+  },
+];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -12,32 +84,40 @@ export default function App() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
-  // Selected project / tech mode
-  const [selectedProject, setSelectedProject] = useState('phoenix');
+  // Persistent State with LocalStorage
+  const [expenses, setExpenses] = useState(() => {
+    try {
+      const saved = localStorage.getItem('expensely_expenses');
+      return saved ? JSON.parse(saved) : INITIAL_EXPENSES;
+    } catch {
+      return INITIAL_EXPENSES;
+    }
+  });
 
-  const projectOptions = [
-    {
-      value: 'phoenix',
-      label: 'Dự Án Phoenix',
-      subtitle: 'Acme Corp • Frankfurt',
-      icon: 'rocket_launch',
-      badge: 'Đang chạy',
-    },
-    {
-      value: 'cybernet',
-      label: 'Hạ Tầng CyberNet',
-      subtitle: 'Munich Data Hub',
-      icon: 'hub',
-      badge: 'Sắp tới',
-    },
-    {
-      value: 'quantum',
-      label: 'Quantum Cloud Link',
-      subtitle: 'Berlin Headquarters',
-      icon: 'cloud_sync',
-      badge: 'Bảo trì',
-    },
-  ];
+  const [trips, setTrips] = useState(() => {
+    try {
+      const saved = localStorage.getItem('expensely_trips');
+      return saved ? JSON.parse(saved) : INITIAL_TRIPS;
+    } catch {
+      return INITIAL_TRIPS;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('expensely_expenses', JSON.stringify(expenses));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [expenses]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('expensely_trips', JSON.stringify(trips));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [trips]);
 
   const categoryOptions = [
     { value: 'Ăn uống', label: 'Ăn uống & Tiếp khách', icon: 'local_dining' },
@@ -57,66 +137,6 @@ export default function App() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const [expenses, setExpenses] = useState([
-    {
-      id: 1,
-      title: 'Ăn tối tiếp khách - Nhà hàng',
-      subtitle: '26 Th10 • Dự án Phoenix',
-      amount: '$245.50',
-      status: 'Chờ duyệt',
-      statusColor: 'text-surface-tint',
-      icon: 'local_dining',
-      hoverColor: 'group-hover:bg-error/10 group-hover:text-error',
-    },
-    {
-      id: 2,
-      title: 'Đổ xăng xe - Trạm Shell',
-      subtitle: '24 Th10 • Chuyến công tác Hamburg',
-      amount: '$85.00',
-      status: 'Đã duyệt',
-      statusColor: 'text-secondary',
-      icon: 'local_gas_station',
-      hoverColor: 'group-hover:bg-tertiary/10 group-hover:text-tertiary',
-    },
-    {
-      id: 3,
-      title: 'Khách sạn Marriott - 2 Đêm',
-      subtitle: '18 Th10 • Hội nghị London Tech',
-      amount: '$540.00',
-      status: 'Đã duyệt',
-      statusColor: 'text-secondary',
-      icon: 'hotel',
-      hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
-    },
-  ]);
-
-  const [trips, setTrips] = useState([
-    {
-      id: 1,
-      title: 'Thăm văn phòng Hamburg',
-      subtitle: '24 Th10 • 280 km',
-      status: 'Hoàn thành',
-      statusBadge: 'bg-secondary/10 text-secondary',
-      icon: 'directions_car',
-    },
-    {
-      id: 2,
-      title: 'Hội nghị công nghệ London',
-      subtitle: '18-20 Th10 • 950 km',
-      status: 'Đã thanh toán',
-      statusBadge: 'bg-surface-container-high text-on-surface-variant',
-      icon: 'flight',
-    },
-    {
-      id: 3,
-      title: 'Họp nhà cung cấp - Cologne',
-      subtitle: '12 Th10 • 145 km',
-      status: 'Hoàn thành',
-      statusBadge: 'bg-secondary/10 text-secondary',
-      icon: 'directions_car',
-    },
-  ]);
 
   const [newExpense, setNewExpense] = useState({
     title: '',
@@ -158,6 +178,14 @@ export default function App() {
     setShowLogExpenseModal(false);
   };
 
+  const handleAddTrip = (newTrip) => {
+    setTrips((prev) => [newTrip, ...prev]);
+  };
+
+  const handleDeleteTrip = (tripId) => {
+    setTrips((prev) => prev.filter((t) => t.id !== tripId));
+  };
+
   return (
     <div className="bg-background font-body-md text-on-background min-h-screen">
       {/* ═══════════════ SIDEBAR NAVIGATION (W-72) ═══════════════ */}
@@ -171,112 +199,102 @@ export default function App() {
           <span className="font-headline-md text-primary tracking-tight">Expensely</span>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-xs px-sm" data-active-classes="bg-primary-container text-on-primary-container shadow-sm">
+        <nav className="flex-1 flex flex-col gap-1.5 px-3">
           <button
             onClick={() => setActiveTab('dashboard')}
             aria-current={activeTab === 'dashboard' ? 'page' : undefined}
-            className={`w-full flex items-center gap-md px-md py-3 rounded-xl transition-all duration-200 group text-left ${
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
               activeTab === 'dashboard'
-                ? 'bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
+                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
               dashboard
             </span>
-            <span className="font-body-md font-medium">Tổng Quan</span>
+            <span className="text-[15px]">Tổng Quan</span>
           </button>
 
           <button
             onClick={() => setActiveTab('tracking')}
             aria-current={activeTab === 'tracking' ? 'page' : undefined}
-            className={`w-full flex items-center gap-md px-md py-3 rounded-xl transition-all duration-200 group text-left ${
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
               activeTab === 'tracking'
-                ? 'bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
+                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
               my_location
             </span>
-            <span className="font-body-md font-medium">Hành Trình</span>
+            <span className="text-[15px]">Hành Trình</span>
           </button>
 
           <button
             onClick={() => setActiveTab('expenses')}
             aria-current={activeTab === 'expenses' ? 'page' : undefined}
-            className={`w-full flex items-center gap-md px-md py-3 rounded-xl transition-all duration-200 group text-left ${
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
               activeTab === 'expenses'
-                ? 'bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
+                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
               receipt_long
             </span>
-            <span className="font-body-md font-medium">Quản Lý Chi Phí</span>
+            <span className="text-[15px]">Quản Lý Chi Phí</span>
           </button>
 
           <button
             onClick={() => setActiveTab('history')}
             aria-current={activeTab === 'history' ? 'page' : undefined}
-            className={`w-full flex items-center gap-md px-md py-3 rounded-xl transition-all duration-200 group text-left ${
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
               activeTab === 'history'
-                ? 'bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
+                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
               history
             </span>
-            <span className="font-body-md font-medium">Lịch Sử Chuyến Đi</span>
+            <span className="text-[15px]">Lịch Sử Chuyến Đi</span>
           </button>
 
           <button
             onClick={() => setActiveTab('reports')}
             aria-current={activeTab === 'reports' ? 'page' : undefined}
-            className={`w-full flex items-center gap-md px-md py-3 rounded-xl transition-all duration-200 group text-left ${
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
               activeTab === 'reports'
-                ? 'bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
+                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
               assessment
             </span>
-            <span className="font-body-md font-medium">Báo Cáo & Thống Kê</span>
+            <span className="text-[15px]">Báo Cáo & Thống Kê</span>
           </button>
 
           <button
             onClick={() => setActiveTab('settings')}
             aria-current={activeTab === 'settings' ? 'page' : undefined}
-            className={`w-full flex items-center gap-md px-md py-3 rounded-xl transition-all duration-200 group text-left ${
+            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
               activeTab === 'settings'
-                ? 'bg-primary-container text-on-primary-container shadow-sm'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
+                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
             }`}
           >
-            <span className="material-symbols-outlined text-md group-hover:scale-110 transition-transform">
+            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
               settings
             </span>
-            <span className="font-body-md font-medium">Cài Đặt</span>
+            <span className="text-[15px]">Cài Đặt</span>
           </button>
         </nav>
       </aside>
 
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
       <div className="pl-72">
-        <header className="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 px-xl flex items-center justify-between border-b border-outline-variant/30">
-          {/* Left Header: Modern Tech / Project Selector Dropdown */}
-          <div className="w-72">
-            <CustomDropdown
-              options={projectOptions}
-              value={selectedProject}
-              onChange={setSelectedProject}
-              placeholder="Chọn dự án công tác..."
-            />
-          </div>
-
+        <header className="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 px-xl flex items-center justify-end border-b border-outline-variant/30">
           {/* Right Header: Notifications & Profile Dropdown */}
           <div className="flex items-center gap-lg">
             <button
@@ -376,7 +394,25 @@ export default function App() {
 
             {/* TAB 2: HÀNH TRÌNH (TRACKING) */}
             {activeTab === 'tracking' && (
-              <TrackingView onOpenLogExpense={() => setShowLogExpenseModal(true)} />
+              <TrackingView
+                onOpenLogExpense={() => setShowLogExpenseModal(true)}
+                onAddTripRecord={handleAddTrip}
+                onAddExpenseRecord={(rec) => {
+                  setExpenses((prev) => [
+                    {
+                      id: Date.now(),
+                      title: rec.title,
+                      subtitle: `Hôm nay • Dự án Phoenix`,
+                      amount: rec.amount,
+                      status: 'Chờ duyệt',
+                      statusColor: 'text-surface-tint',
+                      icon: 'directions_car',
+                      hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
+                    },
+                    ...prev,
+                  ]);
+                }}
+              />
             )}
 
             {/* TAB 3: QUẢN LÝ CHI PHÍ (EXPENSES) */}
@@ -389,35 +425,11 @@ export default function App() {
 
             {/* TAB 4: LỊCH SỬ CHUYẾN ĐI (HISTORY) */}
             {activeTab === 'history' && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="font-headline-lg text-on-surface">Lịch Sử Chuyến Đi & Lưu Trữ</h2>
-                  <p className="text-on-surface-variant text-sm mt-1">
-                    Nhật ký toàn diện về các chuyến công tác đã hoàn tất và hoàn ứng chi phí.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-sm">
-                  {trips.map((trip) => (
-                    <div
-                      key={trip.id}
-                      className="bg-surface-container-lowest p-lg rounded-2xl flex items-center justify-between border border-outline-variant/15 hover:bg-surface-container-low transition-colors"
-                    >
-                      <div className="flex items-center gap-md">
-                        <div className="w-12 h-12 bg-surface-container text-primary rounded-full flex items-center justify-center">
-                          <span className="material-symbols-outlined">{trip.icon}</span>
-                        </div>
-                        <div>
-                          <div className="font-headline-md text-on-surface">{trip.title}</div>
-                          <div className="font-body-md text-on-surface-variant">{trip.subtitle}</div>
-                        </div>
-                      </div>
-                      <span className={`px-3 py-1 font-label-sm rounded-lg ${trip.statusBadge}`}>
-                        {trip.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <HistoryView
+                trips={trips}
+                onDeleteTrip={handleDeleteTrip}
+                onNavigateToTracking={() => setActiveTab('tracking')}
+              />
             )}
 
             {/* TAB 5: BÁO CÁO & THỐNG KÊ (REPORTS) */}
@@ -430,23 +442,23 @@ export default function App() {
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
-                  <div className="p-lg bg-surface-container rounded-2xl border border-outline-variant/20 flex flex-col justify-between h-48">
+                  <div className="p-lg bg-surface-container-lowest rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-48">
                     <div>
-                      <span className="font-label-sm uppercase text-on-surface-variant">Tháng 10 / 2026</span>
-                      <h4 className="font-headline-lg text-on-surface mt-1">Tổng Kết Công Tác Tháng</h4>
-                      <p className="text-sm text-on-surface-variant mt-1">Tổng 1.245 km • Đã chi $4,320.00</p>
+                      <span className="font-label-sm uppercase text-slate-500 font-semibold text-xs">Tháng 10 / 2026</span>
+                      <h4 className="font-headline-lg text-on-surface mt-1 font-bold">Tổng Kết Công Tác Tháng</h4>
+                      <p className="text-sm text-on-surface-variant mt-1 font-medium">Tổng 1.245 km • Đã chi $4,320.00</p>
                     </div>
-                    <button className="self-start px-4 py-2 rounded-xl bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 flex items-center gap-2">
+                    <button className="self-start px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md">
                       <span className="material-symbols-outlined text-base">download</span> Xuất Báo Cáo PDF
                     </button>
                   </div>
-                  <div className="p-lg bg-surface-container rounded-2xl border border-outline-variant/20 flex flex-col justify-between h-48">
+                  <div className="p-lg bg-surface-container-lowest rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-48">
                     <div>
-                      <span className="font-label-sm uppercase text-on-surface-variant">Quý 3 / 2026</span>
-                      <h4 className="font-headline-lg text-on-surface mt-1">Báo Cáo Kiểm Toán Quý</h4>
-                      <p className="text-sm text-on-surface-variant mt-1">Tổng 3.840 km • Đã chi $12,900.00</p>
+                      <span className="font-label-sm uppercase text-slate-500 font-semibold text-xs">Quý 3 / 2026</span>
+                      <h4 className="font-headline-lg text-on-surface mt-1 font-bold">Báo Cáo Kiểm Toán Quý</h4>
+                      <p className="text-sm text-on-surface-variant mt-1 font-medium">Tổng 3.840 km • Đã chi $12,900.00</p>
                     </div>
-                    <button className="self-start px-4 py-2 rounded-xl bg-primary text-on-primary text-sm font-medium hover:bg-primary/90 flex items-center gap-2">
+                    <button className="self-start px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md">
                       <span className="material-symbols-outlined text-base">download</span> Xuất File Excel / CSV
                     </button>
                   </div>
@@ -464,17 +476,17 @@ export default function App() {
                   </p>
                 </div>
                 <div className="space-y-4">
-                  <div className="p-md bg-surface-container rounded-xl flex items-center justify-between">
+                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-xl flex items-center justify-between shadow-sm">
                     <div>
-                      <div className="font-medium text-on-surface">Tự động kích hoạt GPS định vị</div>
-                      <div className="text-xs text-on-surface-variant">Ghi nhận tọa độ vi mô khi bắt đầu chuyến đi</div>
+                      <div className="font-semibold text-on-surface text-sm">Tự động kích hoạt GPS định vị</div>
+                      <div className="text-xs text-on-surface-variant mt-0.5">Ghi nhận tọa độ vi mô khi bắt đầu chuyến đi</div>
                     </div>
                     <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary cursor-pointer" />
                   </div>
-                  <div className="p-md bg-surface-container rounded-xl flex items-center justify-between">
+                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-xl flex items-center justify-between shadow-sm">
                     <div>
-                      <div className="font-medium text-on-surface">Thông báo phê duyệt chi phí tức thì</div>
-                      <div className="text-xs text-on-surface-variant">Gửi thông báo đến phòng kế toán ngay khi kết thúc lộ trình</div>
+                      <div className="font-semibold text-on-surface text-sm">Thông báo phê duyệt chi phí tức thì</div>
+                      <div className="text-xs text-on-surface-variant mt-0.5">Gửi thông báo đến phòng kế toán ngay khi kết thúc lộ trình</div>
                     </div>
                     <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary cursor-pointer" />
                   </div>
@@ -509,7 +521,7 @@ export default function App() {
 
             <form onSubmit={handleAddExpense} className="flex flex-col gap-md">
               <div>
-                <label className="block font-label-sm text-on-surface-variant mb-1 uppercase tracking-wider text-xs">
+                <label className="block font-label-sm text-on-surface-variant mb-1 uppercase tracking-wider text-xs font-semibold">
                   Nội Dung / Mô Tả Chi Phí
                 </label>
                 <input
@@ -523,7 +535,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block font-label-sm text-on-surface-variant mb-1 uppercase tracking-wider text-xs">
+                <label className="block font-label-sm text-on-surface-variant mb-1 uppercase tracking-wider text-xs font-semibold">
                   Số Tiền ($)
                 </label>
                 <input
