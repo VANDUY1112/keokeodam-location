@@ -46,23 +46,28 @@ export default function HistoryView({ trips, onDeleteTrip, onNavigateToTracking 
         </div>
       </div>
 
-      {/* ══════════ STATS SUMMARY ══════════ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
-        <div className="bg-surface-container-lowest rounded-2xl p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)]">
+      {/* ══════════ STATS SUMMARY: BOX 1 (1 LINE), BOX 2 & 3 (2 BOXES/LINE ON MOBILE) ══════════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-lg">
+        {/* Box 1: Full width on mobile */}
+        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)]">
           <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Tổng Chuyến Đi Đã Ghi</div>
-          <div className="text-3xl font-bold text-slate-900 mt-1">{trips.length} chuyến</div>
+          <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{trips.length} chuyến</div>
         </div>
-        <div className="bg-surface-container-lowest rounded-2xl p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)]">
-          <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Tổng Km Tích Lũy</div>
-          <div className="text-3xl font-bold text-primary mt-1">
+
+        {/* Box 2: Half width on mobile */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] flex flex-col justify-between">
+          <div className="text-[11px] sm:text-xs uppercase tracking-wider text-slate-500 font-semibold">Tổng Km Tích Lũy</div>
+          <div className="text-xl sm:text-3xl font-bold text-primary mt-1">
             {trips.reduce((acc, t) => acc + (parseFloat(t.distanceKm) || (t.subtitle?.match(/(\d+([\.,]\d+)?)\s*km/) ? parseFloat(t.subtitle.match(/(\d+([\.,]\d+)?)\s*km/)[1]) : 25)), 0).toFixed(1)} km
           </div>
         </div>
-        <div className="bg-surface-container-lowest rounded-2xl p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)]">
-          <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Trạng Thái Đồng Bộ</div>
-          <div className="text-base font-semibold text-emerald-700 mt-2 flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>Đã lưu an toàn trên LocalStorage</span>
+
+        {/* Box 3: Half width on mobile */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] flex flex-col justify-between">
+          <div className="text-[11px] sm:text-xs uppercase tracking-wider text-slate-500 font-semibold">Trạng Thái</div>
+          <div className="text-xs sm:text-base font-semibold text-emerald-700 mt-1 flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+            <span className="truncate">Đồng bộ LocalStorage</span>
           </div>
         </div>
       </div>

@@ -220,9 +220,9 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row w-full min-h-[calc(100vh-140px)] gap-gutter">
+      <div className="flex flex-col lg:flex-row w-full gap-4 lg:gap-gutter">
         {/* Left Panel: Controls & Trip Details */}
-        <aside className="w-full lg:w-1/3 flex flex-col gap-lg z-10 relative">
+        <aside className="w-full lg:w-1/3 flex flex-col gap-4 lg:gap-lg z-10 relative">
           {/* Live Status Header */}
           <div className="bg-surface-container-lowest rounded-3xl p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] flex flex-col gap-sm relative overflow-hidden group">
             <div className="absolute -right-16 -top-16 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700"></div>
@@ -374,7 +374,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
         </aside>
 
         {/* Right Panel: Interactive Real Map with GPS & Polyline */}
-        <main className="w-full lg:w-2/3 min-h-[480px] lg:h-auto rounded-[2rem] overflow-hidden relative shadow-lg border border-slate-300 bg-slate-100">
+        <main className="w-full lg:w-2/3 min-h-[380px] sm:min-h-[460px] lg:min-h-[580px] h-[380px] sm:h-[450px] lg:h-auto rounded-3xl overflow-hidden relative shadow-lg border border-slate-300 bg-slate-100">
           <LiveRouteMap
             currentPosition={currentPosition}
             startPosition={startPosition}
@@ -386,27 +386,27 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           />
 
           {/* Route Summary Overlay (Top Left) */}
-          <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md rounded-2xl p-md shadow-xl border border-slate-200/90 flex flex-col gap-3 z-[400] max-w-xs pointer-events-auto">
-            <div className="flex items-start gap-3">
-              <div className="flex flex-col items-center gap-1 mt-1">
-                <div className="w-3 h-3 rounded-full bg-emerald-600 ring-4 ring-emerald-100"></div>
-                <div className="w-0.5 h-8 bg-slate-300 border-l-2 border-dashed border-slate-400"></div>
-                <div className="w-3 h-3 rounded-full bg-rose-600 ring-4 ring-rose-100"></div>
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-white/95 backdrop-blur-md rounded-2xl p-2.5 sm:p-md shadow-xl border border-slate-200/90 flex flex-col gap-2 sm:gap-3 z-[400] max-w-[200px] sm:max-w-xs pointer-events-auto">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <div className="flex flex-col items-center gap-0.5 mt-0.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-600 ring-2 ring-emerald-100"></div>
+                <div className="w-0.5 h-6 bg-slate-300 border-l border-dashed border-slate-400"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-rose-600 ring-2 ring-rose-100"></div>
               </div>
-              <div className="flex flex-col gap-3 w-full">
+              <div className="flex flex-col gap-1.5 sm:gap-3 w-full">
                 <div>
-                  <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] font-semibold text-emerald-700">
-                    Điểm xuất phát
+                  <p className="font-label-sm text-emerald-700 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">
+                    Xuất phát
                   </p>
-                  <p className="font-body-md text-on-surface font-semibold truncate text-xs">
+                  <p className="text-on-surface font-semibold truncate text-[11px] sm:text-xs">
                     {startPosition ? `${startPosition.lat.toFixed(4)}, ${startPosition.lng.toFixed(4)}` : originAddress}
                   </p>
                 </div>
                 <div>
-                  <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] font-semibold text-rose-700">
-                    Điểm đến hiện tại
+                  <p className="font-label-sm text-rose-700 uppercase tracking-wider text-[10px] sm:text-[11px] font-bold">
+                    Hiện tại
                   </p>
-                  <p className="font-body-md text-on-surface font-semibold truncate text-xs">
+                  <p className="text-on-surface font-semibold truncate text-[11px] sm:text-xs">
                     {currentPosition ? `${currentPosition.lat.toFixed(4)}, ${currentPosition.lng.toFixed(4)}` : destinationAddress}
                   </p>
                 </div>
@@ -415,35 +415,35 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           </div>
 
           {/* Live Telemetry Floating Overlay (Bottom Center/Right) */}
-          <div className="absolute bottom-4 right-4 flex flex-wrap gap-sm z-[400] pointer-events-auto">
+          <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex flex-wrap gap-2 z-[400] pointer-events-auto">
             {/* Speed */}
-            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-sm shadow-xl flex items-center gap-md border border-slate-200/90 transform hover:-translate-y-1 transition-transform">
-              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-on-surface text-xl">speed</span>
+            <div className="bg-white/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-2 sm:p-sm shadow-xl flex items-center gap-2 sm:gap-md border border-slate-200/90">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-on-surface text-lg sm:text-xl">speed</span>
               </div>
-              <div className="pr-md">
-                <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] mb-0.5 font-medium">
-                  Tốc độ hiện tại
+              <div className="pr-1 sm:pr-md">
+                <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[10px] sm:text-[11px] mb-0.5 font-medium">
+                  Tốc độ
                 </p>
-                <p className="font-headline-lg text-on-surface font-bold leading-none">
+                <p className="text-sm sm:text-lg font-bold text-on-surface leading-none">
                   {isTracking ? currentSpeed : 0}{' '}
-                  <span className="font-body-md text-on-surface-variant font-normal text-sm ml-0.5">km/h</span>
+                  <span className="text-[10px] sm:text-xs font-normal text-on-surface-variant">km/h</span>
                 </p>
               </div>
             </div>
 
             {/* Live Distance */}
-            <div className="bg-slate-900/95 backdrop-blur-xl rounded-2xl p-sm shadow-xl flex items-center gap-md border border-slate-700 transform hover:-translate-y-1 transition-transform">
-              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-white">multiple_stop</span>
+            <div className="bg-slate-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl p-2 sm:p-sm shadow-xl flex items-center gap-2 sm:gap-md border border-slate-700">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <span className="material-symbols-outlined text-white text-lg sm:text-xl">near_me</span>
               </div>
-              <div className="pr-md">
-                <p className="font-label-sm text-slate-400 uppercase tracking-wider text-[11px] mb-0.5 font-medium">
-                  Quãng đường trực tiếp
+              <div className="pr-1 sm:pr-md">
+                <p className="font-label-sm text-slate-400 uppercase tracking-wider text-[10px] sm:text-[11px] mb-0.5 font-medium">
+                  Quãng đường
                 </p>
-                <p className="font-headline-lg text-white font-bold leading-none">
+                <p className="text-sm sm:text-lg font-bold text-white leading-none">
                   {totalDistance.toFixed(2)}{' '}
-                  <span className="font-body-md text-slate-300 font-normal text-sm ml-0.5">km</span>
+                  <span className="text-[10px] sm:text-xs font-normal text-slate-300">km</span>
                 </p>
               </div>
             </div>

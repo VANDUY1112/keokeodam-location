@@ -20,10 +20,10 @@ export default function DashboardView({
 
   return (
     <div className="flex flex-col w-full gap-xl">
-      {/* ══════════ 4 TOP STAT CARDS ══════════ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-lg w-full">
-        {/* Metric 1: Total Distance */}
-        <div className="bg-surface-container-lowest rounded-2xl p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group">
+      {/* ══════════ 4 TOP STAT CARDS: BOX 1 (1 LINE), BOX 2 & 3 (2 BOXES/LINE ON MOBILE) ══════════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-lg w-full">
+        {/* Metric 1: Total Distance - Box 1: Full width on mobile */}
+        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
           <div className="flex items-center justify-between z-10">
             <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
@@ -36,7 +36,7 @@ export default function DashboardView({
             </div>
           </div>
           <div className="flex items-end gap-xs z-10 mt-sm">
-            <span className="font-display text-on-surface text-[34px] leading-none">
+            <span className="font-display text-on-surface text-[30px] sm:text-[34px] leading-none">
               {totalDistanceNum > 0 ? totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '1.245'}
             </span>
             <span className="font-body-md text-on-surface-variant mb-1 font-medium">km</span>
@@ -45,16 +45,16 @@ export default function DashboardView({
             <span className="material-symbols-outlined text-secondary text-[16px] p-0.5 bg-secondary/10 rounded-full">
               trending_up
             </span>
-            <span className="font-label-sm text-secondary font-medium">+12% so với tháng trước</span>
+            <span className="font-label-sm text-secondary font-medium text-xs sm:text-sm">+12% so với tháng trước</span>
           </div>
         </div>
 
-        {/* Metric 2: Avg Speed */}
-        <div className="bg-surface-container-lowest rounded-2xl p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group">
+        {/* Metric 2: Avg Speed - Box 2: Half width on mobile */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group justify-between">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
           <div className="flex items-center justify-between z-10">
-            <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
-              Tốc Độ Trung Bình
+            <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] sm:text-xs font-semibold">
+              Tốc Độ TB
             </span>
             <div className="w-8 h-8 rounded-lg bg-white border border-slate-200/90 shadow-xs flex items-center justify-center text-slate-700">
               <span className="material-symbols-outlined text-[18px]">
@@ -63,25 +63,25 @@ export default function DashboardView({
             </div>
           </div>
           <div className="flex items-end gap-xs z-10 mt-sm">
-            <span className="font-display text-on-surface text-[34px] leading-none">
+            <span className="font-display text-on-surface text-[24px] sm:text-[34px] leading-none">
               68.4
             </span>
-            <span className="font-body-md text-on-surface-variant mb-1 font-medium">km/h</span>
+            <span className="font-body-md text-on-surface-variant mb-1 font-medium text-xs sm:text-sm">km/h</span>
           </div>
           <div className="flex items-center gap-xs z-10 mt-xs">
-            <span className="material-symbols-outlined text-on-surface-variant text-[16px] p-0.5 bg-slate-100 rounded-full">
+            <span className="material-symbols-outlined text-on-surface-variant text-[14px] p-0.5 bg-slate-100 rounded-full">
               horizontal_rule
             </span>
-            <span className="font-label-sm text-on-surface-variant font-medium">Vận tốc ổn định</span>
+            <span className="text-[11px] sm:text-xs text-on-surface-variant font-medium">Vận tốc ổn định</span>
           </div>
         </div>
 
-        {/* Metric 3: Monthly Expenses */}
-        <div className="bg-surface-container-lowest rounded-2xl p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group">
+        {/* Metric 3: Monthly Expenses - Box 3: Half width on mobile */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-md flex flex-col gap-sm border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group justify-between">
           <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
           <div className="flex items-center justify-between z-10">
-            <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
-              Chi Phí Trong Tháng
+            <span className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] sm:text-xs font-semibold">
+              Chi Phí Tháng
             </span>
             <div className="w-8 h-8 rounded-lg bg-white border border-slate-200/90 shadow-xs flex items-center justify-center text-slate-700">
               <span className="material-symbols-outlined text-[18px]">
@@ -90,20 +90,20 @@ export default function DashboardView({
             </div>
           </div>
           <div className="flex items-end gap-xs z-10 mt-sm">
-            <span className="font-display text-on-surface text-[34px] leading-none">
-              ${totalExpenseNum > 0 ? totalExpenseNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '4,320.00'}
+            <span className="font-display text-on-surface text-[22px] sm:text-[34px] leading-none truncate">
+              ${totalExpenseNum > 0 ? totalExpenseNum.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : '4,320'}
             </span>
           </div>
           <div className="flex items-center gap-xs z-10 mt-xs">
-            <span className="material-symbols-outlined text-error text-[16px] p-0.5 bg-error/10 rounded-full">
+            <span className="material-symbols-outlined text-error text-[14px] p-0.5 bg-error/10 rounded-full">
               trending_up
             </span>
-            <span className="font-label-sm text-error font-medium">+5% so với dự toán</span>
+            <span className="text-[11px] sm:text-xs text-error font-medium">+5% dự toán</span>
           </div>
         </div>
 
-        {/* Metric 4: Active Trip */}
-        <div className="bg-primary-container rounded-2xl p-md flex flex-col gap-sm shadow-md border border-slate-800/80 relative overflow-hidden group">
+        {/* Metric 4: Active Trip - Box 4: Full width on mobile */}
+        <div className="col-span-2 lg:col-span-1 bg-primary-container rounded-2xl p-4 sm:p-md flex flex-col gap-sm shadow-md border border-slate-800/80 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-2xl transform translate-x-1/3 -translate-y-1/3"></div>
           <div className="flex items-center justify-between gap-1 z-10">
             <span className="font-label-sm text-on-primary-container uppercase tracking-wider text-xs truncate font-semibold">
@@ -117,15 +117,15 @@ export default function DashboardView({
             </div>
           </div>
           <div className="flex flex-col z-10 mt-sm">
-            <span className="font-headline-lg text-on-primary-container leading-tight">
+            <span className="font-headline-lg text-on-primary-container leading-tight text-xl sm:text-2xl">
               Berlin
             </span>
-            <span className="font-body-md text-on-primary-container/70 flex items-center gap-1 mt-1 font-medium">
+            <span className="font-body-md text-on-primary-container/70 flex items-center gap-1 mt-1 font-medium text-xs sm:text-sm">
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
               Munich
             </span>
           </div>
-          <div className="flex flex-col gap-xs z-10 mt-auto">
+          <div className="flex flex-col gap-xs z-10 mt-auto pt-2">
             <div className="w-full bg-surface-container-low/20 h-1.5 rounded-full overflow-hidden">
               <div className="bg-secondary h-full rounded-full w-[65%] relative">
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-on-secondary rounded-full shadow-[0_0_8px_rgba(0,108,73,0.8)]"></div>

@@ -31,12 +31,12 @@ export default function ExpensesView({ expenses, onOpenAddExpense }) {
         </div>
       </div>
 
-      {/* ══════════ 3 METRIC CARDS ══════════ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
-        {/* Total Spent */}
-        <div className="bg-surface-container-lowest rounded-2xl p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all">
-          <div className="absolute top-0 right-0 p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
-            <span className="material-symbols-outlined text-4xl text-primary">
+      {/* ══════════ 3 METRIC CARDS: BOX 1 (1 LINE), BOX 2 & 3 (2 BOXES/LINE ON MOBILE) ══════════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-lg">
+        {/* Total Spent - Box 1: Full width on mobile */}
+        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all">
+          <div className="absolute top-0 right-0 p-3 sm:p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+            <span className="material-symbols-outlined text-3xl sm:text-4xl text-primary">
               account_balance_wallet
             </span>
           </div>
@@ -44,45 +44,49 @@ export default function ExpensesView({ expenses, onOpenAddExpense }) {
             Tổng Đã Chi
           </p>
           <div className="mt-sm flex items-baseline gap-sm">
-            <span className="font-display text-on-surface text-[34px] leading-tight">$2,450.00</span>
+            <span className="font-display text-on-surface text-[30px] sm:text-[34px] leading-tight">$2,450.00</span>
           </div>
-          <div className="mt-md flex items-center gap-xs text-secondary">
+          <div className="mt-md flex items-center gap-xs text-secondary text-xs sm:text-sm">
             <span className="material-symbols-outlined text-sm p-0.5 bg-secondary/10 rounded-full">trending_up</span>
-            <span className="font-body-md font-medium">+12% so với tháng trước</span>
+            <span className="font-medium">+12% so với tháng trước</span>
           </div>
         </div>
 
-        {/* Budget Remaining */}
-        <div className="bg-surface-container-lowest rounded-2xl p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all">
-          <div className="absolute top-0 right-0 p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
-            <span className="material-symbols-outlined text-4xl text-secondary">savings</span>
+        {/* Budget Remaining - Box 2: Half width on mobile */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="absolute top-0 right-0 p-3 sm:p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+              <span className="material-symbols-outlined text-3xl sm:text-4xl text-secondary">savings</span>
+            </div>
+            <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] sm:text-xs font-semibold">
+              Ngân Sách Còn Lại
+            </p>
+            <div className="mt-sm flex items-baseline gap-sm">
+              <span className="font-display text-on-surface text-[24px] sm:text-[34px] leading-tight">$1,550.00</span>
+            </div>
           </div>
-          <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
-            Ngân Sách Còn Lại
-          </p>
-          <div className="mt-sm flex items-baseline gap-sm">
-            <span className="font-display text-on-surface text-[34px] leading-tight">$1,550.00</span>
-          </div>
-          <div className="mt-md w-full bg-slate-100 border border-slate-200/60 rounded-full h-2.5 overflow-hidden">
-            <div className="bg-secondary h-2.5 rounded-full transition-all duration-700 shadow-sm" style={{ width: '61%' }}></div>
+          <div className="mt-3 w-full bg-slate-100 border border-slate-200/60 rounded-full h-2 overflow-hidden">
+            <div className="bg-secondary h-2 rounded-full transition-all duration-700 shadow-sm" style={{ width: '61%' }}></div>
           </div>
         </div>
 
-        {/* Pending Claims */}
-        <div className="bg-surface-container-lowest rounded-2xl p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all">
-          <div className="absolute top-0 right-0 p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
-            <span className="material-symbols-outlined text-4xl text-tertiary">receipt_long</span>
+        {/* Pending Claims - Box 3: Half width on mobile */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="absolute top-0 right-0 p-3 sm:p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+              <span className="material-symbols-outlined text-3xl sm:text-4xl text-tertiary">receipt_long</span>
+            </div>
+            <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] sm:text-xs font-semibold">
+              Yêu Cầu Chờ Duyệt
+            </p>
+            <div className="mt-sm flex items-baseline gap-xs">
+              <span className="font-display text-on-surface text-[24px] sm:text-[34px] leading-tight">3</span>
+              <span className="text-on-surface-variant text-xs sm:text-sm font-medium">hóa đơn</span>
+            </div>
           </div>
-          <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
-            Yêu Cầu Chờ Duyệt
-          </p>
-          <div className="mt-sm flex items-baseline gap-xs">
-            <span className="font-display text-on-surface text-[34px] leading-tight">3</span>
-            <span className="font-body-md text-on-surface-variant font-medium ml-1">hóa đơn</span>
-          </div>
-          <div className="mt-md flex items-center gap-xs text-on-surface-variant">
-            <span className="material-symbols-outlined text-sm">schedule</span>
-            <span className="font-body-md">Đang chờ kế toán xác nhận</span>
+          <div className="mt-3 text-[11px] sm:text-xs text-on-surface-variant flex items-center gap-1 font-medium">
+            <span className="material-symbols-outlined text-xs sm:text-sm">schedule</span>
+            <span>Đang chờ kế toán xác nhận</span>
           </div>
         </div>
       </div>

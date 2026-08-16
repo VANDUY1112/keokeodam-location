@@ -4,6 +4,7 @@ import TrackingView from './components/TrackingView';
 import ExpensesView from './components/ExpensesView';
 import HistoryView from './components/HistoryView';
 import CustomDropdown from './components/CustomDropdown';
+import MobileCurvedNavBar from './components/MobileCurvedNavBar';
 
 const INITIAL_EXPENSES = [
   {
@@ -78,6 +79,7 @@ const INITIAL_TRIPS = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogExpenseModal, setShowLogExpenseModal] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
@@ -207,10 +209,19 @@ export default function App() {
     localStorage.setItem('expensely_user_avatar', url);
   };
 
+  const navItems = [
+    { id: 'dashboard', label: 'Tổng Quan', icon: 'dashboard' },
+    { id: 'tracking', label: 'Hành Trình', icon: 'my_location' },
+    { id: 'expenses', label: 'Quản Lý Chi Phí', icon: 'receipt_long' },
+    { id: 'history', label: 'Lịch Sử Chuyến Đi', icon: 'history' },
+    { id: 'reports', label: 'Báo Cáo & Thống Kê', icon: 'assessment' },
+    { id: 'settings', label: 'Cài Đặt', icon: 'settings' },
+  ];
+
   return (
     <div className="bg-background font-body-md text-on-background min-h-screen">
-      {/* ═══════════════ SIDEBAR NAVIGATION (W-72) ═══════════════ */}
-      <aside className="fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex flex-col shadow-[1px_0_0_rgba(0,0,0,0.05)]">
+      {/* ═══════════════ DESKTOP SIDEBAR NAVIGATION (W-72) ═══════════════ */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col shadow-[1px_0_0_rgba(0,0,0,0.05)]">
         <div className="h-16 flex items-center px-lg mb-sm gap-sm">
           <img
             alt="Expensely Logo"
@@ -221,103 +232,97 @@ export default function App() {
         </div>
 
         <nav className="flex-1 flex flex-col gap-1.5 px-3">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            aria-current={activeTab === 'dashboard' ? 'page' : undefined}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
-              activeTab === 'dashboard'
-                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
-                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
-              dashboard
-            </span>
-            <span className="text-[15px]">Tổng Quan</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('tracking')}
-            aria-current={activeTab === 'tracking' ? 'page' : undefined}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
-              activeTab === 'tracking'
-                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
-                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
-              my_location
-            </span>
-            <span className="text-[15px]">Hành Trình</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('expenses')}
-            aria-current={activeTab === 'expenses' ? 'page' : undefined}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
-              activeTab === 'expenses'
-                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
-                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
-              receipt_long
-            </span>
-            <span className="text-[15px]">Quản Lý Chi Phí</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('history')}
-            aria-current={activeTab === 'history' ? 'page' : undefined}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
-              activeTab === 'history'
-                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
-                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
-              history
-            </span>
-            <span className="text-[15px]">Lịch Sử Chuyến Đi</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('reports')}
-            aria-current={activeTab === 'reports' ? 'page' : undefined}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
-              activeTab === 'reports'
-                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
-                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
-              assessment
-            </span>
-            <span className="text-[15px]">Báo Cáo & Thống Kê</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('settings')}
-            aria-current={activeTab === 'settings' ? 'page' : undefined}
-            className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
-              activeTab === 'settings'
-                ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
-                : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
-              settings
-            </span>
-            <span className="text-[15px]">Cài Đặt</span>
-          </button>
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              aria-current={activeTab === item.id ? 'page' : undefined}
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
+                activeTab === item.id
+                  ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
+                  : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
+              }`}
+            >
+              <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
+                {item.icon}
+              </span>
+              <span className="text-[15px]">{item.label}</span>
+            </button>
+          ))}
         </nav>
       </aside>
 
+      {/* ═══════════════ MOBILE DRAWER MENU ═══════════════ */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          ></div>
+          <div className="relative w-72 max-w-[80vw] bg-surface-container-low h-full flex flex-col shadow-2xl p-4 z-10 animate-in slide-in-from-left duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+              <div className="flex items-center gap-2.5">
+                <img
+                  alt="Expensely Logo"
+                  className="h-8 w-8 rounded-xl shadow-xs object-cover"
+                  src="/favicon.svg"
+                />
+                <span className="font-bold text-primary text-lg">Expensely</span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <nav className="flex-1 flex flex-col gap-1.5">
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-left transition-all ${
+                    activeTab === item.id
+                      ? 'bg-primary text-white font-semibold shadow-sm'
+                      : 'text-slate-700 hover:bg-slate-200/60 font-medium'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
+                  <span className="text-sm">{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+      )}
+
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
-      <div className="pl-72">
-        <header className="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 px-xl flex items-center justify-end border-b border-outline-variant/30">
+      <div className="pl-0 lg:pl-72">
+        <header className="fixed top-0 left-0 lg:left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-xl flex items-center justify-between border-b border-outline-variant/30 shadow-xs">
+          {/* Mobile Left: Hamburger Button & Logo */}
+          <div className="flex items-center gap-2.5 lg:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 text-slate-700 hover:bg-slate-100 rounded-xl"
+              title="Mở menu"
+            >
+              <span className="material-symbols-outlined text-2xl">menu</span>
+            </button>
+            <div className="flex items-center gap-2">
+              <img alt="Logo" className="w-7 h-7 rounded-lg" src="/favicon.svg" />
+              <span className="font-bold text-slate-900 text-base">Expensely</span>
+            </div>
+          </div>
+
+          {/* Spacer for desktop */}
+          <div className="hidden lg:block"></div>
+
           {/* Right Header: Notifications & Profile Dropdown */}
-          <div className="flex items-center gap-lg">
+          <div className="flex items-center gap-3 sm:gap-lg">
             <button
               onClick={() => setShowNotificationsModal(!showNotificationsModal)}
               className="relative p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors"
@@ -330,14 +335,14 @@ export default function App() {
             <div className="relative" ref={profileMenuRef}>
               <div
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-3 cursor-pointer hover:bg-surface-container-high p-1.5 pr-3 rounded-full transition-all group border border-outline-variant/30 bg-white/60 shadow-xs"
+                className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:bg-surface-container-high p-1 sm:p-1.5 sm:pr-3 rounded-full transition-all group border border-outline-variant/30 bg-white/60 shadow-xs"
               >
                 <img
                   alt="Profile"
-                  className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-primary shadow-xs"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-primary shadow-xs"
                   src={userAvatar}
                 />
-                <span className="font-semibold text-slate-800 text-sm">{userName}</span>
+                <span className="font-semibold text-slate-800 text-sm hidden sm:inline">{userName}</span>
                 <span className={`material-symbols-outlined text-[18px] text-slate-500 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
                   expand_more
                 </span>
@@ -385,7 +390,7 @@ export default function App() {
                     </button>
                   </div>
 
-                  <div className="pt-1.5 border-t border-outline-variant/15">
+                  <div className="pt-1.5 border-t border-slate-100">
                     <button
                       onClick={() => setShowProfileMenu(false)}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-error hover:bg-error-container/20 transition-colors text-left text-xs font-medium"
@@ -400,8 +405,9 @@ export default function App() {
           </div>
         </header>
 
+        {/* Main Content Area */}
         <main className="w-full pt-16 min-h-screen">
-          <div className="p-6 lg:p-8 w-full max-w-[1600px] mx-auto">
+          <div className="p-3.5 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto pb-24 lg:pb-8">
             {/* TAB 1: TỔNG QUAN (DASHBOARD) */}
             {activeTab === 'dashboard' && (
               <DashboardView
@@ -498,7 +504,7 @@ export default function App() {
                 </div>
 
                 {/* Avatar & Profile Card */}
-                <div className="p-6 bg-surface-container-lowest border border-slate-200 rounded-3xl shadow-sm space-y-5">
+                <div className="p-4 sm:p-6 bg-surface-container-lowest border border-slate-200 rounded-3xl shadow-sm space-y-5">
                   <div className="font-bold text-slate-900 text-base">Ảnh Đại Diện & Hồ Sơ Cá Nhân</div>
                   
                   <div className="flex flex-col sm:flex-row items-center gap-5">
@@ -507,11 +513,11 @@ export default function App() {
                       src={userAvatar}
                       className="w-20 h-20 rounded-full object-cover ring-4 ring-primary/20 shadow-md"
                     />
-                    <div className="space-y-2 flex-1 w-full">
+                    <div className="space-y-2 flex-1 w-full text-center sm:text-left">
                       <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
                         Chọn Avatar Có Sẵn
                       </label>
-                      <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-wrap justify-center sm:justify-start gap-3">
                         {AVATAR_PRESETS.map((preset, idx) => (
                           <img
                             key={idx}
@@ -582,6 +588,9 @@ export default function App() {
             )}
           </div>
         </main>
+
+        {/* ═══════════════ MOBILE CURVED BOTTOM NAVIGATION BAR ═══════════════ */}
+        <MobileCurvedNavBar activeTab={activeTab} onSelectTab={setActiveTab} />
       </div>
 
       {/* ═══════════════ MODAL: GHI NHẬN CHI PHÍ ═══════════════ */}
@@ -737,7 +746,7 @@ export default function App() {
 
       {/* ═══════════════ POPUP: THÔNG BÁO ═══════════════ */}
       {showNotificationsModal && (
-        <div className="fixed top-16 right-10 z-50 w-80 bg-surface-container-lowest rounded-2xl p-md border border-outline-variant/30 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="fixed top-16 right-4 sm:right-10 z-50 w-80 max-w-[90vw] bg-surface-container-lowest rounded-2xl p-md border border-outline-variant/30 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center justify-between pb-sm border-b border-outline-variant/20 mb-sm">
             <span className="font-body-md font-semibold text-on-surface">Thông Báo</span>
             <span className="font-label-sm text-secondary font-medium">2 tin mới</span>
