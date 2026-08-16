@@ -6,33 +6,36 @@
   html, body {
     margin: 0;
     padding: 0;
-    background-color: #031427;
-    color: #d3e4fe;
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 }
 
-/* Glassmorphism & High-tech HUD styles */
-.glass-panel {
-  background: rgba(16, 32, 52, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(61, 74, 61, 0.35);
-}
-
-.glass-panel-subtle {
-  background: rgba(11, 28, 48, 0.65);
+/* Crisp Clean Glassmorphism for Light Mode */
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(61, 74, 61, 0.2);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
 }
 
-.hud-border-glow {
-  box-shadow: 0 0 15px rgba(75, 226, 119, 0.15), inset 0 0 15px rgba(75, 226, 119, 0.05);
+.glass-card-hover {
+  transition: all 0.2s ease-in-out;
+}
+.glass-card-hover:hover {
+  border-color: #7dd3fc;
+  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.12), 0 8px 10px -6px rgba(2, 132, 199, 0.08);
+  transform: translateY(-2px);
 }
 
-.radar-grid {
-  background-size: 40px 40px;
+.ocean-gradient {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+}
+
+.map-grid-light {
+  background-size: 32px 32px;
   background-image: 
-    linear-gradient(to right, rgba(137, 206, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(137, 206, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, rgba(2, 132, 199, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(2, 132, 199, 0.05) 1px, transparent 1px);
 }

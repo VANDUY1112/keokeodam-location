@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { 
   X, 
   Speaker, 
-  Plus, 
-  DollarSign, 
-  Battery, 
-  Mic2, 
-  CheckCircle2, 
-  Sliders
+  Plus
 } from 'lucide-react';
 
 export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
@@ -49,21 +44,21 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-200 select-none">
-      <div className="bg-surface-container border border-primary/40 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150 select-none">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+            <div className="w-9 h-9 rounded-xl bg-ocean-50 text-ocean-600 flex items-center justify-center font-bold">
               <Speaker className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-[17px] font-bold text-on-surface">Thêm Loa Kẹo Kéo Mới</h3>
-              <p className="text-[11px] text-on-surface-variant font-mono">Bổ sung thiết bị vào kho nhà</p>
+              <h3 className="text-[16px] font-bold text-slate-800">Thêm Loa Kẹo Kéo Mới</h3>
+              <p className="text-[11px] text-slate-500">Bổ sung thiết bị vào kho nhà</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface p-1">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -73,7 +68,7 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
           {/* Speaker ID & Name */}
           <div className="grid grid-cols-3 gap-2.5">
             <div>
-              <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1 font-semibold">
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
                 Mã Loa *
               </label>
               <input
@@ -82,13 +77,13 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
                 value={speakerId}
                 onChange={(e) => setSpeakerId(e.target.value)}
                 placeholder="VD: LKK-07"
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] font-mono font-bold uppercase focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] font-mono font-bold uppercase focus:outline-none focus:border-ocean-600 focus:bg-white"
               />
             </div>
 
             <div className="col-span-2">
-              <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1 font-semibold">
-                Tên Loa & Hãng Sản Xuất *
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
+                Tên Loa *
               </label>
               <input
                 type="text"
@@ -96,7 +91,7 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="VD: Loa Kéo Nanomax SK-15X5"
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] focus:outline-none focus:border-ocean-600 focus:bg-white"
               />
             </div>
           </div>
@@ -104,13 +99,13 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
           {/* Type & Rate */}
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1 font-semibold">
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
                 Loại Cấu Hình
               </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] focus:outline-none focus:border-ocean-600 focus:bg-white"
               >
                 <option value="Bass 30 Đơn - 450W">Bass 30 Đơn - 450W</option>
                 <option value="Bass 40 Đơn - 600W">Bass 40 Đơn - 600W</option>
@@ -122,15 +117,15 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1 font-semibold">
-                Đơn Giá Thuê (đ / giờ)
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
+                Đơn Giá Thuê (đ / h)
               </label>
               <input
                 type="number"
                 step="5000"
                 value={hourlyRate}
                 onChange={(e) => setHourlyRate(e.target.value)}
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-primary text-[13px] font-mono font-bold focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-ocean-700 text-[13px] font-mono font-bold focus:outline-none focus:border-ocean-600 focus:bg-white"
               />
             </div>
           </div>
@@ -138,8 +133,8 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
           {/* Battery & Mics */}
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1 font-semibold">
-                Mức Pin Hiện Tại (%)
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
+                Pin Hiện Tại (%)
               </label>
               <input
                 type="number"
@@ -147,13 +142,13 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
                 max="100"
                 value={battery}
                 onChange={(e) => setBattery(e.target.value)}
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] font-mono focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] font-mono focus:outline-none focus:border-ocean-600 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1 font-semibold">
-                Số Micro Đi Kèm
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
+                Số Micro
               </label>
               <input
                 type="number"
@@ -161,7 +156,7 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
                 max="4"
                 value={mics}
                 onChange={(e) => setMics(e.target.value)}
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] font-mono focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] font-mono focus:outline-none focus:border-ocean-600 focus:bg-white"
               />
             </div>
           </div>
@@ -171,16 +166,16 @@ export default function AddSpeakerModal({ isOpen, onClose, onAddSpeaker }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px]"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-semibold"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-primary hover:bg-primary/90 text-surface-dim font-bold text-[13px] flex items-center gap-1.5 shadow-lg"
+              className="px-4 py-2 rounded-xl bg-ocean-600 hover:bg-ocean-700 text-white font-bold text-[13px] flex items-center gap-1.5 shadow-xs"
             >
               <Plus className="w-4 h-4" />
-              <span>Thêm Loa Vào Kho</span>
+              <span>Thêm Loa</span>
             </button>
           </div>
 

@@ -2,22 +2,16 @@ import React, { useState } from 'react';
 import { 
   X, 
   MapPin, 
-  Clock, 
   Truck, 
   CheckCircle2, 
-  DollarSign, 
-  User, 
-  Phone, 
   Radio, 
-  Sparkles,
-  ArrowRight,
   Navigation
 } from 'lucide-react';
 
 export default function CheckinModal({ 
   isOpen, 
   onClose, 
-  mode, // 'delivery' | 'return'
+  mode, 
   speakers, 
   preSelectedSpeakerId,
   onCheckinDelivery,
@@ -106,36 +100,36 @@ export default function CheckinModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-200 select-none">
-      <div className="bg-surface-container border border-primary/40 rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-in fade-in duration-150 select-none">
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xl max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto">
         
         {/* Header with Mode Switcher */}
-        <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(75,226,119,0.3)]">
+            <div className="w-10 h-10 rounded-xl bg-ocean-50 border border-ocean-200 flex items-center justify-center text-ocean-600">
               <Radio className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-[18px] font-bold text-on-surface">
+              <h2 className="text-[17px] font-bold text-slate-800">
                 {activeMode === 'delivery' ? 'Check-in: Chở Giao Loa Đến Khách' : 'Check-in: Thu Hồi & Loa Đã Về Nhà'}
               </h2>
-              <p className="text-[12px] text-on-surface-variant font-mono">Định vị vị trí thủ công & Tự động tính tiền theo giờ</p>
+              <p className="text-[12px] text-slate-500">Định vị vị trí thủ công & Tự động tính tiền theo giờ</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface p-1">
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="grid grid-cols-2 gap-2 bg-surface-container-high p-1 rounded-xl border border-outline-variant/20">
+        <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
           <button
             type="button"
             onClick={() => setActiveMode('delivery')}
-            className={`py-2.5 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-all ${
+            className={`py-2 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-all ${
               activeMode === 'delivery'
-                ? 'bg-primary text-surface-dim shadow-md'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-white text-ocean-700 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <Truck className="w-4 h-4" />
@@ -145,14 +139,14 @@ export default function CheckinModal({
           <button
             type="button"
             onClick={() => setActiveMode('return')}
-            className={`py-2.5 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-all ${
+            className={`py-2 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-all ${
               activeMode === 'return'
-                ? 'bg-secondary-container text-on-secondary-container shadow-md'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-white text-emerald-700 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>2. Loa Đã Về Nhà (Tính Tiền)</span>
+            <span>2. Loa Đã Về Nhà (Thu Tiền)</span>
           </button>
         </div>
 
@@ -162,12 +156,12 @@ export default function CheckinModal({
             
             {/* Choose Speaker */}
             <div>
-              <label className="block text-[12px] font-mono text-on-surface-variant uppercase mb-1.5 font-semibold">
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1.5 font-mono">
                 Chọn Loa Sẵn Sàng Tại Nhà ({availableSpeakers.length} loa có sẵn)
               </label>
               {availableSpeakers.length === 0 ? (
-                <div className="p-3 bg-error/15 border border-error/30 rounded-xl text-error text-[13px]">
-                  Hiện tất cả loa đều đang cho khách thuê! Hãy chọn loa thu hồi trước khi giao mới.
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-[13px]">
+                  Hiện tất cả loa đều đang cho khách thuê!
                 </div>
               ) : (
                 <select
@@ -177,7 +171,7 @@ export default function CheckinModal({
                     const spk = speakers.find(s => s.id === e.target.value);
                     if (spk) setHourlyRate(spk.hourlyRate);
                   }}
-                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-3 text-on-surface font-semibold text-[14px] focus:outline-none focus:border-primary"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold text-[13px] focus:outline-none focus:border-ocean-600 focus:bg-white"
                 >
                   {availableSpeakers.map((spk) => (
                     <option key={spk.id} value={spk.id}>
@@ -191,7 +185,7 @@ export default function CheckinModal({
             {/* Customer Information Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[12px] font-mono text-on-surface-variant uppercase mb-1">
+                <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
                   Tên Khách Thuê / Mục Đích *
                 </label>
                 <input
@@ -199,13 +193,13 @@ export default function CheckinModal({
                   required
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="VD: Anh Tuấn (Sinh nhật), Chị Lan (Khai trương)"
-                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] focus:outline-none focus:border-primary"
+                  placeholder="VD: Anh Tuấn (Sinh nhật)"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] focus:outline-none focus:border-ocean-600 focus:bg-white"
                 />
               </div>
 
               <div>
-                <label className="block text-[12px] font-mono text-on-surface-variant uppercase mb-1">
+                <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1 font-mono">
                   Số Điện Thoại Khách
                 </label>
                 <input
@@ -213,7 +207,7 @@ export default function CheckinModal({
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
                   placeholder="VD: 0908 123 456"
-                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] focus:outline-none focus:border-primary font-mono"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] font-mono focus:outline-none focus:border-ocean-600 focus:bg-white"
                 />
               </div>
             </div>
@@ -221,7 +215,7 @@ export default function CheckinModal({
             {/* Customer Location Check-in */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-[12px] font-mono text-on-surface-variant uppercase font-semibold">
+                <label className="text-[11px] font-bold uppercase text-slate-500 font-mono">
                   Địa Chỉ Điểm Thuê (Check-in Vị Trí) *
                 </label>
                 <button
@@ -231,7 +225,7 @@ export default function CheckinModal({
                     setDistanceKm(3.8);
                     setShippingFee(20000);
                   }}
-                  className="text-[11px] text-primary hover:underline font-mono flex items-center gap-1"
+                  className="text-[11px] text-ocean-600 hover:underline font-bold flex items-center gap-1"
                 >
                   <Navigation className="w-3 h-3" /> Lấy GPS hiện tại
                 </button>
@@ -242,29 +236,25 @@ export default function CheckinModal({
                 value={customerAddress}
                 onChange={(e) => setCustomerAddress(e.target.value)}
                 placeholder="Nhập địa chỉ nhà/quán ăn khách đang thuê..."
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] focus:outline-none focus:border-primary"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] focus:outline-none focus:border-ocean-600 focus:bg-white"
               />
             </div>
 
             {/* Pricing & Distance Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface-container-low/60 p-3.5 rounded-xl border border-outline-variant/20">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
               <div>
-                <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1">
-                  Đơn Giá Thuê (VNĐ / Giờ)
-                </label>
+                <label className="block text-[11px] text-slate-500 mb-1">Đơn Giá Thuê (đ / h)</label>
                 <input
                   type="number"
                   step="5000"
                   value={hourlyRate}
                   onChange={(e) => setHourlyRate(e.target.value)}
-                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-2 text-on-surface text-[13px] font-mono font-bold text-primary focus:outline-none"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-ocean-700 text-[13px] font-mono font-bold focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1">
-                  Khoảng Cách (km từ nhà)
-                </label>
+                <label className="block text-[11px] text-slate-500 mb-1">Khoảng Cách (km)</label>
                 <input
                   type="number"
                   step="0.5"
@@ -274,54 +264,38 @@ export default function CheckinModal({
                     setDistanceKm(km);
                     setShippingFee(km > 2 ? Math.round((km - 2) * 5000 + 15000) : 0);
                   }}
-                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-2 text-on-surface text-[13px] font-mono focus:outline-none"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-[13px] font-mono focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono text-on-surface-variant uppercase mb-1">
-                  Phí Ship Vận Chuyển (VNĐ)
-                </label>
+                <label className="block text-[11px] text-slate-500 mb-1">Phí Ship (đ)</label>
                 <input
                   type="number"
                   step="5000"
                   value={shippingFee}
                   onChange={(e) => setShippingFee(e.target.value)}
-                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-lg p-2 text-on-surface text-[13px] font-mono text-secondary focus:outline-none"
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-slate-800 text-[13px] font-mono focus:outline-none"
                 />
               </div>
             </div>
 
-            {/* Note */}
-            <div>
-              <label className="block text-[12px] font-mono text-on-surface-variant uppercase mb-1">
-                Ghi Chú Phụ Kiện Kèm Theo
-              </label>
-              <input
-                type="text"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="VD: 2 micro không dây, dây sạc, pin tiểu dự phòng..."
-                className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-2.5 text-on-surface text-[13px] focus:outline-none focus:border-primary"
-              />
-            </div>
-
             {/* Submit Action */}
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px]"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-semibold"
               >
                 Hủy
               </button>
               <button
                 type="submit"
                 disabled={availableSpeakers.length === 0}
-                className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-surface-dim font-bold text-[13px] flex items-center gap-2 shadow-[0_0_15px_rgba(75,226,119,0.3)] disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-ocean-600 hover:bg-ocean-700 text-white font-bold text-[13px] flex items-center gap-2 shadow-xs disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Xác Nhận Đã Giao Loa & Bắt Đầu Tính Giờ</span>
+                <span>Bắt Đầu Giao Loa & Tính Giờ</span>
               </button>
             </div>
 
@@ -334,18 +308,18 @@ export default function CheckinModal({
             
             {/* Choose Renting Speaker */}
             <div>
-              <label className="block text-[12px] font-mono text-on-surface-variant uppercase mb-1.5 font-semibold">
+              <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1.5 font-mono">
                 Chọn Loa Cần Thu Hồi & Về Nhà ({rentingSpeakers.length} loa đang ngoài khách)
               </label>
               {rentingSpeakers.length === 0 ? (
-                <div className="p-3 bg-primary/15 border border-primary/30 rounded-xl text-primary text-[13px]">
-                  Tất cả các loa đều đã ở nhà sẵn sàng! Không có loa nào đang cho thuê.
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-[13px]">
+                  Tất cả các loa đều đã ở nhà sẵn sàng!
                 </div>
               ) : (
                 <select
                   value={returnSpeakerId}
                   onChange={(e) => setReturnSpeakerId(e.target.value)}
-                  className="w-full bg-surface-container-high border border-outline-variant/30 rounded-xl p-3 text-on-surface font-semibold text-[14px] focus:outline-none focus:border-primary"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800 font-semibold text-[13px] focus:outline-none focus:border-ocean-600 focus:bg-white"
                 >
                   {rentingSpeakers.map((spk) => (
                     <option key={spk.id} value={spk.id}>
@@ -358,47 +332,42 @@ export default function CheckinModal({
 
             {/* Bill Summary Card */}
             {currentSpeakerForReturn && currentSpeakerForReturn.currentRental && (
-              <div className="bg-surface-container-high/80 border border-outline-variant/30 rounded-2xl p-4 space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                   <div>
-                    <div className="text-[15px] font-bold text-on-surface">{currentSpeakerForReturn.name}</div>
-                    <div className="text-[12px] text-on-surface-variant">Khách thuê: <strong>{currentSpeakerForReturn.currentRental.customerName}</strong> ({currentSpeakerForReturn.currentRental.customerPhone})</div>
+                    <div className="text-[14px] font-bold text-slate-800">{currentSpeakerForReturn.name}</div>
+                    <div className="text-[12px] text-slate-500">Khách thuê: <strong>{currentSpeakerForReturn.currentRental.customerName}</strong></div>
                   </div>
-                  <span className="text-[12px] font-mono bg-tertiary/20 text-tertiary px-2.5 py-1 rounded-full font-bold">
+                  <span className="text-[11px] font-mono bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-bold border border-amber-200">
                     Giao lúc: {currentSpeakerForReturn.currentRental.startTime}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-[12px] font-mono">
-                  <div className="bg-surface-container p-2.5 rounded-xl border border-outline-variant/10">
-                    <div className="text-on-surface-variant">Thời gian thuê</div>
-                    <div className="text-[16px] font-black text-primary mt-0.5">{elapsedHours} tiếng</div>
+                  <div className="bg-white p-2 rounded-lg border border-slate-200">
+                    <div className="text-slate-500 text-[11px]">Thời gian</div>
+                    <div className="text-[15px] font-bold text-ocean-700">{elapsedHours} tiếng</div>
                   </div>
-                  <div className="bg-surface-container p-2.5 rounded-xl border border-outline-variant/10">
-                    <div className="text-on-surface-variant">Đơn giá / giờ</div>
-                    <div className="text-[15px] font-bold text-on-surface mt-0.5">{currentSpeakerForReturn.hourlyRate.toLocaleString('vi-VN')}đ</div>
+                  <div className="bg-white p-2 rounded-lg border border-slate-200">
+                    <div className="text-slate-500 text-[11px]">Đơn giá</div>
+                    <div className="text-[14px] font-bold text-slate-800">{currentSpeakerForReturn.hourlyRate.toLocaleString('vi-VN')}đ</div>
                   </div>
-                  <div className="bg-surface-container p-2.5 rounded-xl border border-outline-variant/10">
-                    <div className="text-on-surface-variant">Quãng đường</div>
-                    <div className="text-[15px] font-bold text-secondary mt-0.5">{currentSpeakerForReturn.currentRental.distanceKm} km</div>
+                  <div className="bg-white p-2 rounded-lg border border-slate-200">
+                    <div className="text-slate-500 text-[11px]">Quãng đường</div>
+                    <div className="text-[14px] font-bold text-slate-800">{currentSpeakerForReturn.currentRental.distanceKm} km</div>
                   </div>
-                  <div className="bg-surface-container p-2.5 rounded-xl border border-outline-variant/10">
-                    <div className="text-on-surface-variant">Phí ship</div>
-                    <div className="text-[15px] font-bold text-on-surface mt-0.5">{(currentSpeakerForReturn.currentRental.shippingFee || 0).toLocaleString('vi-VN')}đ</div>
+                  <div className="bg-white p-2 rounded-lg border border-slate-200">
+                    <div className="text-slate-500 text-[11px]">Phí ship</div>
+                    <div className="text-[14px] font-bold text-slate-800">{(currentSpeakerForReturn.currentRental.shippingFee || 0).toLocaleString('vi-VN')}đ</div>
                   </div>
                 </div>
 
                 {/* Total Cash to Collect */}
-                <div className="bg-primary/10 border border-primary/30 p-3.5 rounded-xl flex items-center justify-between">
-                  <div>
-                    <span className="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider font-semibold">
-                      Tổng Tiền Cần Thu Của Khách:
-                    </span>
-                    <div className="text-[11px] text-on-surface-variant">
-                      ({elapsedHours}h × {currentSpeakerForReturn.hourlyRate.toLocaleString('vi-VN')}đ) + Phí ship {(currentSpeakerForReturn.currentRental.shippingFee || 0).toLocaleString('vi-VN')}đ
-                    </div>
-                  </div>
-                  <div className="text-[24px] font-black text-primary font-mono">
+                <div className="bg-emerald-50 border border-emerald-300 p-3 rounded-xl flex items-center justify-between">
+                  <span className="text-[12px] font-bold text-emerald-900 uppercase font-mono">
+                    Tổng Tiền Cần Thu Của Khách:
+                  </span>
+                  <div className="text-[22px] font-black text-emerald-700 font-mono">
                     {totalBill.toLocaleString('vi-VN')} đ
                   </div>
                 </div>
@@ -407,21 +376,21 @@ export default function CheckinModal({
             )}
 
             {/* Submit Action */}
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-bright text-on-surface text-[13px]"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[13px] font-semibold"
               >
                 Hủy
               </button>
               <button
                 type="submit"
                 disabled={rentingSpeakers.length === 0}
-                className="px-6 py-2.5 rounded-xl bg-secondary-container hover:bg-secondary-container/90 text-on-secondary-container font-bold text-[13px] flex items-center gap-2 shadow-lg disabled:opacity-50"
+                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] flex items-center gap-2 shadow-xs disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Xác Nhận Đã Thu Tiền & Loa Đã Chở Về Kho</span>
+                <span>Đã Thu Tiền & Loa Đã Về Nhà</span>
               </button>
             </div>
 
