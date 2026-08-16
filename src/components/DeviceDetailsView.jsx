@@ -1,430 +1,345 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Speaker, 
-  Battery, 
-  Mic2, 
-  MapPin, 
-  Clock, 
-  Phone, 
-  DollarSign, 
-  CheckCircle2, 
-  PlusCircle, 
-  Route, 
-  Calendar,
-  AlertCircle,
-  Truck,
-  Plus,
-  Printer,
-  Calculator
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
+import { HOME_LOCATION } from '../data/speakersData';
 
 export default function DeviceDetailsView({ 
-  speakers, 
-  selectedSpeakerId, 
+  speakers = [], 
+  selectedSpeakerId = 'LKK-01', 
   onSelectSpeaker, 
   onOpenCheckinModal, 
-  onOpenAddSpeakerModal,
-  onOpenReceiptModal,
-  searchTerm 
+  onOpenAddSpeakerModal, 
+  onOpenReceiptModal, 
+  searchTerm = '' 
 }) {
+  const [currentId, setCurrentId] = useState(selectedSpeakerId || 'LKK-01');
   const [now, setNow] = useState(Date.now());
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const routeLineRef = useRef(null);
+  const markerRef = useRef(null);
 
-  // Quick price calculator state
-  const [calcHours, setCalcHours] = useState(4);
-  const [calcDistance, setCalcDistance] = useState(5);
-
-  // Ticker for live rental clock
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
+    const t = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(t);
   }, []);
 
-  const filteredSpeakers = speakers.filter(s => {
-    if (!searchTerm) return true;
-    const q = searchTerm.toLowerCase();
-    return s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || s.type.toLowerCase().includes(q);
-  });
+  const speaker = speakers.find(s => s.id === currentId) || speakers[0] || {};
+  const isRenting = speaker.status === 'renting';
 
-  const selectedSpeaker = speakers.find(s => s.id === selectedSpeakerId) || speakers[0];
+  // Live rental calculations
+  const rentalDurationHrs = isRenting && speaker.currentRental 
+    ? Math.max(1, (now - speaker.currentRental.startTimestamp) / 3600000).toFixed(1)
+    : 0;
+  const elapsedMinutes = isRenting && speaker.currentRental 
+    ? Math.floor(((now - speaker.currentRental.startTimestamp) % 3600000) / 60000)
+    : 0;
+  const elapsedHoursInt = isRenting && speaker.currentRental 
+    ? Math.floor((now - speaker.currentRental.startTimestamp) / 3600000)
+    : 0;
 
-  // Calculate live rental timer
-  let elapsedFormatted = "0h 00m 00s";
-  let elapsedHoursDecimal = 0;
-  let liveRentalAmount = 0;
+  const currentRentalCost = isRenting && speaker.currentRental 
+    ? Math.round(rentalDurationHrs * speaker.hourlyRate)
+    : 0;
+  const shippingFee = speaker.currentRental?.shippingFee || 0;
+  const deposit = speaker.currentRental?.deposit || 0;
+  const totalDue = currentRentalCost + shippingFee - deposit;
 
-  if (selectedSpeaker?.currentRental) {
-    const elapsedMs = now - selectedSpeaker.currentRental.startTimestamp;
-    const hrs = Math.floor(elapsedMs / (3600 * 1000));
-    const mins = Math.floor((elapsedMs % (3600 * 1000)) / (60 * 1000));
-    const secs = Math.floor((elapsedMs % (60 * 1000)) / 1000);
-    elapsedFormatted = `${hrs}h ${mins < 10 ? '0' : ''}${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
-    
-    elapsedHoursDecimal = Math.max(1, +(elapsedMs / (3600 * 1000)).toFixed(2));
-    liveRentalAmount = Math.round(elapsedHoursDecimal * selectedSpeaker.hourlyRate) + (selectedSpeaker.currentRental.shippingFee || 0);
-  }
+  // Initialize Map for current speaker route
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.remove();
+      mapInstanceRef.current = null;
+    }
 
-  // Quick estimate calculation
-  const calcShipFee = calcDistance > 2 ? Math.round((calcDistance - 2) * 5000 + 15000) : 0;
-  const calcTotalEstimate = Math.round(calcHours * (selectedSpeaker?.hourlyRate || 80000)) + calcShipFee;
+    const homeLat = HOME_LOCATION.lat || 10.8752;
+    const homeLng = HOME_LOCATION.lng || 106.7725;
+
+    const destLat = speaker.currentRental?.lat || (homeLat + (speaker.currentRental?.coords?.y - 50) * 0.003) || homeLat + 0.015;
+    const destLng = speaker.currentRental?.lng || (homeLng + (speaker.currentRental?.coords?.x - 50) * 0.003) || homeLng + 0.018;
+
+    const map = L.map(mapContainerRef.current, {
+      center: isRenting ? [(homeLat + destLat) / 2, (homeLng + destLng) / 2] : [homeLat, homeLng],
+      zoom: isRenting ? 13 : 14,
+      zoomControl: false,
+      attributionControl: false
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      subdomains: 'abcd'
+    }).addTo(map);
+
+    // Home base marker
+    const homeIcon = L.divIcon({
+      className: 'home-pin',
+      html: `
+        <div class="flex flex-col items-center" style="transform: translate(-50%, -50%);">
+          <div class="px-2 py-0.5 bg-primary text-white font-bold text-[10px] rounded shadow mb-1">Kho Nhà</div>
+          <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-lg border-2 border-white">
+            <span class="material-symbols-outlined text-[18px]">home</span>
+          </div>
+        </div>
+      `,
+      iconSize: [80, 50],
+      iconAnchor: [40, 25]
+    });
+    L.marker([homeLat, homeLng], { icon: homeIcon }).addTo(map);
+
+    // If renting, draw delivery route and customer location marker
+    if (isRenting && speaker.currentRental) {
+      const routePoints = [
+        [homeLat, homeLng],
+        [destLat, destLng]
+      ];
+
+      L.polyline(routePoints, {
+        color: '#005ab3',
+        weight: 4,
+        opacity: 0.9,
+        dashArray: '6, 6'
+      }).addTo(map);
+
+      const customerIcon = L.divIcon({
+        className: 'customer-pin',
+        html: `
+          <div class="flex flex-col items-center" style="transform: translate(-50%, -50%);">
+            <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center animate-ping absolute top-0"></div>
+            <div class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xl border-2 border-white z-10">
+              <span class="material-symbols-outlined text-[20px]">speaker</span>
+            </div>
+            <div class="mt-1 bg-white px-2 py-0.5 rounded shadow text-center border border-slate-300">
+              <span class="font-bold text-[11px] text-slate-800">${speaker.currentRental.customerName}</span>
+              <div class="text-[9px] text-primary font-mono font-bold">${speaker.currentRental.distanceKm} km</div>
+            </div>
+          </div>
+        `,
+        iconSize: [110, 60],
+        iconAnchor: [55, 30]
+      });
+
+      L.marker([destLat, destLng], { icon: customerIcon }).addTo(map);
+    }
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [currentId, speaker]);
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto select-none space-y-6">
-      
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 p-5 rounded-2xl shadow-xs">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-ocean-50 border border-ocean-200 flex items-center justify-center text-ocean-600 shadow-xs">
-            <Speaker className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-[20px] font-bold text-slate-800 font-mono">{selectedSpeaker.id}</h1>
-              <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full font-bold ${
-                selectedSpeaker.status === 'renting'
-                  ? 'bg-amber-50 text-amber-700 border border-amber-200 animate-pulse'
-                  : selectedSpeaker.status === 'returning'
-                  ? 'bg-slate-100 text-slate-700 border border-slate-200'
-                  : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-              }`}>
-                {selectedSpeaker.statusLabel}
-              </span>
-            </div>
-            <p className="text-[13px] text-slate-500 mt-0.5">{selectedSpeaker.name} • Loại: <span className="text-slate-800 font-semibold">{selectedSpeaker.type}</span></p>
-          </div>
-        </div>
-
-        {/* Quick Check-in Actions */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            onClick={onOpenAddSpeakerModal}
-            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[12px] font-bold flex items-center gap-1.5 transition-all border border-slate-200"
-          >
-            <Plus className="w-4 h-4 text-ocean-600" />
-            <span>+ Thêm Loa Mới</span>
-          </button>
-
-          {selectedSpeaker.status === 'available' ? (
-            <button
-              onClick={() => onOpenCheckinModal('delivery', selectedSpeaker.id)}
-              className="px-4 py-2 rounded-xl bg-ocean-600 hover:bg-ocean-700 text-white font-bold text-[13px] flex items-center gap-2 shadow-sm shadow-ocean-600/20 transition-all"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>Giao Loa Này Đến Khách</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => onOpenCheckinModal('return', selectedSpeaker.id)}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[13px] flex items-center gap-2 shadow-sm transition-all"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Loa Đã Về Nhà (Thu Tiền)</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Main Grid: Left Speaker List / Right Deep Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div className="flex flex-col w-full h-[calc(100vh-64px)] overflow-hidden bg-background select-none -m-container-margin">
+      <div className="flex-1 flex overflow-hidden">
         
-        {/* Left Column: Speaker Directory (4 Cols) */}
-        <div className="lg:col-span-4 bg-white border border-slate-200 p-5 rounded-2xl shadow-xs space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h2 className="text-[14px] font-bold text-slate-800 uppercase tracking-wider font-mono">
-              Danh Sách Loa ({speakers.length})
-            </h2>
-            <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-              {speakers.filter(s => s.status === 'available').length} Có Sẵn
-            </span>
-          </div>
-
-          <div className="space-y-2 max-h-[680px] overflow-y-auto pr-1">
-            {filteredSpeakers.map((spk) => {
-              const isSelected = spk.id === selectedSpeaker.id;
-              const isRenting = spk.status === 'renting';
-
-              return (
-                <div
-                  key={spk.id}
-                  onClick={() => onSelectSpeaker(spk.id)}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-ocean-50/70 border-ocean-400 shadow-xs'
-                      : 'bg-white hover:bg-slate-50 border-slate-200'
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-2.5 h-2.5 rounded-full ${
-                        isRenting ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'
-                      }`} />
-                      <div>
-                        <span className="font-mono text-[14px] font-bold text-slate-800">{spk.id}</span>
-                        <div className="text-[12px] text-slate-500 font-medium line-clamp-1">{spk.name}</div>
-                      </div>
-                    </div>
-                    <span className="font-mono text-[13px] font-bold text-ocean-700">{spk.hourlyRate.toLocaleString('vi-VN')}đ/h</span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-100 text-[11px]">
-                    <div>
-                      <span className="text-slate-500">Pin:</span>{' '}
-                      <span className="text-slate-800 font-semibold">{spk.battery}%</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500">Micro:</span>{' '}
-                      <span className="text-ocean-700 font-bold">{spk.mics} mic</span>
-                    </div>
-                    <div className="text-right">
-                      <span className={`font-semibold ${isRenting ? 'text-amber-700' : 'text-emerald-700'}`}>
-                        {isRenting ? 'Đang thuê' : 'Tại nhà'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right Column: Deep Telemetry & Live Clock (8 Cols) */}
-        <div className="lg:col-span-8 space-y-6">
+        {/* ═══════════════ LEFT SIDEBAR: THÔNG TIN CHI TIẾT LOA & HÀNH TRÌNH (W-96) ═══════════════ */}
+        <aside className="w-96 bg-surface flex flex-col shadow-[1px_0_4px_rgba(0,0,0,0.05)] z-10 shrink-0 border-r border-outline-variant/20">
           
-          {/* Hardware Status Gauges */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            
-            {/* Battery Level */}
-            <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-[11px] font-bold uppercase text-slate-400 font-mono">Ắc Quy / Pin</span>
-                <Battery className="w-4 h-4 text-emerald-600" />
-              </div>
-              <div className="my-2">
-                <div className="text-[26px] font-black text-slate-800 font-mono">{selectedSpeaker.battery}%</div>
-                <div className="text-[11px] text-slate-500">Hát liên tục ~6-8 tiếng</div>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className={`h-full rounded-full ${selectedSpeaker.battery < 30 ? 'bg-rose-500' : 'bg-emerald-500'}`}
-                  style={{ width: `${selectedSpeaker.battery}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Micro kèm theo */}
-            <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-[11px] font-bold uppercase text-slate-400 font-mono">Phụ Kiện Kèm</span>
-                <Mic2 className="w-4 h-4 text-ocean-600" />
-              </div>
-              <div className="my-2">
-                <div className="text-[26px] font-black text-ocean-700 font-mono">{selectedSpeaker.mics} Micro</div>
-                <div className="text-[11px] text-slate-500">Đầy đủ dây sạc nguồn</div>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div className="bg-ocean-600 h-full rounded-full" style={{ width: '100%' }} />
-              </div>
-            </div>
-
-            {/* Đơn giá thuê */}
-            <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-[11px] font-bold uppercase text-slate-400 font-mono">Đơn Giá Thuê</span>
-                <DollarSign className="w-4 h-4 text-ocean-600" />
-              </div>
-              <div className="my-2">
-                <div className="text-[24px] font-black text-ocean-700 font-mono">
-                  {selectedSpeaker.hourlyRate.toLocaleString('vi-VN')}
-                </div>
-                <div className="text-[11px] text-slate-500">VNĐ / mỗi tiếng</div>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div className="bg-ocean-600 h-full rounded-full" style={{ width: '100%' }} />
-              </div>
-            </div>
-
-            {/* Tổng ca thuê */}
-            <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-[11px] font-bold uppercase text-slate-400 font-mono">Tổng Ca Thuê</span>
-                <Clock className="w-4 h-4 text-amber-600" />
-              </div>
-              <div className="my-2">
-                <div className="text-[26px] font-black text-slate-800 font-mono">{selectedSpeaker.totalRentalsCount} ca</div>
-                <div className="text-[11px] text-ocean-600 font-bold">{(selectedSpeaker.totalRevenue / 1000000).toFixed(1)} triệu đ</div>
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div className="bg-amber-500 h-full rounded-full" style={{ width: '85%' }} />
-              </div>
-            </div>
-
+          {/* Speaker Selector Pill Strip */}
+          <div className="p-stack-sm bg-surface-container-low border-b border-outline-variant/20 flex gap-1.5 overflow-x-auto">
+            {speakers.map(s => (
+              <button
+                key={s.id}
+                onClick={() => {
+                  setCurrentId(s.id);
+                  if (onSelectSpeaker) onSelectSpeaker(s.id);
+                }}
+                className={`px-3 py-1 rounded-lg text-[12px] font-mono font-bold transition-all whitespace-nowrap ${
+                  s.id === currentId 
+                    ? 'bg-primary text-on-primary shadow-xs' 
+                    : s.status === 'renting'
+                      ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                      : 'bg-surface text-on-surface-variant hover:bg-surface-container'
+                }`}
+              >
+                {s.id}
+              </button>
+            ))}
           </div>
 
-          {/* RENTAL ACTIVE DETAILS & LIVE CLOCK */}
-          {selectedSpeaker.currentRental ? (
-            <div className="bg-white border border-amber-300 rounded-2xl p-6 space-y-5 shadow-sm relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                    <h3 className="text-[17px] font-bold text-slate-800">Ca Thuê Đang Hoạt Động (Trực Tiếp)</h3>
-                  </div>
-                  <p className="text-[12px] text-slate-500 mt-0.5">Khách đã nhận loa và đang tính tiền theo giờ</p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`tel:${selectedSpeaker.currentRental.customerPhone}`}
-                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[12px] font-bold flex items-center gap-1.5 transition-all border border-slate-200"
-                  >
-                    <Phone className="w-3.5 h-3.5 text-ocean-600" />
-                    <span>Gọi Khách</span>
-                  </a>
-
-                  <button
-                    onClick={() => {
-                      onOpenReceiptModal({
-                        id: 'HD-' + selectedSpeaker.id + '-' + Date.now().toString().slice(-4),
-                        customerName: selectedSpeaker.currentRental.customerName,
-                        customerPhone: selectedSpeaker.currentRental.customerPhone,
-                        address: selectedSpeaker.currentRental.address,
-                        speakerId: selectedSpeaker.id,
-                        speakerName: selectedSpeaker.name,
-                        rentHours: elapsedHoursDecimal,
-                        hourlyRate: selectedSpeaker.hourlyRate,
-                        distanceKm: selectedSpeaker.currentRental.distanceKm,
-                        shippingFee: selectedSpeaker.currentRental.shippingFee,
-                        totalAmount: liveRentalAmount
-                      });
-                    }}
-                    className="px-3.5 py-2 rounded-xl bg-ocean-50 hover:bg-ocean-100 border border-ocean-200 text-ocean-700 text-[12px] font-bold flex items-center gap-1.5 transition-all"
-                  >
-                    <Printer className="w-3.5 h-3.5" />
-                    <span>In Phiếu Thu</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Live Rental Stopwatch Display */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                {/* Timer Clock */}
-                <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-col justify-center items-center text-center">
-                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                    Thời Gian Khách Đã Thuê (Live Timer)
-                  </span>
-                  <div className="text-[32px] font-black text-ocean-700 font-mono my-1 tracking-wider">
-                    {elapsedFormatted}
-                  </div>
-                  <div className="text-[11px] text-slate-500">
-                    Check-in giao lúc: <strong className="text-slate-800">{selectedSpeaker.currentRental.startTime}</strong>
-                  </div>
-                </div>
-
-                {/* Amount Accumulator */}
-                <div className="bg-amber-50/60 border border-amber-200 p-4 rounded-xl flex flex-col justify-center items-center text-center">
-                  <span className="text-[11px] font-bold text-amber-800 uppercase tracking-wider font-mono">
-                    Tiền Thuê Tạm Tính Hiện Tại
-                  </span>
-                  <div className="text-[32px] font-black text-amber-700 font-mono my-1 tracking-wider">
-                    {liveRentalAmount.toLocaleString('vi-VN')} đ
-                  </div>
-                  <div className="text-[11px] text-slate-600">
-                    ({elapsedHoursDecimal}h × {selectedSpeaker.hourlyRate.toLocaleString('vi-VN')}đ) + Ship {selectedSpeaker.currentRental.shippingFee.toLocaleString('vi-VN')}đ
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Customer Dossier */}
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5 text-[13px]">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Khách thuê:</span>
-                  <strong className="text-slate-800">{selectedSpeaker.currentRental.customerName}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Địa chỉ giao loa:</span>
-                  <span className="font-medium text-slate-700 text-right">{selectedSpeaker.currentRental.address}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Quãng đường chở từ nhà:</span>
-                  <span className="font-mono text-ocean-700 font-bold">{selectedSpeaker.currentRental.distanceKm} km</span>
-                </div>
-              </div>
-
-              {/* Return Button */}
-              <button
-                onClick={() => onOpenCheckinModal('return', selectedSpeaker.id)}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 text-[14px] shadow-sm transition-all"
-              >
-                <CheckCircle2 className="w-5 h-5" />
-                <span>Check-in: Khách Đã Trả & Đã Chở Loa Về Nhà (Chốt Tiền)</span>
-              </button>
-
-            </div>
-          ) : (
-            <div className="bg-white border border-slate-200 p-8 rounded-2xl text-center space-y-4 shadow-xs">
-              <div className="w-16 h-16 rounded-full bg-ocean-50 border border-ocean-200 flex items-center justify-center text-ocean-600 mx-auto">
-                <Speaker className="w-8 h-8" />
-              </div>
+          {/* Speaker Card Header */}
+          <div className="p-stack-lg border-b border-outline-variant/20 flex flex-col gap-stack-sm bg-surface-container-lowest relative overflow-hidden">
+            <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-[18px] font-bold text-slate-800">Loa Hiện Đang Ở Nhà Sẵn Sàng</h3>
-                <p className="text-[13px] text-slate-500 max-w-md mx-auto mt-1">
-                  Loa đã được sạc đầy pin ({selectedSpeaker.battery}%), đủ 2 micro không dây và củ sạc. Sẵn sàng chở đi giao khách bất cứ lúc nào!
+                <div className="flex items-center gap-2">
+                  <h1 className="font-headline-md text-headline-md text-on-surface font-mono font-extrabold">{speaker.id}</h1>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full font-mono ${
+                    isRenting ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                  }`}>
+                    {speaker.statusLabel || (isRenting ? 'Khách đang thuê' : 'Tại kho nhà')}
+                  </span>
+                </div>
+                <p className="font-body-sm text-[12px] text-on-surface-variant mt-1 font-medium">
+                  {speaker.name} ({speaker.type})
                 </p>
               </div>
-              <button
-                onClick={() => onOpenCheckinModal('delivery', selectedSpeaker.id)}
-                className="px-6 py-2.5 bg-ocean-600 hover:bg-ocean-700 text-white font-bold rounded-xl inline-flex items-center gap-2 text-[13px] shadow-sm shadow-ocean-600/20 transition-all"
-              >
-                <PlusCircle className="w-4 h-4" />
-                <span>+ Check-in Chở Loa Này Đi Giao Khách</span>
-              </button>
-            </div>
-          )}
-
-          {/* Quick Price Calculator Widget */}
-          <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-3 shadow-xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-ocean-600" />
-                <h3 className="text-[14px] font-bold text-slate-800">Công Cụ Báo Giá Nhanh Cho Khách Hỏi Thuê</h3>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <span className="material-symbols-outlined text-[24px]">speaker</span>
               </div>
-              <span className="text-[11px] text-slate-500">Áp dụng cho {selectedSpeaker.name}</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-[11px] text-slate-500 mb-1">Số giờ dự kiến thuê</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="24"
-                  value={calcHours}
-                  onChange={(e) => setCalcHours(parseFloat(e.target.value) || 1)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] font-mono focus:outline-none focus:border-ocean-600"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] text-slate-500 mb-1">Khoảng cách ship (km)</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={calcDistance}
-                  onChange={(e) => setCalcDistance(parseFloat(e.target.value) || 0)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-[13px] font-mono focus:outline-none focus:border-ocean-600"
-                />
-              </div>
-
-              <div className="bg-ocean-50 border border-ocean-200 p-2 rounded-xl flex flex-col justify-center text-center">
-                <span className="text-[10px] text-ocean-700 font-bold uppercase">Tổng tiền báo khách:</span>
-                <span className="text-[18px] font-black text-ocean-800 font-mono">{calcTotalEstimate.toLocaleString('vi-VN')} đ</span>
-              </div>
+            <div className="mt-stack-sm flex items-center justify-between text-[12px] bg-surface-container-low p-2 rounded-lg font-mono">
+              <span>Đơn giá thuê: <strong className="text-primary">{speaker.hourlyRate?.toLocaleString('vi-VN')}đ / giờ</strong></span>
+              <span>Pin: <strong className="text-emerald-700">{speaker.battery}%</strong></span>
             </div>
           </div>
 
-        </div>
+          {/* Scroll Area */}
+          <div className="flex-1 overflow-y-auto p-stack-lg flex flex-col gap-stack-lg custom-scrollbar">
+            
+            {/* IF RENTING: LIVE RENTAL JOURNEY DETAILS */}
+            {isRenting && speaker.currentRental ? (
+              <div className="flex flex-col gap-stack-md">
+                
+                {/* Live Meter Widget */}
+                <div className="bg-primary/5 border border-primary/20 p-stack-md rounded-2xl flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-[12px]">
+                    <span className="font-label-md uppercase tracking-wider text-primary font-bold flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span> Đồng hồ tính tiền
+                    </span>
+                    <span className="font-mono text-primary font-bold">Giao lúc: {speaker.currentRental.startTime}</span>
+                  </div>
+
+                  <div className="flex items-baseline justify-between pt-1">
+                    <div>
+                      <div className="text-[28px] font-mono font-black text-on-surface leading-tight">
+                        {elapsedHoursInt}h {elapsedMinutes}p
+                      </div>
+                      <div className="text-[11px] text-on-surface-variant">Thời lượng hát thực tế</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[22px] font-mono font-black text-emerald-700 leading-tight">
+                        {currentRentalCost.toLocaleString('vi-VN')}đ
+                      </div>
+                      <div className="text-[11px] text-emerald-600 font-medium">Tiền giờ tạm tính</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer & Location */}
+                <div className="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant/20 space-y-2 text-[12px]">
+                  <div className="font-label-md text-on-surface-variant uppercase font-bold text-[11px]">
+                    Thông tin chuyến giao loa
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-on-surface-variant">Khách thuê:</span>
+                    <strong className="text-on-surface">{speaker.currentRental.customerName}</strong>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-on-surface-variant">Số điện thoại:</span>
+                    <a href={`tel:${speaker.currentRental.customerPhone}`} className="text-primary font-bold font-mono hover:underline flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">call</span>
+                      {speaker.currentRental.customerPhone}
+                    </a>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-on-surface-variant">Địa điểm giao:</span>
+                    <span className="text-right font-medium max-w-[180px] truncate" title={speaker.currentRental.address}>
+                      {speaker.currentRental.address}
+                    </span>
+                  </div>
+
+                  <div className="pt-1.5 border-t border-outline-variant/20 flex justify-between font-mono">
+                    <span>Quãng đường chở đi:</span>
+                    <strong className="text-primary">{speaker.currentRental.distanceKm} km</strong>
+                  </div>
+
+                  <div className="flex justify-between font-mono">
+                    <span>Phí ship vận chuyển:</span>
+                    <strong>+{speaker.currentRental.shippingFee?.toLocaleString('vi-VN')}đ</strong>
+                  </div>
+
+                  {deposit > 0 && (
+                    <div className="flex justify-between font-mono text-amber-700">
+                      <span>Đã đặt cọc trước:</span>
+                      <strong>-{deposit.toLocaleString('vi-VN')}đ</strong>
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t border-outline-variant/30 flex justify-between items-center text-[13px]">
+                    <span className="font-bold text-on-surface">Tổng tiền cần thu:</span>
+                    <span className="font-mono font-black text-[16px] text-emerald-700">
+                      {Math.max(0, totalDue).toLocaleString('vi-VN')}đ
+                    </span>
+                  </div>
+                </div>
+
+                {/* Main Action Button: End Journey */}
+                <button
+                  onClick={() => onOpenCheckinModal('return', speaker.id)}
+                  className="w-full py-3 px-4 bg-primary hover:bg-primary-container text-on-primary font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-98"
+                >
+                  <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                  <span>Kết Thúc Hành Trình &amp; Thu Loa Về</span>
+                </button>
+              </div>
+            ) : (
+              /* IF AVAILABLE: READY TO DELIVER */
+              <div className="flex flex-col gap-stack-md">
+                <div className="bg-emerald-50 border border-emerald-200 p-stack-md rounded-2xl flex flex-col gap-1 text-emerald-800">
+                  <div className="font-bold flex items-center gap-1 text-[13px]">
+                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                    Loa đang sẵn sàng tại kho nhà
+                  </div>
+                  <div className="text-[12px] opacity-90">
+                    Pin {speaker.battery}% đầy đủ 2 micro không dây, dây sạc. Sẵn sàng giao ngay cho khách mới.
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onOpenCheckinModal('delivery', speaker.id)}
+                  className="w-full py-3 px-4 bg-primary hover:bg-primary-container text-on-primary font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-98"
+                >
+                  <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                  <span>Giao Loa Cho Khách Mới</span>
+                </button>
+              </div>
+            )}
+
+            {/* Hardware Status */}
+            <div className="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant/20 space-y-2 text-[12px]">
+              <div className="font-label-md text-on-surface-variant uppercase font-bold text-[11px]">
+                Trạng thái thiết bị &amp; Phụ kiện
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-surface-container-low p-2 rounded-lg">
+                  <div className="text-on-surface-variant">Micro không dây</div>
+                  <div className="font-bold text-on-surface font-mono">{speaker.mics || 2} Cây (Pin Tốt)</div>
+                </div>
+                <div className="bg-surface-container-low p-2 rounded-lg">
+                  <div className="text-on-surface-variant">Dây nguồn / Sạc</div>
+                  <div className="font-bold text-emerald-700">Đầy đủ</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+        {/* ═══════════════ MAIN CONTENT: INTERACTIVE MAP OF JOURNEY ═══════════════ */}
+        <section className="flex-1 flex flex-col relative bg-surface-dim">
+          <div ref={mapContainerRef} className="flex-1 relative w-full h-full z-0"></div>
+
+          {/* Floating Info Banner over Map */}
+          <div className="absolute top-4 left-4 z-10 bg-surface/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-md border border-outline-variant/20 flex items-center gap-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+            <div>
+              <div className="text-[13px] font-bold text-on-surface">
+                {isRenting ? `Hành trình giao loa ${speaker.id}` : `Vị trí kho nhà (${speaker.id} đang ở kho)`}
+              </div>
+              <div className="text-[11px] text-on-surface-variant font-mono">
+                {isRenting ? `Khoảng cách từ nhà đến khách: ${speaker.currentRental?.distanceKm} km` : HOME_LOCATION.address}
+              </div>
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   );
