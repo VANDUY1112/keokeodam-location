@@ -46,54 +46,54 @@ export default function HistoryView({ trips, onDeleteTrip, onNavigateToTracking 
         </div>
       </div>
 
-      {/* ══════════ STATS SUMMARY: BOX 1 (1 LINE), BOX 2 & 3 (2 BOXES/LINE ON MOBILE) ══════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-lg">
-        {/* Box 1: Full width on mobile */}
-        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)]">
-          <div className="text-xs uppercase tracking-wider text-slate-500 font-semibold">Tổng Chuyến Đi Đã Ghi</div>
-          <div className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">{trips.length} chuyến</div>
+      {/* ══════════ STATS SUMMARY ══════════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        {/* Box 1 */}
+        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-3xl p-5 lg:p-6 border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] min-h-[140px] flex flex-col justify-between">
+          <div className="text-xs lg:text-[13px] uppercase tracking-wider text-slate-500 font-bold">Tổng Chuyến Đi Đã Ghi</div>
+          <div className="text-2xl sm:text-3xl lg:text-[34px] font-black text-slate-900 mt-1">{trips.length} chuyến</div>
         </div>
 
-        {/* Box 2: Half width on mobile */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] flex flex-col justify-between">
-          <div className="text-[11px] sm:text-xs uppercase tracking-wider text-slate-500 font-semibold">Tổng Km Tích Lũy</div>
-          <div className="text-xl sm:text-3xl font-bold text-primary mt-1">
+        {/* Box 2 */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-3xl p-5 lg:p-6 border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] flex flex-col justify-between min-h-[140px]">
+          <div className="text-xs lg:text-[13px] uppercase tracking-wider text-slate-500 font-bold">Tổng Km Tích Lũy</div>
+          <div className="text-2xl sm:text-3xl lg:text-[34px] font-black text-primary mt-1">
             {trips.reduce((acc, t) => acc + (parseFloat(t.distanceKm) || (t.subtitle?.match(/(\d+([\.,]\d+)?)\s*km/) ? parseFloat(t.subtitle.match(/(\d+([\.,]\d+)?)\s*km/)[1]) : 25)), 0).toFixed(1)} km
           </div>
         </div>
 
-        {/* Box 3: Half width on mobile */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] flex flex-col justify-between">
-          <div className="text-[11px] sm:text-xs uppercase tracking-wider text-slate-500 font-semibold">Trạng Thái</div>
-          <div className="text-xs sm:text-base font-semibold text-emerald-700 mt-1 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+        {/* Box 3 */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-3xl p-5 lg:p-6 border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] flex flex-col justify-between min-h-[140px]">
+          <div className="text-xs lg:text-[13px] uppercase tracking-wider text-slate-500 font-bold">Trạng Thái Lưu Trữ</div>
+          <div className="text-sm sm:text-base lg:text-lg font-bold text-emerald-700 mt-1 flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
             <span className="truncate">Đồng bộ LocalStorage</span>
           </div>
         </div>
       </div>
 
       {/* ══════════ TRIPS LIST ══════════ */}
-      <div className="flex flex-col gap-sm">
+      <div className="flex flex-col gap-3.5">
         {filteredTrips.length === 0 ? (
-          <div className="p-12 text-center bg-surface-container-lowest rounded-2xl border border-slate-200">
-            <span className="material-symbols-outlined text-4xl text-slate-400">explore_off</span>
-            <p className="text-slate-600 mt-2 font-medium">Chưa tìm thấy chuyến đi nào.</p>
+          <div className="p-12 text-center bg-surface-container-lowest rounded-3xl border border-slate-200">
+            <span className="material-symbols-outlined text-5xl text-slate-400">explore_off</span>
+            <p className="text-slate-600 mt-3 font-semibold text-base">Chưa tìm thấy chuyến đi nào.</p>
           </div>
         ) : (
           filteredTrips.map((trip) => (
             <div
               key={trip.id}
-              className="bg-surface-container-lowest p-lg rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_6px_20px_rgba(11,28,48,0.06)] hover:border-slate-300 transition-all"
+              className="bg-surface-container-lowest p-5 lg:p-6 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_6px_20px_rgba(11,28,48,0.06)] hover:border-slate-300 transition-all"
             >
-              <div className="flex items-center gap-md min-w-0">
-                <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/80 text-primary flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-2xl">{trip.icon || 'near_me'}</span>
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-13 h-13 lg:w-14 lg:h-14 rounded-2xl bg-slate-100 border border-slate-200/80 text-primary flex items-center justify-center shrink-0 shadow-xs">
+                  <span className="material-symbols-outlined text-[26px] lg:text-[28px]">{trip.icon || 'near_me'}</span>
                 </div>
                 <div className="min-w-0">
-                  <div className="font-headline-md text-on-surface font-semibold text-base truncate">
+                  <div className="text-base lg:text-lg font-bold text-on-surface truncate">
                     {trip.title}
                   </div>
-                  <div className="text-xs text-on-surface-variant font-medium mt-0.5 flex items-center gap-2">
+                  <div className="text-xs lg:text-sm text-slate-500 font-medium mt-1 flex items-center gap-2">
                     <span>{trip.subtitle}</span>
                     {trip.duration && (
                       <>
@@ -107,7 +107,7 @@ export default function HistoryView({ trips, onDeleteTrip, onNavigateToTracking 
 
               <div className="flex items-center gap-3 self-end md:self-auto">
                 <span
-                  className={`px-3 py-1 font-label-sm rounded-lg border text-xs font-semibold ${
+                  className={`px-3 py-1.5 font-bold rounded-xl border text-xs lg:text-sm ${
                     trip.statusBadge?.includes('secondary') || trip.status === 'Hoàn thành'
                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
                       : 'bg-slate-100 text-slate-700 border-slate-200'
@@ -119,9 +119,9 @@ export default function HistoryView({ trips, onDeleteTrip, onNavigateToTracking 
                 {/* Button: Xem Bản Đồ Lộ Trình */}
                 <button
                   onClick={() => setSelectedTripForMap(trip)}
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs font-semibold text-slate-800 flex items-center gap-1.5 transition-colors shadow-sm"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs lg:text-sm font-bold text-slate-800 flex items-center gap-2 transition-colors shadow-sm"
                 >
-                  <span className="material-symbols-outlined text-[16px] text-primary">map</span>
+                  <span className="material-symbols-outlined text-[18px] text-primary">map</span>
                   <span>Xem Lộ Trình</span>
                 </button>
 
@@ -130,9 +130,9 @@ export default function HistoryView({ trips, onDeleteTrip, onNavigateToTracking 
                   <button
                     onClick={() => onDeleteTrip(trip.id)}
                     title="Xóa chuyến đi này"
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                    <span className="material-symbols-outlined text-[20px]">delete</span>
                   </button>
                 )}
               </div>

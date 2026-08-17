@@ -5,13 +5,14 @@ import ExpensesView from './components/ExpensesView';
 import HistoryView from './components/HistoryView';
 import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
+import { formatVND, parseVNDNumber } from './utils/format';
 
 const INITIAL_EXPENSES = [
   {
     id: 1,
     title: 'Ăn tối tiếp khách - Nhà hàng',
     subtitle: '26 Th10 • Dự án Phoenix',
-    amount: '$245.50',
+    amount: '1.850.000 ₫',
     status: 'Chờ duyệt',
     statusColor: 'text-surface-tint',
     icon: 'local_dining',
@@ -21,7 +22,7 @@ const INITIAL_EXPENSES = [
     id: 2,
     title: 'Đổ xăng xe - Trạm Shell',
     subtitle: '24 Th10 • Chuyến công tác Hamburg',
-    amount: '$85.00',
+    amount: '650.000 ₫',
     status: 'Đã duyệt',
     statusColor: 'text-secondary',
     icon: 'local_gas_station',
@@ -31,7 +32,7 @@ const INITIAL_EXPENSES = [
     id: 3,
     title: 'Khách sạn Marriott - 2 Đêm',
     subtitle: '18 Th10 • Hội nghị London Tech',
-    amount: '$540.00',
+    amount: '4.200.000 ₫',
     status: 'Đã duyệt',
     statusColor: 'text-secondary',
     icon: 'hotel',
@@ -86,11 +87,18 @@ export default function App() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
-  // Persistent State with LocalStorage
+  // Persistent State with LocalStorage & Automatic VNĐ format sanitization
   const [expenses, setExpenses] = useState(() => {
     try {
       const saved = localStorage.getItem('expensely_expenses');
-      return saved ? JSON.parse(saved) : INITIAL_EXPENSES;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.map((item) => ({
+          ...item,
+          amount: formatVND(item.amount),
+        }));
+      }
+      return INITIAL_EXPENSES;
     } catch {
       return INITIAL_EXPENSES;
     }
@@ -164,11 +172,14 @@ export default function App() {
       hoverColor = 'group-hover:bg-primary/10 group-hover:text-primary';
     }
 
+    const rawNum = parseFloat(String(newExpense.amount).replace(/[^0-9.]/g, '')) || 0;
+    const formattedAmount = formatVND(rawNum);
+
     const item = {
       id: Date.now(),
       title: newExpense.title,
       subtitle: `Hôm nay • ${newExpense.project}`,
-      amount: `$${parseFloat(newExpense.amount).toFixed(2)}`,
+      amount: formattedAmount,
       status: 'Chờ duyệt',
       statusColor: 'text-surface-tint',
       icon,
@@ -221,32 +232,32 @@ export default function App() {
   return (
     <div className="bg-background font-body-md text-on-background min-h-screen">
       {/* ═══════════════ DESKTOP SIDEBAR NAVIGATION (W-72) ═══════════════ */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col shadow-[1px_0_0_rgba(0,0,0,0.05)]">
-        <div className="h-16 flex items-center px-lg mb-sm gap-sm">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col shadow-[1px_0_0_rgba(0,0,0,0.05)] border-r border-slate-200/60">
+        <div className="h-20 flex items-center px-6 gap-3 border-b border-slate-200/60">
           <img
             alt="Expensely Logo"
-            className="h-8 w-8 rounded-xl shadow-xs object-cover"
+            className="h-9 w-9 rounded-xl shadow-xs object-cover"
             src="/favicon.svg"
           />
-          <span className="font-headline-md text-primary tracking-tight font-bold">Expensely</span>
+          <span className="text-xl text-primary tracking-tight font-extrabold">Expensely</span>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-1.5 px-3">
+        <nav className="flex-1 flex flex-col gap-2 px-3.5 py-5">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               aria-current={activeTab === item.id ? 'page' : undefined}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group text-left ${
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-200 group text-left ${
                 activeTab === item.id
-                  ? 'bg-primary-container text-on-primary-container shadow-sm font-semibold'
-                  : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-medium'
+                  ? 'bg-primary text-white shadow-md font-bold'
+                  : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-semibold'
               }`}
             >
-              <span className="material-symbols-outlined text-[22px] group-hover:scale-110 transition-transform">
+              <span className={`material-symbols-outlined text-[24px] transition-transform ${activeTab === item.id ? 'text-white' : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-900'}`}>
                 {item.icon}
               </span>
-              <span className="text-[15px]">{item.label}</span>
+              <span className="text-[15px] lg:text-base">{item.label}</span>
             </button>
           ))}
         </nav>
@@ -302,7 +313,7 @@ export default function App() {
 
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
       <div className="pl-0 lg:pl-72">
-        <header className="fixed top-0 left-0 lg:left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-xl flex items-center justify-between border-b border-outline-variant/30 shadow-xs">
+        <header className="fixed top-0 left-0 lg:left-72 right-0 h-20 bg-surface/90 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b border-outline-variant/30 shadow-xs">
           {/* Mobile Left: Hamburger Button & Logo */}
           <div className="flex items-center gap-2.5 lg:hidden">
             <button
@@ -322,28 +333,28 @@ export default function App() {
           <div className="hidden lg:block"></div>
 
           {/* Right Header: Notifications & Profile Dropdown */}
-          <div className="flex items-center gap-3 sm:gap-lg">
+          <div className="flex items-center gap-3 sm:gap-6">
             <button
               onClick={() => setShowNotificationsModal(!showNotificationsModal)}
-              className="relative p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors"
+              className="relative p-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors"
             >
-              <span className="material-symbols-outlined text-[22px]">notifications</span>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
+              <span className="material-symbols-outlined text-[24px]">notifications</span>
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full ring-2 ring-surface"></span>
             </button>
 
             {/* Profile Dropdown Container */}
             <div className="relative" ref={profileMenuRef}>
               <div
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:bg-surface-container-high p-1 sm:p-1.5 sm:pr-3 rounded-full transition-all group border border-outline-variant/30 bg-white/60 shadow-xs"
+                className="flex items-center gap-2.5 sm:gap-3 cursor-pointer hover:bg-surface-container-high p-1.5 sm:p-2 sm:pr-4 rounded-full transition-all group border border-outline-variant/30 bg-white/70 shadow-xs"
               >
                 <img
                   alt="Profile"
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-primary shadow-xs"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-primary shadow-xs"
                   src={userAvatar}
                 />
-                <span className="font-semibold text-slate-800 text-sm hidden sm:inline">{userName}</span>
-                <span className={`material-symbols-outlined text-[18px] text-slate-500 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
+                <span className="font-bold text-slate-800 text-sm sm:text-base hidden sm:inline">{userName}</span>
+                <span className={`material-symbols-outlined text-[20px] text-slate-500 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
                   expand_more
                 </span>
               </div>
@@ -366,36 +377,36 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="py-1.5 space-y-0.5 text-xs">
+                  <div className="py-2 space-y-1 text-xs sm:text-sm">
                     <button
                       onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container-high transition-colors text-left"
                     >
-                      <span className="material-symbols-outlined text-[18px] text-primary">person</span>
-                      <span>Hồ sơ & Tài khoản</span>
+                      <span className="material-symbols-outlined text-[20px] text-primary">person</span>
+                      <span className="font-medium">Hồ sơ & Tài khoản</span>
                     </button>
                     <button
                       onClick={() => { setActiveTab('reports'); setShowProfileMenu(false); }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container-high transition-colors text-left"
                     >
-                      <span className="material-symbols-outlined text-[18px] text-secondary">analytics</span>
-                      <span>Hạn mức công tác</span>
+                      <span className="material-symbols-outlined text-[20px] text-secondary">analytics</span>
+                      <span className="font-medium">Hạn mức công tác</span>
                     </button>
                     <button
                       onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container-high transition-colors text-left"
                     >
-                      <span className="material-symbols-outlined text-[18px] text-tertiary">tune</span>
-                      <span>Tùy chỉnh hệ thống</span>
+                      <span className="material-symbols-outlined text-[20px] text-tertiary">tune</span>
+                      <span className="font-medium">Tùy chỉnh hệ thống</span>
                     </button>
                   </div>
 
                   <div className="pt-1.5 border-t border-slate-100">
                     <button
                       onClick={() => setShowProfileMenu(false)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-error hover:bg-error-container/20 transition-colors text-left text-xs font-medium"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-error hover:bg-error-container/20 transition-colors text-left text-xs sm:text-sm font-semibold"
                     >
-                      <span className="material-symbols-outlined text-[18px]">logout</span>
+                      <span className="material-symbols-outlined text-[20px]">logout</span>
                       <span>Đăng xuất</span>
                     </button>
                   </div>
@@ -406,8 +417,8 @@ export default function App() {
         </header>
 
         {/* Main Content Area */}
-        <main className="w-full pt-16 min-h-screen">
-          <div className="p-3.5 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto pb-24 lg:pb-8">
+        <main className="w-full pt-20 lg:pt-24 min-h-screen">
+          <div className="p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto pb-24 lg:pb-8">
             {/* TAB 1: TỔNG QUAN (DASHBOARD) */}
             {activeTab === 'dashboard' && (
               <DashboardView
@@ -430,7 +441,7 @@ export default function App() {
                       id: Date.now(),
                       title: rec.title,
                       subtitle: `Hôm nay • Dự án Phoenix`,
-                      amount: rec.amount,
+                      amount: formatVND(rec.amount),
                       status: 'Chờ duyệt',
                       statusColor: 'text-surface-tint',
                       icon: 'directions_car',
@@ -463,30 +474,30 @@ export default function App() {
             {activeTab === 'reports' && (
               <div className="space-y-6">
                 <div>
-                  <h2 className="font-headline-lg text-on-surface">Báo Cáo & Quyết Toán Chi Phí</h2>
-                  <p className="text-on-surface-variant text-sm mt-1">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-on-surface">Báo Cáo & Quyết Toán Chi Phí</h2>
+                  <p className="text-slate-600 text-sm sm:text-base mt-1">
                     Tổng hợp chi phí hàng tháng, phân tích số km di chuyển và xuất báo cáo hoàn ứng.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
-                  <div className="p-lg bg-surface-container-lowest rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-48">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                  <div className="p-6 lg:p-8 bg-surface-container-lowest rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between h-56">
                     <div>
-                      <span className="font-label-sm uppercase text-slate-500 font-semibold text-xs">Tháng 10 / 2026</span>
-                      <h4 className="font-headline-lg text-on-surface mt-1 font-bold">Tổng Kết Công Tác Tháng</h4>
-                      <p className="text-sm text-on-surface-variant mt-1 font-medium">Tổng 1.245 km • Đã chi $4,320.00</p>
+                      <span className="font-bold uppercase text-slate-500 text-xs lg:text-sm tracking-wider">Tháng 10 / 2026</span>
+                      <h4 className="text-xl lg:text-2xl font-black text-on-surface mt-1.5">Tổng Kết Công Tác Tháng</h4>
+                      <p className="text-base text-slate-600 mt-2 font-medium">Tổng 1.245 km • Đã chi <span className="font-bold text-slate-900">32.500.000 ₫</span></p>
                     </div>
-                    <button className="self-start px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md">
-                      <span className="material-symbols-outlined text-base">download</span> Xuất Báo Cáo PDF
+                    <button className="self-start px-5 py-2.5 rounded-xl bg-primary text-white text-sm lg:text-base font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md transition-all">
+                      <span className="material-symbols-outlined text-lg">download</span> Xuất Báo Cáo PDF
                     </button>
                   </div>
-                  <div className="p-lg bg-surface-container-lowest rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-48">
+                  <div className="p-6 lg:p-8 bg-surface-container-lowest rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between h-56">
                     <div>
-                      <span className="font-label-sm uppercase text-slate-500 font-semibold text-xs">Quý 3 / 2026</span>
-                      <h4 className="font-headline-lg text-on-surface mt-1 font-bold">Báo Cáo Kiểm Toán Quý</h4>
-                      <p className="text-sm text-on-surface-variant mt-1 font-medium">Tổng 3.840 km • Đã chi $12,900.00</p>
+                      <span className="font-bold uppercase text-slate-500 text-xs lg:text-sm tracking-wider">Quý 3 / 2026</span>
+                      <h4 className="text-xl lg:text-2xl font-black text-on-surface mt-1.5">Báo Cáo Kiểm Toán Quý</h4>
+                      <p className="text-base text-slate-600 mt-2 font-medium">Tổng 3.840 km • Đã chi <span className="font-bold text-slate-900">98.600.000 ₫</span></p>
                     </div>
-                    <button className="self-start px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md">
-                      <span className="material-symbols-outlined text-base">download</span> Xuất File Excel / CSV
+                    <button className="self-start px-5 py-2.5 rounded-xl bg-primary text-white text-sm lg:text-base font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md transition-all">
+                      <span className="material-symbols-outlined text-lg">download</span> Xuất File Excel / CSV
                     </button>
                   </div>
                 </div>
@@ -497,34 +508,34 @@ export default function App() {
             {activeTab === 'settings' && (
               <div className="space-y-6 max-w-3xl">
                 <div>
-                  <h2 className="font-headline-lg text-on-surface">Cài Đặt & Tùy Chọn</h2>
-                  <p className="text-on-surface-variant text-sm mt-1">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-on-surface">Cài Đặt & Tùy Chọn</h2>
+                  <p className="text-slate-600 text-sm sm:text-base mt-1">
                     Cấu hình ảnh đại diện, phương tiện di chuyển, định mức hoàn ứng và thông tin tài khoản.
                   </p>
                 </div>
 
                 {/* Avatar & Profile Card */}
-                <div className="p-4 sm:p-6 bg-surface-container-lowest border border-slate-200 rounded-3xl shadow-sm space-y-5">
-                  <div className="font-bold text-slate-900 text-base">Ảnh Đại Diện & Hồ Sơ Cá Nhân</div>
+                <div className="p-6 lg:p-8 bg-surface-container-lowest border border-slate-200 rounded-3xl shadow-sm space-y-6">
+                  <div className="font-extrabold text-slate-900 text-lg">Ảnh Đại Diện & Hồ Sơ Cá Nhân</div>
                   
-                  <div className="flex flex-col sm:flex-row items-center gap-5">
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
                     <img
                       alt="Current Avatar"
                       src={userAvatar}
-                      className="w-20 h-20 rounded-full object-cover ring-4 ring-primary/20 shadow-md"
+                      className="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20 shadow-md"
                     />
-                    <div className="space-y-2 flex-1 w-full text-center sm:text-left">
-                      <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
+                    <div className="space-y-2.5 flex-1 w-full text-center sm:text-left">
+                      <label className="text-xs lg:text-sm font-bold uppercase text-slate-500 tracking-wider">
                         Chọn Avatar Có Sẵn
                       </label>
-                      <div className="flex flex-wrap justify-center sm:justify-start gap-3">
+                      <div className="flex flex-wrap justify-center sm:justify-start gap-3.5">
                         {AVATAR_PRESETS.map((preset, idx) => (
                           <img
                             key={idx}
                             src={preset}
                             alt={`Avatar option ${idx + 1}`}
                             onClick={() => handleSelectAvatar(preset)}
-                            className={`w-12 h-12 rounded-full object-cover cursor-pointer transition-all hover:scale-110 ${
+                            className={`w-13 h-13 rounded-full object-cover cursor-pointer transition-all hover:scale-110 ${
                               userAvatar === preset
                                 ? 'ring-4 ring-primary shadow-lg scale-105'
                                 : 'ring-2 ring-slate-200 opacity-70 hover:opacity-100'
@@ -535,9 +546,9 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-slate-500 tracking-wider mb-1">
+                      <label className="block text-xs lg:text-sm font-bold uppercase text-slate-500 tracking-wider mb-1.5">
                         Tên Hiển Thị
                       </label>
                       <input
@@ -547,11 +558,11 @@ export default function App() {
                           setUserName(e.target.value);
                           localStorage.setItem('expensely_user_name', e.target.value);
                         }}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-base focus:outline-none focus:ring-2 focus:ring-primary font-semibold"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-slate-500 tracking-wider mb-1">
+                      <label className="block text-xs lg:text-sm font-bold uppercase text-slate-500 tracking-wider mb-1.5">
                         Hoặc Dán Link Avatar Riêng
                       </label>
                       <input
@@ -562,24 +573,24 @@ export default function App() {
                             handleSelectAvatar(e.target.value.trim());
                           }
                         }}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-base focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
+                  <div className="p-5 lg:p-6 bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
                     <div>
-                      <div className="font-semibold text-on-surface text-sm">Tự động kích hoạt GPS định vị</div>
-                      <div className="text-xs text-on-surface-variant mt-0.5">Ghi nhận tọa độ vi mô khi bắt đầu chuyến đi</div>
+                      <div className="font-bold text-on-surface text-base">Tự động kích hoạt GPS định vị</div>
+                      <div className="text-sm text-slate-500 mt-0.5">Ghi nhận tọa độ vi mô khi bắt đầu chuyến đi</div>
                     </div>
                     <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary cursor-pointer" />
                   </div>
-                  <div className="p-md bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
+                  <div className="p-5 lg:p-6 bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
                     <div>
-                      <div className="font-semibold text-on-surface text-sm">Thông báo phê duyệt chi phí tức thì</div>
-                      <div className="text-xs text-on-surface-variant mt-0.5">Gửi thông báo đến phòng kế toán ngay khi kết thúc lộ trình</div>
+                      <div className="font-bold text-on-surface text-base">Thông báo phê duyệt chi phí tức thì</div>
+                      <div className="text-sm text-slate-500 mt-0.5">Gửi thông báo đến phòng kế toán ngay khi kết thúc lộ trình</div>
                     </div>
                     <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary cursor-pointer" />
                   </div>
@@ -595,29 +606,29 @@ export default function App() {
 
       {/* ═══════════════ MODAL: GHI NHẬN CHI PHÍ ═══════════════ */}
       {showLogExpenseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-surface-container-lowest rounded-2xl max-w-md w-full p-xl border border-outline-variant/30 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-lg">
-              <div className="flex items-center gap-sm">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined">receipt_long</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-surface-container-lowest rounded-3xl max-w-lg w-full p-6 lg:p-8 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[26px]">receipt_long</span>
                 </div>
                 <div>
-                  <h3 className="font-headline-md text-on-surface">Ghi Nhận Chi Phí Mới</h3>
-                  <p className="font-label-sm text-on-surface-variant">Dự án Phoenix</p>
+                  <h3 className="text-xl font-extrabold text-on-surface">Ghi Nhận Chi Phí Mới</h3>
+                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Dự án Phoenix</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowLogExpenseModal(false)}
-                className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleAddExpense} className="flex flex-col gap-md">
+            <form onSubmit={handleAddExpense} className="flex flex-col gap-4">
               <div>
-                <label className="block font-label-sm text-on-surface-variant mb-1 uppercase tracking-wider text-xs font-semibold">
+                <label className="block text-slate-700 mb-1.5 uppercase tracking-wider text-xs lg:text-sm font-bold">
                   Nội Dung / Mô Tả Chi Phí
                 </label>
                 <input
@@ -626,22 +637,22 @@ export default function App() {
                   placeholder="Ví dụ: Ăn tối tiếp khách, Đổ xăng xe..."
                   value={newExpense.title}
                   onChange={(e) => setNewExpense({ ...newExpense, title: e.target.value })}
-                  className="w-full px-md py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary text-on-surface font-body-md"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 font-medium text-base"
                 />
               </div>
 
               <div>
-                <label className="block font-label-sm text-on-surface-variant mb-1 uppercase tracking-wider text-xs font-semibold">
-                  Số Tiền ($)
+                <label className="block text-slate-700 mb-1.5 uppercase tracking-wider text-xs lg:text-sm font-bold">
+                  Số Tiền (VNĐ)
                 </label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1000"
                   required
-                  placeholder="0.00"
+                  placeholder="Ví dụ: 250.000 hoặc 1.500.000"
                   value={newExpense.amount}
                   onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                  className="w-full px-md py-2.5 rounded-xl bg-surface-container border border-outline-variant/40 focus:outline-none focus:ring-2 focus:ring-primary text-on-surface font-body-md"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 font-bold text-base"
                 />
               </div>
 
@@ -655,17 +666,17 @@ export default function App() {
                 />
               </div>
 
-              <div className="flex gap-sm mt-lg">
+              <div className="flex gap-3 mt-4 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowLogExpenseModal(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-medium transition-colors"
+                  className="flex-1 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-on-surface font-bold transition-colors text-base"
                 >
                   Hủy Bỏ
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-medium transition-colors shadow-md"
+                  className="flex-1 py-3.5 rounded-xl bg-primary hover:bg-slate-800 text-on-primary font-bold transition-colors shadow-md text-base"
                 >
                   Lưu Chi Phí
                 </button>
@@ -677,65 +688,65 @@ export default function App() {
 
       {/* ═══════════════ MODAL: XEM LỊCH TRÌNH ═══════════════ */}
       {showItineraryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-surface-container-lowest rounded-2xl max-w-lg w-full p-xl border border-outline-variant/30 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-lg">
-              <div className="flex items-center gap-sm">
-                <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
-                  <span className="material-symbols-outlined">map</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-surface-container-lowest rounded-3xl max-w-lg w-full p-6 lg:p-8 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[26px]">map</span>
                 </div>
                 <div>
-                  <h3 className="font-headline-md text-on-surface">Lịch Trình Dự Án Phoenix</h3>
-                  <p className="font-label-sm text-on-surface-variant">Frankfurt • Kế hoạch 3 ngày</p>
+                  <h3 className="text-xl font-extrabold text-on-surface">Lịch Trình Dự Án Phoenix</h3>
+                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Frankfurt • Kế hoạch 3 ngày</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowItineraryModal(false)}
-                className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
 
             <div className="space-y-4 py-2">
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold text-xs">
+                <div className="w-9 h-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-extrabold text-sm shrink-0 mt-0.5">
                   01
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-body-md font-semibold text-on-surface">Ngày 1: Họp Khởi Động Với Khách Hàng</h4>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Làm việc với ban quản trị Acme Corp, kiểm toán hệ thống & lắp đặt tủ rack.</p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded bg-secondary/10 text-secondary text-[11px] font-medium">Đã hoàn thành</span>
+                  <h4 className="text-base font-bold text-on-surface">Ngày 1: Họp Khởi Động Với Khách Hàng</h4>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Làm việc với ban quản trị Acme Corp, kiểm toán hệ thống & lắp đặt tủ rack.</p>
+                  <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-secondary/10 text-secondary text-xs font-bold">Đã hoàn thành</span>
                 </div>
               </div>
 
               <div className="flex gap-4 items-start">
-                <div className="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-xs">
+                <div className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center font-extrabold text-sm shrink-0 mt-0.5">
                   02
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-body-md font-semibold text-on-surface">Ngày 2: Triển Khai Phần Cứng Giai Đoạn 2</h4>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Cấu hình máy chủ, thiết lập đường truyền telemetry tốc độ cao & kiểm thử.</p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded bg-primary-container text-on-primary-container text-[11px] font-medium">Đang thực hiện (Dự kiến 45p)</span>
+                  <h4 className="text-base font-bold text-on-surface">Ngày 2: Triển Khai Phần Cứng Giai Đoạn 2</h4>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Cấu hình máy chủ, thiết lập đường truyền telemetry tốc độ cao & kiểm thử.</p>
+                  <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold">Đang thực hiện (Dự kiến 45p)</span>
                 </div>
               </div>
 
               <div className="flex gap-4 items-start opacity-70">
-                <div className="w-8 h-8 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-bold text-xs">
+                <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-extrabold text-sm shrink-0 mt-0.5">
                   03
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-body-md font-semibold text-on-surface">Ngày 3: Đào Tạo Nhân Sự & Bàn Giao</h4>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Bàn giao tài liệu hướng dẫn, buổi huấn luyện nhân viên và khởi hành về.</p>
-                  <span className="inline-block mt-1 px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-[11px] font-medium">Sắp tới</span>
+                  <h4 className="text-base font-bold text-on-surface">Ngày 3: Đào Tạo Nhân Sự & Bàn Giao</h4>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Bàn giao tài liệu hướng dẫn, buổi huấn luyện nhân viên và khởi hành về.</p>
+                  <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold">Sắp tới</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-xl flex justify-end">
+            <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setShowItineraryModal(false)}
-                className="px-xl py-2.5 rounded-xl bg-primary text-on-primary font-medium hover:bg-primary/90 transition-colors shadow-md"
+                className="px-6 py-3 rounded-xl bg-primary text-on-primary font-bold hover:bg-slate-800 transition-colors shadow-md text-base"
               >
                 Đóng Lịch Trình
               </button>
@@ -746,19 +757,19 @@ export default function App() {
 
       {/* ═══════════════ POPUP: THÔNG BÁO ═══════════════ */}
       {showNotificationsModal && (
-        <div className="fixed top-16 right-4 sm:right-10 z-50 w-80 max-w-[90vw] bg-surface-container-lowest rounded-2xl p-md border border-outline-variant/30 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="flex items-center justify-between pb-sm border-b border-outline-variant/20 mb-sm">
-            <span className="font-body-md font-semibold text-on-surface">Thông Báo</span>
-            <span className="font-label-sm text-secondary font-medium">2 tin mới</span>
+        <div className="fixed top-20 right-4 sm:right-10 z-50 w-88 max-w-[90vw] bg-surface-container-lowest rounded-3xl p-5 border border-slate-200 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+            <span className="font-bold text-base text-on-surface">Thông Báo</span>
+            <span className="text-xs font-bold text-secondary bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">2 tin mới</span>
           </div>
-          <div className="space-y-2 text-xs">
-            <div className="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer">
-              <div className="font-medium text-on-surface">Chi phí đã được phê duyệt</div>
-              <div className="text-on-surface-variant mt-0.5">Hóa đơn xăng xe ($85.00) đã được hoàn ứng.</div>
+          <div className="space-y-2.5 text-xs lg:text-sm">
+            <div className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-100">
+              <div className="font-bold text-on-surface text-sm">Chi phí đã được phê duyệt</div>
+              <div className="text-slate-600 mt-1">Hóa đơn xăng xe (650.000 ₫) đã được hoàn ứng.</div>
             </div>
-            <div className="p-2 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer">
-              <div className="font-medium text-on-surface">Cảnh báo giao thông</div>
-              <div className="text-on-surface-variant mt-0.5">Đoạn cao tốc A3 hướng Frankfurt đã thông thoáng.</div>
+            <div className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-100">
+              <div className="font-bold text-on-surface text-sm">Cảnh báo giao thông</div>
+              <div className="text-slate-600 mt-1">Đoạn cao tốc A3 hướng Frankfurt đã thông thoáng.</div>
             </div>
           </div>
         </div>

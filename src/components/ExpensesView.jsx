@@ -1,28 +1,33 @@
 import React, { useState } from 'react';
+import { formatVND, parseVNDNumber } from '../utils/format';
 
-export default function ExpensesView({ expenses, onOpenAddExpense }) {
+export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
   const [timeRange, setTimeRange] = useState('Tháng');
 
+  const totalSpent = expenses.reduce((acc, e) => acc + parseVNDNumber(e.amount), 0);
+  const displayTotalSpent = totalSpent > 0 ? formatVND(totalSpent) : '24.500.000 ₫';
+  const pendingCount = expenses.filter(e => e.status === 'Chờ duyệt').length || 3;
+
   return (
-    <div className="flex flex-col w-full gap-xl">
+    <div className="flex flex-col w-full gap-6 lg:gap-8">
       {/* ══════════ TOP HEADER & TIMEFRAME FILTER ══════════ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-headline-lg text-on-surface">Quản Lý Chi Phí</h1>
-          <p className="font-body-md text-on-surface-variant mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface">Quản Lý Chi Phí</h1>
+          <p className="text-slate-600 text-sm sm:text-base mt-1">
             Theo dõi và phân loại các khoản chi tiêu trong chuyến công tác
           </p>
         </div>
 
-        <div className="flex bg-surface-container-high/60 border border-slate-200/90 rounded-xl p-1 self-start sm:self-auto shadow-sm">
+        <div className="flex bg-surface-container-high/60 border border-slate-200/90 rounded-2xl p-1.5 self-start sm:self-auto shadow-sm">
           {['Ngày', 'Tuần', 'Tháng'].map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-md py-1.5 rounded-lg transition-all font-label-sm ${
+              className={`px-4 py-2 rounded-xl transition-all text-sm font-bold ${
                 timeRange === range
-                  ? 'bg-surface-container-lowest text-on-surface shadow-sm font-semibold'
-                  : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high'
+                  ? 'bg-surface-container-lowest text-on-surface shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-surface-container-high'
               }`}
             >
               {range}
@@ -31,167 +36,138 @@ export default function ExpensesView({ expenses, onOpenAddExpense }) {
         </div>
       </div>
 
-      {/* ══════════ 3 METRIC CARDS: BOX 1 (1 LINE), BOX 2 & 3 (2 BOXES/LINE ON MOBILE) ══════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-lg">
-        {/* Total Spent - Box 1: Full width on mobile */}
-        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all">
-          <div className="absolute top-0 right-0 p-3 sm:p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
-            <span className="material-symbols-outlined text-3xl sm:text-4xl text-primary">
+      {/* ══════════ 3 METRIC CARDS ══════════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        {/* Total Spent */}
+        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-3xl p-5 lg:p-6 relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all flex flex-col justify-between min-h-[160px]">
+          <div className="absolute top-0 right-0 p-4 lg:p-6 opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+            <span className="material-symbols-outlined text-4xl sm:text-5xl text-primary">
               account_balance_wallet
             </span>
           </div>
-          <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-xs font-semibold">
-            Tổng Đã Chi
-          </p>
-          <div className="mt-sm flex items-baseline gap-sm">
-            <span className="font-display text-on-surface text-[30px] sm:text-[34px] leading-tight">$2,450.00</span>
+          <div>
+            <p className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">
+              Tổng Đã Chi
+            </p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl lg:text-[34px] font-black text-on-surface leading-tight">
+                {displayTotalSpent}
+              </span>
+            </div>
           </div>
-          <div className="mt-md flex items-center gap-xs text-secondary text-xs sm:text-sm">
-            <span className="material-symbols-outlined text-sm p-0.5 bg-secondary/10 rounded-full">trending_up</span>
-            <span className="font-medium">+12% so với tháng trước</span>
+          <div className="mt-3 flex items-center gap-1.5 text-secondary text-xs lg:text-sm">
+            <span className="material-symbols-outlined text-base p-0.5 bg-secondary/10 rounded-full">trending_up</span>
+            <span className="font-bold">+12% so với tháng trước</span>
           </div>
         </div>
 
-        {/* Budget Remaining - Box 2: Half width on mobile */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all flex flex-col justify-between">
+        {/* Budget Remaining */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-3xl p-5 lg:p-6 relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all flex flex-col justify-between min-h-[160px]">
           <div>
-            <div className="absolute top-0 right-0 p-3 sm:p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
-              <span className="material-symbols-outlined text-3xl sm:text-4xl text-secondary">savings</span>
+            <div className="absolute top-0 right-0 p-4 lg:p-6 opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+              <span className="material-symbols-outlined text-4xl sm:text-5xl text-secondary">savings</span>
             </div>
-            <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] sm:text-xs font-semibold">
+            <p className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">
               Ngân Sách Còn Lại
             </p>
-            <div className="mt-sm flex items-baseline gap-sm">
-              <span className="font-display text-on-surface text-[24px] sm:text-[34px] leading-tight">$1,550.00</span>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl lg:text-[34px] font-black text-on-surface leading-tight">
+                15.500.000 ₫
+              </span>
             </div>
           </div>
-          <div className="mt-3 w-full bg-slate-100 border border-slate-200/60 rounded-full h-2 overflow-hidden">
-            <div className="bg-secondary h-2 rounded-full transition-all duration-700 shadow-sm" style={{ width: '61%' }}></div>
+          <div className="mt-3 w-full bg-slate-100 border border-slate-200/60 rounded-full h-2.5 overflow-hidden">
+            <div className="bg-secondary h-full rounded-full transition-all duration-700 shadow-sm" style={{ width: '61%' }}></div>
           </div>
         </div>
 
-        {/* Pending Claims - Box 3: Half width on mobile */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-lg relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all flex flex-col justify-between">
+        {/* Pending Claims */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-3xl p-5 lg:p-6 relative overflow-hidden group border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all flex flex-col justify-between min-h-[160px]">
           <div>
-            <div className="absolute top-0 right-0 p-3 sm:p-lg opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
-              <span className="material-symbols-outlined text-3xl sm:text-4xl text-tertiary">receipt_long</span>
+            <div className="absolute top-0 right-0 p-4 lg:p-6 opacity-15 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">
+              <span className="material-symbols-outlined text-4xl sm:text-5xl text-amber-600">receipt_long</span>
             </div>
-            <p className="font-label-sm text-on-surface-variant uppercase tracking-wider text-[11px] sm:text-xs font-semibold">
+            <p className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">
               Yêu Cầu Chờ Duyệt
             </p>
-            <div className="mt-sm flex items-baseline gap-xs">
-              <span className="font-display text-on-surface text-[24px] sm:text-[34px] leading-tight">3</span>
-              <span className="text-on-surface-variant text-xs sm:text-sm font-medium">hóa đơn</span>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl lg:text-[34px] font-black text-on-surface leading-tight">
+                {pendingCount}
+              </span>
+              <span className="text-slate-500 text-sm lg:text-base font-bold">hóa đơn</span>
             </div>
           </div>
-          <div className="mt-3 text-[11px] sm:text-xs text-on-surface-variant flex items-center gap-1 font-medium">
-            <span className="material-symbols-outlined text-xs sm:text-sm">schedule</span>
+          <div className="mt-3 text-xs lg:text-sm text-slate-500 flex items-center gap-1.5 font-semibold">
+            <span className="material-symbols-outlined text-[18px]">schedule</span>
             <span>Đang chờ kế toán xác nhận</span>
           </div>
         </div>
       </div>
 
       {/* ══════════ 2-COLUMN SECTION: TABLE & DONUT CHART ══════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Left Column (2 Cols): Recent Expenses Table */}
-        <div className="lg:col-span-2 bg-surface-container-lowest rounded-2xl p-lg border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
-          <div className="flex items-center justify-between mb-lg">
-            <h2 className="font-headline-md text-on-surface">Chi Phí Gần Đây</h2>
+        <div className="lg:col-span-2 bg-surface-container-lowest rounded-3xl p-6 lg:p-8 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl lg:text-2xl font-bold text-on-surface">Chi Phí Gần Đây</h2>
             <button
               onClick={onOpenAddExpense}
-              className="flex items-center gap-xs bg-primary text-on-primary px-4 py-2.5 rounded-xl hover:bg-primary/90 transition-all shadow-md active:scale-95"
+              className="flex items-center gap-2 bg-primary text-on-primary px-5 py-3 rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95 text-sm lg:text-base font-bold"
             >
-              <span className="material-symbols-outlined text-sm">add</span>
-              <span className="font-label-sm font-medium">Thêm Chi Phí</span>
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span>Thêm Chi Phí</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 text-on-surface-variant font-label-sm uppercase tracking-wider text-xs">
-                  <th className="pb-3 font-semibold">Ngày</th>
-                  <th className="pb-3 font-semibold">Mô tả</th>
-                  <th className="pb-3 font-semibold">Phân loại</th>
-                  <th className="pb-3 font-semibold text-right">Số tiền</th>
-                  <th className="pb-3 font-semibold text-center">Trạng thái</th>
+                <tr className="border-b border-slate-200 text-slate-500 uppercase tracking-wider text-xs lg:text-sm font-bold">
+                  <th className="pb-3.5">Ngày</th>
+                  <th className="pb-3.5">Mô tả</th>
+                  <th className="pb-3.5">Phân loại</th>
+                  <th className="pb-3.5 text-right">Số tiền</th>
+                  <th className="pb-3.5 text-center">Trạng thái</th>
                 </tr>
               </thead>
-              <tbody className="font-body-md text-on-surface divide-y divide-slate-100">
-                <tr className="hover:bg-slate-50/80 transition-colors group">
-                  <td className="py-3.5 pr-md whitespace-nowrap text-on-surface-variant">24 Th10, 2026</td>
-                  <td className="py-3.5 pr-md font-medium text-on-surface">Ăn tối tiếp khách - Nhà hàng</td>
-                  <td className="py-3.5 pr-md whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 text-orange-700 border border-orange-200/60 font-medium text-xs">
-                      <span className="material-symbols-outlined text-sm">restaurant</span> Ăn uống
-                    </span>
-                  </td>
-                  <td className="py-3.5 pr-md text-right font-semibold">$145.20</td>
-                  <td className="py-3.5 text-center whitespace-nowrap">
-                    <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-xs font-semibold">
-                      Đã duyệt
-                    </span>
-                  </td>
-                </tr>
-
-                <tr className="hover:bg-slate-50/80 transition-colors group">
-                  <td className="py-3.5 pr-md whitespace-nowrap text-on-surface-variant">22 Th10, 2026</td>
-                  <td className="py-3.5 pr-md font-medium text-on-surface">Taxi sân bay</td>
-                  <td className="py-3.5 pr-md whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 font-medium text-xs">
-                      <span className="material-symbols-outlined text-sm">local_taxi</span> Di chuyển
-                    </span>
-                  </td>
-                  <td className="py-3.5 pr-md text-right font-semibold">$45.00</td>
-                  <td className="py-3.5 text-center whitespace-nowrap">
-                    <span className="inline-block px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200/60 text-xs font-semibold">
-                      Chờ duyệt
-                    </span>
-                  </td>
-                </tr>
-
-                <tr className="hover:bg-slate-50/80 transition-colors group">
-                  <td className="py-3.5 pr-md whitespace-nowrap text-on-surface-variant">20 Th10, 2026</td>
-                  <td className="py-3.5 pr-md font-medium text-on-surface">Phòng khách sạn Marriott</td>
-                  <td className="py-3.5 pr-md whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 border border-purple-200/60 font-medium text-xs">
-                      <span className="material-symbols-outlined text-sm">hotel</span> Lưu trú
-                    </span>
-                  </td>
-                  <td className="py-3.5 pr-md text-right font-semibold">$850.00</td>
-                  <td className="py-3.5 text-center whitespace-nowrap">
-                    <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-xs font-semibold">
-                      Đã duyệt
-                    </span>
-                  </td>
-                </tr>
-
-                <tr className="hover:bg-slate-50/80 transition-colors group">
-                  <td className="py-3.5 pr-md whitespace-nowrap text-on-surface-variant">18 Th10, 2026</td>
-                  <td className="py-3.5 pr-md font-medium text-on-surface">Văn phòng phẩm dự án</td>
-                  <td className="py-3.5 pr-md whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-medium text-xs">
-                      <span className="material-symbols-outlined text-sm">inventory_2</span> Vật tư
-                    </span>
-                  </td>
-                  <td className="py-3.5 pr-md text-right font-semibold">$32.50</td>
-                  <td className="py-3.5 text-center whitespace-nowrap">
-                    <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-xs font-semibold">
-                      Đã duyệt
-                    </span>
-                  </td>
-                </tr>
+              <tbody className="text-on-surface divide-y divide-slate-100 text-sm lg:text-base">
+                {expenses.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors group">
+                    <td className="py-4 pr-4 whitespace-nowrap text-slate-500 font-medium">
+                      {item.subtitle ? item.subtitle.split('•')[0] : 'Hôm nay'}
+                    </td>
+                    <td className="py-4 pr-4 font-bold text-on-surface">{item.title}</td>
+                    <td className="py-4 pr-4 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-200/60 font-semibold text-xs lg:text-sm">
+                        <span className="material-symbols-outlined text-[18px]">{item.icon || 'receipt'}</span>
+                        <span>{item.category || 'Chi phí'}</span>
+                      </span>
+                    </td>
+                    <td className="py-4 pr-4 text-right font-black text-slate-900 whitespace-nowrap">
+                      {formatVND(item.amount)}
+                    </td>
+                    <td className="py-4 text-center whitespace-nowrap">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs lg:text-sm font-bold border ${
+                        item.status === 'Đã duyệt'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                          : 'bg-amber-50 text-amber-700 border-amber-200/60'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
         {/* Right Column (1 Col): Spending by Category Donut */}
-        <div className="bg-surface-container-lowest rounded-2xl p-lg flex flex-col border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
-          <h2 className="font-headline-md text-on-surface mb-lg">Chi Phí Theo Danh Mục</h2>
+        <div className="bg-surface-container-lowest rounded-3xl p-6 lg:p-8 flex flex-col border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
+          <h2 className="text-xl lg:text-2xl font-bold text-on-surface mb-6">Chi Phí Theo Danh Mục</h2>
           
-          <div className="flex-1 flex flex-col items-center justify-center relative min-h-[250px]">
-            <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 100 100">
+          <div className="flex-1 flex flex-col items-center justify-center relative min-h-[260px]">
+            <svg className="w-52 h-52 transform -rotate-90" viewBox="0 0 100 100">
               <circle
                 className="text-slate-100"
                 cx="50"
@@ -238,43 +214,43 @@ export default function ExpensesView({ expenses, onOpenAddExpense }) {
               ></circle>
             </svg>
 
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="font-label-sm uppercase tracking-wider text-xs text-on-surface-variant">Tổng chi</span>
-              <span className="font-headline-lg font-bold text-on-surface mt-0.5">$2,450</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-sm font-bold">Tổng chi</span>
+              <span className="text-xl lg:text-2xl font-black text-on-surface mt-0.5">24.500.000 ₫</span>
             </div>
           </div>
 
-          <div className="mt-lg space-y-2.5 pt-md border-t border-slate-100">
+          <div className="mt-6 space-y-3 pt-4 border-t border-slate-100 text-sm lg:text-base">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-3 h-3 rounded-full bg-primary ring-2 ring-primary/20"></div>
-                <span className="font-body-md text-on-surface font-medium">Di chuyển & Đi lại</span>
+              <div className="flex items-center gap-3">
+                <div className="w-3.5 h-3.5 rounded-full bg-primary ring-2 ring-primary/20"></div>
+                <span className="font-semibold text-on-surface">Di chuyển & Đi lại</span>
               </div>
-              <span className="font-body-md text-on-surface-variant font-semibold">45%</span>
+              <span className="font-bold text-slate-700">45%</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-3 h-3 rounded-full bg-secondary ring-2 ring-secondary/20"></div>
-                <span className="font-body-md text-on-surface font-medium">Khách sạn & Lưu trú</span>
+              <div className="flex items-center gap-3">
+                <div className="w-3.5 h-3.5 rounded-full bg-secondary ring-2 ring-secondary/20"></div>
+                <span className="font-semibold text-on-surface">Khách sạn & Lưu trú</span>
               </div>
-              <span className="font-body-md text-on-surface-variant font-semibold">35%</span>
+              <span className="font-bold text-slate-700">35%</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-3 h-3 rounded-full bg-amber-600 ring-2 ring-amber-600/20"></div>
-                <span className="font-body-md text-on-surface font-medium">Ăn uống & Tiếp khách</span>
+              <div className="flex items-center gap-3">
+                <div className="w-3.5 h-3.5 rounded-full bg-amber-600 ring-2 ring-amber-600/20"></div>
+                <span className="font-semibold text-on-surface">Ăn uống & Tiếp khách</span>
               </div>
-              <span className="font-body-md text-on-surface-variant font-semibold">15%</span>
+              <span className="font-bold text-slate-700">15%</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-3 h-3 rounded-full bg-slate-300 ring-2 ring-slate-300/30"></div>
-                <span className="font-body-md text-on-surface font-medium">Chi phí khác</span>
+              <div className="flex items-center gap-3">
+                <div className="w-3.5 h-3.5 rounded-full bg-slate-300 ring-2 ring-slate-300/30"></div>
+                <span className="font-semibold text-on-surface">Chi phí khác</span>
               </div>
-              <span className="font-body-md text-on-surface-variant font-semibold">5%</span>
+              <span className="font-bold text-slate-700">5%</span>
             </div>
           </div>
         </div>

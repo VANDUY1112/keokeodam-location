@@ -27,7 +27,7 @@ export default function CustomDropdown({
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {label && (
-        <label className="block font-label-sm text-on-surface-variant mb-1 uppercase tracking-wider text-xs">
+        <label className="block text-slate-700 mb-1.5 uppercase tracking-wider text-xs lg:text-sm font-bold">
           {label}
         </label>
       )}
@@ -36,24 +36,24 @@ export default function CustomDropdown({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high border transition-all text-left group ${
+        className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-slate-50 hover:bg-slate-100 border transition-all text-left group ${
           isOpen
             ? 'border-primary ring-2 ring-primary/20 shadow-sm'
-            : 'border-outline-variant/30 hover:border-outline-variant/60'
+            : 'border-slate-200 hover:border-slate-300'
         }`}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           {(selectedOption?.icon || icon) && (
-            <span className="material-symbols-outlined text-[20px] text-primary shrink-0">
+            <span className="material-symbols-outlined text-[22px] text-primary shrink-0">
               {selectedOption?.icon || icon}
             </span>
           )}
           <div className="truncate">
-            <div className="font-body-md font-medium text-on-surface truncate">
+            <div className="font-semibold text-on-surface text-base truncate">
               {selectedOption ? selectedOption.label : placeholder}
             </div>
             {selectedOption?.subtitle && (
-              <div className="text-[11px] text-on-surface-variant truncate">
+              <div className="text-xs text-slate-500 truncate mt-0.5">
                 {selectedOption.subtitle}
               </div>
             )}
@@ -61,8 +61,8 @@ export default function CustomDropdown({
         </div>
 
         <span
-          className={`material-symbols-outlined text-on-surface-variant text-[20px] transition-transform duration-200 shrink-0 ${
-            isOpen ? 'rotate-180 text-primary' : 'group-hover:text-on-surface'
+          className={`material-symbols-outlined text-slate-500 text-[22px] transition-transform duration-200 shrink-0 ${
+            isOpen ? 'rotate-180 text-primary' : 'group-hover:text-slate-800'
           }`}
         >
           expand_more
@@ -71,7 +71,7 @@ export default function CustomDropdown({
 
       {/* Animated Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-full min-w-[220px] bg-surface-container-lowest/95 backdrop-blur-xl border border-outline-variant/25 rounded-2xl shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 top-full mt-2 w-full min-w-[220px] bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
           <div className="max-h-60 overflow-y-auto space-y-1">
             {options.map((option) => {
               const isSelected = option.value === value;
@@ -83,28 +83,28 @@ export default function CustomDropdown({
                     onChange(option.value);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl transition-all text-left ${
+                  className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl transition-all text-left ${
                     isSelected
-                      ? 'bg-primary-container text-on-primary-container font-medium'
-                      : 'text-on-surface hover:bg-surface-container-high'
+                      ? 'bg-primary text-white font-bold shadow-xs'
+                      : 'text-slate-800 hover:bg-slate-100 font-medium'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     {option.icon && (
                       <span
-                        className={`material-symbols-outlined text-[18px] shrink-0 ${
-                          isSelected ? 'text-on-primary-container' : 'text-on-surface-variant'
+                        className={`material-symbols-outlined text-[20px] shrink-0 ${
+                          isSelected ? 'text-white' : 'text-slate-500'
                         }`}
                       >
                         {option.icon}
                       </span>
                     )}
                     <div>
-                      <div className="text-sm truncate">{option.label}</div>
+                      <div className="text-sm sm:text-base truncate font-semibold">{option.label}</div>
                       {option.subtitle && (
                         <div
-                          className={`text-[11px] truncate ${
-                            isSelected ? 'text-on-primary-container/80' : 'text-on-surface-variant'
+                          className={`text-xs truncate ${
+                            isSelected ? 'text-white/80' : 'text-slate-500'
                           }`}
                         >
                           {option.subtitle}
@@ -114,7 +114,7 @@ export default function CustomDropdown({
                   </div>
 
                   {isSelected && (
-                    <span className="material-symbols-outlined text-[18px] text-on-primary-container shrink-0">
+                    <span className="material-symbols-outlined text-[20px] text-white shrink-0">
                       check
                     </span>
                   )}

@@ -467,45 +467,45 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
               </div>
               <button
                 onClick={() => setShowSummaryModal(false)}
-                className="text-slate-400 hover:text-slate-700 p-1"
+                className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
 
             {/* Key Metrics Grid */}
-            <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+            <div className="grid grid-cols-2 gap-3.5 bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Tổng Quãng Đường</span>
-                <div className="text-2xl font-bold text-slate-900 mt-0.5">{summaryData.distance} km</div>
+                <span className="text-xs uppercase tracking-wider text-slate-500 font-bold">Tổng Quãng Đường</span>
+                <div className="text-2xl lg:text-3xl font-black text-slate-900 mt-1">{summaryData.distance} km</div>
               </div>
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Thời Gian Di Chuyển</span>
-                <div className="text-2xl font-bold text-slate-900 mt-0.5">{summaryData.duration}</div>
+                <span className="text-xs uppercase tracking-wider text-slate-500 font-bold">Thời Gian Di Chuyển</span>
+                <div className="text-2xl lg:text-3xl font-black text-slate-900 mt-1">{summaryData.duration}</div>
               </div>
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Tốc Độ Trung Bình</span>
-                <div className="text-lg font-semibold text-slate-800 mt-0.5">{summaryData.avgSpeed} km/h</div>
+                <span className="text-xs uppercase tracking-wider text-slate-500 font-bold">Tốc Độ Trung Bình</span>
+                <div className="text-lg lg:text-xl font-bold text-slate-800 mt-1">{summaryData.avgSpeed} km/h</div>
               </div>
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Định Mức Công Tác</span>
-                <div className="text-lg font-semibold text-emerald-600 mt-0.5">{summaryData.cost.toLocaleString('vi-VN')} đ</div>
+                <span className="text-xs uppercase tracking-wider text-slate-500 font-bold">Định Mức Hoàn Ứng</span>
+                <div className="text-lg lg:text-xl font-extrabold text-emerald-700 mt-1">{(summaryData.cost || 0).toLocaleString('vi-VN')} ₫</div>
               </div>
             </div>
 
             {/* Coordinates info */}
-            <div className="space-y-2 text-xs">
+            <div className="space-y-2.5 text-xs lg:text-sm">
               <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Tọa độ bắt đầu:</span>
-                <span className="font-mono text-slate-800">{summaryData.origin}</span>
+                <span className="text-slate-500 font-medium">Tọa độ bắt đầu:</span>
+                <span className="font-mono text-slate-800 font-semibold">{summaryData.origin}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Tọa độ kết thúc:</span>
-                <span className="font-mono text-slate-800">{summaryData.destination}</span>
+                <span className="text-slate-500 font-medium">Tọa độ kết thúc:</span>
+                <span className="font-mono text-slate-800 font-semibold">{summaryData.destination}</span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-slate-500">Điểm GPS ghi nhận:</span>
-                <span className="font-semibold text-slate-800">{summaryData.pointsCount} điểm tọa độ</span>
+                <span className="text-slate-500 font-medium">Điểm GPS ghi nhận:</span>
+                <span className="font-bold text-slate-800">{summaryData.pointsCount} điểm tọa độ</span>
               </div>
             </div>
 
@@ -513,7 +513,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
               <button
                 type="button"
                 onClick={() => setShowSummaryModal(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-on-surface font-semibold text-sm transition-colors"
+                className="flex-1 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-on-surface font-bold text-base transition-colors"
               >
                 Đóng
               </button>
@@ -545,13 +545,13 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
                   if (onAddExpenseRecord) {
                     onAddExpenseRecord({
                       title: `Hoàn ứng xe - ${summaryData.distance} km`,
-                      amount: `$${(summaryData.cost / 25000).toFixed(2)}`,
+                      amount: `${(summaryData.cost || 0).toLocaleString('vi-VN')} ₫`,
                       category: 'Di chuyển',
                     });
                   }
                   setShowSummaryModal(false);
                 }}
-                className="flex-1 py-3 rounded-xl bg-primary hover:bg-slate-800 text-white font-semibold text-sm transition-colors shadow-md"
+                className="flex-1 py-3.5 rounded-xl bg-primary hover:bg-slate-800 text-white font-bold text-base transition-colors shadow-md"
               >
                 Lưu & Hoàn Ứng
               </button>
