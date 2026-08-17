@@ -88,14 +88,14 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
             title="Tổng Quan"
           >
             <BarChart3
-              size={22}
+              size={23}
               className={`transition-all duration-200 ${
                 activeTab === 'dashboard'
                   ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
                   : 'text-slate-400 group-hover:text-white stroke-[1.8]'
               }`}
             />
-            <span className={`text-[10px] mt-1 leading-none ${activeTab === 'dashboard' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'dashboard' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Tổng Quan
             </span>
           </button>
@@ -107,14 +107,14 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
             title="Chi Phí"
           >
             <Receipt
-              size={22}
+              size={23}
               className={`transition-all duration-200 ${
                 activeTab === 'expenses'
                   ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
                   : 'text-slate-400 group-hover:text-white stroke-[1.8]'
               }`}
             />
-            <span className={`text-[10px] mt-1 leading-none ${activeTab === 'expenses' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'expenses' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Chi Phí
             </span>
           </button>
@@ -129,14 +129,14 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
             title="Lịch Sử"
           >
             <History
-              size={22}
+              size={23}
               className={`transition-all duration-200 ${
                 activeTab === 'history'
                   ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
                   : 'text-slate-400 group-hover:text-white stroke-[1.8]'
               }`}
             />
-            <span className={`text-[10px] mt-1 leading-none ${activeTab === 'history' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'history' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Lịch Sử
             </span>
           </button>
@@ -148,14 +148,14 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
             title="Cài Đặt"
           >
             <Settings
-              size={22}
+              size={23}
               className={`transition-all duration-200 ${
                 activeTab === 'settings'
                   ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
                   : 'text-slate-400 group-hover:text-white stroke-[1.8]'
               }`}
             />
-            <span className={`text-[10px] mt-1 leading-none ${activeTab === 'settings' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'settings' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Cài Đặt
             </span>
           </button>

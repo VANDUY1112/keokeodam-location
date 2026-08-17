@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatVND, parseVNDNumber } from '../utils/format';
+import DashboardMiniMap from './DashboardMiniMap';
 
 export default function DashboardView({
   expenses = [],
@@ -210,34 +211,9 @@ export default function DashboardView({
           </div>
         </div>
 
-        {/* Right Map Image Box */}
-        <div
-          onClick={() => onNavigateToTab('tracking')}
-          className="w-full lg:w-[42%] rounded-2xl overflow-hidden relative shadow-md border border-slate-200/90 z-10 cursor-pointer min-h-[280px]"
-        >
-          <div
-            className="w-full h-full bg-cover bg-center transition-transform duration-700 hover:scale-105"
-            data-location="Frankfurt, Germany"
-            style={{
-              backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuAwkmdpmyx4qqd78u2loh-z85VEvZ6j4dFmAQFnZ8kLmrCV4z62v2ApBCROnmEbkAyAajWgyVegqJQIC8OU3rQxpZvfb63EpepXP72bFCLjm4E35D-ArQroocYLGYfvfTxfP7AOcG5VYREJ7qdR583W4R4r2uwQ96c4cEgiulzZWx7i-WGqunr51qe2iIz5vHXZy-FauHbzVTcEnbG0T3z8ULO-Ps-dIk0yvZS4IGItT8ulRJrDheBu')`,
-            }}
-          ></div>
-
-          <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-2xl flex items-center justify-between shadow-lg border border-slate-200/80">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-primary text-on-primary rounded-xl flex items-center justify-center shadow-sm">
-                <span className="material-symbols-outlined text-[22px]">navigation</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm lg:text-base font-bold text-on-surface">Đang điều hướng đến điểm hẹn</span>
-                <span className="text-xs lg:text-sm text-slate-500 font-medium">Dự kiến: 45 phút</span>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-lg lg:text-2xl font-extrabold text-on-surface">24 km</span>
-              <span className="text-xs lg:text-sm font-bold text-emerald-700">Thông thoáng</span>
-            </div>
-          </div>
+        {/* Right Map Box: Live Leaflet Interactive Map */}
+        <div className="w-full lg:w-[46%] rounded-2xl overflow-hidden relative shadow-md border border-slate-200/90 z-10 min-h-[320px] lg:min-h-[360px] flex flex-col">
+          <DashboardMiniMap onNavigateToTracking={() => onNavigateToTab && onNavigateToTab('tracking')} />
         </div>
       </div>
 
