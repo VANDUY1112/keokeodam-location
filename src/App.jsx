@@ -10,19 +10,19 @@ import { formatVND, parseVNDNumber } from './utils/format';
 const INITIAL_EXPENSES = [
   {
     id: 1,
-    title: 'Ăn tối tiếp khách - Nhà hàng',
-    subtitle: '26 Th10 • Dự án Phoenix',
-    amount: '1.850.000 ₫',
-    status: 'Chờ duyệt',
-    statusColor: 'text-surface-tint',
-    icon: 'local_dining',
-    hoverColor: 'group-hover:bg-error/10 group-hover:text-error',
+    title: 'Thu tiền thuê loa - Anh Hoàng (Tiệc Sinh Nhật)',
+    subtitle: 'Hôm nay • Gói Loa Bass 40 (800W)',
+    amount: '450.000 ₫',
+    status: 'Đã duyệt',
+    statusColor: 'text-secondary',
+    icon: 'speaker',
+    hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
   },
   {
     id: 2,
-    title: 'Đổ xăng xe - Trạm Shell',
-    subtitle: '24 Th10 • Chuyến công tác Hamburg',
-    amount: '650.000 ₫',
+    title: 'Đổ xăng xe máy giao loa - Trạm Petrolimex',
+    subtitle: 'Hôm qua • Ship 4 đơn nội thành',
+    amount: '120.000 ₫',
     status: 'Đã duyệt',
     statusColor: 'text-secondary',
     icon: 'local_gas_station',
@@ -30,12 +30,12 @@ const INITIAL_EXPENSES = [
   },
   {
     id: 3,
-    title: 'Khách sạn Marriott - 2 Đêm',
-    subtitle: '18 Th10 • Hội nghị London Tech',
-    amount: '4.200.000 ₫',
+    title: 'Thu tiền thuê loa - Chị Mai (Tân Gia Q.7)',
+    subtitle: '24 Th10 • Gói Loa Đôi Bass 50 (1500W)',
+    amount: '620.000 ₫',
     status: 'Đã duyệt',
     statusColor: 'text-secondary',
-    icon: 'hotel',
+    icon: 'volume_up',
     hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
   },
 ];
@@ -43,13 +43,16 @@ const INITIAL_EXPENSES = [
 const INITIAL_TRIPS = [
   {
     id: 1,
-    title: 'Thăm văn phòng Hamburg',
-    subtitle: '24 Th10 • 280 km',
-    distanceKm: 280,
-    duration: '03:45:00',
-    status: 'Hoàn thành',
+    title: 'Giao Loa: Anh Hoàng - 0903.111.222',
+    subtitle: 'Hôm nay • 5.2 km • Loa Bass 40 (800W)',
+    distanceKm: 5.2,
+    duration: '00:18:30',
+    cost: 428000,
+    speakerName: 'Loa Kéo Bass 40 (800W)',
+    customerName: 'Anh Hoàng',
+    status: 'Đã bàn giao',
     statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-    icon: 'near_me',
+    icon: 'speaker',
     pathCoordinates: [
       { lat: 10.7769, lng: 106.7009 },
       { lat: 10.7801, lng: 106.7052 },
@@ -58,23 +61,29 @@ const INITIAL_TRIPS = [
   },
   {
     id: 2,
-    title: 'Hội nghị công nghệ London',
-    subtitle: '18-20 Th10 • 950 km',
-    distanceKm: 950,
-    duration: '12:30:00',
-    status: 'Đã thanh toán',
-    statusBadge: 'bg-surface-container-high text-on-surface-variant',
-    icon: 'flight',
+    title: 'Giao Loa: Chị Mai - 0918.333.444',
+    subtitle: 'Hôm qua • 8.4 km • Loa Đôi Bass 50',
+    distanceKm: 8.4,
+    duration: '00:26:45',
+    cost: 626000,
+    speakerName: 'Loa Kéo Đôi Bass 50 Khủng (1500W)',
+    customerName: 'Chị Mai',
+    status: 'Đã bàn giao',
+    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+    icon: 'volume_up',
   },
   {
     id: 3,
-    title: 'Họp nhà cung cấp - Cologne',
-    subtitle: '12 Th10 • 145 km',
-    distanceKm: 145,
-    duration: '02:15:00',
-    status: 'Hoàn thành',
+    title: 'Giao Loa: Anh Nam - 0912.345.678',
+    subtitle: '24 Th10 • 3.8 km • Loa Bass 40',
+    distanceKm: 3.8,
+    duration: '00:14:10',
+    cost: 407000,
+    speakerName: 'Loa Kéo Bass 40',
+    customerName: 'Anh Nam',
+    status: 'Đã bàn giao',
     statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-    icon: 'near_me',
+    icon: 'speaker',
   },
 ];
 
@@ -222,9 +231,9 @@ export default function App() {
 
   const navItems = [
     { id: 'dashboard', label: 'Tổng Quan', icon: 'dashboard' },
-    { id: 'tracking', label: 'Hành Trình', icon: 'my_location' },
-    { id: 'expenses', label: 'Quản Lý Chi Phí', icon: 'receipt_long' },
-    { id: 'history', label: 'Lịch Sử Chuyến Đi', icon: 'history' },
+    { id: 'tracking', label: 'Giao Loa & GPS', icon: 'two_wheeler' },
+    { id: 'expenses', label: 'Doanh Thu & Chi Phí', icon: 'payments' },
+    { id: 'history', label: 'Lịch Sử Đơn Thuê', icon: 'speaker' },
     { id: 'reports', label: 'Báo Cáo & Thống Kê', icon: 'assessment' },
     { id: 'settings', label: 'Cài Đặt', icon: 'settings' },
   ];
@@ -234,12 +243,13 @@ export default function App() {
       {/* ═══════════════ DESKTOP SIDEBAR NAVIGATION (W-72) ═══════════════ */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col shadow-[1px_0_0_rgba(0,0,0,0.05)] border-r border-slate-200/60">
         <div className="h-20 flex items-center px-6 gap-3 border-b border-slate-200/60">
-          <img
-            alt="Expensely Logo"
-            className="h-9 w-9 rounded-xl shadow-xs object-cover"
-            src="/favicon.svg"
-          />
-          <span className="text-xl text-primary tracking-tight font-extrabold">Expensely</span>
+          <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md">
+            <span className="material-symbols-outlined text-2xl">speaker</span>
+          </div>
+          <div>
+            <span className="text-lg text-slate-900 tracking-tight font-black block leading-none">Kẹo Kéo Express</span>
+            <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1 block">Cho Thuê Loa GPS</span>
+          </div>
         </div>
 
         <nav className="flex-1 flex flex-col gap-2 px-3.5 py-5">

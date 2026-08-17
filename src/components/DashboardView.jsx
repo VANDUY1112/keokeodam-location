@@ -45,7 +45,7 @@ export default function DashboardView({
           </div>
 
           <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-xs lg:text-sm">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-xs lg:text-sm">
               <span className="material-symbols-outlined text-[16px] lg:text-[18px]">
                 trending_up
               </span>
@@ -78,25 +78,23 @@ export default function DashboardView({
 
           <div className="flex items-center gap-1.5 z-10">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-xs lg:text-sm">
-              <span className="material-symbols-outlined text-[16px] lg:text-[18px]">
-                horizontal_rule
-              </span>
+
               Vận tốc ổn định
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Monthly Expenses (VNĐ) */}
+        {/* Metric 3: Monthly Revenue / Expenses (VNĐ) */}
         <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[160px] lg:min-h-[175px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
           <div className="flex items-center justify-between z-10">
             <span className="text-slate-700 font-bold uppercase tracking-wide text-sm sm:text-base">
-              Chi phí tháng
+              Doanh thu tháng
             </span>
             <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 border border-blue-100 text-primary flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
               <span className="material-symbols-outlined text-[22px] lg:text-[26px]">
-                receipt_long
+                payments
               </span>
             </div>
           </div>
@@ -108,110 +106,103 @@ export default function DashboardView({
           </div>
 
           <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold text-xs lg:text-sm">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-xs lg:text-sm">
               <span className="material-symbols-outlined text-[16px] lg:text-[18px]">
                 trending_up
               </span>
-              +5% so với tháng trước
+              +15% so với tháng trước
             </span>
           </div>
         </div>
 
-        {/* Metric 4: Active Trip */}
-        <div className="col-span-2 lg:col-span-1 bg-primary-container rounded-2xl p-5 lg:p-6 flex flex-col justify-between shadow-md border border-slate-800/80 relative overflow-hidden group min-h-[160px] lg:min-h-[175px]">
-          <div className="absolute top-0 right-0 w-36 h-36 bg-primary/30 rounded-full blur-2xl transform translate-x-1/3 -translate-y-1/3"></div>
+        {/* Metric 4: Total Speaker Rentals */}
+        <div className="col-span-2 lg:col-span-1 bg-surface-container-lowest rounded-2xl p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[160px] lg:min-h-[175px]">
+          <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between gap-2 z-10">
-            <span className="text-on-primary-container font-bold uppercase tracking-wide text-sm sm:text-base truncate">
-              Chuyến đang đi
+          <div className="flex items-center justify-between z-10">
+            <span className="text-slate-700 font-bold uppercase tracking-wide text-sm sm:text-base">
+              Tổng loa được thuê
             </span>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-secondary/25 rounded-full shrink-0 border border-secondary/40">
-              <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
-              <span className="text-xs font-bold text-secondary tracking-wide whitespace-nowrap">
-                DI CHUYỂN
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 border border-blue-100 text-primary flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+              <span className="material-symbols-outlined text-[22px] lg:text-[26px]">
+                speaker
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col z-10 my-1">
-            <span className="font-headline-lg text-on-primary-container leading-tight text-2xl lg:text-3xl font-extrabold">
-              Berlin
+          <div className="flex items-baseline gap-2 z-10 my-1">
+            <span className="font-display text-on-surface text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
+              {trips.length > 0 ? trips.length : 36}
             </span>
-            <span className="font-body-md text-on-primary-container/80 flex items-center gap-1.5 mt-1 font-semibold text-sm lg:text-base">
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              Munich
-            </span>
+            <span className="text-slate-500 font-bold text-base lg:text-lg">đơn</span>
           </div>
 
-          <div className="flex flex-col gap-1.5 z-10">
-            <div className="w-full bg-surface-container-low/20 h-2 rounded-full overflow-hidden">
-              <div className="bg-secondary h-full rounded-full w-[65%] relative">
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-on-secondary rounded-full shadow-[0_0_8px_rgba(0,108,73,0.8)]"></div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full font-label-sm text-on-primary-container/80 text-xs lg:text-[13px] font-medium">
-              <span>340 km đã đi</span>
-              <span>Còn 180 km</span>
-            </div>
+          <div className="flex items-center gap-1.5 z-10">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-xs lg:text-sm">
+              <span className="material-symbols-outlined text-[16px] lg:text-[18px]">
+                trending_up
+              </span>
+              +8 đơn trong tuần
+            </span>
           </div>
         </div>
       </div>
 
-      {/* ══════════ HERO ASSIGNMENT CARD ══════════ */}
+      {/* ══════════ HERO ASSIGNMENT CARD: LOA KẸO KÉO ══════════ */}
       <div className="w-full bg-surface-container-lowest rounded-3xl p-6 lg:p-8 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)] relative overflow-hidden flex flex-col lg:flex-row gap-6 lg:gap-8">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-transparent to-slate-50/60 pointer-events-none"></div>
 
         <div className="flex-1 flex flex-col z-10">
           <div className="flex items-center gap-3 mb-4">
             <span className="px-3.5 py-1.5 bg-primary/10 border border-primary/20 text-primary font-label-sm rounded-full tracking-wider uppercase text-xs lg:text-sm font-bold">
-              Nhiệm Vụ Hiện Tại
+              Đơn Thuê Loa Tiêu Biểu
             </span>
             <span className="text-slate-500 font-medium text-sm lg:text-base flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[18px]">schedule</span> Bắt đầu lúc 08:30
+              <span className="material-symbols-outlined text-[18px]">schedule</span> Bàn giao lúc 08:30
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-on-surface leading-tight tracking-tight mb-2">
-            Dự Án Phoenix
+          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-black text-on-surface leading-tight tracking-tight mb-2">
+            Tiệc Tân Gia - Anh Nam
           </h2>
 
           <p className="text-slate-600 text-base sm:text-lg font-normal mb-6 max-w-xl">
-            Tư vấn tại chỗ cho khách hàng và triển khai phần cứng giai đoạn 2.
+            Cho thuê dàn loa kéo đôi Bass 50 công suất 1500W kèm 2 mic kim loại UHF + phí cước ship tận nhà.
           </p>
 
           <div className="grid grid-cols-2 gap-y-4 gap-x-6 sm:gap-x-10 mt-auto pt-2 border-t border-slate-100/80">
             <div className="flex flex-col gap-1">
               <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Khách hàng</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-on-surface">Acme Corp Ltd.</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-on-surface">Anh Nam (0912.345.678)</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Thời gian dự kiến</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-on-surface">3 Ngày</span>
+              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Thời gian thuê</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-on-surface">1 Ngày (24h)</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Ngân sách cấp</span>
-              <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-on-surface">300.000.000 ₫</span>
+              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Gói loa bàn giao</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-primary">Loa Đôi Bass 50 (1500W)</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Đã chi tiêu</span>
-              <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-on-surface">85.500.000 ₫</span>
+              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Tổng tiền thu từ khách</span>
+              <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-on-surface">575.000 ₫</span>
             </div>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3 sm:gap-4">
             <button
-              onClick={onOpenLogExpense}
+              onClick={() => onNavigateToTab && onNavigateToTab('tracking')}
               className="bg-primary text-on-primary font-semibold text-sm sm:text-base px-6 py-3.5 rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center gap-2.5"
             >
-              <span className="material-symbols-outlined text-[20px]">add_circle</span>
-              Ghi Nhận Chi Phí
+              <span className="material-symbols-outlined text-[20px]">two_wheeler</span>
+              Bắt Đầu Giao Loa (GPS)
             </button>
 
             <button
-              onClick={onOpenItinerary}
+              onClick={onOpenLogExpense}
               className="bg-slate-100 border border-slate-200 text-on-surface font-semibold text-sm sm:text-base px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-2"
             >
-              Xem Lịch Trình <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+              Ghi Nhận Thu Chi <span className="material-symbols-outlined text-[20px]">add_circle</span>
             </button>
           </div>
         </div>
