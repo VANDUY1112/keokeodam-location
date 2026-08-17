@@ -26,11 +26,11 @@ export default function DashboardView({
         <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between z-10">
-            <span className="text-slate-700 font-bold uppercase tracking-wide text-xs sm:text-sm lg:text-base">
+          <div className="flex items-center justify-between gap-2 z-10">
+            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
               Tổng quãng đường
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 border border-blue-100 text-primary flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
               <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
                 near_me
               </span>
@@ -45,8 +45,8 @@ export default function DashboardView({
           </div>
 
           <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-[11px] sm:text-xs lg:text-sm truncate">
-              <span className="material-symbols-outlined text-[14px] sm:text-[16px] lg:text-[18px]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
+              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
                 trending_up
               </span>
               +12% tháng trước
@@ -58,11 +58,11 @@ export default function DashboardView({
         <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between z-10">
-            <span className="text-slate-700 font-bold uppercase tracking-wide text-xs sm:text-sm lg:text-base">
+          <div className="flex items-center justify-between gap-2 z-10">
+            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
               Tốc độ trung bình
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
               <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
                 speed
               </span>
@@ -77,8 +77,8 @@ export default function DashboardView({
           </div>
 
           <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-[11px] sm:text-xs lg:text-sm truncate">
-              <span className="material-symbols-outlined text-[14px] sm:text-[16px] lg:text-[18px]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
+              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
                 horizontal_rule
               </span>
               Vận tốc ổn định
@@ -90,11 +90,11 @@ export default function DashboardView({
         <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between z-10">
-            <span className="text-slate-700 font-bold uppercase tracking-wide text-xs sm:text-sm lg:text-base">
+          <div className="flex items-center justify-between gap-2 z-10">
+            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
               Doanh thu tháng
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 border border-blue-100 text-primary flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
               <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
                 payments
               </span>
@@ -108,8 +108,8 @@ export default function DashboardView({
           </div>
 
           <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-[11px] sm:text-xs lg:text-sm truncate">
-              <span className="material-symbols-outlined text-[14px] sm:text-[16px] lg:text-[18px]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
+              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
                 trending_up
               </span>
               +15% tháng trước
@@ -121,11 +121,11 @@ export default function DashboardView({
         <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between z-10">
-            <span className="text-slate-700 font-bold uppercase tracking-wide text-xs sm:text-sm lg:text-base">
+          <div className="flex items-center justify-between gap-2 z-10">
+            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
               Tổng loa được thuê
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 border border-blue-100 text-primary flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
               <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
                 speaker
               </span>
@@ -140,8 +140,8 @@ export default function DashboardView({
           </div>
 
           <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200/60 font-semibold text-[11px] sm:text-xs lg:text-sm truncate">
-              <span className="material-symbols-outlined text-[14px] sm:text-[16px] lg:text-[18px]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
+              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
                 trending_up
               </span>
               +8 đơn tuần này
@@ -168,44 +168,44 @@ export default function DashboardView({
             Tiệc Tân Gia - Anh Nam
           </h2>
 
-          <p className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-normal leading-relaxed mb-4 max-w-xl">
+          <p className="text-slate-600 text-sm sm:text-base lg:text-[17px] font-normal leading-relaxed mb-4 max-w-xl">
             Cho thuê dàn loa kéo đôi Bass 50 công suất 1500W kèm 2 mic kim loại UHF + phí cước ship tận nhà.
           </p>
 
-          <div className="grid grid-cols-2 gap-y-3 gap-x-4 sm:gap-x-8 mt-auto pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-y-3.5 gap-x-4 sm:gap-x-8 mt-auto pt-3 border-t border-slate-100">
             <div className="flex flex-col">
-              <span className="text-slate-400 text-xs font-medium">Khách hàng</span>
-              <span className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">Anh Nam (0912.345.678)</span>
+              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Khách hàng</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5">Anh Nam</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-slate-400 text-xs font-medium">Thời gian thuê</span>
-              <span className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">1 Ngày (24h)</span>
+              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Tổng giờ thuê</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5">24 Giờ</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-slate-400 text-xs font-medium">Gói loa bàn giao</span>
-              <span className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">Loa Đôi Bass 50 (1500W)</span>
+              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Số điện thoại</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 font-mono">0912.345.678</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-slate-400 text-xs font-medium">Tổng tiền thu từ khách</span>
-              <span className="text-base sm:text-lg lg:text-xl font-extrabold text-slate-900 mt-0.5">575.000 ₫</span>
+              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Tổng tiền thu từ khách</span>
+              <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-slate-900 mt-0.5">575.000 ₫</span>
             </div>
           </div>
 
           <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
             <button
-              onClick={() => onNavigateToTab && onNavigateToTab('tracking')}
+              onClick={() => onNavigateToTab && onNavigateToTab('history')}
               className="bg-slate-900 text-white font-semibold text-xs sm:text-sm px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:bg-slate-800 transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-[17px] sm:text-[19px] shrink-0">two_wheeler</span>
-              <span className="truncate">Giao Loa (GPS)</span>
+              <span className="material-symbols-outlined text-[17px] sm:text-[19px] shrink-0">visibility</span>
+              <span className="truncate">Xem Chi Tiết</span>
             </button>
 
             <button
-              onClick={onOpenLogExpense}
+              onClick={() => onNavigateToTab && onNavigateToTab('tracking')}
               className="bg-slate-100 border border-slate-200/90 text-slate-800 font-semibold text-xs sm:text-sm px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-1.5"
             >
-              <span className="truncate">Ghi Nhận Thu Chi</span>
-              <span className="material-symbols-outlined text-[17px] sm:text-[19px] text-primary shrink-0">add_circle</span>
+              <span className="material-symbols-outlined text-[17px] sm:text-[19px] text-slate-700 shrink-0">replay</span>
+              <span className="truncate">Thuê Lại Loa</span>
             </button>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function DashboardView({
                 className="bg-surface-container-lowest p-3.5 sm:p-4 lg:p-5 rounded-2xl flex items-center justify-between hover:bg-slate-50 transition-all cursor-pointer group border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_4px_16px_rgba(11,28,48,0.06)] gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-blue-50 text-primary rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all border border-blue-100 shadow-xs shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-slate-100 text-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all border border-slate-200/90 shadow-xs shrink-0">
                     <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{trip.icon || 'speaker'}</span>
                   </div>
                   <div className="flex flex-col min-w-0 flex-1">
@@ -318,7 +318,7 @@ export default function DashboardView({
                   <span className="font-display font-extrabold text-sm sm:text-base lg:text-lg text-on-surface whitespace-nowrap">
                     {formatVND(item.amount)}
                   </span>
-                  <span className={`text-xs sm:text-[13px] lg:text-[14px] font-semibold mt-0.5 whitespace-nowrap ${item.statusColor || 'text-secondary'}`}>
+                  <span className="text-xs sm:text-[13px] lg:text-[14px] font-medium mt-0.5 text-slate-500 whitespace-nowrap">
                     {item.status}
                   </span>
                 </div>
