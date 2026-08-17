@@ -155,12 +155,12 @@ export default function DashboardView({
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-transparent to-slate-50/60 pointer-events-none"></div>
 
         <div className="flex-1 flex flex-col z-10">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="px-3 py-1 bg-slate-100 border border-slate-200/80 text-slate-700 font-semibold rounded-lg text-xs sm:text-[13px]">
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
+            <span className="px-3.5 py-1.5 bg-slate-100 border border-slate-200/80 text-slate-800 font-bold rounded-xl text-xs sm:text-sm lg:text-[15px]">
               Đơn Thuê Loa Tiêu Biểu
             </span>
-            <span className="text-slate-500 font-medium text-xs sm:text-[13px] flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px]">schedule</span> Bàn giao lúc 08:30
+            <span className="text-slate-600 font-medium text-xs sm:text-sm lg:text-[15px] flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">schedule</span> Bàn giao lúc 08:30
             </span>
           </div>
 
