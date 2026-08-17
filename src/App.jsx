@@ -332,26 +332,13 @@ export default function App() {
               </button>
             ))}
           </nav>
-
-          {/* User Footer inside Drawer */}
-          <div className="pt-4 border-t border-slate-100 mt-auto flex items-center gap-3">
-            <img
-              src={userAvatar}
-              alt={userName}
-              className="w-10 h-10 rounded-full object-cover border border-slate-200"
-            />
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-sm font-bold text-slate-900 truncate">{userName}</span>
-              <span className="text-xs text-slate-500 truncate">Quản trị viên</span>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
       <div className="pl-0 lg:pl-72">
         <header className="fixed top-0 left-0 lg:left-72 right-0 h-20 bg-surface/90 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b border-outline-variant/30 shadow-xs">
-          {/* Mobile Left: Hamburger Button & Logo */}
+          {/* Mobile Left: Hamburger Button */}
           <div className="flex items-center gap-2.5 lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -360,10 +347,6 @@ export default function App() {
             >
               <span className="material-symbols-outlined text-2xl">menu</span>
             </button>
-            <div className="flex items-center gap-2">
-              <img alt="Logo" className="w-7 h-7 rounded-lg" src="/favicon.svg" />
-              <span className="font-bold text-slate-900 text-base">Expensely</span>
-            </div>
           </div>
 
           {/* Spacer for desktop */}

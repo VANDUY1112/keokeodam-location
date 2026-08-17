@@ -176,35 +176,6 @@ export default function DashboardMiniMap({ onNavigateToTracking }) {
           <span className="material-symbols-outlined text-[18px]">open_in_full</span>
         </button>
       </div>
-
-      {/* ─── Bottom Floating Status Card ─── */}
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onNavigateToTracking && onNavigateToTracking();
-        }}
-        className="absolute bottom-3 left-3 right-3 z-10 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl flex items-center justify-between shadow-lg border border-slate-200/90 hover:bg-white transition-all cursor-pointer"
-      >
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
-            <span className="material-symbols-outlined text-[20px] sm:text-[22px]">navigation</span>
-          </div>
-          <div className="flex flex-col min-w-0 flex-1">
-            <span className="text-xs sm:text-sm lg:text-[15px] font-bold text-slate-900 truncate">
-              Đang điều hướng đến điểm hẹn
-            </span>
-            <span className="text-[11px] sm:text-xs text-slate-500 font-medium truncate mt-0.5">
-              Dự kiến: 45 phút • 128 Điện Biên Phủ
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-col items-end shrink-0 pl-2">
-          <span className="text-base sm:text-lg lg:text-xl font-extrabold text-slate-900">4.2 km</span>
-          <span className="text-[11px] sm:text-xs font-medium text-slate-500 whitespace-nowrap">
-            Thông thoáng
-          </span>
-        </div>
-      </div>
     </div>
   );
 }

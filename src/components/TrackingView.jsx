@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import LiveRouteMap from './LiveRouteMap';
+import LiveRouteMap, { MAP_LAYERS } from './LiveRouteMap';
 import { formatVND } from '../utils/format';
 
 // Haversine formula to compute distance in km between two lat/lng points
@@ -71,6 +71,9 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const [destinationAddress, setDestinationAddress] = useState('Chưa bắt đầu');
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [summaryData, setSummaryData] = useState(null);
+  const [selectedLayer, setSelectedLayer] = useState('googleHybrid');
+  const [showLayerMenu, setShowLayerMenu] = useState(false);
+  const [recenterTrigger, setRecenterTrigger] = useState(0);
 
   const watchIdRef = useRef(null);
   const simIntervalRef = useRef(null);
@@ -112,8 +115,8 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     seconds > 3 && totalDistance > 0
       ? ((totalDistance / (seconds / 3600))).toFixed(1)
       : isTracking
-      ? (currentSpeed > 0 ? (currentSpeed * 0.9).toFixed(1) : '28.5')
-      : '0';
+        ? (currentSpeed > 0 ? (currentSpeed * 0.9).toFixed(1) : '28.5')
+        : '0';
 
   // Real-time Shipping fee (VNĐ)
   const currentShippingCost = Math.round((totalDistance > 0 ? totalDistance : 0) * ratePerKm);
@@ -283,7 +286,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
       <div className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8">
         {/* ══════════ LEFT PANEL: RENTAL CONTROLS & LIVE STATS ══════════ */}
         <aside className="w-full lg:w-[420px] shrink-0 flex flex-col gap-5 z-10 relative">
-          
+
           {/* Status & Live Timer Card */}
           <div className="bg-surface-container-lowest rounded-3xl p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)] flex flex-col gap-4 relative overflow-hidden group">
             <div className="absolute -right-16 -top-16 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700"></div>
@@ -291,18 +294,16 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
             <div className="flex items-center justify-between z-10">
               <h2 className="text-xl lg:text-2xl font-black text-on-surface tracking-tight">Giao Loa Trực Tuyến</h2>
               <div
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-colors ${
-                  isTracking
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold'
-                    : 'bg-slate-100 text-slate-700 border-slate-200 font-semibold'
-                }`}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-colors ${isTracking
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold'
+                  : 'bg-slate-100 text-slate-700 border-slate-200 font-semibold'
+                  }`}
               >
                 <span
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    isTracking ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-                  }`}
+                  className={`w-2.5 h-2.5 rounded-full ${isTracking ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                    }`}
                 ></span>
-                <span className="text-xs uppercase tracking-wider">
+                <span className="text-xs sm:text-sm font-semibold">
                   {isTracking ? (isSimulating ? 'Đang chạy mô phỏng' : 'Đang di chuyển') : 'Sẵn sàng'}
                 </span>
               </div>
@@ -310,17 +311,29 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
 
             {/* Timer & Speed HUD */}
             <div className="grid grid-cols-2 gap-3 pt-2 z-10">
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70">
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">Thời Gian Đi</span>
-                <span className="text-2xl lg:text-3xl font-black text-slate-900 tabular-nums">
-                  {formatTime(seconds)}
-                </span>
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70 flex flex-col justify-between">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-900 font-bold text-sm lg:text-base">Thời gian đi</span>
+                  <span className="material-symbols-outlined text-xl text-slate-500">schedule</span>
+                </div>
+                <div className="mt-1.5">
+                  <span className="text-2xl lg:text-3xl font-black text-slate-900 tabular-nums">
+                    {formatTime(seconds)}
+                  </span>
+                </div>
               </div>
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70">
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider block">Tốc Độ TB</span>
-                <span className="text-2xl lg:text-3xl font-black text-primary tabular-nums">
-                  {currentAvgSpeed} <span className="text-xs font-semibold text-slate-500">km/h</span>
-                </span>
+
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70 flex flex-col justify-between">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-900 font-bold text-sm lg:text-base">Tốc độ trung bình</span>
+                  <span className="material-symbols-outlined text-xl text-slate-500">speed</span>
+                </div>
+                <div className="mt-1.5 flex items-baseline gap-1">
+                  <span className="text-2xl lg:text-3xl font-black text-slate-900 tabular-nums">
+                    {currentAvgSpeed}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-500">km/h</span>
+                </div>
               </div>
             </div>
           </div>
@@ -330,11 +343,10 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
             <button
               onClick={handleStartTracking}
               disabled={isTracking}
-              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative overflow-hidden border ${
-                isTracking
-                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
-                  : 'bg-primary text-white border-primary hover:bg-slate-800'
-              }`}
+              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative overflow-hidden border ${isTracking
+                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
+                }`}
             >
               <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                 play_circle
@@ -345,11 +357,10 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
             <button
               onClick={handleStopTracking}
               disabled={!isTracking}
-              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group border ${
-                !isTracking
-                  ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
-                  : 'bg-rose-600 text-white border-rose-700 shadow-lg hover:bg-rose-700'
-              }`}
+              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group border ${!isTracking
+                ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
+                : 'bg-rose-600 text-white border-rose-700 shadow-lg hover:bg-rose-700'
+                }`}
             >
               <span className="material-symbols-outlined text-4xl">
                 stop_circle
@@ -361,24 +372,23 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           {/* Desktop Demo Drive Button */}
           <button
             onClick={toggleSimulation}
-            className={`w-full py-3 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 border transition-all shadow-xs ${
-              isSimulating
-                ? 'bg-amber-50 text-amber-800 border-amber-300 ring-2 ring-amber-200'
-                : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
-            }`}
+            className={`w-full py-3 px-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2.5 border transition-all shadow-xs ${isSimulating
+              ? 'bg-slate-900 text-white border-slate-900 ring-2 ring-slate-400'
+              : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
+              }`}
           >
-            <span className="material-symbols-outlined text-xl text-primary">
+            <span className="material-symbols-outlined text-xl">
               {isSimulating ? 'pause_circle' : 'two_wheeler'}
             </span>
-            <span>{isSimulating ? 'Tạm dừng mô phỏng di chuyển' : 'Thử nghiệm di chuyển xe (Demo GPS Drive)'}</span>
+            <span>{isSimulating ? 'Tạm dừng mô phỏng lộ trình' : 'Mô phỏng lộ trình giao loa (Chạy thử)'}</span>
           </button>
 
           {/* Real-time Distance & Estimated Collection Box */}
           <div className="grid grid-cols-2 gap-4 w-full">
             <div className="bg-surface-container-lowest rounded-2xl p-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] flex flex-col justify-between">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs uppercase tracking-wider font-bold">Quãng Đường</span>
-                <span className="material-symbols-outlined text-xl text-primary">near_me</span>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-900 font-bold text-sm lg:text-base">Tổng quãng đường</span>
+                <span className="material-symbols-outlined text-xl text-slate-500">near_me</span>
               </div>
               <div className="mt-2">
                 <span className="text-2xl lg:text-3xl font-black text-slate-900">
@@ -389,99 +399,133 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
             </div>
 
             <div className="bg-surface-container-lowest rounded-2xl p-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] flex flex-col justify-between">
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs uppercase tracking-wider font-bold">Cước Ship Tạm Tính</span>
-                <span className="material-symbols-outlined text-xl text-secondary">local_shipping</span>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-900 font-bold text-sm lg:text-base">Tiền típ</span>
+                <span className="material-symbols-outlined text-xl text-slate-500">volunteer_activism</span>
               </div>
               <div className="mt-2">
-                <span className="text-xl lg:text-2xl font-black text-secondary truncate block">
+                <span className="text-2xl lg:text-3xl font-black text-slate-900 truncate block">
                   {formatVND(currentShippingCost)}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Rental Order Form / Customer Selection */}
-          <div className="bg-surface-container-lowest rounded-3xl p-5 border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] space-y-4">
+          {/* ══════════ DELIVERY ROUTE ITINERARY CARD (HÀNH TRÌNH) ══════════ */}
+          <div className="bg-surface-container-lowest rounded-3xl p-5 border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] space-y-4 overflow-hidden relative">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-xl">receipt_long</span>
-                <span>Thông Tin Đơn Thuê Loa</span>
+                <span className="material-symbols-outlined text-slate-800 text-xl">route</span>
+                <span>Hành trình giao loa</span>
               </h3>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                {selectedSpeaker?.price ? formatVND(selectedSpeaker.price) : '350.000 ₫'}
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${isTracking
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-slate-100 text-slate-700 border-slate-200'
+                }`}>
+                {isTracking && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>}
+                {isTracking ? 'Xe đang trên đường' : 'Chuẩn bị xuất phát'}
               </span>
             </div>
 
-            <div className="space-y-3 text-sm">
-              <div>
-                <label className="block text-xs uppercase tracking-wider font-bold text-slate-600 mb-1">
-                  Chọn Loại Loa Kẹo Kéo
-                </label>
-                <select
-                  disabled={isTracking}
-                  value={selectedSpeaker?.id}
-                  onChange={(e) => {
-                    const spk = SPEAKER_PACKAGES.find((p) => p.id === e.target.value);
-                    if (spk) setSelectedSpeaker(spk);
-                  }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
-                >
-                  {SPEAKER_PACKAGES.map((pkg) => (
-                    <option key={pkg.id} value={pkg.id}>
-                      {pkg.name} — {formatVND(pkg.price)}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-slate-500 mt-1">{selectedSpeaker?.desc}</p>
-              </div>
+            {isTracking ? (
+              /* ─── LIVE ACTIVE JOURNEY (KHI ĐANG ĐI) ─── */
+              <div className="space-y-4 pt-1">
+                <div className="relative pl-6 space-y-4 before:absolute before:left-[5px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-300">
+                  {/* Origin */}
+                  <div className="relative">
+                    <span className="absolute -left-6 top-1 w-3 h-3 rounded-full border-2 border-slate-800 bg-white ring-4 ring-white"></span>
+                    <div>
+                      <span className="text-xs text-slate-500 font-medium block">Điểm xuất phát</span>
+                      <p className="text-sm font-bold text-slate-900 mt-0.5">100 Nguyễn Huệ, P. Bến Nghé, Quận 1</p>
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-xs uppercase tracking-wider font-bold text-slate-600 mb-1">
-                  Khách Thuê & Số Điện Thoại
-                </label>
-                <input
-                  type="text"
-                  disabled={isTracking}
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="VD: Anh Nam - 0909.888.999"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
-                />
-              </div>
+                  {/* Live Progress */}
+                  <div className="relative py-1">
+                    <span className="absolute -left-6 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-slate-900 text-white flex items-center justify-center ring-4 ring-white">
+                      <span className="material-symbols-outlined text-[10px]">two_wheeler</span>
+                    </span>
+                    <div className="bg-slate-900 text-white p-3 rounded-xl flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-200">Đang di chuyển giao loa</span>
+                      <span className="text-xs font-mono font-bold text-white bg-white/15 px-2 py-0.5 rounded">
+                        {totalDistance.toFixed(2)} km
+                      </span>
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-xs uppercase tracking-wider font-bold text-slate-600 mb-1">
-                  Địa Chỉ Giao Loa
-                </label>
-                <input
-                  type="text"
-                  disabled={isTracking}
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder="Địa chỉ giao tiệc / sự kiện..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
-                />
-              </div>
+                  {/* Destination */}
+                  <div className="relative">
+                    <span className="absolute -left-6 top-1 w-3 h-3 bg-slate-900 rounded-[2px] ring-4 ring-white"></span>
+                    <div className="space-y-1">
+                      <span className="text-xs text-slate-500 font-medium block">Điểm giao đến</span>
+                      <p className="text-sm font-bold text-slate-900">{deliveryAddress}</p>
+                      <p className="text-xs text-slate-600">Khách nhận: <strong className="text-slate-800 font-semibold">{customerName}</strong></p>
+                    </div>
+                  </div>
+                </div>
 
-              {/* Total Estimated Collection Preview */}
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-                  Dự tính thu từ khách:
-                </span>
-                <span className="text-lg font-black text-emerald-700">
-                  {formatVND(currentTotalCollect)}
-                </span>
+                {/* Collection summary */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-sm font-bold text-slate-700">Dự tính thu từ khách:</span>
+                  <span className="text-xl font-black text-slate-900">{formatVND(currentTotalCollect)}</span>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* ─── PRE-START SETUP (TRƯỚC KHI BẮT ĐẦU) ─── */
+              <div className="space-y-4">
+                <div className="relative pl-6 space-y-4 before:absolute before:left-[5px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                  {/* Origin */}
+                  <div className="relative">
+                    <span className="absolute -left-6 top-1 w-3 h-3 rounded-full border-2 border-slate-800 bg-white ring-4 ring-white"></span>
+                    <div>
+                      <span className="text-xs text-slate-500 font-medium block">Điểm xuất phát</span>
+                      <p className="text-sm font-bold text-slate-900 mt-0.5">100 Nguyễn Huệ, P. Bến Nghé, Quận 1</p>
+                    </div>
+                  </div>
+
+                  {/* Destination */}
+                  <div className="relative">
+                    <span className="absolute -left-6 top-1.5 w-3.5 h-3.5 bg-slate-900 rounded-[2px] ring-4 ring-white"></span>
+                    <div className="space-y-2.5">
+                      <span className="text-sm text-slate-500 font-semibold block">Điểm giao đến</span>
+                      <input
+                        type="text"
+                        value={deliveryAddress}
+                        onChange={(e) => setDeliveryAddress(e.target.value)}
+                        placeholder="Nhập địa chỉ giao tiệc / sự kiện..."
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 text-[14px]"
+                      />
+                      <div>
+                        <label className="block text-sm font-bold text-slate-800 mb-1">
+                          Người nhận &amp; SĐT
+                        </label>
+                        <input
+                          type="text"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          placeholder="VD: Anh Tuấn - 0908.123.456"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 text-[14px]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Collection summary */}
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-sm font-bold text-slate-700">Dự tính thu từ khách:</span>
+                  <span className="text-xl font-black text-slate-900">{formatVND(currentTotalCollect)}</span>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
         {/* ══════════ RIGHT PANEL: INTERACTIVE LIVE ROUTE MAP ══════════ */}
         <section className="flex-1 flex flex-col min-h-[500px] lg:min-h-[700px] bg-surface-container-lowest rounded-3xl p-4 lg:p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)] relative">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div className="flex flex-col gap-3 mb-4">
             <div>
-              <h3 className="text-xl lg:text-2xl font-black text-on-surface flex items-center gap-2">
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-on-surface flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">map</span>
                 <span>Bản Đồ Lộ Trình GPS Giao Loa</span>
               </h3>
@@ -490,9 +534,68 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 bg-slate-100 px-3.5 py-1.5 rounded-xl border border-slate-200 self-start sm:self-auto">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary animate-ping"></span>
-              <span>GPS Trực Tiếp</span>
+            {/* Map Controls placed directly next to GPS Badge */}
+            <div className="flex items-center gap-2 flex-wrap relative z-30 pt-1">
+              {/* GPS Live Badge */}
+              <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200 shrink-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>GPS Trực Tiếp</span>
+              </div>
+
+              {/* Nút Căn Giữa Vị Trí (My Location) */}
+              <button
+                type="button"
+                title="Căn giữa vị trí của tôi"
+                onClick={() => setRecenterTrigger((t) => t + 1)}
+                className="h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center border border-slate-200 shadow-xs transition-all active:scale-95 shrink-0"
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  my_location
+                </span>
+              </button>
+
+              {/* Map Layer Switcher */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowLayerMenu(!showLayerMenu)}
+                  className="flex items-center gap-2 h-9 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-semibold border border-slate-200 shadow-xs transition-all shrink-0"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-slate-700">layers</span>
+                  <span>{MAP_LAYERS[selectedLayer]?.name || 'Vệ Tinh'}</span>
+                  <span className={`material-symbols-outlined text-[16px] text-slate-500 transition-transform ${showLayerMenu ? 'rotate-180' : ''}`}>
+                    expand_more
+                  </span>
+                </button>
+
+                {showLayerMenu && (
+                  <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1.5 w-56 bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 space-y-1 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    {Object.values(MAP_LAYERS).map((layer) => {
+                      const isSelected = layer.id === selectedLayer;
+                      return (
+                        <button
+                          key={layer.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedLayer(layer.id);
+                            setShowLayerMenu(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs sm:text-sm transition-all ${
+                            isSelected
+                              ? 'bg-slate-100 text-slate-900 font-bold border border-slate-200'
+                              : 'text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>{layer.name}</span>
+                          {isSelected && (
+                            <span className="material-symbols-outlined text-[16px] text-slate-900 font-bold">check</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -504,6 +607,9 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
               endPosition={endPosition}
               pathCoordinates={pathCoordinates}
               isTracking={isTracking}
+              selectedLayer={selectedLayer}
+              recenterTrigger={recenterTrigger}
+              showInternalControls={false}
             />
           </div>
         </section>
@@ -541,7 +647,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
                 {formatVND(summaryData.totalCollect)}
               </div>
               <span className="inline-block mt-2 px-3 py-1 bg-emerald-100/80 text-emerald-800 text-xs font-bold rounded-full">
-                Bao gồm tiền thuê loa + Phí cước di chuyển
+                Bao gồm tiền thuê loa + Tiền típ
               </span>
             </div>
 
@@ -552,7 +658,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
                 <span className="font-bold text-slate-900">{formatVND(summaryData.rentalFee)}</span>
               </div>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                <span className="text-slate-600 font-medium">2. Cước vận chuyển ({summaryData.distance} km × 15.000 ₫):</span>
+                <span className="text-slate-600 font-medium">2. Tiền típ ({summaryData.distance} km):</span>
                 <span className="font-bold text-slate-900">{formatVND(summaryData.shippingFee)}</span>
               </div>
               <div className="flex items-center justify-between pt-1">
@@ -564,15 +670,15 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
             {/* GPS Metrics Grid */}
             <div className="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/70 text-center">
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">Quãng Đường</span>
+                <span className="text-xs text-slate-800 font-bold block mb-1">Quãng đường</span>
                 <span className="text-xl font-black text-slate-900 mt-0.5 block">{summaryData.distance} km</span>
               </div>
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">Thời Gian Đi</span>
+                <span className="text-xs text-slate-800 font-bold block mb-1">Thời gian đi</span>
                 <span className="text-xl font-black text-slate-900 mt-0.5 block">{summaryData.duration}</span>
               </div>
               <div>
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-bold block">Tốc Độ TB</span>
+                <span className="text-xs text-slate-800 font-bold block mb-1">Tốc độ TB</span>
                 <span className="text-xl font-black text-primary mt-0.5 block">{summaryData.avgSpeed} km/h</span>
               </div>
             </div>

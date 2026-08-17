@@ -81,24 +81,24 @@ const createCurrentIcon = () =>
   });
 
 // Map Tile Options
-const MAP_LAYERS = {
+export const MAP_LAYERS = {
   googleHybrid: {
     id: 'googleHybrid',
-    name: 'Vệ Tinh Google',
+    name: 'Vệ Tinh',
     url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
     maxZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
   },
   darkMuted: {
     id: 'darkMuted',
-    name: 'Bản Đồ Đêm (Dịu Mắt)',
+    name: 'Bản Đồ Đêm',
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     maxZoom: 19,
     subdomains: 'abcd',
   },
   googleStreets: {
     id: 'googleStreets',
-    name: 'Đường Phố Google',
+    name: 'Đường Phố',
     url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
     maxZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -114,10 +114,16 @@ export default function LiveRouteMap({
   originAddress = 'Điểm định vị GPS',
   destinationAddress = 'Đang di chuyển...',
   readOnly = false,
+  selectedLayer: propSelectedLayer,
+  recenterTrigger: propRecenterTrigger,
+  showInternalControls = false,
 }) {
-  const [selectedLayer, setSelectedLayer] = useState('googleHybrid');
+  const [internalSelectedLayer, setInternalSelectedLayer] = useState('googleHybrid');
   const [showLayerMenu, setShowLayerMenu] = useState(false);
-  const [recenterTrigger, setRecenterTrigger] = useState(0);
+  const [internalRecenterTrigger, setInternalRecenterTrigger] = useState(0);
+
+  const selectedLayer = propSelectedLayer !== undefined ? propSelectedLayer : internalSelectedLayer;
+  const recenterTrigger = propRecenterTrigger !== undefined ? propRecenterTrigger : internalRecenterTrigger;
 
   const defaultCenter = [10.7769, 106.7009];
   const center = currentPosition
@@ -130,7 +136,7 @@ export default function LiveRouteMap({
   const activeLayerConfig = MAP_LAYERS[selectedLayer] || MAP_LAYERS.googleHybrid;
 
   return (
-    <div className="w-full h-full relative rounded-[2rem] overflow-hidden">
+    <div className="w-full h-full relative overflow-hidden">
       <MapContainer
         center={center}
         zoom={16}
@@ -219,61 +225,63 @@ export default function LiveRouteMap({
         />
       </MapContainer>
 
-      {/* ══════════ FLOATING CONTROLS: RECENTER & LAYER SWITCHER (TOP RIGHT) ══════════ */}
-      <div className="absolute top-4 right-4 z-[400] pointer-events-auto flex items-center gap-2">
-        {/* Nút Căn Giữa Vị Trí Hiện Tại (My Location / Recenter) */}
-        <button
-          type="button"
-          title="Căn giữa vị trí của tôi"
-          onClick={() => setRecenterTrigger((t) => t + 1)}
-          className="w-10 h-10 rounded-2xl bg-white/95 hover:bg-white text-slate-700 flex items-center justify-center backdrop-blur-md border border-slate-200/90 shadow-xl transition-all active:scale-95 group"
-        >
-          <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">
-            my_location
-          </span>
-        </button>
-
-        {/* Map Layer Switcher */}
-        <div className="relative">
+      {/* ══════════ FLOATING CONTROLS: RECENTER & LAYER SWITCHER (OPTIONAL INTERNAL) ══════════ */}
+      {showInternalControls && (
+        <div className="absolute top-4 right-4 z-[400] pointer-events-auto flex items-center gap-2">
+          {/* Nút Căn Giữa Vị Trí Hiện Tại (My Location / Recenter) */}
           <button
-            onClick={() => setShowLayerMenu(!showLayerMenu)}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white/95 hover:bg-white text-slate-700 text-xs font-semibold backdrop-blur-md border border-slate-200/90 shadow-xl transition-all"
+            type="button"
+            title="Căn giữa vị trí của tôi"
+            onClick={() => setInternalRecenterTrigger((t) => t + 1)}
+            className="w-10 h-10 rounded-2xl bg-white/95 hover:bg-white text-slate-700 flex items-center justify-center backdrop-blur-md border border-slate-200/90 shadow-xl transition-all active:scale-95 group"
           >
-            <span className="material-symbols-outlined text-[18px] text-slate-700">layers</span>
-            <span>{activeLayerConfig.name}</span>
-            <span className={`material-symbols-outlined text-[16px] text-slate-500 transition-transform ${showLayerMenu ? 'rotate-180' : ''}`}>
-              expand_more
+            <span className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">
+              my_location
             </span>
           </button>
 
-          {showLayerMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-2xl p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
-              {Object.values(MAP_LAYERS).map((layer) => {
-                const isSelected = layer.id === selectedLayer;
-                return (
-                  <button
-                    key={layer.id}
-                    onClick={() => {
-                      setSelectedLayer(layer.id);
-                      setShowLayerMenu(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all ${
-                      isSelected
-                        ? 'bg-slate-100 text-slate-900 font-bold border border-slate-200/80 shadow-xs'
-                        : 'text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <span>{layer.name}</span>
-                    {isSelected && (
-                      <span className="material-symbols-outlined text-[16px] text-slate-900 font-bold">check</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {/* Map Layer Switcher */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLayerMenu(!showLayerMenu)}
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white/95 hover:bg-white text-slate-700 text-xs font-semibold backdrop-blur-md border border-slate-200/90 shadow-xl transition-all"
+            >
+              <span className="material-symbols-outlined text-[18px] text-slate-700">layers</span>
+              <span>{activeLayerConfig.name}</span>
+              <span className={`material-symbols-outlined text-[16px] text-slate-500 transition-transform ${showLayerMenu ? 'rotate-180' : ''}`}>
+                expand_more
+              </span>
+            </button>
+
+            {showLayerMenu && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-2xl p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                {Object.values(MAP_LAYERS).map((layer) => {
+                  const isSelected = layer.id === selectedLayer;
+                  return (
+                    <button
+                      key={layer.id}
+                      onClick={() => {
+                        setInternalSelectedLayer(layer.id);
+                        setShowLayerMenu(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all ${
+                        isSelected
+                          ? 'bg-slate-100 text-slate-900 font-bold border border-slate-200/80 shadow-xs'
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{layer.name}</span>
+                      {isSelected && (
+                        <span className="material-symbols-outlined text-[16px] text-slate-900 font-bold">check</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
