@@ -72,15 +72,16 @@ export default function DashboardMiniMap({ onNavigateToTracking }) {
 
   const tileUrl =
     tileMode === 'satellite'
-      ? 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
-      : 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+      ? 'https://mt1.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}'
+      : 'https://mt1.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}';
 
   return (
     <div className="w-full h-full min-h-[320px] lg:min-h-[360px] relative rounded-2xl overflow-hidden shadow-inner border border-slate-200/90 group">
       {/* ─── Leaflet Map Container ─── */}
       <MapContainer
         center={[10.785, 106.698]}
-        zoom={14}
+        zoom={16}
+        zoomControl={false}
         scrollWheelZoom={false}
         attributionControl={false}
         className="w-full h-full z-0"
@@ -89,7 +90,8 @@ export default function DashboardMiniMap({ onNavigateToTracking }) {
         <MapBoundsController />
         <TileLayer
           url={tileUrl}
-          maxZoom={20}
+          maxZoom={22}
+          maxNativeZoom={20}
           subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
         />
 

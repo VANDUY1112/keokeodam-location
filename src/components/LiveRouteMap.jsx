@@ -11,7 +11,7 @@ function MapController({ position, pathCoordinates, isTracking, recenterTrigger 
     if (!position || !map) return;
 
     if (!hasCenteredInitial.current) {
-      map.setView([position.lat, position.lng], 16, { animate: true });
+      map.setView([position.lat, position.lng], 18, { animate: true });
       hasCenteredInitial.current = true;
     } else if (isTracking) {
       map.panTo([position.lat, position.lng], { animate: true, duration: 1 });
@@ -21,7 +21,7 @@ function MapController({ position, pathCoordinates, isTracking, recenterTrigger 
   // Recenter on demand when user clicks "My Location" button
   useEffect(() => {
     if (recenterTrigger && position && map) {
-      map.setView([position.lat, position.lng], 17, { animate: true });
+      map.setView([position.lat, position.lng], 18.5, { animate: true });
     }
   }, [recenterTrigger, position, map]);
 
@@ -80,27 +80,30 @@ const createCurrentIcon = () =>
     iconAnchor: [16, 16],
   });
 
-// Map Tile Options
+// Map Tile Options (Large, high-contrast Vietnamese text labels)
 export const MAP_LAYERS = {
   googleHybrid: {
     id: 'googleHybrid',
     name: 'Vệ Tinh',
-    url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-    maxZoom: 20,
+    url: 'https://mt1.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}',
+    maxZoom: 22,
+    maxNativeZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
   },
   darkMuted: {
     id: 'darkMuted',
     name: 'Bản Đồ Đêm',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    maxZoom: 19,
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+    maxZoom: 20,
+    maxNativeZoom: 19,
     subdomains: 'abcd',
   },
   googleStreets: {
     id: 'googleStreets',
     name: 'Đường Phố',
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-    maxZoom: 20,
+    url: 'https://mt1.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}',
+    maxZoom: 22,
+    maxNativeZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
   },
 };
@@ -139,16 +142,18 @@ export default function LiveRouteMap({
     <div className="w-full h-full relative overflow-hidden">
       <MapContainer
         center={center}
-        zoom={16}
+        zoom={18}
+        zoomControl={false}
         scrollWheelZoom={true}
         className="w-full h-full min-h-[480px] z-0"
         attributionControl={false}
       >
-        {/* Active Map Tile Layer */}
+        {/* Active Map Tile Layer (Retina HD High Res) */}
         <TileLayer
           key={selectedLayer}
           url={activeLayerConfig.url}
           maxZoom={activeLayerConfig.maxZoom}
+          maxNativeZoom={activeLayerConfig.maxNativeZoom}
           subdomains={activeLayerConfig.subdomains}
         />
 

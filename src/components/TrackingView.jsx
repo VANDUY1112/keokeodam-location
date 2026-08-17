@@ -526,8 +526,8 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           <div className="flex flex-col gap-3 mb-4">
             <div>
               <h3 className="text-lg sm:text-xl lg:text-2xl font-black text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary">map</span>
-                <span>Bản Đồ Lộ Trình GPS Giao Loa</span>
+                <span className="material-symbols-outlined text-slate-800">public</span>
+                <span>Bản đồ lộ trình</span>
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
                 Vệt đường màu xanh vẽ trực tiếp theo xe di chuyển theo thời gian thực
@@ -580,11 +580,10 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
                             setSelectedLayer(layer.id);
                             setShowLayerMenu(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs sm:text-sm transition-all ${
-                            isSelected
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs sm:text-sm transition-all ${isSelected
                               ? 'bg-slate-100 text-slate-900 font-bold border border-slate-200'
                               : 'text-slate-700 hover:bg-slate-50'
-                          }`}
+                            }`}
                         >
                           <span>{layer.name}</span>
                           {isSelected && (
