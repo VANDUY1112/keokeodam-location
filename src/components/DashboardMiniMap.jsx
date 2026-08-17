@@ -200,7 +200,7 @@ export default function DashboardMiniMap({ onNavigateToTracking }) {
         </div>
         <div className="flex flex-col items-end shrink-0 pl-2">
           <span className="text-base sm:text-lg lg:text-xl font-extrabold text-slate-900">4.2 km</span>
-          <span className="text-[11px] sm:text-xs font-bold text-emerald-700 whitespace-nowrap">
+          <span className="text-[11px] sm:text-xs font-medium text-slate-500 whitespace-nowrap">
             Thông thoáng
           </span>
         </div>
