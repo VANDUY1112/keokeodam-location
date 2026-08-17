@@ -27,8 +27,8 @@ export default function DashboardView({
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
           <div className="flex items-center justify-between z-10">
-            <span className="text-slate-600 font-medium text-sm sm:text-base">
-              Tổng Quãng Đường
+            <span className="text-slate-700 font-bold uppercase tracking-wide text-sm sm:text-base">
+              Tổng quãng đường
             </span>
             <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 border border-blue-100 text-primary flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
               <span className="material-symbols-outlined text-[22px] lg:text-[26px]">
@@ -59,8 +59,8 @@ export default function DashboardView({
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
           <div className="flex items-center justify-between z-10">
-            <span className="text-slate-600 font-medium text-sm sm:text-base">
-              Tốc Độ TB
+            <span className="text-slate-700 font-bold uppercase tracking-wide text-sm sm:text-base">
+              Tốc độ trung bình
             </span>
             <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
               <span className="material-symbols-outlined text-[22px] lg:text-[26px]">
@@ -91,8 +91,8 @@ export default function DashboardView({
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
           <div className="flex items-center justify-between z-10">
-            <span className="text-slate-600 font-medium text-sm sm:text-base">
-              Chi Phí Tháng
+            <span className="text-slate-700 font-bold uppercase tracking-wide text-sm sm:text-base">
+              Chi phí tháng
             </span>
             <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-blue-50 border border-blue-100 text-primary flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
               <span className="material-symbols-outlined text-[22px] lg:text-[26px]">
@@ -122,8 +122,8 @@ export default function DashboardView({
           <div className="absolute top-0 right-0 w-36 h-36 bg-primary/30 rounded-full blur-2xl transform translate-x-1/3 -translate-y-1/3"></div>
 
           <div className="flex items-center justify-between gap-2 z-10">
-            <span className="text-on-primary-container font-medium text-sm sm:text-base truncate">
-              Chuyến Đang Đi
+            <span className="text-on-primary-container font-bold uppercase tracking-wide text-sm sm:text-base truncate">
+              Chuyến đang đi
             </span>
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-secondary/25 rounded-full shrink-0 border border-secondary/40">
               <div className="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
@@ -279,8 +279,8 @@ export default function DashboardView({
                 </div>
                 <div className="flex items-center gap-2.5">
                   <span className={`px-3 py-1 font-semibold rounded-lg border text-xs lg:text-sm ${trip.statusBadge?.includes('secondary') || trip.status === 'Hoàn thành'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
-                      : 'bg-slate-100 text-slate-700 border-slate-200'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                    : 'bg-slate-100 text-slate-700 border-slate-200'
                     }`}>
                     {trip.status}
                   </span>
@@ -326,8 +326,8 @@ export default function DashboardView({
                 <div className="flex flex-col items-end">
                   <span className="text-base lg:text-lg font-extrabold text-on-surface">{formatVND(item.amount)}</span>
                   <span className={`text-xs lg:text-sm font-bold px-2.5 py-0.5 rounded-md mt-1 ${item.status === 'Đã duyệt'
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200/60'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                    : 'bg-amber-50 text-amber-700 border border-amber-200/60'
                     }`}>
                     {item.status}
                   </span>
