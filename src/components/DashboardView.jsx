@@ -155,57 +155,57 @@ export default function DashboardView({
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-transparent to-slate-50/60 pointer-events-none"></div>
 
         <div className="flex-1 flex flex-col z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="px-3.5 py-1.5 bg-primary/10 border border-primary/20 text-primary font-label-sm rounded-full tracking-wider uppercase text-xs lg:text-sm font-bold">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="px-3 py-1 bg-slate-100 border border-slate-200/80 text-slate-700 font-semibold rounded-lg text-xs sm:text-[13px]">
               Đơn Thuê Loa Tiêu Biểu
             </span>
-            <span className="text-slate-500 font-medium text-sm lg:text-base flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[18px]">schedule</span> Bàn giao lúc 08:30
+            <span className="text-slate-500 font-medium text-xs sm:text-[13px] flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px]">schedule</span> Bàn giao lúc 08:30
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-black text-on-surface leading-tight tracking-tight mb-2">
+          <h2 className="text-xl sm:text-2xl lg:text-[26px] font-bold text-slate-900 leading-snug tracking-tight mb-2">
             Tiệc Tân Gia - Anh Nam
           </h2>
 
-          <p className="text-slate-600 text-base sm:text-lg font-normal mb-6 max-w-xl">
+          <p className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-normal leading-relaxed mb-4 max-w-xl">
             Cho thuê dàn loa kéo đôi Bass 50 công suất 1500W kèm 2 mic kim loại UHF + phí cước ship tận nhà.
           </p>
 
-          <div className="grid grid-cols-2 gap-y-4 gap-x-6 sm:gap-x-10 mt-auto pt-2 border-t border-slate-100/80">
-            <div className="flex flex-col gap-1">
-              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Khách hàng</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-on-surface">Anh Nam (0912.345.678)</span>
+          <div className="grid grid-cols-2 gap-y-3 gap-x-4 sm:gap-x-8 mt-auto pt-3 border-t border-slate-100">
+            <div className="flex flex-col">
+              <span className="text-slate-400 text-xs font-medium">Khách hàng</span>
+              <span className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">Anh Nam (0912.345.678)</span>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Thời gian thuê</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-on-surface">1 Ngày (24h)</span>
+            <div className="flex flex-col">
+              <span className="text-slate-400 text-xs font-medium">Thời gian thuê</span>
+              <span className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">1 Ngày (24h)</span>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Gói loa bàn giao</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-primary">Loa Đôi Bass 50 (1500W)</span>
+            <div className="flex flex-col">
+              <span className="text-slate-400 text-xs font-medium">Gói loa bàn giao</span>
+              <span className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">Loa Đôi Bass 50 (1500W)</span>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-slate-500 uppercase tracking-wider text-xs lg:text-[13px] font-bold">Tổng tiền thu từ khách</span>
-              <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-on-surface">575.000 ₫</span>
+            <div className="flex flex-col">
+              <span className="text-slate-400 text-xs font-medium">Tổng tiền thu từ khách</span>
+              <span className="text-base sm:text-lg lg:text-xl font-extrabold text-slate-900 mt-0.5">575.000 ₫</span>
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-4 w-full">
+          <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
             <button
               onClick={() => onNavigateToTab && onNavigateToTab('tracking')}
-              className="bg-primary text-white font-bold text-xs sm:text-sm lg:text-base px-2.5 sm:px-6 py-2.5 sm:py-3.5 rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 sm:gap-2.5"
+              className="bg-slate-900 text-white font-semibold text-xs sm:text-sm px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:bg-slate-800 transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-[17px] sm:text-[20px] shrink-0">two_wheeler</span>
+              <span className="material-symbols-outlined text-[17px] sm:text-[19px] shrink-0">two_wheeler</span>
               <span className="truncate">Giao Loa (GPS)</span>
             </button>
 
             <button
               onClick={onOpenLogExpense}
-              className="bg-slate-100 border border-slate-200 text-on-surface font-bold text-xs sm:text-sm lg:text-base px-2.5 sm:px-6 py-2.5 sm:py-3.5 rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-1.5 sm:gap-2"
+              className="bg-slate-100 border border-slate-200/90 text-slate-800 font-semibold text-xs sm:text-sm px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-1.5"
             >
               <span className="truncate">Ghi Nhận Thu Chi</span>
-              <span className="material-symbols-outlined text-[17px] sm:text-[20px] text-primary shrink-0">add_circle</span>
+              <span className="material-symbols-outlined text-[17px] sm:text-[19px] text-primary shrink-0">add_circle</span>
             </button>
           </div>
         </div>
