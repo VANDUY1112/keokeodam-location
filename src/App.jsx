@@ -273,53 +273,80 @@ export default function App() {
         </nav>
       </aside>
 
-      {/* ═══════════════ MOBILE DRAWER MENU ═══════════════ */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
-          ></div>
-          <div className="relative w-72 max-w-[80vw] bg-surface-container-low h-full flex flex-col shadow-2xl p-4 z-10 animate-in slide-in-from-left duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
-              <div className="flex items-center gap-2.5">
-                <img
-                  alt="Expensely Logo"
-                  className="h-8 w-8 rounded-xl shadow-xs object-cover"
-                  src="/favicon.svg"
-                />
-                <span className="font-bold text-primary text-lg">Expensely</span>
-              </div>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 text-slate-500 hover:text-slate-800 rounded-lg"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
+      {/* ═══════════════ MOBILE DRAWER MENU (PREMIUM SLIDE & BLUR) ═══════════════ */}
+      <div
+        className={`fixed inset-0 z-[100] lg:hidden transition-all duration-300 ${
+          mobileMenuOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
+        }`}
+      >
+        {/* Backdrop */}
+        <div
+          className={`fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ease-out ${
+            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
 
-            <nav className="flex-1 flex flex-col gap-1.5">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-left transition-all ${
-                    activeTab === item.id
-                      ? 'bg-primary text-white font-semibold shadow-sm'
-                      : 'text-slate-700 hover:bg-slate-200/60 font-medium'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[22px]">{item.icon}</span>
-                  <span className="text-sm">{item.label}</span>
-                </button>
-              ))}
-            </nav>
+        {/* Drawer Panel */}
+        <div
+          className={`relative w-80 max-w-[85vw] bg-white h-full flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.3)] p-5 z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
+            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
+                <span className="material-symbols-outlined text-[22px]">speaker</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-slate-900 text-base leading-tight">Kẹo Kéo Express</span>
+                <span className="text-xs text-slate-500 font-medium">Quản lý & Giao loa GPS</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+
+          <nav className="flex-1 flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-left transition-all ${
+                  activeTab === item.id
+                    ? 'bg-slate-900 text-white font-bold shadow-md shadow-slate-900/15'
+                    : 'text-slate-700 hover:bg-slate-100 font-medium'
+                }`}
+              >
+                <span className={`material-symbols-outlined text-[22px] ${activeTab === item.id ? 'text-white' : 'text-slate-500'}`}>
+                  {item.icon}
+                </span>
+                <span className="text-sm font-semibold">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* User Footer inside Drawer */}
+          <div className="pt-4 border-t border-slate-100 mt-auto flex items-center gap-3">
+            <img
+              src={userAvatar}
+              alt={userName}
+              className="w-10 h-10 rounded-full object-cover border border-slate-200"
+            />
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-sm font-bold text-slate-900 truncate">{userName}</span>
+              <span className="text-xs text-slate-500 truncate">Quản trị viên</span>
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
       <div className="pl-0 lg:pl-72">

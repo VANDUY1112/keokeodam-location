@@ -184,7 +184,7 @@ export default function DashboardView({
             </div>
             <div className="flex flex-col">
               <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Số điện thoại</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 font-mono">0912.345.678</span>
+              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 tracking-normal">0912.345.678</span>
             </div>
             <div className="flex flex-col">
               <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Tổng tiền thu từ khách</span>
