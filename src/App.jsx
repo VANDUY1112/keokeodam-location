@@ -267,10 +267,7 @@ export default function App() {
           <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
           </div>
-          <div>
-            <span className="text-lg text-slate-900 tracking-tight font-black block leading-none">Locahome</span>
-            <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1 block">Quản Lý Lộ Trình Loa</span>
-          </div>
+          <span className="text-xl text-slate-900 tracking-tight font-black">Locahome</span>
         </div>
 
         <nav className="flex-1 flex flex-col gap-2 px-3.5 py-5">
@@ -319,10 +316,7 @@ export default function App() {
               <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
                 <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-slate-900 text-base leading-tight">Locahome</span>
-                <span className="text-xs text-slate-500 font-medium">Quản lý lộ trình loa</span>
-              </div>
+              <span className="font-bold text-slate-900 text-lg">Locahome</span>
             </div>
           </div>
 
@@ -371,10 +365,13 @@ export default function App() {
           <div className="flex items-center gap-3 sm:gap-6">
             <button
               onClick={() => setShowNotificationsModal(!showNotificationsModal)}
-              className="relative p-2.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-full transition-colors"
+              className="relative p-1.5 text-slate-700 hover:text-slate-950 transition-transform active:scale-90 group focus:outline-none"
+              title="Thông báo"
             >
-              <span className="material-symbols-outlined text-[24px]">notifications</span>
-              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full ring-2 ring-surface"></span>
+              <span className="material-symbols-outlined text-[26px] group-hover:rotate-12 transition-transform duration-200 block">
+                notifications
+              </span>
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
             </button>
 
             {/* Profile Dropdown Container */}
@@ -396,7 +393,7 @@ export default function App() {
 
               {/* Profile Dropdown Menu */}
               {showProfileMenu && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-surface-container-lowest/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 animate-popup-open">
                   <div className="p-3 border-b border-slate-100 flex items-center gap-3">
                     <img
                       alt="Profile"
@@ -690,21 +687,108 @@ export default function App() {
         </div>
       )}
 
-      {/* ═══════════════ POPUP: THÔNG BÁO ═══════════════ */}
+      {/* ═══════════════ POPUP: THÔNG BÁO (ANIMATED) ═══════════════ */}
       {showNotificationsModal && (
-        <div className="fixed top-20 right-4 sm:right-10 z-50 w-88 max-w-[90vw] bg-surface-container-lowest rounded-3xl p-5 border border-slate-200 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-            <span className="font-bold text-base text-on-surface">Thông Báo</span>
-            <span className="text-xs font-bold text-secondary bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">2 tin mới</span>
-          </div>
-          <div className="space-y-2.5 text-xs lg:text-sm">
-            <div className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-100">
-              <div className="font-bold text-on-surface text-sm">Chi phí đã được phê duyệt</div>
-              <div className="text-slate-600 mt-1">Hóa đơn xăng xe (650.000 ₫) đã được hoàn ứng.</div>
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop to close on click outside */}
+          <div
+            className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs animate-backdrop-fade"
+            onClick={() => setShowNotificationsModal(false)}
+          ></div>
+
+          {/* Animated Dropdown Card */}
+          <div className="fixed top-20 right-4 sm:right-10 z-50 w-88 sm:w-96 max-w-[92vw] bg-white rounded-3xl p-5 border border-slate-200 shadow-2xl animate-popup-open flex flex-col space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base text-slate-900">Thông Báo</span>
+                <span className="text-[11px] font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                  3 mới
+                </span>
+              </div>
+              <button
+                onClick={() => setShowNotificationsModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
             </div>
-            <div className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer border border-slate-100">
-              <div className="font-bold text-on-surface text-sm">Cảnh báo giao thông</div>
-              <div className="text-slate-600 mt-1">Đoạn cao tốc A3 hướng Frankfurt đã thông thoáng.</div>
+
+            <div className="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar">
+              {/* Notification 1 */}
+              <div
+                onClick={() => {
+                  setActiveTab('history');
+                  setShowNotificationsModal(false);
+                }}
+                className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-[18px]">two_wheeler</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đơn thuê mới hoàn tất</span>
+                    <span className="text-[10px] text-slate-400 font-medium shrink-0">5p trước</span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+                    Loa Bass 40 Nanomax đã bàn giao thành công cho khách Anh Hoàng (Tiệc Sinh Nhật).
+                  </p>
+                </div>
+              </div>
+
+              {/* Notification 2 */}
+              <div
+                onClick={() => {
+                  setActiveTab('tracking');
+                  setShowNotificationsModal(false);
+                }}
+                className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-[18px]">battery_alert</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Nhắc pin loa LKK-04</span>
+                    <span className="text-[10px] text-slate-400 font-medium shrink-0">25p trước</span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+                    Pin loa Dalton 600W còn 55%, đã thuê hơn 4 tiếng tại Kha Vạn Cân.
+                  </p>
+                </div>
+              </div>
+
+              {/* Notification 3 */}
+              <div
+                onClick={() => {
+                  setActiveTab('expenses');
+                  setShowNotificationsModal(false);
+                }}
+                className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
+              >
+                <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đã duyệt chi phí xăng xe</span>
+                    <span className="text-[10px] text-slate-400 font-medium shrink-0">1h trước</span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+                    Hóa đơn 120.000 ₫ trạm xăng Petrolimex đã được cập nhật vào sổ chi tiêu.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+              <span className="text-slate-400 font-medium">Đã cập nhật tất cả</span>
+              <button
+                onClick={() => setShowNotificationsModal(false)}
+                className="font-bold text-slate-900 hover:underline"
+              >
+                Đóng
+              </button>
             </div>
           </div>
         </div>
