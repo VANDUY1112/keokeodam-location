@@ -249,41 +249,60 @@ export default function LiveRouteMap({
           <div className="relative">
             <button
               onClick={() => setShowLayerMenu(!showLayerMenu)}
-              className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white/95 hover:bg-white text-slate-700 text-xs font-semibold backdrop-blur-md border border-slate-200/90 shadow-xl transition-all"
+              className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold border border-slate-200 shadow-xl transition-all active:scale-95"
             >
-              <span className="material-symbols-outlined text-[18px] text-slate-700">layers</span>
+              <span className="material-symbols-outlined text-[18px] text-slate-700">satellite_alt</span>
               <span>{activeLayerConfig.name}</span>
-              <span className={`material-symbols-outlined text-[16px] text-slate-500 transition-transform ${showLayerMenu ? 'rotate-180' : ''}`}>
+              <span className={`material-symbols-outlined text-[16px] text-slate-500 transition-transform duration-200 ${showLayerMenu ? 'rotate-180 text-slate-900' : ''}`}>
                 expand_more
               </span>
             </button>
 
-            {showLayerMenu && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-2xl p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
-                {Object.values(MAP_LAYERS).map((layer) => {
-                  const isSelected = layer.id === selectedLayer;
-                  return (
-                    <button
-                      key={layer.id}
-                      onClick={() => {
-                        setInternalSelectedLayer(layer.id);
-                        setShowLayerMenu(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all ${
+            <div
+              className={`absolute right-0 top-full mt-2 w-48 sm:w-52 bg-white border border-slate-200 rounded-2xl shadow-2xl p-1.5 space-y-1 z-50 transition-all duration-200 ease-out origin-top-right ${
+                showLayerMenu
+                  ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
+                  : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
+              }`}
+            >
+              {Object.values(MAP_LAYERS).map((layer) => {
+                const isSelected = layer.id === selectedLayer;
+                return (
+                  <button
+                    key={layer.id}
+                    onClick={() => {
+                      setInternalSelectedLayer(layer.id);
+                      setTimeout(() => setShowLayerMenu(false), 120);
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-xs sm:text-sm transition-all duration-200 ease-out active:scale-95 group ${
+                      isSelected
+                        ? 'bg-slate-900 text-white font-semibold shadow-xs translate-x-0.5'
+                        : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 hover:translate-x-1 font-medium'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                          isSelected
+                            ? 'bg-white scale-100'
+                            : 'bg-slate-300 group-hover:bg-slate-600 scale-75 group-hover:scale-100'
+                        }`}
+                      ></span>
+                      <span>{layer.name}</span>
+                    </span>
+                    <span
+                      className={`material-symbols-outlined text-[16px] transition-all duration-200 ${
                         isSelected
-                          ? 'bg-slate-100 text-slate-900 font-bold border border-slate-200/80 shadow-xs'
-                          : 'text-slate-700 hover:bg-slate-50'
+                          ? 'text-white scale-100 opacity-100'
+                          : 'scale-0 opacity-0 text-transparent'
                       }`}
                     >
-                      <span>{layer.name}</span>
-                      {isSelected && (
-                        <span className="material-symbols-outlined text-[16px] text-slate-900 font-bold">check</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                      check
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

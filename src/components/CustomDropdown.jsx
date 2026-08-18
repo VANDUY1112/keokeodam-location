@@ -69,66 +69,74 @@ export default function CustomDropdown({
         </span>
       </button>
 
-      {/* Animated Dropdown Menu */}
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-full min-w-[220px] bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-50 animate-popup-open">
-          <div className="max-h-60 overflow-y-auto space-y-1 no-scrollbar">
-            {options.map((option) => {
-              const isSelected = option.value === value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl transition-all text-left ${
-                    isSelected
-                      ? 'bg-slate-900 text-white font-bold shadow-xs'
-                      : 'text-slate-700 hover:bg-slate-100 font-medium'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    {option.icon && (
-                      <span
-                        className={`material-symbols-outlined text-[18px] shrink-0 ${
-                          isSelected ? 'text-white' : 'text-slate-400'
+      {/* Animated Dropdown Menu (Open & Close transitions) */}
+      <div
+        className={`absolute right-0 top-full mt-2 w-full min-w-[220px] bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-50 transition-all duration-200 ease-out origin-top ${
+          isOpen
+            ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
+            : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
+        }`}
+      >
+        <div className="max-h-60 overflow-y-auto space-y-1 no-scrollbar">
+          {options.map((option) => {
+            const isSelected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  setTimeout(() => setIsOpen(false), 120);
+                }}
+                className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 ease-out active:scale-95 text-left group ${
+                  isSelected
+                    ? 'bg-slate-900 text-white font-semibold shadow-xs translate-x-0.5'
+                    : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 hover:translate-x-1 font-medium'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {option.icon && (
+                    <span
+                      className={`material-symbols-outlined text-[18px] shrink-0 transition-transform duration-200 ${
+                        isSelected ? 'text-white' : 'text-slate-400 group-hover:text-slate-700 group-hover:scale-110'
+                      }`}
+                    >
+                      {option.icon}
+                    </span>
+                  )}
+                  <div>
+                    <div className="text-sm truncate font-semibold">{option.label}</div>
+                    {option.subtitle && (
+                      <div
+                        className={`text-xs truncate ${
+                          isSelected ? 'text-slate-300' : 'text-slate-400'
                         }`}
                       >
-                        {option.icon}
-                      </span>
+                        {option.subtitle}
+                      </div>
                     )}
-                    <div>
-                      <div className="text-sm truncate font-semibold">{option.label}</div>
-                      {option.subtitle && (
-                        <div
-                          className={`text-xs truncate ${
-                            isSelected ? 'text-slate-300' : 'text-slate-400'
-                          }`}
-                        >
-                          {option.subtitle}
-                        </div>
-                      )}
-                    </div>
                   </div>
+                </div>
 
-                  {isSelected && (
-                    <span className="material-symbols-outlined text-[18px] text-white shrink-0">
-                      check
-                    </span>
-                  )}
-                  {option.badge && !isSelected && (
-                    <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200 shrink-0">
-                      {option.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+                <span
+                  className={`material-symbols-outlined text-[18px] shrink-0 transition-all duration-200 ${
+                    isSelected
+                      ? 'text-white scale-100 opacity-100'
+                      : 'scale-0 opacity-0 text-transparent'
+                  }`}
+                >
+                  check
+                </span>
+                {option.badge && !isSelected && (
+                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200 shrink-0">
+                    {option.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }

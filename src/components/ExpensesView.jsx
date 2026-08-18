@@ -174,6 +174,42 @@ const TIME_RANGE_DATA = {
   },
 };
 
+// ─── Smooth Animated Number Component ───
+function AnimatedCounter({ value, formatter = (v) => Math.round(v).toLocaleString('vi-VN'), duration = 450 }) {
+  const [display, setDisplay] = useState(value);
+  const prevValue = React.useRef(value);
+
+  useEffect(() => {
+    const start = typeof prevValue.current === 'number' ? prevValue.current : 0;
+    const end = typeof value === 'number' ? value : 0;
+    prevValue.current = value;
+    if (start === end) return;
+
+    let startTime = null;
+    let animId;
+
+    const animate = (time) => {
+      if (!startTime) startTime = time;
+      const progress = Math.min((time - startTime) / duration, 1);
+      // Cubic ease out curve
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = start + (end - start) * ease;
+      setDisplay(current);
+
+      if (progress < 1) {
+        animId = requestAnimationFrame(animate);
+      } else {
+        setDisplay(end);
+      }
+    };
+
+    animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, [value, duration]);
+
+  return <span className="tabular-nums tracking-tight">{formatter(display)}</span>;
+}
+
 export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
   const [timeRange, setTimeRange] = useState('Tháng');
   const activeData = TIME_RANGE_DATA[timeRange] || TIME_RANGE_DATA['Tháng'];
@@ -189,10 +225,12 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
       ? expenses
       : activeData.expenses;
 
-  const currentTotalSpent =
+  const totalSpentNumeric =
     timeRange === 'Tháng' && expenses.length > 0
-      ? formatVND(expenses.reduce((acc, e) => acc + parseVNDNumber(e.amount), 0))
-      : activeData.totalSpent;
+      ? expenses.reduce((acc, e) => acc + parseVNDNumber(e.amount), 0)
+      : parseVNDNumber(activeData.totalSpent);
+
+  const budgetRemainingNumeric = parseVNDNumber(activeData.remainingBudget);
 
   const currentPendingCount =
     timeRange === 'Tháng' && expenses.length > 0
@@ -277,7 +315,10 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
 
           <div className="flex items-baseline gap-1 my-1">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight truncate">
-              {currentTotalSpent}
+              <AnimatedCounter 
+                value={totalSpentNumeric} 
+                formatter={(v) => `${Math.round(v).toLocaleString('vi-VN')} ₫`} 
+              />
             </span>
           </div>
 
@@ -304,7 +345,10 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
 
           <div className="flex items-baseline gap-1 my-1">
             <span className="font-display text-slate-900 text-lg sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight truncate">
-              {activeData.remainingBudget}
+              <AnimatedCounter 
+                value={budgetRemainingNumeric} 
+                formatter={(v) => `${Math.round(v).toLocaleString('vi-VN')} ₫`} 
+              />
             </span>
           </div>
 
@@ -331,7 +375,7 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
 
           <div className="flex items-baseline gap-1.5 my-1">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight">
-              {currentPendingCount}
+              <AnimatedCounter value={currentPendingCount} />
             </span>
             <span className="text-slate-500 text-xs sm:text-sm lg:text-base font-bold">hóa đơn</span>
           </div>

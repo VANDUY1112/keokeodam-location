@@ -242,7 +242,7 @@ export default function MapView({
             className="w-10 h-10 bg-surface text-on-surface rounded-full flex items-center justify-center hover:bg-surface-container transition-colors shadow-sm focus:outline-none"
             title="Đổi kiểu bản đồ"
           >
-            <span className="material-symbols-outlined text-outline">layers</span>
+            <span className="material-symbols-outlined text-outline">satellite_alt</span>
           </button>
 
           <div className={`absolute right-12 top-0 bg-surface rounded-lg p-stack-sm shadow-md flex-col gap-unit whitespace-nowrap z-30 border border-outline-variant/20 ${showLayerDropdown ? 'flex' : 'hidden group-hover:flex'}`}>

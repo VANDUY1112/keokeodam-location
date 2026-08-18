@@ -81,6 +81,42 @@ const CATEGORY_SHARE = [
   { name: 'Loa Xách Tay & Bass 30', percent: 14, revenue: 8900000, count: 35 },
 ];
 
+// ─── Smooth Animated Number Component ───
+function AnimatedCounter({ value, formatter = (v) => Math.round(v).toLocaleString('vi-VN'), duration = 450 }) {
+  const [display, setDisplay] = useState(value);
+  const prevValue = React.useRef(value);
+
+  React.useEffect(() => {
+    const start = typeof prevValue.current === 'number' ? prevValue.current : 0;
+    const end = typeof value === 'number' ? value : 0;
+    prevValue.current = value;
+    if (start === end) return;
+
+    let startTime = null;
+    let animId;
+
+    const animate = (time) => {
+      if (!startTime) startTime = time;
+      const progress = Math.min((time - startTime) / duration, 1);
+      // Cubic ease out curve
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = start + (end - start) * ease;
+      setDisplay(current);
+
+      if (progress < 1) {
+        animId = requestAnimationFrame(animate);
+      } else {
+        setDisplay(end);
+      }
+    };
+
+    animId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animId);
+  }, [value, duration]);
+
+  return <span className="tabular-nums tracking-tight">{formatter(display)}</span>;
+}
+
 export default function ReportsView({ 
   speakers = [], 
   onSelectSpeaker, 
@@ -139,9 +175,9 @@ export default function ReportsView({
                   setTimeRange(tab.id);
                   setActiveChartIdx(null);
                 }}
-                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-all text-xs sm:text-sm font-bold ${
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-all duration-200 text-xs sm:text-sm font-bold ${
                   timeRange === tab.id
-                    ? 'bg-white text-slate-900 shadow-xs'
+                    ? 'bg-white text-slate-900 shadow-sm scale-102'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
                 }`}
               >
@@ -161,7 +197,7 @@ export default function ReportsView({
         </div>
       </div>
 
-      {/* ══════════ 4 TOP KPI CARDS (CLEAN MONOCHROME SLATE) ══════════ */}
+      {/* ══════════ 4 TOP KPI CARDS (CLEAN MONOCHROME SLATE + ANIMATED COUNTER) ══════════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-6 w-full">
         {/* Card 1: Total Revenue */}
         <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
@@ -176,7 +212,10 @@ export default function ReportsView({
 
           <div className="my-1">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight truncate block">
-              {formatVND(currentData.revenue)}
+              <AnimatedCounter 
+                value={currentData.revenue} 
+                formatter={(v) => `${Math.round(v).toLocaleString('vi-VN')} ₫`} 
+              />
             </span>
           </div>
 
@@ -201,7 +240,7 @@ export default function ReportsView({
 
           <div className="flex items-baseline gap-1 my-1">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight">
-              {currentData.rentalsCount}
+              <AnimatedCounter value={currentData.rentalsCount} />
             </span>
             <span className="text-slate-500 font-bold text-xs sm:text-sm">ca thuê</span>
           </div>
@@ -226,14 +265,17 @@ export default function ReportsView({
 
           <div className="flex items-baseline gap-1 my-1">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight">
-              {currentData.distanceKm}
+              <AnimatedCounter 
+                value={currentData.distanceKm} 
+                formatter={(v) => v.toFixed(1)} 
+              />
             </span>
             <span className="text-slate-500 font-bold text-xs sm:text-sm">km GPS</span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[11px] sm:text-xs truncate">
-              Thu ship: {formatVND(currentData.shippingIncome)}
+              Thu ship: <AnimatedCounter value={currentData.shippingIncome} formatter={(v) => `${Math.round(v).toLocaleString('vi-VN')} ₫`} />
             </span>
           </div>
         </div>
@@ -251,7 +293,10 @@ export default function ReportsView({
 
           <div className="my-1">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight truncate block">
-              {formatVND(currentData.avgPerRental)}
+              <AnimatedCounter 
+                value={currentData.avgPerRental} 
+                formatter={(v) => `${Math.round(v).toLocaleString('vi-VN')} ₫`} 
+              />
             </span>
           </div>
 

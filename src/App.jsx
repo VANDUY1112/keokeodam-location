@@ -391,78 +391,82 @@ export default function App() {
                 </span>
               </div>
 
-              {/* Profile Dropdown Menu */}
-              {showProfileMenu && (
-                <div className="absolute right-0 top-full mt-2 w-76 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 animate-popup-open flex flex-col space-y-2">
-                  <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-3">
-                    <img
-                      alt="Profile"
-                      className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-xs"
-                      src={userAvatar}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="font-bold text-sm text-slate-900 truncate">{userName}</div>
-                      <div className="text-xs text-slate-500 truncate">Quản Trị Viên Locahome</div>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-800 text-[10px] font-bold mt-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        Đang Hoạt Động
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 text-xs sm:text-sm">
-                    <button
-                      onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
-                    >
-                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">settings</span>
-                      <span className="font-semibold">Cài Đặt & Cấu Hình</span>
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab('reports'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
-                    >
-                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">assessment</span>
-                      <span className="font-semibold">Báo Cáo & Thống Kê</span>
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab('tracking'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
-                    >
-                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">two_wheeler</span>
-                      <span className="font-semibold">Giao Loa & GPS</span>
-                    </button>
-                    <button
-                      onClick={() => { setActiveTab('expenses'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
-                    >
-                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">payments</span>
-                      <span className="font-semibold">Sổ Thu Chi & Hoá Đơn</span>
-                    </button>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <button
-                      onClick={() => {
-                        if (window.confirm('Khôi phục toàn bộ dữ liệu mẫu ban đầu?')) {
-                          localStorage.clear();
-                          window.location.reload();
-                        }
-                      }}
-                      className="text-slate-500 hover:text-slate-900 font-semibold transition-colors flex items-center gap-1"
-                    >
-                      <span className="material-symbols-outlined text-sm">restart_alt</span>
-                      Đặt Lại Dữ Liệu
-                    </button>
-                    <button
-                      onClick={() => setShowProfileMenu(false)}
-                      className="text-slate-400 hover:text-slate-700 font-bold"
-                    >
-                      Đóng
-                    </button>
+              {/* Profile Dropdown Menu (Open & Close transition) */}
+              <div
+                className={`absolute right-0 top-full mt-2 w-76 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 flex flex-col space-y-2 transition-all duration-200 ease-out origin-top-right ${
+                  showProfileMenu
+                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
+                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
+                }`}
+              >
+                <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-3">
+                  <img
+                    alt="Profile"
+                    className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-xs"
+                    src={userAvatar}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-bold text-sm text-slate-900 truncate">{userName}</div>
+                    <div className="text-xs text-slate-500 truncate">Quản Trị Viên Locahome</div>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-800 text-[10px] font-bold mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Đang Hoạt Động
+                    </span>
                   </div>
                 </div>
-              )}
+
+                <div className="space-y-1 text-xs sm:text-sm">
+                  <button
+                    onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }}
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">settings</span>
+                    <span className="font-semibold">Cài Đặt & Cấu Hình</span>
+                  </button>
+                  <button
+                    onClick={() => { setActiveTab('reports'); setShowProfileMenu(false); }}
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">assessment</span>
+                    <span className="font-semibold">Báo Cáo & Thống Kê</span>
+                  </button>
+                  <button
+                    onClick={() => { setActiveTab('tracking'); setShowProfileMenu(false); }}
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">two_wheeler</span>
+                    <span className="font-semibold">Giao Loa & GPS</span>
+                  </button>
+                  <button
+                    onClick={() => { setActiveTab('expenses'); setShowProfileMenu(false); }}
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
+                  >
+                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">payments</span>
+                    <span className="font-semibold">Sổ Thu Chi & Hoá Đơn</span>
+                  </button>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Khôi phục toàn bộ dữ liệu mẫu ban đầu?')) {
+                        localStorage.clear();
+                        window.location.reload();
+                      }
+                    }}
+                    className="text-slate-500 hover:text-slate-900 font-semibold transition-colors flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-sm">restart_alt</span>
+                    Đặt Lại Dữ Liệu
+                  </button>
+                  <button
+                    onClick={() => setShowProfileMenu(false)}
+                    className="text-slate-400 hover:text-slate-700 font-bold"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -706,112 +710,124 @@ export default function App() {
         </div>
       )}
 
-      {/* ═══════════════ POPUP: THÔNG BÁO (ANIMATED) ═══════════════ */}
-      {showNotificationsModal && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          {/* Backdrop to close on click outside */}
-          <div
-            className="fixed inset-0 bg-slate-950/20 backdrop-blur-xs animate-backdrop-fade"
-            onClick={() => setShowNotificationsModal(false)}
-          ></div>
+      {/* ═══════════════ POPUP: THÔNG BÁO (ANIMATED OPEN & CLOSE) ═══════════════ */}
+      <div
+        className={`fixed inset-0 z-50 overflow-hidden transition-all duration-200 ${
+          showNotificationsModal
+            ? 'pointer-events-auto visible'
+            : 'pointer-events-none invisible'
+        }`}
+      >
+        {/* Backdrop */}
+        <div
+          className={`fixed inset-0 bg-slate-950/20 backdrop-blur-xs transition-opacity duration-200 ease-out ${
+            showNotificationsModal ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={() => setShowNotificationsModal(false)}
+        ></div>
 
-          {/* Animated Dropdown Card */}
-          <div className="fixed top-20 right-4 sm:right-10 z-50 w-88 sm:w-96 max-w-[92vw] bg-white rounded-3xl p-5 border border-slate-200 shadow-2xl animate-popup-open flex flex-col space-y-3">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-base text-slate-900">Thông Báo</span>
-                <span className="text-[11px] font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                  3 mới
-                </span>
-              </div>
-              <button
-                onClick={() => setShowNotificationsModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
+        {/* Animated Dropdown Card */}
+        <div
+          className={`fixed top-20 right-4 sm:right-10 z-50 w-88 sm:w-96 max-w-[92vw] bg-white rounded-3xl p-5 border border-slate-200 shadow-2xl flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${
+            showNotificationsModal
+              ? 'opacity-100 scale-100 translate-y-0'
+              : 'opacity-0 scale-95 -translate-y-3'
+          }`}
+        >
+          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-base text-slate-900">Thông Báo</span>
+              <span className="text-[11px] font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                3 mới
+              </span>
             </div>
+            <button
+              onClick={() => setShowNotificationsModal(false)}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
 
-            <div className="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar">
-              {/* Notification 1 */}
-              <div
-                onClick={() => {
-                  setActiveTab('history');
-                  setShowNotificationsModal(false);
-                }}
-                className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-[18px]">two_wheeler</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đơn thuê mới hoàn tất</span>
-                    <span className="text-[10px] text-slate-400 font-medium shrink-0">5p trước</span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                    Loa Bass 40 Nanomax đã bàn giao thành công cho khách Anh Hoàng (Tiệc Sinh Nhật).
-                  </p>
-                </div>
+          <div className="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar">
+            {/* Notification 1 */}
+            <div
+              onClick={() => {
+                setActiveTab('history');
+                setShowNotificationsModal(false);
+              }}
+              className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
+            >
+              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="material-symbols-outlined text-[18px]">two_wheeler</span>
               </div>
-
-              {/* Notification 2 */}
-              <div
-                onClick={() => {
-                  setActiveTab('tracking');
-                  setShowNotificationsModal(false);
-                }}
-                className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-[18px]">battery_alert</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đơn thuê mới hoàn tất</span>
+                  <span className="text-[10px] text-slate-400 font-medium shrink-0">5p trước</span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Nhắc pin loa LKK-04</span>
-                    <span className="text-[10px] text-slate-400 font-medium shrink-0">25p trước</span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                    Pin loa Dalton 600W còn 55%, đã thuê hơn 4 tiếng tại Kha Vạn Cân.
-                  </p>
-                </div>
-              </div>
-
-              {/* Notification 3 */}
-              <div
-                onClick={() => {
-                  setActiveTab('expenses');
-                  setShowNotificationsModal(false);
-                }}
-                className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
-              >
-                <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đã duyệt chi phí xăng xe</span>
-                    <span className="text-[10px] text-slate-400 font-medium shrink-0">1h trước</span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                    Hóa đơn 120.000 ₫ trạm xăng Petrolimex đã được cập nhật vào sổ chi tiêu.
-                  </p>
-                </div>
+                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+                  Loa Bass 40 Nanomax đã bàn giao thành công cho khách Anh Hoàng (Tiệc Sinh Nhật).
+                </p>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
-              <span className="text-slate-400 font-medium">Đã cập nhật tất cả</span>
-              <button
-                onClick={() => setShowNotificationsModal(false)}
-                className="font-bold text-slate-900 hover:underline"
-              >
-                Đóng
-              </button>
+            {/* Notification 2 */}
+            <div
+              onClick={() => {
+                setActiveTab('tracking');
+                setShowNotificationsModal(false);
+              }}
+              className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
+            >
+              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="material-symbols-outlined text-[18px]">battery_alert</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Nhắc pin loa LKK-04</span>
+                  <span className="text-[10px] text-slate-400 font-medium shrink-0">25p trước</span>
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+                  Pin loa Dalton 600W còn 55%, đã thuê hơn 4 tiếng tại Kha Vạn Cân.
+                </p>
+              </div>
+            </div>
+
+            {/* Notification 3 */}
+            <div
+              onClick={() => {
+                setActiveTab('expenses');
+                setShowNotificationsModal(false);
+              }}
+              className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
+            >
+              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đã duyệt chi phí xăng xe</span>
+                  <span className="text-[10px] text-slate-400 font-medium shrink-0">1h trước</span>
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+                  Hóa đơn 120.000 ₫ trạm xăng Petrolimex đã được cập nhật vào sổ chi tiêu.
+                </p>
+              </div>
             </div>
           </div>
+
+          <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+            <span className="text-slate-400 font-medium">Đã cập nhật tất cả</span>
+            <button
+              onClick={() => setShowNotificationsModal(false)}
+              className="font-bold text-slate-900 hover:underline"
+            >
+              Đóng
+            </button>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* ═══════════════ TOAST NOTIFICATION ═══════════════ */}
       {toast && (
