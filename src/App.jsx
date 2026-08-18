@@ -358,8 +358,8 @@ export default function App() {
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
       <div className="pl-0 lg:pl-72">
         <header className="fixed top-0 left-0 lg:left-72 right-0 bg-white/95 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b border-slate-200 shadow-xs mobile-header-bar">
-          {/* Mobile Left: Hamburger Button & Clickable Brand Logo */}
-          <div className="flex items-center gap-2 lg:hidden">
+          {/* Mobile Left: Hamburger Button */}
+          <div className="flex items-center gap-2.5 lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 text-slate-700 hover:bg-slate-100 rounded-xl active:scale-95 transition-transform"
@@ -367,16 +367,6 @@ export default function App() {
             >
               <span className="material-symbols-outlined text-2xl">menu</span>
             </button>
-            <div
-              onClick={() => setActiveTab('dashboard')}
-              className="flex items-center gap-2 cursor-pointer active:scale-95 transition-transform ml-1 select-none"
-              title="Trở về Trang Tổng Quan"
-            >
-              <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-xs">
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
-              </div>
-              <span className="font-black text-slate-900 text-base tracking-tight">Locahome</span>
-            </div>
           </div>
 
           {/* Spacer for desktop */}
