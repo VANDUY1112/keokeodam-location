@@ -255,8 +255,8 @@ export default function App() {
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
           </div>
           <div>
-            <span className="text-lg text-slate-900 tracking-tight font-black block leading-none">Kẹo Kéo Express</span>
-            <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1 block">Cho Thuê Loa GPS</span>
+            <span className="text-lg text-slate-900 tracking-tight font-black block leading-none">Locahome</span>
+            <span className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mt-1 block">Quản Lý Lộ Trình Loa</span>
           </div>
         </div>
 
@@ -301,22 +301,16 @@ export default function App() {
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+          <div className="flex items-center pb-4 border-b border-slate-100 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
                 <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-slate-900 text-base leading-tight">Kẹo Kéo Express</span>
-                <span className="text-xs text-slate-500 font-medium">Quản lý & Giao loa GPS</span>
+                <span className="font-bold text-slate-900 text-base leading-tight">Locahome</span>
+                <span className="text-xs text-slate-500 font-medium">Quản lý lộ trình loa</span>
               </div>
             </div>
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-9 h-9 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all"
-            >
-              <span className="material-symbols-outlined text-[20px]">close</span>
-            </button>
           </div>
 
           <nav className="flex-1 flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
