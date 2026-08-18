@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- Dark Circle Slate 900 Background -->
-  <circle cx="32" cy="32" r="30" fill="#0f172a" stroke="#1e293b" stroke-width="2" />
+  <!-- Solid Dark Slate 900 Background Without Inner Circle Border -->
+  <rect width="64" height="64" rx="16" fill="#0f172a" />
   
-  <!-- Crisp White Navigation Pointer Arrow pointing TOP-RIGHT (↗ North-East) -->
-  <polygon points="45,19 30,50 27,37 14,34" fill="#ffffff" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round" />
+  <!-- Crisp White Navigation Pointer Arrow -->
+  <polygon points="46,18 31,49 27,37 15,33" fill="#ffffff" stroke="#ffffff" stroke-width="1" stroke-linejoin="round" />
 </svg>

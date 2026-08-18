@@ -41,6 +41,33 @@
   display: none;
 }
 
+/* ══════════ SAFE AREA SPACING FOR MOBILE & IOS ══════════ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+.mobile-header-bar {
+  padding-top: var(--safe-top);
+  height: calc(var(--safe-top) + 60px);
+}
+
+@media (min-width: 1024px) {
+  .mobile-header-bar {
+    padding-top: 0px;
+    height: 72px;
+  }
+}
+
+.mobile-main-content {
+  padding-top: calc(var(--safe-top) + 68px);
+}
+
+@media (min-width: 1024px) {
+  .mobile-main-content {
+    padding-top: 88px;
+  }
+}
+
 /* ══════════ CUSTOM ANIMATIONS FOR NOTIFICATIONS & MODALS ══════════ */
 @keyframes popupOpen {
   0% {
