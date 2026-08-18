@@ -221,12 +221,12 @@ export default function App() {
     setTrips((prev) => prev.filter((t) => t.id !== tripId));
   };
 
-  const NAV_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%230f172a"/><path d="M70 30 L56 70 L47 47 L30 56 Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  const NAV_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230f172a"/><polygon points="72,28 56,72 47,47 28,56" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/></svg>`;
 
   const [userAvatar, setUserAvatar] = useState(() => {
     const saved = localStorage.getItem('expensely_user_avatar');
-    // If no saved avatar or old photo preset, default to NAV_AVATAR
-    if (!saved || saved.includes('unsplash.com')) {
+    // If no saved avatar or old photo preset or old circular SVG, default to new NAV_AVATAR
+    if (!saved || saved.includes('unsplash.com') || saved.includes('<circle')) {
       localStorage.setItem('expensely_user_avatar', NAV_AVATAR);
       return NAV_AVATAR;
     }
@@ -346,7 +346,7 @@ export default function App() {
 
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
       <div className="pl-0 lg:pl-72">
-        <header className="fixed top-0 left-0 lg:left-72 right-0 h-20 bg-surface/90 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b border-outline-variant/30 shadow-xs">
+        <header className="fixed top-0 left-0 lg:left-72 right-0 bg-white/95 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b border-slate-200 shadow-xs mobile-header-bar">
           {/* Mobile Left: Hamburger Button */}
           <div className="flex items-center gap-2.5 lg:hidden">
             <button
@@ -378,11 +378,11 @@ export default function App() {
             <div className="relative" ref={profileMenuRef}>
               <div
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-2.5 sm:gap-3 cursor-pointer hover:bg-surface-container-high p-1.5 sm:p-2 sm:pr-4 rounded-full transition-all group border border-outline-variant/30 bg-white/70 shadow-xs"
+                className="flex items-center gap-2.5 sm:gap-3 cursor-pointer hover:bg-slate-100 p-1 sm:p-1.5 sm:pr-3.5 rounded-2xl transition-all group border border-slate-200 bg-white shadow-xs"
               >
                 <img
                   alt="Profile"
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-slate-200 group-hover:ring-primary shadow-xs"
+                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-slate-300 shadow-xs"
                   src={userAvatar}
                 />
                 <span className="font-bold text-slate-800 text-sm sm:text-base hidden sm:inline">{userName}</span>
@@ -397,7 +397,7 @@ export default function App() {
                   <div className="p-3 border-b border-slate-100 flex items-center gap-3">
                     <img
                       alt="Profile"
-                      className="w-12 h-12 rounded-full object-cover ring-2 ring-primary shadow-sm"
+                      className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-xs"
                       src={userAvatar}
                     />
                     <div className="min-w-0 flex-1">
@@ -449,7 +449,7 @@ export default function App() {
         </header>
 
         {/* Main Content Area */}
-        <main className="w-full pt-20 lg:pt-24 min-h-screen">
+        <main className="w-full mobile-main-content min-h-screen">
           <div className="p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto pb-24 lg:pb-8">
             {/* TAB 1: TỔNG QUAN (DASHBOARD) */}
             {activeTab === 'dashboard' && (
