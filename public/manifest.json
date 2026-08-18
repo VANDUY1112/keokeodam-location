@@ -1,6 +1,6 @@
 {
-  "short_name": "Expensely",
-  "name": "Expensely - GPS Tracker & Expense Manager",
+  "short_name": "Locahome",
+  "name": "Locahome - Quản Lý Cho Thuê Loa Kéo",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -20,7 +20,7 @@
   ],
   "start_url": "/",
   "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "theme_color": "#ffffff",
   "display": "standalone",
   "orientation": "portrait"
 }
