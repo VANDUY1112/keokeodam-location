@@ -458,7 +458,7 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
         <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 flex flex-col justify-between border border-slate-200 shadow-[0_2px_16px_rgba(11,28,48,0.03)]">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900">
+              <h2 className="text-[16px] font-bold text-slate-900">
                 Biến Động Chi Phí
               </h2>
               <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold">
