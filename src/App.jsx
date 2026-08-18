@@ -3,9 +3,12 @@ import DashboardView from './components/DashboardView';
 import TrackingView from './components/TrackingView';
 import ExpensesView from './components/ExpensesView';
 import HistoryView from './components/HistoryView';
+import ReportsView from './components/ReportsView';
+import SettingsView from './components/SettingsView';
 import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
 import { formatVND, parseVNDNumber } from './utils/format';
+import { INITIAL_SPEAKERS } from './data/speakersData';
 
 const INITIAL_EXPENSES = [
   {
@@ -121,6 +124,16 @@ export default function App() {
       return INITIAL_TRIPS;
     }
   });
+
+  const [speakers, setSpeakers] = useState(INITIAL_SPEAKERS);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   useEffect(() => {
     try {
@@ -494,130 +507,30 @@ export default function App() {
 
             {/* TAB 5: BÁO CÁO & THỐNG KÊ (REPORTS) */}
             {activeTab === 'reports' && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-on-surface">Báo Cáo & Quyết Toán Chi Phí</h2>
-                  <p className="text-slate-600 text-sm sm:text-base mt-1">
-                    Tổng hợp chi phí hàng tháng, phân tích số km di chuyển và xuất báo cáo hoàn ứng.
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                  <div className="p-6 lg:p-8 bg-surface-container-lowest rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between h-56">
-                    <div>
-                      <span className="font-bold uppercase text-slate-500 text-xs lg:text-sm tracking-wider">Tháng 10 / 2026</span>
-                      <h4 className="text-xl lg:text-2xl font-black text-on-surface mt-1.5">Tổng Kết Công Tác Tháng</h4>
-                      <p className="text-base text-slate-600 mt-2 font-medium">Tổng 1.245 km • Đã chi <span className="font-bold text-slate-900">32.500.000 ₫</span></p>
-                    </div>
-                    <button className="self-start px-5 py-2.5 rounded-xl bg-primary text-white text-sm lg:text-base font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md transition-all">
-                      <span className="material-symbols-outlined text-lg">download</span> Xuất Báo Cáo PDF
-                    </button>
-                  </div>
-                  <div className="p-6 lg:p-8 bg-surface-container-lowest rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between h-56">
-                    <div>
-                      <span className="font-bold uppercase text-slate-500 text-xs lg:text-sm tracking-wider">Quý 3 / 2026</span>
-                      <h4 className="text-xl lg:text-2xl font-black text-on-surface mt-1.5">Báo Cáo Kiểm Toán Quý</h4>
-                      <p className="text-base text-slate-600 mt-2 font-medium">Tổng 3.840 km • Đã chi <span className="font-bold text-slate-900">98.600.000 ₫</span></p>
-                    </div>
-                    <button className="self-start px-5 py-2.5 rounded-xl bg-primary text-white text-sm lg:text-base font-semibold hover:bg-slate-800 flex items-center gap-2 shadow-md transition-all">
-                      <span className="material-symbols-outlined text-lg">download</span> Xuất File Excel / CSV
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <ReportsView
+                speakers={speakers}
+                onSelectSpeaker={(id) => {}}
+                setActiveTab={setActiveTab}
+                setToast={setToast}
+              />
             )}
 
             {/* TAB 6: CÀI ĐẶT (SETTINGS) */}
             {activeTab === 'settings' && (
-              <div className="space-y-6 max-w-3xl">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-on-surface">Cài Đặt & Tùy Chọn</h2>
-                  <p className="text-slate-600 text-sm sm:text-base mt-1">
-                    Cấu hình ảnh đại diện, phương tiện di chuyển, định mức hoàn ứng và thông tin tài khoản.
-                  </p>
-                </div>
-
-                {/* Avatar & Profile Card */}
-                <div className="p-6 lg:p-8 bg-surface-container-lowest border border-slate-200 rounded-3xl shadow-sm space-y-6">
-                  <div className="font-extrabold text-slate-900 text-lg">Ảnh Đại Diện & Hồ Sơ Cá Nhân</div>
-                  
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <img
-                      alt="Current Avatar"
-                      src={userAvatar}
-                      className="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20 shadow-md"
-                    />
-                    <div className="space-y-2.5 flex-1 w-full text-center sm:text-left">
-                      <label className="text-xs lg:text-sm font-bold uppercase text-slate-500 tracking-wider">
-                        Chọn Avatar Có Sẵn
-                      </label>
-                      <div className="flex flex-wrap justify-center sm:justify-start gap-3.5">
-                        {AVATAR_PRESETS.map((preset, idx) => (
-                          <img
-                            key={idx}
-                            src={preset}
-                            alt={`Avatar option ${idx + 1}`}
-                            onClick={() => handleSelectAvatar(preset)}
-                            className={`w-13 h-13 rounded-full object-cover cursor-pointer transition-all hover:scale-110 ${
-                              userAvatar === preset
-                                ? 'ring-4 ring-primary shadow-lg scale-105'
-                                : 'ring-2 ring-slate-200 opacity-70 hover:opacity-100'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs lg:text-sm font-bold uppercase text-slate-500 tracking-wider mb-1.5">
-                        Tên Hiển Thị
-                      </label>
-                      <input
-                        type="text"
-                        value={userName}
-                        onChange={(e) => {
-                          setUserName(e.target.value);
-                          localStorage.setItem('expensely_user_name', e.target.value);
-                        }}
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-base focus:outline-none focus:ring-2 focus:ring-primary font-semibold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs lg:text-sm font-bold uppercase text-slate-500 tracking-wider mb-1.5">
-                        Hoặc Dán Link Avatar Riêng
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://..."
-                        onBlur={(e) => {
-                          if (e.target.value.trim()) {
-                            handleSelectAvatar(e.target.value.trim());
-                          }
-                        }}
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-base focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="p-5 lg:p-6 bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div>
-                      <div className="font-bold text-on-surface text-base">Tự động kích hoạt GPS định vị</div>
-                      <div className="text-sm text-slate-500 mt-0.5">Ghi nhận tọa độ vi mô khi bắt đầu chuyến đi</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary cursor-pointer" />
-                  </div>
-                  <div className="p-5 lg:p-6 bg-surface-container-lowest border border-slate-200 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div>
-                      <div className="font-bold text-on-surface text-base">Thông báo phê duyệt chi phí tức thì</div>
-                      <div className="text-sm text-slate-500 mt-0.5">Gửi thông báo đến phòng kế toán ngay khi kết thúc lộ trình</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary cursor-pointer" />
-                  </div>
-                </div>
-              </div>
+              <SettingsView
+                userAvatar={userAvatar}
+                setUserAvatar={setUserAvatar}
+                userName={userName}
+                setUserName={setUserName}
+                setToast={setToast}
+                onResetAllData={() => {
+                  setExpenses(INITIAL_EXPENSES);
+                  setTrips(INITIAL_TRIPS);
+                  setSpeakers(INITIAL_SPEAKERS);
+                  localStorage.removeItem('expensely_expenses');
+                  localStorage.removeItem('expensely_trips');
+                }}
+              />
             )}
           </div>
         </main>
@@ -794,6 +707,20 @@ export default function App() {
               <div className="text-slate-600 mt-1">Đoạn cao tốc A3 hướng Frankfurt đã thông thoáng.</div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ═══════════════ TOAST NOTIFICATION ═══════════════ */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-200 border border-slate-700 max-w-md">
+          <span className="material-symbols-outlined text-emerald-400 text-2xl shrink-0">check_circle</span>
+          <div className="min-w-0">
+            <div className="text-sm font-bold truncate">{toast.title}</div>
+            <div className="text-xs text-slate-300 line-clamp-2">{toast.desc}</div>
+          </div>
+          <button onClick={() => setToast(null)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white shrink-0 ml-auto">
+            <span className="material-symbols-outlined text-base">close</span>
+          </button>
         </div>
       )}
     </div>

@@ -5,314 +5,597 @@ import {
   Calendar, 
   Route, 
   TrendingUp, 
-  Speaker
+  Speaker,
+  BarChart3,
+  PieChart,
+  Layers,
+  ArrowUpRight,
+  Filter,
+  CheckCircle2,
+  Printer
 } from 'lucide-react';
 import { RECENT_RENTAL_LOGS } from '../data/speakersData';
+import { formatVND } from '../utils/format';
+
+const REPORT_DATA = {
+  '7d': {
+    label: '7 Ngày Qua',
+    revenue: 11950000,
+    growth: '+18% so với tuần trước',
+    rentalsCount: 38,
+    avgHours: '3.8h / ca',
+    distanceKm: 215.4,
+    shippingIncome: 920000,
+    avgPerRental: 314500,
+    peakDay: 'Thứ 7 (2.850.000 ₫)',
+    chartData: [
+      { label: 'T2', name: 'Thứ 2', revenue: 850000, orders: 3, height: '30%' },
+      { label: 'T3', name: 'Thứ 3', revenue: 1150000, orders: 4, height: '40%' },
+      { label: 'T4', name: 'Thứ 4', revenue: 980000, orders: 3, height: '35%' },
+      { label: 'T5', name: 'Thứ 5', revenue: 1420000, orders: 5, height: '50%' },
+      { label: 'T6', name: 'Thứ 6', revenue: 2100000, orders: 7, height: '74%' },
+      { label: 'T7', name: 'Thứ 7', revenue: 2850000, orders: 9, height: '100%', peak: true },
+      { label: 'CN', name: 'Chủ Nhật', revenue: 2600000, orders: 7, height: '91%', peak: true },
+    ]
+  },
+  '30d': {
+    label: '30 Ngày Qua',
+    revenue: 48600000,
+    growth: '+12% so với tháng trước',
+    rentalsCount: 152,
+    avgHours: '4.1h / ca',
+    distanceKm: 842.0,
+    shippingIncome: 3680000,
+    avgPerRental: 319700,
+    peakDay: 'Tuần 4 (14.200.000 ₫)',
+    chartData: [
+      { label: 'Tuần 1', name: 'Tuần 1 (01 - 07)', revenue: 10400000, orders: 34, height: '73%' },
+      { label: 'Tuần 2', name: 'Tuần 2 (08 - 14)', revenue: 11800000, orders: 37, height: '83%' },
+      { label: 'Tuần 3', name: 'Tuần 3 (15 - 21)', revenue: 12200000, orders: 39, height: '86%' },
+      { label: 'Tuần 4', name: 'Tuần 4 (22 - 30)', revenue: 14200000, orders: 42, height: '100%', peak: true },
+    ]
+  },
+  'ytd': {
+    label: 'Từ Đầu Năm (YTD)',
+    revenue: 285400000,
+    growth: '+25% so với cùng kỳ',
+    rentalsCount: 890,
+    avgHours: '4.0h / ca',
+    distanceKm: 4920.5,
+    shippingIncome: 21500000,
+    avgPerRental: 320600,
+    peakDay: 'Tháng 12 (42.500.000 ₫)',
+    chartData: [
+      { label: 'Q1', name: 'Quý 1', revenue: 58000000, orders: 180, height: '62%' },
+      { label: 'Q2', name: 'Quý 2', revenue: 64500000, orders: 205, height: '69%' },
+      { label: 'Q3', name: 'Quý 3', revenue: 69000000, orders: 215, height: '74%' },
+      { label: 'Q4', name: 'Quý 4', revenue: 93900000, orders: 290, height: '100%', peak: true },
+    ]
+  }
+};
+
+const CATEGORY_SHARE = [
+  { name: 'Loa Bass 50 Đôi Khủng (1200W)', percent: 38, revenue: 22400000, count: 62 },
+  { name: 'Loa Bass 40 Nanomax (800W)', percent: 26, revenue: 16200000, count: 54 },
+  { name: 'Loa 4 Tấc Đôi Sân Khấu (1000W)', percent: 22, revenue: 13500000, count: 41 },
+  { name: 'Loa Xách Tay & Bass 30', percent: 14, revenue: 8900000, count: 35 },
+];
 
 export default function ReportsView({ 
-  speakers, 
+  speakers = [], 
   onSelectSpeaker, 
   setActiveTab, 
   setToast 
 }) {
   const [timeRange, setTimeRange] = useState('7d');
+  const [chartMetric, setChartMetric] = useState('revenue'); // 'revenue' | 'orders'
+  const [activeChartIdx, setActiveChartIdx] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const weeklyRevenueData = [
-    { day: 'Thứ 2', revenue: '850.000đ', amount: 850000, height: '45%' },
-    { day: 'Thứ 3', revenue: '1.150.000đ', amount: 1150000, height: '60%' },
-    { day: 'Thứ 4', revenue: '980.000đ', amount: 980000, height: '50%' },
-    { day: 'Thứ 5', revenue: '1.420.000đ', amount: 1420000, height: '70%' },
-    { day: 'Thứ 6', revenue: '2.100.000đ', amount: 2100000, height: '90%' },
-    { day: 'Thứ 7', revenue: '2.850.000đ', amount: 2850000, height: '100%', highlight: true },
-    { day: 'Chủ Nhật', revenue: '2.600.000đ', amount: 2600000, height: '95%', highlight: true },
-  ];
+  const currentData = REPORT_DATA[timeRange] || REPORT_DATA['7d'];
 
   const handleExport = (format) => {
-    setToast({
-      title: `Đã Xuất Sổ Thu Tiền Cho Thuê Loa (${format})`,
-      desc: `Báo cáo doanh thu & lịch sử ca thuê cho mốc: ${timeRange === '7d' ? '7 NGÀY QUA' : timeRange === '30d' ? '30 NGÀY QUA' : 'TỪ ĐẦU NĂM (YTD)'}.`,
-      type: 'success'
-    });
+    if (setToast) {
+      setToast({
+        title: `Đã Xuất Báo Cáo (${format})`,
+        desc: `Báo cáo doanh thu & lịch sử ca thuê mốc ${currentData.label} đã được tải về.`,
+        type: 'success'
+      });
+    }
   };
 
+  const filteredLogs = RECENT_RENTAL_LOGS.filter(
+    (log) =>
+      log.speakerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.speakerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.address.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div className="flex flex-col w-full relative min-h-screen select-none p-6 max-w-[1600px] mx-auto space-y-6">
-      
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="flex flex-col w-full gap-5 sm:gap-6 lg:gap-8 pb-24 lg:pb-8">
+      {/* ══════════ TOP HEADER & TIMEFRAME SELECTOR ══════════ */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
-          <h1 className="text-[24px] text-slate-900 font-black tracking-tight">
-            Sổ Doanh Thu & Lịch Sử Thuê Loa
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Báo Cáo & Thống Kê Kinh Doanh
           </h1>
-          <p className="text-[13px] text-slate-500 max-w-2xl mt-0.5">
-            Thống kê tiền cho thuê theo tiếng, phí vận chuyển và lịch sử từng ca thuê loa kẹo kéo.
+          <p className="text-slate-500 text-xs sm:text-sm lg:text-base mt-0.5 sm:mt-1">
+            Tổng hợp doanh thu, ca thuê loa, đo đạc quãng đường giao nhận và hiệu suất thiết bị
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
-            <button
-              onClick={() => setTimeRange('7d')}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
-                timeRange === '7d' 
-                  ? 'bg-white text-ocean-700 shadow-xs' 
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              7 Ngày Qua
-            </button>
-            <button
-              onClick={() => setTimeRange('30d')}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
-                timeRange === '30d' 
-                  ? 'bg-white text-ocean-700 shadow-xs' 
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              30 Ngày Qua
-            </button>
-            <button
-              onClick={() => setTimeRange('ytd')}
-              className={`px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all ${
-                timeRange === 'ytd' 
-                  ? 'bg-white text-ocean-700 shadow-xs' 
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Từ Đầu Năm (YTD)
-            </button>
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          {/* Time range pill selector */}
+          <div className="flex bg-slate-100 border border-slate-200 rounded-2xl p-1 shadow-xs">
+            {[
+              { id: '7d', label: '7 Ngày Qua' },
+              { id: '30d', label: '30 Ngày Qua' },
+              { id: 'ytd', label: 'Năm Nay (YTD)' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setTimeRange(tab.id);
+                  setActiveChartIdx(null);
+                }}
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl transition-all text-xs sm:text-sm font-bold ${
+                  timeRange === tab.id
+                    ? 'bg-white text-slate-900 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Export Action */}
+          <button
+            onClick={() => handleExport('CSV')}
+            className="flex items-center gap-1.5 px-3.5 py-2 sm:py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-xs active:scale-95 whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            <span>Xuất Excel / CSV</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ══════════ 4 TOP KPI CARDS (CLEAN MONOCHROME SLATE) ══════════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-6 w-full">
+        {/* Card 1: Total Revenue */}
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
+              Tổng doanh thu
+            </span>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+              <DollarSign className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="my-1">
+            <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight truncate block">
+              {formatVND(currentData.revenue)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[11px] sm:text-xs">
+              <TrendingUp className="w-3.5 h-3.5" />
+              {currentData.growth}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Total Rental Shifts */}
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
+              Tổng ca cho thuê
+            </span>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+              <Speaker className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="flex items-baseline gap-1 my-1">
+            <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight">
+              {currentData.rentalsCount}
+            </span>
+            <span className="text-slate-500 font-bold text-xs sm:text-sm">ca thuê</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[11px] sm:text-xs">
+              <span>{currentData.avgHours}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Total Delivery Km */}
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
+              Quãng đường ship
+            </span>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+              <Route className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="flex items-baseline gap-1 my-1">
+            <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight">
+              {currentData.distanceKm}
+            </span>
+            <span className="text-slate-500 font-bold text-xs sm:text-sm">km GPS</span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[11px] sm:text-xs truncate">
+              Thu ship: {formatVND(currentData.shippingIncome)}
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Average per Rental */}
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
+              Bình quân mỗi ca
+            </span>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+          </div>
+
+          <div className="my-1">
+            <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[28px] font-black leading-tight tracking-tight truncate block">
+              {formatVND(currentData.avgPerRental)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 font-bold text-[11px] sm:text-xs">
+              Tiền giờ + tiền ship
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Top 4 KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* Card 1 */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-ocean-50 text-ocean-600 flex items-center justify-center">
-              <DollarSign className="w-4 h-4" />
+      {/* ══════════ SECTION: CHARTS ROW ══════════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Left 2 Cols: Main Bar / Wave Chart (Revenue & Orders) */}
+        <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border border-slate-200 shadow-[0_2px_16px_rgba(11,28,48,0.03)] flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                    Biểu Đồ Doanh Thu & Ca Thuê
+                  </h2>
+                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                    {currentData.label}
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  Phân bổ dòng tiền và mật độ bàn giao thiết bị
+                </p>
+              </div>
+
+              {/* Metric Toggle */}
+              <div className="flex bg-slate-100 border border-slate-200 rounded-xl p-1 self-start sm:self-auto">
+                <button
+                  onClick={() => setChartMetric('revenue')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    chartMetric === 'revenue'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Doanh Thu (VNĐ)
+                </button>
+                <button
+                  onClick={() => setChartMetric('orders')}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    chartMetric === 'orders'
+                      ? 'bg-white text-slate-900 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Số Ca Thuê
+                </button>
+              </div>
             </div>
-            <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-              Doanh Thu Tuần Này
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[28px] font-black text-ocean-700 font-mono">11.95</span>
-            <span className="text-[14px] text-slate-600 font-bold font-mono">triệu đ</span>
-          </div>
-          <div className="mt-2 flex items-center gap-1 text-emerald-600 font-semibold text-[12px]">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>Tăng 18% so với tuần trước</span>
-          </div>
-        </div>
 
-        {/* Card 2 */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-              <Speaker className="w-4 h-4" />
-            </div>
-            <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-              Tổng Ca Cho Thuê
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[28px] font-black text-slate-800 font-mono">38</span>
-            <span className="text-[14px] text-slate-600 font-bold font-mono">ca thuê</span>
-          </div>
-          <div className="mt-2 text-slate-500 text-[12px]">
-            <span>Trung bình ~3.8 tiếng / mỗi ca</span>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Route className="w-4 h-4" />
-            </div>
-            <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-              Tổng Quãng Đường Ship
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[28px] font-black text-slate-800 font-mono">215.4</span>
-            <span className="text-[14px] text-slate-600 font-bold font-mono">km</span>
-          </div>
-          <div className="mt-2 text-amber-700 text-[12px] font-medium">
-            <span>Thu về ~920.000đ tiền ship</span>
-          </div>
-        </div>
-
-        {/* Card 4 */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <Calendar className="w-4 h-4" />
-            </div>
-            <span className="text-[12px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-              Bình Quân Mỗi Ca
-            </span>
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-[28px] font-black text-emerald-600 font-mono">314</span>
-            <span className="text-[14px] text-slate-600 font-bold font-mono">nghìn đ</span>
-          </div>
-          <div className="mt-2 text-slate-500 text-[12px]">
-            <span>Bao gồm tiền giờ + ship</span>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Middle Section: Weekly Revenue Bars & Speaker Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Doanh Thu 7 Ngày Trong Tuần */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-[16px] font-bold text-slate-800">Doanh Thu Thu Tiền Theo Ngày</h2>
-              <p className="text-[12px] text-slate-500">Biểu đồ tổng tiền thu từ Thứ 2 đến Chủ Nhật</p>
+            {/* Focused Item summary pill */}
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 sm:p-4 flex items-center justify-between mb-6">
+              <div>
+                <span className="text-xs text-slate-500 font-bold block">
+                  {activeChartIdx !== null 
+                    ? currentData.chartData[activeChartIdx]?.name 
+                    : `Đỉnh cao nhất: ${currentData.peakDay}`}
+                </span>
+                <span className="text-base sm:text-xl font-black text-slate-900">
+                  {activeChartIdx !== null
+                    ? (chartMetric === 'revenue' 
+                        ? formatVND(currentData.chartData[activeChartIdx]?.revenue) 
+                        : `${currentData.chartData[activeChartIdx]?.orders} ca thuê`)
+                    : formatVND(currentData.revenue)}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-xs text-slate-400 font-medium block">Tỷ trọng</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-700">
+                  {activeChartIdx !== null
+                    ? `${((currentData.chartData[activeChartIdx]?.revenue / currentData.revenue) * 100).toFixed(0)}% tổng kỳ`
+                    : '100%'}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Chart Area */}
-          <div className="flex-1 min-h-[260px] relative w-full flex items-end justify-between gap-3 px-4 pb-8">
-            <div className="absolute inset-0 flex flex-col justify-between pb-8 z-0 pointer-events-none">
-              <div className="w-full h-[1px] bg-slate-100"></div>
-              <div className="w-full h-[1px] bg-slate-100"></div>
-              <div className="w-full h-[1px] bg-slate-100"></div>
-              <div className="w-full h-[1px] bg-slate-100"></div>
-              <div className="w-full h-[1px] bg-slate-200"></div>
+          {/* Interactive Modern Bar Chart Area */}
+          <div className="min-h-[220px] sm:min-h-[260px] relative w-full flex items-end justify-between gap-2 sm:gap-4 px-2 sm:px-4 pb-6 pt-2">
+            {/* Horizontal Grid lines */}
+            <div className="absolute inset-0 flex flex-col justify-between pb-6 pointer-events-none z-0">
+              <div className="w-full h-px bg-slate-100"></div>
+              <div className="w-full h-px bg-slate-100"></div>
+              <div className="w-full h-px bg-slate-100"></div>
+              <div className="w-full h-px bg-slate-200"></div>
             </div>
 
             {/* Bars */}
-            <div className="w-full flex justify-between items-end h-full z-10 relative">
-              {weeklyRevenueData.map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`w-12 rounded-t-md transition-all duration-200 relative group cursor-pointer ${
-                    item.highlight
-                      ? 'bg-ocean-600 hover:bg-ocean-700 shadow-md shadow-ocean-600/20'
-                      : 'bg-ocean-100 hover:bg-ocean-200'
-                  }`}
-                  style={{ height: item.height }}
-                >
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white font-mono font-bold text-[11px] px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md z-20">
-                    {item.revenue}
+            <div className="w-full flex justify-between items-end h-full z-10 relative gap-2 sm:gap-3">
+              {currentData.chartData.map((item, idx) => {
+                const isSelected = activeChartIdx === idx;
+                const isPeak = item.peak;
+
+                return (
+                  <div
+                    key={idx}
+                    onMouseEnter={() => setActiveChartIdx(idx)}
+                    onMouseLeave={() => setActiveChartIdx(null)}
+                    onClick={() => setActiveChartIdx(idx)}
+                    className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer"
+                  >
+                    {/* Bar Pill */}
+                    <div className="w-full max-w-[48px] flex flex-col justify-end items-center h-full">
+                      <div
+                        className={`w-full rounded-t-xl transition-all duration-300 relative ${
+                          isSelected
+                            ? 'bg-slate-900 shadow-md scale-105'
+                            : isPeak
+                            ? 'bg-slate-800 group-hover:bg-slate-900'
+                            : 'bg-slate-200 group-hover:bg-slate-300'
+                        }`}
+                        style={{ height: item.height }}
+                      >
+                        {/* Hover Tooltip */}
+                        <div className="absolute -top-9 left-1/2 -translate-x-1/2 bg-slate-900 text-white font-bold text-[10px] sm:text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg z-30 pointer-events-none">
+                          {chartMetric === 'revenue' ? formatVND(item.revenue) : `${item.orders} ca`}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* X-axis Label */}
+                    <span className={`text-[11px] sm:text-xs font-bold mt-2 transition-colors ${
+                      isSelected || isPeak ? 'text-slate-900 font-extrabold' : 'text-slate-500'
+                    }`}>
+                      {item.label}
+                    </span>
                   </div>
-                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[11px] text-slate-600 font-semibold whitespace-nowrap">
-                    {item.day}
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right 1 Col: Speaker Category Share & Top Performers */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border border-slate-200 shadow-[0_2px_16px_rgba(11,28,48,0.03)] flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                Tỷ Trọng Doanh Thu
+              </h2>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                Phân loại loa
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mb-5">
+              Cơ cấu đóng góp doanh thu theo dòng công suất
+            </p>
+
+            {/* Category Progress Bars */}
+            <div className="space-y-4">
+              {CATEGORY_SHARE.map((cat, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs sm:text-sm">
+                    <span className="font-bold text-slate-800 truncate pr-2">{cat.name}</span>
+                    <span className="font-black text-slate-900 shrink-0">{cat.percent}%</span>
+                  </div>
+                  {/* Progress track */}
+                  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        idx === 0
+                          ? 'bg-slate-900'
+                          : idx === 1
+                          ? 'bg-slate-700'
+                          : idx === 2
+                          ? 'bg-slate-500'
+                          : 'bg-slate-400'
+                      }`}
+                      style={{ width: `${cat.percent}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>{cat.count} ca thuê</span>
+                    <span className="font-medium">{formatVND(cat.revenue)}</span>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Top Loa Cho Thuê Chạy Nhất */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs flex flex-col">
-          <h2 className="text-[16px] font-bold text-slate-800 mb-4">Loa Đắt Khách Nhất</h2>
-          
-          <div className="space-y-2.5">
-            {speakers.slice(0, 4).map((spk, idx) => (
-              <div
-                key={spk.id}
-                onClick={() => {
-                  onSelectSpeaker(spk.id);
-                  setActiveTab('device-details');
-                }}
-                className="p-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-ocean-50/50 hover:border-ocean-200 transition-all cursor-pointer flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center font-mono font-bold text-[11px] ${
-                    idx === 0 ? 'bg-ocean-600 text-white shadow-xs' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {idx + 1}
-                  </span>
-                  <div>
-                    <div className="text-[13px] font-bold text-slate-800">{spk.id} - {spk.name}</div>
-                    <div className="text-[11px] text-slate-500 font-mono">{spk.totalRentalsCount} ca thuê • {spk.hourlyRate.toLocaleString('vi-VN')}đ/h</div>
+          {/* Quick Rank Highlight */}
+          <div className="mt-6 pt-5 border-t border-slate-100">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3">
+              Top Loa Đắt Khách Nhất
+            </span>
+            <div className="space-y-2">
+              {speakers.slice(0, 3).map((spk, idx) => (
+                <div
+                  key={spk.id}
+                  onClick={() => {
+                    if (onSelectSpeaker) onSelectSpeaker(spk.id);
+                    if (setActiveTab) setActiveTab('device-details');
+                  }}
+                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100 hover:border-slate-300 transition-all cursor-pointer flex items-center justify-between gap-2"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                      idx === 0 ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                    }`}>
+                      {idx + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                        {spk.id} • {spk.name}
+                      </div>
+                      <div className="text-[10px] sm:text-xs text-slate-500">
+                        {spk.totalRentalsCount} ca • {formatVND(spk.hourlyRate)}/h
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className="text-right">
-                  <div className="font-mono font-bold text-ocean-700 text-[13px]">
+                  <span className="text-xs sm:text-sm font-black text-slate-900 shrink-0">
                     {(spk.totalRevenue / 1000000).toFixed(1)} tr
-                  </div>
+                  </span>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-
         </div>
-
       </div>
 
-      {/* Bottom Section: Lịch Sử Ca Thuê */}
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-        <div className="p-5 flex items-center justify-between border-b border-slate-100">
+      {/* ══════════ SECTION: DETAILED RENTAL HISTORY TABLE ══════════ */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-[0_2px_16px_rgba(11,28,48,0.03)] overflow-hidden">
+        <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100">
           <div>
-            <h2 className="text-[16px] font-bold text-slate-800">Lịch Sử Các Ca Thuê Gần Đây</h2>
-            <p className="text-[12px] text-slate-500 font-mono mt-0.5">Lưu trữ thời gian giao/trả, số giờ hát, tiền thuê và phí ship</p>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">
+              Lịch Sử Các Ca Thuê Gần Đây
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Lưu trữ thời gian giao/trả, số giờ hát, tiền thuê và phí vận chuyển
+            </p>
           </div>
 
-          <button
-            onClick={() => handleExport('CSV')}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[12px] transition-colors border border-slate-200"
-          >
-            <Download className="w-4 h-4 text-ocean-600" />
-            <span>Xuất Excel / CSV</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 sm:flex-initial">
+              <input
+                type="text"
+                placeholder="Tìm mã ca, khách hàng..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8 pr-3 py-1.5 sm:py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 w-full sm:w-56"
+              />
+              <span className="material-symbols-outlined absolute left-2 top-2 text-slate-400 text-[16px]">
+                search
+              </span>
+            </div>
+
+            <button
+              onClick={() => handleExport('CSV')}
+              className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0"
+              title="Xuất Excel"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Xuất</span>
+            </button>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-[13px]">
+        {/* Mobile View: Cards */}
+        <div className="block md:hidden divide-y divide-slate-100">
+          {filteredLogs.map((log) => (
+            <div key={log.id} className="p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-black text-slate-900">{log.speakerId}</span>
+                  <span className="text-xs text-slate-500 ml-1.5">• {log.speakerName}</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-900 text-white">
+                  Đã về kho
+                </span>
+              </div>
+
+              <div className="text-xs text-slate-700">
+                <span className="font-bold">{log.customerName}</span> ({log.customerPhone})
+                <div className="text-slate-500 text-[11px] truncate mt-0.5">{log.address}</div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1 text-xs">
+                <div className="text-slate-500">
+                  <span>{log.rentHours}h • {log.distanceKm} km</span>
+                </div>
+                <div className="font-black text-slate-900 text-sm">
+                  {formatVND(log.totalAmount)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs sm:text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-500 font-semibold">
-                <th className="p-3.5">Mã Ca / Loa</th>
-                <th className="p-3.5">Khách Thuê</th>
-                <th className="p-3.5">Địa Chỉ Giao</th>
-                <th className="p-3.5">Số Giờ Hát</th>
-                <th className="p-3.5">Quãng Đường</th>
-                <th className="p-3.5">Tổng Tiền Thu</th>
-                <th className="p-3.5 text-right">Trạng Thái</th>
+              <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                <th className="py-3.5 px-4">Mã Ca / Loa</th>
+                <th className="py-3.5 px-4">Khách Thuê</th>
+                <th className="py-3.5 px-4">Địa Chỉ Giao</th>
+                <th className="py-3.5 px-4">Thời Lượng</th>
+                <th className="py-3.5 px-4">Quãng Đường</th>
+                <th className="py-3.5 px-4 text-right">Tổng Tiền</th>
+                <th className="py-3.5 px-4 text-center">Trạng Thái</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
-              {RECENT_RENTAL_LOGS.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="p-3.5">
-                    <div className="font-bold text-ocean-800 font-mono">{log.speakerId}</div>
-                    <div className="text-[11px] text-slate-500">{log.speakerName}</div>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-900">
+              {filteredLogs.map((log) => (
+                <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="py-3.5 px-4">
+                    <div className="font-bold text-slate-900">{log.speakerId}</div>
+                    <div className="text-xs text-slate-500">{log.speakerName}</div>
                   </td>
 
-                  <td className="p-3.5">
-                    <div className="font-semibold text-slate-800">{log.customerName}</div>
-                    <div className="text-[11px] text-slate-500 font-mono">{log.customerPhone}</div>
+                  <td className="py-3.5 px-4">
+                    <div className="font-semibold text-slate-900">{log.customerName}</div>
+                    <div className="text-xs text-slate-500 font-mono">{log.customerPhone}</div>
                   </td>
 
-                  <td className="p-3.5 text-slate-600">{log.address}</td>
-
-                  <td className="p-3.5">
-                    <span className="font-bold text-slate-800">{log.rentHours} tiếng</span>
-                    <div className="text-[10px] text-slate-500">{log.hourlyRate.toLocaleString('vi-VN')}đ/h</div>
+                  <td className="py-3.5 px-4 text-slate-600 max-w-[220px] truncate">
+                    {log.address}
                   </td>
 
-                  <td className="p-3.5 font-mono">
-                    <span>{log.distanceKm} km</span>
-                    <div className="text-[10px] text-slate-500">Ship: {log.shippingFee.toLocaleString('vi-VN')}đ</div>
+                  <td className="py-3.5 px-4">
+                    <span className="font-bold text-slate-900">{log.rentHours} tiếng</span>
+                    <div className="text-xs text-slate-500">{formatVND(log.hourlyRate)}/h</div>
                   </td>
 
-                  <td className="p-3.5">
-                    <span className="font-bold text-ocean-700 font-mono text-[14px]">{log.totalAmount.toLocaleString('vi-VN')} đ</span>
+                  <td className="py-3.5 px-4">
+                    <span className="font-semibold text-slate-800">{log.distanceKm} km</span>
+                    <div className="text-xs text-slate-500">Ship: {formatVND(log.shippingFee)}</div>
                   </td>
 
-                  <td className="p-3.5 text-right">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold">
+                  <td className="py-3.5 px-4 text-right">
+                    <span className="font-black text-slate-900 text-sm sm:text-base">
+                      {formatVND(log.totalAmount)}
+                    </span>
+                  </td>
+
+                  <td className="py-3.5 px-4 text-center">
+                    <span className="inline-block px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs">
                       Đã Về Kho
                     </span>
                   </td>
@@ -321,9 +604,8 @@ export default function ReportsView({
             </tbody>
           </table>
         </div>
-
       </div>
-
     </div>
   );
 }
+
