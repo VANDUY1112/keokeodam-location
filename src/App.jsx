@@ -263,8 +263,12 @@ export default function App() {
     <div className="bg-background font-body-md text-on-background min-h-screen">
       {/* ═══════════════ DESKTOP SIDEBAR NAVIGATION (W-72) ═══════════════ */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col shadow-[1px_0_0_rgba(0,0,0,0.05)] border-r border-slate-200/60">
-        <div className="h-20 flex items-center px-6 gap-3 border-b border-slate-200/60">
-          <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
+        <div
+          onClick={() => setActiveTab('dashboard')}
+          className="h-20 flex items-center px-6 gap-3 border-b border-slate-200/60 cursor-pointer hover:bg-slate-100/60 transition-colors group"
+          title="Trở về Trang Tổng Quan"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md group-hover:scale-105 active:scale-95 transition-transform">
             <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
           </div>
           <span className="text-xl text-slate-900 tracking-tight font-black">Locahome</span>
@@ -311,9 +315,16 @@ export default function App() {
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <div className="flex items-center pb-4 border-b border-slate-100 mb-4">
+          <div
+            onClick={() => {
+              setActiveTab('dashboard');
+              setMobileMenuOpen(false);
+            }}
+            className="flex items-center pb-4 border-b border-slate-100 mb-4 cursor-pointer group"
+            title="Trở về Trang Tổng Quan"
+          >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm group-hover:scale-105 active:scale-95 transition-transform">
                 <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
               </div>
               <span className="font-bold text-slate-900 text-lg">Locahome</span>
@@ -347,15 +358,25 @@ export default function App() {
       {/* ═══════════════ TOP HEADER & MAIN CONTENT AREA ═══════════════ */}
       <div className="pl-0 lg:pl-72">
         <header className="fixed top-0 left-0 lg:left-72 right-0 bg-white/95 backdrop-blur-xl z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between border-b border-slate-200 shadow-xs mobile-header-bar">
-          {/* Mobile Left: Hamburger Button */}
-          <div className="flex items-center gap-2.5 lg:hidden">
+          {/* Mobile Left: Hamburger Button & Clickable Brand Logo */}
+          <div className="flex items-center gap-2 lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 text-slate-700 hover:bg-slate-100 rounded-xl"
+              className="p-2 text-slate-700 hover:bg-slate-100 rounded-xl active:scale-95 transition-transform"
               title="Mở menu"
             >
               <span className="material-symbols-outlined text-2xl">menu</span>
             </button>
+            <div
+              onClick={() => setActiveTab('dashboard')}
+              className="flex items-center gap-2 cursor-pointer active:scale-95 transition-transform ml-1 select-none"
+              title="Trở về Trang Tổng Quan"
+            >
+              <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-xs">
+                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
+              </div>
+              <span className="font-black text-slate-900 text-base tracking-tight">Locahome</span>
+            </div>
           </div>
 
           {/* Spacer for desktop */}
@@ -473,7 +494,7 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className="w-full mobile-main-content min-h-screen">
-          <div className="p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto pb-24 lg:pb-8">
+          <div key={activeTab} className="p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto pb-24 lg:pb-8 animate-page-enter">
             {/* TAB 1: TỔNG QUAN (DASHBOARD) */}
             {activeTab === 'dashboard' && (
               <DashboardView

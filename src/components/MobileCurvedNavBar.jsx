@@ -84,18 +84,25 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
           {/* Nút 1: Tổng Quan */}
           <button
             onClick={() => onSelectTab('dashboard')}
-            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-transform"
+            onTouchStart={() => {}}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-all duration-200"
             title="Tổng Quan"
           >
-            <BarChart3
-              size={23}
-              className={`transition-all duration-200 ${
-                activeTab === 'dashboard'
-                  ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
-                  : 'text-slate-400 group-hover:text-white stroke-[1.8]'
-              }`}
-            />
-            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'dashboard' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <div className={`relative transition-transform duration-200 ${activeTab === 'dashboard' ? '-translate-y-1 scale-105' : ''}`}>
+              <BarChart3
+                size={23}
+                className={`transition-all duration-200 ${
+                  activeTab === 'dashboard'
+                    ? 'text-white stroke-[2.8] drop-shadow-sm'
+                    : 'text-slate-400 group-hover:text-white stroke-[1.8]'
+                }`}
+              />
+              {activeTab === 'dashboard' && (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
+              )}
+            </div>
+            <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'dashboard' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Tổng Quan
             </span>
           </button>
@@ -103,18 +110,25 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
           {/* Nút 2: Chi Phí */}
           <button
             onClick={() => onSelectTab('expenses')}
-            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-transform"
+            onTouchStart={() => {}}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-all duration-200"
             title="Chi Phí"
           >
-            <Receipt
-              size={23}
-              className={`transition-all duration-200 ${
-                activeTab === 'expenses'
-                  ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
-                  : 'text-slate-400 group-hover:text-white stroke-[1.8]'
-              }`}
-            />
-            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'expenses' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <div className={`relative transition-transform duration-200 ${activeTab === 'expenses' ? '-translate-y-1 scale-105' : ''}`}>
+              <Receipt
+                size={23}
+                className={`transition-all duration-200 ${
+                  activeTab === 'expenses'
+                    ? 'text-white stroke-[2.8] drop-shadow-sm'
+                    : 'text-slate-400 group-hover:text-white stroke-[1.8]'
+                }`}
+              />
+              {activeTab === 'expenses' && (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
+              )}
+            </div>
+            <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'expenses' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Chi Phí
             </span>
           </button>
@@ -125,18 +139,25 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
           {/* Nút 4: Lịch Sử */}
           <button
             onClick={() => onSelectTab('history')}
-            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-transform"
+            onTouchStart={() => {}}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-all duration-200"
             title="Lịch Sử"
           >
-            <History
-              size={23}
-              className={`transition-all duration-200 ${
-                activeTab === 'history'
-                  ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
-                  : 'text-slate-400 group-hover:text-white stroke-[1.8]'
-              }`}
-            />
-            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'history' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <div className={`relative transition-transform duration-200 ${activeTab === 'history' ? '-translate-y-1 scale-105' : ''}`}>
+              <History
+                size={23}
+                className={`transition-all duration-200 ${
+                  activeTab === 'history'
+                    ? 'text-white stroke-[2.8] drop-shadow-sm'
+                    : 'text-slate-400 group-hover:text-white stroke-[1.8]'
+                }`}
+              />
+              {activeTab === 'history' && (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
+              )}
+            </div>
+            <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'history' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Lịch Sử
             </span>
           </button>
@@ -144,18 +165,25 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
           {/* Nút 5: Cài Đặt */}
           <button
             onClick={() => onSelectTab('settings')}
-            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-transform"
+            onTouchStart={() => {}}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+            className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-all duration-200"
             title="Cài Đặt"
           >
-            <Settings
-              size={23}
-              className={`transition-all duration-200 ${
-                activeTab === 'settings'
-                  ? 'text-white stroke-[2.8] scale-110 drop-shadow-sm'
-                  : 'text-slate-400 group-hover:text-white stroke-[1.8]'
-              }`}
-            />
-            <span className={`text-xs sm:text-[13px] mt-1 leading-none ${activeTab === 'settings' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+            <div className={`relative transition-transform duration-200 ${activeTab === 'settings' ? '-translate-y-1 scale-105' : ''}`}>
+              <Settings
+                size={23}
+                className={`transition-all duration-200 ${
+                  activeTab === 'settings'
+                    ? 'text-white stroke-[2.8] drop-shadow-sm'
+                    : 'text-slate-400 group-hover:text-white stroke-[1.8]'
+                }`}
+              />
+              {activeTab === 'settings' && (
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
+              )}
+            </div>
+            <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'settings' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Cài Đặt
             </span>
           </button>
