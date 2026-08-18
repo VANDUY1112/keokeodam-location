@@ -48,7 +48,7 @@ const SPEAKER_PACKAGES = [
   },
 ];
 
-export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddExpenseRecord }) {
+export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddExpenseRecord, onOpenVietQR }) {
   const [isTracking, setIsTracking] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(null);
   const [startPosition, setStartPosition] = useState(null);
@@ -711,12 +711,29 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
               </div>
             </div>
 
+            {/* Quick VietQR Button */}
+            {onOpenVietQR && (
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenVietQR(
+                    summaryData.totalCollect || 350000,
+                    `LOCAHOME ${summaryData.customerName.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 20)}`
+                  );
+                }}
+                className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
+              >
+                <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
+                <span>Tạo Mã VietQR Thu Tiền ({formatVND(summaryData.totalCollect)})</span>
+              </button>
+            )}
+
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => setShowSummaryModal(false)}
-                className="flex-1 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-on-surface font-bold text-base transition-colors"
+                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-on-surface font-bold text-sm sm:text-base transition-colors"
               >
                 Đóng
               </button>
@@ -757,10 +774,10 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
                   }
                   setShowSummaryModal(false);
                 }}
-                className="flex-1 py-3.5 rounded-xl bg-primary hover:bg-slate-800 text-white font-bold text-base transition-colors shadow-md flex items-center justify-center gap-2"
+                className="flex-1 py-3 rounded-xl bg-primary hover:bg-slate-800 text-white font-bold text-sm sm:text-base transition-colors shadow-md flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-xl">save</span>
-                <span>Lưu Đơn & Doanh Thu</span>
+                <span>Lưu Đơn Hàng</span>
               </button>
             </div>
           </div>

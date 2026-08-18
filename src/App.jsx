@@ -7,6 +7,7 @@ import ReportsView from './components/ReportsView';
 import SettingsView from './components/SettingsView';
 import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
+import VietQRModal from './components/VietQRModal';
 import { formatVND, parseVNDNumber } from './utils/format';
 import { INITIAL_SPEAKERS } from './data/speakersData';
 
@@ -127,6 +128,13 @@ export default function App() {
 
   const [speakers, setSpeakers] = useState(INITIAL_SPEAKERS);
   const [toast, setToast] = useState(null);
+  const [showVietQRModal, setShowVietQRModal] = useState(false);
+  const [vietQRData, setVietQRData] = useState({ amount: 280000, note: 'LOCAHOME THUE LOA' });
+
+  const openVietQR = (amount = 280000, note = 'LOCAHOME THUE LOA') => {
+    setVietQRData({ amount, note });
+    setShowVietQRModal(true);
+  };
 
   useEffect(() => {
     if (toast) {
@@ -372,8 +380,18 @@ export default function App() {
           {/* Spacer for desktop */}
           <div className="hidden lg:block"></div>
 
-          {/* Right Header: Notifications & Profile Dropdown */}
-          <div className="flex items-center gap-3 sm:gap-6">
+          {/* Right Header: VietQR Quick Button, Notifications & Profile Dropdown */}
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            {/* Quick VietQR Button */}
+            <button
+              onClick={() => openVietQR(280000, 'LOCAHOME THUE LOA')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all"
+              title="Tạo mã VietQR thu tiền"
+            >
+              <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
+              <span className="hidden sm:inline">Tạo Mã QR</span>
+            </button>
+
             <button
               onClick={() => setShowNotificationsModal(!showNotificationsModal)}
               className="relative p-1.5 text-slate-700 hover:text-slate-950 transition-transform active:scale-90 group focus:outline-none"
@@ -500,17 +518,18 @@ export default function App() {
             {activeTab === 'tracking' && (
               <TrackingView
                 onOpenLogExpense={() => setShowLogExpenseModal(true)}
+                onOpenVietQR={openVietQR}
                 onAddTripRecord={handleAddTrip}
                 onAddExpenseRecord={(rec) => {
                   setExpenses((prev) => [
                     {
                       id: Date.now(),
                       title: rec.title,
-                      subtitle: `Hôm nay • Dự án Phoenix`,
+                      subtitle: `Hôm nay • Thu tiền giao loa`,
                       amount: formatVND(rec.amount),
-                      status: 'Chờ duyệt',
-                      statusColor: 'text-surface-tint',
-                      icon: 'directions_car',
+                      status: 'Đã duyệt',
+                      statusColor: 'text-secondary',
+                      icon: 'speaker',
                       hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
                     },
                     ...prev,
@@ -532,6 +551,7 @@ export default function App() {
               <HistoryView
                 trips={trips}
                 onDeleteTrip={handleDeleteTrip}
+                onOpenVietQR={openVietQR}
                 onNavigateToTracking={() => setActiveTab('tracking')}
               />
             )}
@@ -839,6 +859,29 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* ═══════════════ VIETQR PAYMENT MODAL ═══════════════ */}
+      <VietQRModal
+        isOpen={showVietQRModal}
+        onClose={() => setShowVietQRModal(false)}
+        initialAmount={vietQRData.amount}
+        initialNote={vietQRData.note}
+        setToast={setToast}
+        onConfirmPayment={(data) => {
+          // Add income record to expenses list
+          const incomeRecord = {
+            id: Date.now(),
+            title: `Thu tiền VietQR - ${data.note}`,
+            subtitle: `Vừa xong • Chuyển khoản VietQR Napas 247`,
+            amount: formatVND(data.amount),
+            status: 'Đã duyệt',
+            statusColor: 'text-secondary',
+            icon: 'qr_code_2',
+            hoverColor: 'group-hover:bg-emerald-500/10 group-hover:text-emerald-600',
+          };
+          setExpenses([incomeRecord, ...expenses]);
+        }}
+      />
 
       {/* ═══════════════ TOAST NOTIFICATION ═══════════════ */}
       {toast && (

@@ -5,6 +5,7 @@ import { RentalsController } from '../controllers/rentalsController.js';
 import { ExpensesController } from '../controllers/expensesController.js';
 import { GpsController } from '../controllers/gpsController.js';
 import { ReportsController, SettingsController } from '../controllers/reportsController.js';
+import { PaymentController } from '../controllers/paymentController.js';
 import { authenticate, optionalAuth, authorize } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validator.js';
 import { authRateLimiter, gpsRateLimiter } from '../middlewares/security.js';
@@ -59,3 +60,7 @@ router.get('/gps/history/:speakerId', optionalAuth, GpsController.getHistory);
 router.get('/reports/summary', optionalAuth, ReportsController.getSummary);
 router.get('/settings', optionalAuth, SettingsController.getSettings);
 router.put('/settings', authenticate, authorize('admin'), SettingsController.updateSettings);
+
+// ─── 8. Payment & Bank Webhook Routes (100% Auto Detection) ───
+router.post('/payment/webhook', PaymentController.handleWebhook);
+router.post('/payment/simulate-success', PaymentController.simulateSuccess);

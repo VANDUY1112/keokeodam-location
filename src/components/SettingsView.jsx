@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { HOME_LOCATION } from '../data/speakersData';
 import { formatVND } from '../utils/format';
+import { VIETNAM_BANKS, DEFAULT_BANK_CONFIG } from '../utils/vietqr';
+import { CreditCard, QrCode } from 'lucide-react';
 
 const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
@@ -40,6 +42,32 @@ export default function SettingsView({
   const [warehouseAddress, setWarehouseAddress] = useState(() => localStorage.getItem('kko_warehouse_address') || HOME_LOCATION.address);
   const [warehouseLat, setWarehouseLat] = useState(() => localStorage.getItem('kko_warehouse_lat') || String(HOME_LOCATION.lat || 10.8752));
   const [warehouseLng, setWarehouseLng] = useState(() => localStorage.getItem('kko_warehouse_lng') || String(HOME_LOCATION.lng || 106.7725));
+
+  // Bank Account VietQR state
+  const [bankId, setBankId] = useState(() => {
+    try {
+      const saved = localStorage.getItem('locahome_bank_config');
+      return saved ? JSON.parse(saved).bankId : DEFAULT_BANK_CONFIG.bankId;
+    } catch {
+      return DEFAULT_BANK_CONFIG.bankId;
+    }
+  });
+  const [accountNo, setAccountNo] = useState(() => {
+    try {
+      const saved = localStorage.getItem('locahome_bank_config');
+      return saved ? JSON.parse(saved).accountNo : DEFAULT_BANK_CONFIG.accountNo;
+    } catch {
+      return DEFAULT_BANK_CONFIG.accountNo;
+    }
+  });
+  const [accountName, setAccountName] = useState(() => {
+    try {
+      const saved = localStorage.getItem('locahome_bank_config');
+      return saved ? JSON.parse(saved).accountName : DEFAULT_BANK_CONFIG.accountName;
+    } catch {
+      return DEFAULT_BANK_CONFIG.accountName;
+    }
+  });
 
   // Pricing rules state
   const [baseHourlyRate, setBaseHourlyRate] = useState(() => localStorage.getItem('kko_base_hourly_rate') || '80000');
@@ -74,10 +102,18 @@ export default function SettingsView({
       localStorage.setItem('kko_auto_late_fee', String(autoLateFee));
       localStorage.setItem('kko_gps_interval', gpsInterval);
 
+      // Save Bank VietQR config
+      localStorage.setItem('locahome_bank_config', JSON.stringify({
+        bankId,
+        accountNo,
+        accountName: accountName.toUpperCase(),
+        template: 'compact2'
+      }));
+
       if (setToast) {
         setToast({
           title: 'Đã Lưu Cấu Hình Thành Công',
-          desc: 'Tất cả cài đặt kho hàng, bảng giá và định vị GPS đã được áp dụng.',
+          desc: 'Cài đặt tài khoản VietQR, kho hàng và bảng giá đã được áp dụng.',
           type: 'success'
         });
       }
@@ -344,7 +380,69 @@ export default function SettingsView({
           </div>
         </div>
 
-        {/* ══════════ SECTION 3: BẢNG GIÁ & ĐỊNH MỨC VẬN CHUYỂN ══════════ */}
+        {/* ══════════ SECTION 3: TÀI KHOẢN NGÂN HÀNG NHẬN TIỀN VIETQR ══════════ */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] space-y-4">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center">
+              <CreditCard className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                Tài Khoản Ngân Hàng Nhận Tiền VietQR
+              </h2>
+              <p className="text-xs text-slate-500">
+                Cấu hình tài khoản nhận tiền chuyển khoản tự động chuẩn Napas 247
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div>
+              <label className="block text-xs font-bold text-slate-600 mb-1">
+                Ngân Hàng Thụ Hưởng
+              </label>
+              <select
+                value={bankId}
+                onChange={(e) => setBankId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+              >
+                {VIETNAM_BANKS.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.shortName} ({b.id})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-600 mb-1">
+                Số Tài Khoản Nhận Tiền
+              </label>
+              <input
+                type="text"
+                value={accountNo}
+                onChange={(e) => setAccountNo(e.target.value)}
+                placeholder="Ví dụ: 0908123456..."
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-600 mb-1">
+                Tên Chủ Tài Khoản (Không Dấu)
+              </label>
+              <input
+                type="text"
+                value={accountName}
+                onChange={(e) => setAccountName(e.target.value.toUpperCase())}
+                placeholder="Ví dụ: TRAN ANH TUAN..."
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold uppercase focus:outline-none focus:ring-2 focus:ring-slate-900"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ══════════ SECTION 4: BẢNG GIÁ & ĐỊNH MỨC VẬN CHUYỂN ══════════ */}
         <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] space-y-4">
           <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
             <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center">
