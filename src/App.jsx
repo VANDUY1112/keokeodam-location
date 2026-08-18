@@ -393,53 +393,72 @@ export default function App() {
 
               {/* Profile Dropdown Menu */}
               {showProfileMenu && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl p-2 z-50 animate-popup-open">
-                  <div className="p-3 border-b border-slate-100 flex items-center gap-3">
+                <div className="absolute right-0 top-full mt-2 w-76 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 animate-popup-open flex flex-col space-y-2">
+                  <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-3">
                     <img
                       alt="Profile"
                       className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-xs"
                       src={userAvatar}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-sm text-on-surface truncate">{userName}</div>
-                      <div className="text-xs text-on-surface-variant truncate">Kỹ Sư Trưởng Thực Địa</div>
-                      <span className="inline-block px-2 py-0.5 rounded bg-secondary/10 text-secondary text-[11px] font-semibold mt-1">
-                        GPS Trực Tuyến
+                      <div className="font-bold text-sm text-slate-900 truncate">{userName}</div>
+                      <div className="text-xs text-slate-500 truncate">Quản Trị Viên Locahome</div>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-800 text-[10px] font-bold mt-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        Đang Hoạt Động
                       </span>
                     </div>
                   </div>
 
-                  <div className="py-2 space-y-1 text-xs sm:text-sm">
+                  <div className="space-y-1 text-xs sm:text-sm">
                     <button
                       onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container-high transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
                     >
-                      <span className="material-symbols-outlined text-[20px] text-primary">person</span>
-                      <span className="font-medium">Hồ sơ & Tài khoản</span>
+                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">settings</span>
+                      <span className="font-semibold">Cài Đặt & Cấu Hình</span>
                     </button>
                     <button
                       onClick={() => { setActiveTab('reports'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container-high transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
                     >
-                      <span className="material-symbols-outlined text-[20px] text-secondary">analytics</span>
-                      <span className="font-medium">Hạn mức công tác</span>
+                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">assessment</span>
+                      <span className="font-semibold">Báo Cáo & Thống Kê</span>
                     </button>
                     <button
-                      onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface hover:bg-surface-container-high transition-colors text-left"
+                      onClick={() => { setActiveTab('tracking'); setShowProfileMenu(false); }}
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
                     >
-                      <span className="material-symbols-outlined text-[20px] text-tertiary">tune</span>
-                      <span className="font-medium">Tùy chỉnh hệ thống</span>
+                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">two_wheeler</span>
+                      <span className="font-semibold">Giao Loa & GPS</span>
+                    </button>
+                    <button
+                      onClick={() => { setActiveTab('expenses'); setShowProfileMenu(false); }}
+                      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
+                    >
+                      <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">payments</span>
+                      <span className="font-semibold">Sổ Thu Chi & Hoá Đơn</span>
                     </button>
                   </div>
 
-                  <div className="pt-1.5 border-t border-slate-100">
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Khôi phục toàn bộ dữ liệu mẫu ban đầu?')) {
+                          localStorage.clear();
+                          window.location.reload();
+                        }
+                      }}
+                      className="text-slate-500 hover:text-slate-900 font-semibold transition-colors flex items-center gap-1"
+                    >
+                      <span className="material-symbols-outlined text-sm">restart_alt</span>
+                      Đặt Lại Dữ Liệu
+                    </button>
                     <button
                       onClick={() => setShowProfileMenu(false)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-error hover:bg-error-container/20 transition-colors text-left text-xs sm:text-sm font-semibold"
+                      className="text-slate-400 hover:text-slate-700 font-bold"
                     >
-                      <span className="material-symbols-outlined text-[20px]">logout</span>
-                      <span>Đăng xuất</span>
+                      Đóng
                     </button>
                   </div>
                 </div>
