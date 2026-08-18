@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { formatVND, parseVNDNumber } from '../utils/format';
+import { Pagination } from './Pagination';
 
 const TIME_RANGE_DATA = {
   'Ngày': {
@@ -225,6 +226,21 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
       ? expenses
       : activeData.expenses;
 
+  // Pagination state & calculations
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [timeRange]);
+
+  const totalItems = currentExpenses.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const paginatedExpenses = currentExpenses.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   const totalSpentNumeric =
     timeRange === 'Tháng' && expenses.length > 0
       ? expenses.reduce((acc, e) => acc + parseVNDNumber(e.amount), 0)
@@ -406,20 +422,20 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
             </button>
           </div>
 
-          {/* Mobile Card List (Hidden on desktop) */}
-          <div className="flex flex-col gap-2.5 md:hidden">
-            {currentExpenses.length === 0 ? (
-              <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 font-medium text-sm">
+          {/* Mobile Divided Row List (Clean divider without cramped card borders) */}
+          <div className="divide-y divide-slate-100 md:hidden">
+            {paginatedExpenses.length === 0 ? (
+              <div className="py-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 font-medium text-sm">
                 Chưa có chi phí nào được ghi nhận.
               </div>
             ) : (
-              currentExpenses.map((item) => (
+              paginatedExpenses.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white p-3.5 rounded-2xl flex items-center justify-between border border-slate-200 shadow-[0_1px_6px_rgba(11,28,48,0.02)] gap-3 hover:bg-slate-50/80 transition-all"
+                  className="py-3.5 flex items-center justify-between gap-3 hover:bg-slate-50/60 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-2xs shrink-0">
                       <span className="material-symbols-outlined text-[20px]">
                         {item.icon || 'receipt'}
                       </span>
@@ -435,12 +451,12 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end shrink-0 gap-1">
-                    <span className="text-sm font-black text-slate-900">
+                  <div className="flex flex-col items-end shrink-0 gap-1 pl-1">
+                    <span className="text-sm font-black text-slate-900 whitespace-nowrap">
                       {formatVND(item.amount)}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${
                         item.status === 'Đã duyệt'
                           ? 'bg-slate-900 text-white border-slate-900'
                           : 'bg-slate-100 text-slate-700 border-slate-200'
@@ -467,7 +483,7 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
                 </tr>
               </thead>
               <tbody className="text-slate-900 divide-y divide-slate-100 text-sm lg:text-base">
-                {currentExpenses.map((item) => (
+                {paginatedExpenses.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                     <td className="py-4 pr-4 whitespace-nowrap text-slate-500 font-medium">
                       {item.subtitle ? item.subtitle.split('•')[0] : 'Hôm nay'}
@@ -496,6 +512,24 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
               </tbody>
             </table>
           </div>
+
+          {/* Modern Pagination Bar */}
+          {totalItems > 0 && (
+            <div className="mt-3">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={totalItems}
+                pageSize={pageSize}
+                pageSizeOptions={[5, 10, 20, 50]}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Right Column (1 Col): Biến Động Chi Phí Dạng Sóng (Smooth Wave Area Chart) */}

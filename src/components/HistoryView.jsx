@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import LiveRouteMap from './LiveRouteMap';
 import { formatVND } from '../utils/format';
 
-export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTracking }) {
+export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTracking, onOpenVietQR }) {
   const [selectedTripForMap, setSelectedTripForMap] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -222,6 +222,18 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                   <span className="hidden sm:inline-block text-xs font-bold px-2.5 py-1 rounded-lg border bg-slate-900 text-white border-slate-900 whitespace-nowrap">
                     {trip.status || 'Hoàn thành'}
                   </span>
+
+                  {/* Button: Thu Tiền VietQR */}
+                  {onOpenVietQR && (
+                    <button
+                      onClick={() => onOpenVietQR(costVal, `KEO KEO DAM nhan ${costVal.toLocaleString('vi-VN')}`)}
+                      className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-colors shadow-xs whitespace-nowrap active:scale-95"
+                      title="Tạo mã VietQR thu tiền đơn này"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">qr_code_2</span>
+                      <span>Mã QR</span>
+                    </button>
+                  )}
 
                   {/* Button: Xem Bản Đồ Lộ Trình */}
                   <button

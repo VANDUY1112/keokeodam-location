@@ -360,6 +360,20 @@ export default function App() {
               </button>
             ))}
           </nav>
+
+          {/* Quick VietQR Drawer Button */}
+          <div className="pt-3 border-t border-slate-100 mt-2">
+            <button
+              onClick={() => {
+                openVietQR(500000, 'KEO KEO DAM nhan 500.000');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-md active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
+              <span>Tạo Mã VietQR Thu Tiền</span>
+            </button>
+          </div>
         </div>
       </div>
 

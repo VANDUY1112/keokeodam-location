@@ -15,7 +15,6 @@ function playSuccessTone() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc1.type = 'sine';
@@ -86,7 +85,6 @@ export default function VietQRModal({
     if (!isOpen || isPaid) return;
 
     const unsubscribe = gpsSocket.subscribe((eventData) => {
-      // If payment success event received
       if (eventData && (eventData.transactionId || eventData.amount)) {
         triggerPaymentSuccess({
           transactionId: eventData.transactionId || `MB-${Date.now().toString().slice(-6)}`,
@@ -196,7 +194,6 @@ export default function VietQRModal({
     }
   };
 
-  // Demo trigger for simulating instant webhook payment
   const handleSimulateWebhook = () => {
     triggerPaymentSuccess({
       transactionId: `MB-${Date.now().toString().slice(-6)}`,
@@ -211,7 +208,7 @@ export default function VietQRModal({
     { label: '100k', value: 100000 },
     { label: '240k', value: 240000 },
     { label: '280k', value: 280000 },
-    { label: '500k (Cọc)', value: 500000 },
+    { label: '500k', value: 500000 },
     { label: '1 Triệu', value: 1000000 },
   ];
 
@@ -224,7 +221,7 @@ export default function VietQRModal({
       ></div>
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-[420px] bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xl z-10 flex flex-col gap-3 animate-popup-open my-auto max-h-[92vh] overflow-y-auto no-scrollbar">
+      <div className="relative w-full max-w-[420px] bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xl z-10 flex flex-col gap-3.5 animate-popup-open my-auto max-h-[92vh] overflow-y-auto no-scrollbar">
         
         {/* ══════════ SCREEN 1: SUCCESS CELEBRATION (AUTOMATIC DETECTED) ══════════ */}
         {isPaid ? (
@@ -237,10 +234,10 @@ export default function VietQRModal({
             </div>
 
             <div className="space-y-1">
-              <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+              <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
                 Tự Động Nhận Diện Webhook
               </span>
-              <h3 className="text-lg font-bold text-slate-900">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900">
                 Thanh Toán Thành Công!
               </h3>
               <p className="text-xs text-slate-500 font-medium">
@@ -249,41 +246,41 @@ export default function VietQRModal({
             </div>
 
             {/* Amount Badge */}
-            <div className="w-full bg-slate-50 border border-slate-200/80 rounded-xl p-3 space-y-1.5 text-left">
+            <div className="w-full bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 space-y-2 text-left">
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-500 font-medium">Số tiền nhận:</span>
-                <span className="text-base font-black text-emerald-600">
+                <span className="text-base font-bold text-emerald-600">
                   +{formatVND(paidDetails?.amount || amount)}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs pt-1 border-t border-slate-200/60">
+              <div className="flex justify-between items-center text-xs pt-1.5 border-t border-slate-200/60">
                 <span className="text-slate-500 font-medium">Mã giao dịch:</span>
-                <span className="font-mono font-semibold text-slate-800 text-[11px]">
+                <span className="font-mono font-semibold text-slate-800 text-xs">
                   {paidDetails?.transactionId}
                 </span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-500 font-medium">Nội dung:</span>
-                <span className="font-semibold text-slate-800 text-[11px] truncate max-w-[200px]">
+                <span className="font-semibold text-slate-800 text-xs truncate max-w-[200px]">
                   {paidDetails?.content}
                 </span>
               </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-slate-500 font-medium">Thời gian:</span>
-                <span className="font-medium text-slate-600 text-[11px]">
+                <span className="font-medium text-slate-600 text-xs">
                   {paidDetails?.timestamp}
                 </span>
               </div>
             </div>
 
-            <p className="text-[11px] text-slate-400 font-normal">
-              Tự động đóng sau <strong className="text-slate-700">{countdown}s</strong> hoặc bấm Đóng bên dưới
+            <p className="text-xs text-slate-400 font-normal">
+              Tự động đóng sau <strong className="text-slate-700 font-semibold">{countdown}s</strong> hoặc bấm Đóng bên dưới
             </p>
 
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm transition-all shadow-xs active:scale-95"
+              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm transition-all shadow-xs active:scale-95"
             >
               Hoàn Tất & Đóng
             </button>
@@ -297,31 +294,19 @@ export default function VietQRModal({
                 <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-2xs">
                   <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-tight">
-                    Mã VietQR Thu Tiền
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-normal mt-0.5 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Tự động nhận diện khi khách chuyển xong</span>
-                  </p>
-                </div>
+                <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-tight">
+                  Mã VietQR Thu Tiền
+                </h3>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
             </div>
 
-            {/* Amount Input & Quick Select */}
+            {/* Amount Input & Quick Select Full Line Grid */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-medium text-slate-600">
+                <label className="text-xs sm:text-sm font-semibold text-slate-700">
                   Số tiền muốn nhận
                 </label>
-                <span className="text-xs font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
+                <span className="text-sm sm:text-base font-bold text-slate-900 bg-slate-100 px-3 py-1 rounded-xl border border-slate-200/80 shadow-2xs">
                   {formatVND(amount)}
                 </span>
               </div>
@@ -332,25 +317,25 @@ export default function VietQRModal({
                   step="10000"
                   value={amount}
                   onChange={(e) => handleAmountChange(e.target.value)}
-                  className="w-full pl-3 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
+                  className="w-full pl-3.5 pr-9 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold text-base focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
                   placeholder="Nhập số tiền..."
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
                   ₫
                 </span>
               </div>
 
-              {/* Quick Select Buttons */}
-              <div className="flex gap-1.5 flex-wrap pt-0.5">
+              {/* Quick Select Buttons - FULL LINE GRID (5 Columns) */}
+              <div className="grid grid-cols-5 gap-1.5 pt-0.5 w-full">
                 {QUICK_AMOUNTS.map((item) => (
                   <button
                     key={item.value}
                     type="button"
                     onClick={() => handleAmountChange(item.value)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all active:scale-95 ${
+                    className={`py-1.5 px-1 rounded-xl text-xs font-semibold text-center transition-all duration-150 active:scale-95 truncate w-full ${
                       amount === item.value
-                        ? 'bg-slate-900 text-white shadow-2xs'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium'
                     }`}
                   >
                     {item.label}
@@ -360,20 +345,15 @@ export default function VietQRModal({
             </div>
 
             {/* Note / Transfer Description Input */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-medium text-slate-600">
-                  Nội dung chuyển khoản
-                </label>
-                <span className="text-[10px] text-slate-400 font-normal">
-                  (Tự động đồng bộ theo số tiền)
-                </span>
-              </div>
+            <div className="space-y-1.5">
+              <label className="text-xs sm:text-sm font-semibold text-slate-700">
+                Nội dung chuyển khoản
+              </label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-normal text-xs sm:text-sm focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold text-sm sm:text-base focus:outline-none focus:border-slate-400 focus:bg-white transition-all"
                 placeholder="Ví dụ: KEO KEO DAM nhan 500.000..."
               />
             </div>
@@ -390,7 +370,7 @@ export default function VietQRModal({
                 {isImageLoading && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 gap-1.5">
                     <span className="material-symbols-outlined text-2xl animate-spin text-slate-800">progress_activity</span>
-                    <span className="text-[11px] font-medium text-slate-500">Đang tải mã QR...</span>
+                    <span className="text-xs font-medium text-slate-500">Đang tải mã QR...</span>
                   </div>
                 )}
               </div>
@@ -401,13 +381,13 @@ export default function VietQRModal({
                   <div className="font-semibold text-slate-800 text-xs truncate">
                     {currentBank.shortName} • {bankConfig.accountNo}
                   </div>
-                  <div className="text-slate-500 font-normal text-[11px] truncate mt-0.5">
+                  <div className="text-slate-500 font-medium text-xs truncate mt-0.5">
                     Chủ TK: {bankConfig.accountName}
                   </div>
                 </div>
                 <button
                   onClick={handleCopyAccountNo}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs shrink-0 transition-colors active:scale-95"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs shrink-0 transition-colors active:scale-95"
                 >
                   <span className="material-symbols-outlined text-[14px]">
                     {isCopied ? 'check' : 'content_copy'}
@@ -417,26 +397,47 @@ export default function VietQRModal({
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-0.5">
-              <button
-                type="button"
-                onClick={handleDownloadQR}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs sm:text-sm transition-all active:scale-95 border border-slate-200/80"
-              >
-                <span className="material-symbols-outlined text-[16px]">download</span>
-                <span>Tải Ảnh QR</span>
-              </button>
-
-              <button
-                type="button"
+            {/* Auto-checking Radar Status & Action Buttons */}
+            <div className="flex flex-col gap-2 pt-0.5">
+              {/* Auto Checking Live Radar Bar */}
+              <div 
                 onClick={handleSimulateWebhook}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs sm:text-sm transition-all shadow-xs active:scale-95"
-                title="Khách quét xong sẽ tự động xác nhận"
+                title="Hệ thống đang kết nối ngân hàng và tự động kiểm tra biến động số dư theo thời gian thực"
+                className="w-full py-2.5 px-3.5 rounded-xl bg-slate-900 text-white flex items-center justify-between shadow-xs border border-slate-800 select-none cursor-pointer group hover:bg-slate-850 transition-all active:scale-98"
               >
-                <span className="material-symbols-outlined text-[16px]">check_circle</span>
-                <span>Xác Nhận Đã Nhận</span>
-              </button>
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold text-slate-100">
+                    Đang tự động kiểm tra...
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-emerald-400 font-semibold bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/40">
+                  <span className="material-symbols-outlined text-[13px] animate-spin">sync</span>
+                  <span>Trực tiếp</span>
+                </div>
+              </div>
+
+              {/* Auxiliary Buttons */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleDownloadQR}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-all active:scale-95 border border-slate-200/80"
+                >
+                  <span className="material-symbols-outlined text-[15px]">download</span>
+                  <span>Tải Ảnh QR</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition-all active:scale-95 border border-slate-200/80"
+                >
+                  <span>Đóng</span>
+                </button>
+              </div>
             </div>
           </>
         )}

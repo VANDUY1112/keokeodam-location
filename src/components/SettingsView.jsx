@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   User, 
   MapPin, 
@@ -68,6 +68,29 @@ export default function SettingsView({
       return DEFAULT_BANK_CONFIG.accountName;
     }
   });
+
+  // Bank Dropdown state & outside click handler
+  const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
+  const [bankSearchQuery, setBankSearchQuery] = useState('');
+  const bankDropdownRef = useRef(null);
+
+  const selectedBank = VIETNAM_BANKS.find((b) => b.id === bankId) || VIETNAM_BANKS[0];
+  const filteredBanks = VIETNAM_BANKS.filter(
+    (b) =>
+      b.shortName.toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
+      b.name.toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
+      b.id.toLowerCase().includes(bankSearchQuery.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (bankDropdownRef.current && !bankDropdownRef.current.contains(e.target)) {
+        setIsBankDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Pricing rules state
   const [baseHourlyRate, setBaseHourlyRate] = useState(() => localStorage.getItem('kko_base_hourly_rate') || '80000');
@@ -397,21 +420,115 @@ export default function SettingsView({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            <div>
+            {/* Custom Animated Bank Dropdown */}
+            <div className="relative" ref={bankDropdownRef}>
               <label className="block text-xs font-bold text-slate-600 mb-1">
                 Ngân Hàng Thụ Hưởng
               </label>
-              <select
-                value={bankId}
-                onChange={(e) => setBankId(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+              
+              {/* Dropdown Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsBankDropdownOpen(!isBankDropdownOpen)}
+                className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border transition-all text-left flex items-center justify-between shadow-2xs group ${
+                  isBankDropdownOpen
+                    ? 'border-slate-900 ring-2 ring-slate-900/10 bg-white'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
               >
-                {VIETNAM_BANKS.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.shortName} ({b.id})
-                  </option>
-                ))}
-              </select>
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                    {selectedBank?.shortName?.slice(0, 2) || 'NH'}
+                  </div>
+                  <div className="truncate">
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm">
+                      {selectedBank?.shortName}
+                    </span>
+                    <span className="text-slate-500 text-[11px] ml-1.5 hidden sm:inline truncate">
+                      ({selectedBank?.name})
+                    </span>
+                  </div>
+                </div>
+                <span
+                  className={`material-symbols-outlined text-[18px] text-slate-400 group-hover:text-slate-700 transition-transform duration-200 shrink-0 ${
+                    isBankDropdownOpen ? 'rotate-180 text-slate-900' : ''
+                  }`}
+                >
+                  keyboard_arrow_down
+                </span>
+              </button>
+
+              {/* Animated Floating Menu */}
+              {isBankDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 p-2 space-y-1 max-h-64 overflow-y-auto no-scrollbar animate-popup-open sm:w-[320px]">
+                  {/* Search Bar inside dropdown */}
+                  <div className="px-2 py-1.5 border-b border-slate-100 mb-1 sticky top-0 bg-white">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Tìm tên ngân hàng..."
+                        value={bankSearchQuery}
+                        onChange={(e) => setBankSearchQuery(e.target.value)}
+                        className="w-full pl-7 pr-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 font-medium focus:outline-none focus:border-slate-900"
+                        autoFocus
+                      />
+                      <span className="material-symbols-outlined absolute left-1.5 top-1.5 text-slate-400 text-[16px]">
+                        search
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bank Option Items */}
+                  {filteredBanks.map((b) => {
+                    const isSelected = b.id === bankId;
+                    return (
+                      <button
+                        key={b.id}
+                        type="button"
+                        onClick={() => {
+                          setBankId(b.id);
+                          setIsBankDropdownOpen(false);
+                          setBankSearchQuery('');
+                        }}
+                        className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl text-left transition-all ${
+                          isSelected
+                            ? 'bg-slate-900 text-white font-bold'
+                            : 'hover:bg-slate-100 text-slate-700 font-medium'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 ${
+                              isSelected
+                                ? 'bg-white/20 text-white'
+                                : 'bg-slate-100 text-slate-800'
+                            }`}
+                          >
+                            {b.shortName.slice(0, 2)}
+                          </div>
+                          <div className="truncate">
+                            <div className="text-xs font-bold leading-tight truncate">
+                              {b.shortName}
+                            </div>
+                            <div
+                              className={`text-[10px] truncate ${
+                                isSelected ? 'text-slate-300' : 'text-slate-500'
+                              }`}
+                            >
+                              {b.name}
+                            </div>
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <span className="material-symbols-outlined text-[16px] text-emerald-400 shrink-0">
+                            check
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div>
