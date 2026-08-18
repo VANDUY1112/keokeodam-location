@@ -208,8 +208,16 @@ export default function App() {
     setTrips((prev) => prev.filter((t) => t.id !== tripId));
   };
 
+  const NAV_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%230f172a"/><path d="M70 30 L56 70 L47 47 L30 56 Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/></svg>`;
+
   const [userAvatar, setUserAvatar] = useState(() => {
-    return localStorage.getItem('expensely_user_avatar') || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80';
+    const saved = localStorage.getItem('expensely_user_avatar');
+    // If no saved avatar or old photo preset, default to NAV_AVATAR
+    if (!saved || saved.includes('unsplash.com')) {
+      localStorage.setItem('expensely_user_avatar', NAV_AVATAR);
+      return NAV_AVATAR;
+    }
+    return saved;
   });
 
   const [userName, setUserName] = useState(() => {
@@ -217,11 +225,11 @@ export default function App() {
   });
 
   const AVATAR_PRESETS = [
+    NAV_AVATAR,
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
   ];
 
   const handleSelectAvatar = (url) => {
@@ -243,8 +251,8 @@ export default function App() {
       {/* ═══════════════ DESKTOP SIDEBAR NAVIGATION (W-72) ═══════════════ */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-72 bg-surface-container-low z-50 flex-col shadow-[1px_0_0_rgba(0,0,0,0.05)] border-r border-slate-200/60">
         <div className="h-20 flex items-center px-6 gap-3 border-b border-slate-200/60">
-          <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md">
-            <span className="material-symbols-outlined text-2xl">speaker</span>
+          <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-md">
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
           </div>
           <div>
             <span className="text-lg text-slate-900 tracking-tight font-black block leading-none">Kẹo Kéo Express</span>
@@ -296,7 +304,7 @@ export default function App() {
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm">
-                <span className="material-symbols-outlined text-[22px]">speaker</span>
+                <span className="material-symbols-outlined text-[22px]" style={{ fontVariationSettings: "'FILL' 1" }}>near_me</span>
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-slate-900 text-base leading-tight">Kẹo Kéo Express</span>

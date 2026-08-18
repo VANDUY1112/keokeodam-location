@@ -8,7 +8,8 @@ import {
   X,
   ExternalLink,
   Speaker,
-  Coins
+  Coins,
+  Navigation
 } from 'lucide-react';
 
 export default function Header({ 
@@ -133,8 +134,8 @@ export default function Header({
             <div className="text-[13px] font-bold text-slate-800 leading-tight">Gia Đình Đàm</div>
             <div className="text-[11px] text-ocean-600 font-semibold">Quản Trị Cho Thuê</div>
           </div>
-          <div className="w-9 h-9 rounded-full bg-ocean-50 border border-ocean-200 flex items-center justify-center text-ocean-700 font-bold shadow-xs">
-            <User className="w-4 h-4" />
+          <div className="w-9 h-9 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-white shadow-xs">
+            <Navigation className="w-4 h-4 text-white fill-white" />
           </div>
         </div>
 
