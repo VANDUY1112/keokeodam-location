@@ -337,7 +337,7 @@ export function CuteAvatarPill({ letter = "K", color = "pink" }) {
 // 🌟 MAIN LANDING PAGE VIEW COMPONENT
 // ══════════════════════════════════════════════════════════
 
-export default function LandingPageView({ 
+export default function LandingPageView({
   onNavigateToAdmin,
   onOpenVietQR,
   onAddBooking
@@ -369,6 +369,18 @@ export default function LandingPageView({
   });
 
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [showStarDropdown, setShowStarDropdown] = useState(false);
+  const starDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (starDropdownRef.current && !starDropdownRef.current.contains(event.target)) {
+        setShowStarDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Trigger floating heart particles
   const triggerParticleBurst = (x = window.innerWidth / 2, y = window.innerHeight / 2) => {
@@ -645,6 +657,9 @@ export default function LandingPageView({
     .filter(r => {
       if (reviewFilter === '5star') return r.rating === 5;
       if (reviewFilter === '4star') return r.rating === 4;
+      if (reviewFilter === '3star') return r.rating === 3;
+      if (reviewFilter === '2star') return r.rating === 2;
+      if (reviewFilter === '1star') return r.rating === 1;
       return true;
     })
     .sort((a, b) => {
@@ -668,19 +683,23 @@ export default function LandingPageView({
       const rect = e.currentTarget.getBoundingClientRect();
       triggerParticleBurst(rect.left + 50, rect.top);
     }
-    const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:Locahome - Thue Loa Keo
-ORG:Locahome Rentals
-TEL;TYPE=CELL,VOICE:0368115592
-NOTE:Dich vu cho thue loa keo hoa toc 30 phut TP.HCM - Hotline 0368115592
-END:VCARD`;
+    const vcard = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      'N:Dặm;Kẹo Kéo;;;',
+      'FN:Kẹo Kéo Dặm',
+      'ORG:Locahome - Cho Thuê Loa Kéo',
+      'TEL;TYPE=CELL,VOICE:0368115592',
+      'TEL;TYPE=WORK,VOICE:0368115592',
+      'NOTE:Dịch vụ cho thuê loa kéo hỏa tốc 30 phút Tuy Hòa & Phú Yên - Hotline: 0368.115.592',
+      'END:VCARD'
+    ].join('\r\n');
 
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'Locahome-0368115592.vcf');
+    link.setAttribute('download', 'Keo-Keo-Dam-0368115592.vcf');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -867,50 +886,46 @@ END:VCARD`;
 
             {/* Clean Kawaii Navigation Links */}
             <nav className="hidden md:flex items-center gap-1.5 bg-white/70 backdrop-blur-md p-1.5 rounded-full border border-[#864d61]/10 shadow-xs">
-              <a 
+              <a
                 href="#reviews"
                 onClick={() => setActiveNav('reviews')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                  activeNav === 'reviews' 
-                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-                }`}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'reviews'
+                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
+                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                  }`}
               >
                 <CuteStarIcon filled={activeNav === 'reviews'} className="w-4 h-4" />
                 <span>Đánh Giá</span>
               </a>
-              <a 
+              <a
                 href="#speakers"
                 onClick={() => setActiveNav('speakers')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                  activeNav === 'speakers' 
-                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-                }`}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'speakers'
+                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
+                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                  }`}
               >
                 <CuteSpeakerIcon className="w-4 h-4" />
                 <span>Bảng Giá Loa</span>
               </a>
-              <a 
+              <a
                 href="#sound-demo"
                 onClick={() => setActiveNav('sound-demo')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                  activeNav === 'sound-demo' 
-                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-                }`}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'sound-demo'
+                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
+                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                  }`}
               >
                 <CuteMusicNotesDecor className="w-4 h-4" />
                 <span>Thử Âm Thanh</span>
               </a>
-              <a 
+              <a
                 href="#faq"
                 onClick={() => setActiveNav('faq')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                  activeNav === 'faq' 
-                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-                }`}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'faq'
+                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
+                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                  }`}
               >
                 <CuteHeartIcon filled={activeNav === 'faq'} className="w-4 h-4" />
                 <span>Hỏi Đáp</span>
@@ -920,15 +935,14 @@ END:VCARD`;
             {/* Action CTAs */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <button
-                onClick={() => {
-                  setSelectedSpeakerForBooking('puffy-bass-pro');
-                  setShowBookingModal(true);
+                onClick={(e) => {
+                  triggerParticleBurst(e.clientX, e.clientY);
+                  setShowAddReviewModal(true);
                 }}
-                className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md"
-                title="Đặt thuê loa giao nhanh 30 phút"
+                className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md hover:scale-105"
+                title="Mở form viết đánh giá trải nghiệm"
               >
-                <CuteMicIcon className="w-4 h-4 shrink-0" />
-                <span>Thuê Loa Ngay</span>
+                <span>Viết Đánh Giá</span>
               </button>
             </div>
           </div>
@@ -943,24 +957,15 @@ END:VCARD`;
         {/* HERO BANNER SECTION */}
         <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
           <div className="flex flex-col items-center text-center gap-6">
-            
+
             {/* Chibi Mascot Banner Card */}
-            <div className="relative w-full max-w-3xl h-[260px] sm:h-[320px] rounded-[3rem] bg-[#e9ddff] shadow-[0_12px_40px_rgba(134,77,97,0.15)] p-1.5 overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ffd9e3] via-[#c9e6ff] to-[#b2f2bb] opacity-60 rounded-[3rem]"></div>
-              
-              <div 
-                className="relative w-full h-full rounded-[2.7rem] overflow-hidden bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{
-                  backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuC9IP_GwJOJIXC5YHLU1A-T69rPdGrgMhoyhmjLkijArjAcLIl6Mxv3PO3MUOLmLAPJLcCqa_aC3ynJh2uBjr_6OGoiGUYy5faclk6pKUm7FOItLXNrqzg6zsU6EqZkWfaig3XrFElvBJHvFeS5nFaBlll4bII4XKEfOZ1dd56kPjgmjtk3_34FWDRS7cKOsGKtVMvT05IxJvQP4_Ovrms8FHOPY_ukMYflOeoY8vyo9MuMRa2GQIoN')`
-                }}
-              >
-                {/* Floating Music Notes */}
-                <div className="absolute top-6 left-10 animate-bounce drop-shadow-md">
-                  <CuteMusicNotesDecor className="w-10 h-10 text-[#ffb7ce]" />
-                </div>
-                <div className="absolute bottom-8 right-12 animate-[bounce_4s_infinite_ease-in-out_0.5s] drop-shadow-md">
-                  <CuteMusicNotesDecor className="w-9 h-9 text-[#2f6a3f]" />
-                </div>
+            <div className="w-full max-w-4xl rounded-[2.8rem] overflow-hidden shadow-[0_16px_40px_rgba(134,77,97,0.14)] border-4 border-white">
+              <div className="relative w-full aspect-[1774/887] overflow-hidden bg-[#201047]">
+                <img
+                  src="/anh1.png"
+                  alt="Locahome Chibi Mascot Banner"
+                  className="w-full h-full object-cover scale-[1.07] hover:scale-[1.1] transition-transform duration-700 block"
+                />
               </div>
             </div>
 
@@ -987,9 +992,8 @@ END:VCARD`;
                     const el = document.getElementById('speakers');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="bg-[#864d61] text-white font-headline text-base px-8 py-3.5 rounded-full clay-button-pink flex items-center gap-2"
+                  className="bg-[#864d61] text-white font-headline text-base px-8 py-3.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md"
                 >
-                  <CuteSpeakerIcon className="w-5 h-5" />
                   <span>Chọn Loa Thuê Ngay</span>
                 </button>
 
@@ -998,9 +1002,8 @@ END:VCARD`;
                     const el = document.getElementById('sound-demo');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="bg-[#b2f2bb] text-[#00210b] font-headline text-base px-7 py-3.5 rounded-full clay-button-green flex items-center gap-2"
+                  className="bg-[#b2f2bb] text-[#00210b] font-headline text-base px-7 py-3.5 rounded-full clay-button-green flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md"
                 >
-                  <CuteMusicNotesDecor className="w-5 h-5" />
                   <span>Nghe Thử Âm Thanh</span>
                 </button>
               </div>
@@ -1056,7 +1059,7 @@ END:VCARD`;
         <section id="sound-demo" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white/90 rounded-[3rem] p-6 sm:p-10 border-2 border-[#ffd9e3] shadow-[0_12px_36px_rgba(134,77,97,0.08)]">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              
+
               {/* Left text & Equalizer bars */}
               <div className="text-center md:text-left">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#ffd9e3] rounded-full text-[#864d61] text-xs font-bold uppercase tracking-wider mb-2">
@@ -1075,11 +1078,10 @@ END:VCARD`;
                   {[40, 75, 55, 95, 60, 85, 45, 100, 70, 50, 90, 65].map((h, idx) => (
                     <span
                       key={idx}
-                      className={`w-1.5 rounded-full transition-all duration-300 ${
-                        playingAudio 
-                          ? 'bg-[#864d61] animate-pulse' 
-                          : 'bg-[#ffd9e3]'
-                      }`}
+                      className={`w-1.5 rounded-full transition-all duration-300 ${playingAudio
+                        ? 'bg-[#864d61] animate-pulse'
+                        : 'bg-[#ffd9e3]'
+                        }`}
                       style={{
                         height: playingAudio ? `${(h * (Math.sin(idx + Date.now() / 200) + 1.5)) / 2}%` : '25%',
                         minHeight: '6px'
@@ -1096,11 +1098,10 @@ END:VCARD`;
               <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
                 <button
                   onClick={() => playSoundDemo('bass')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${
-                    playingAudio === 'bass'
-                      ? 'bg-[#864d61] text-white border-[#864d61] shadow-md ring-2 ring-[#ffd9e3]'
-                      : 'bg-[#fdf7ff] text-[#201047] border-[#ffd9e3] hover:bg-[#ffd9e3]/40'
-                  }`}
+                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'bass'
+                    ? 'bg-[#864d61] text-white border-[#864d61] shadow-md ring-2 ring-[#ffd9e3]'
+                    : 'bg-[#fdf7ff] text-[#201047] border-[#ffd9e3] hover:bg-[#ffd9e3]/40'
+                    }`}
                 >
                   <CuteAudioWaveIcon className="w-4.5 h-4.5" />
                   <span>Super Bass 40</span>
@@ -1108,11 +1109,10 @@ END:VCARD`;
 
                 <button
                   onClick={() => playSoundDemo('bolero')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${
-                    playingAudio === 'bolero'
-                      ? 'bg-[#2f6a3f] text-white border-[#2f6a3f] shadow-md ring-2 ring-[#b2f2bb]'
-                      : 'bg-[#fdf7ff] text-[#201047] border-[#b2f2bb] hover:bg-[#b2f2bb]/40'
-                  }`}
+                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'bolero'
+                    ? 'bg-[#2f6a3f] text-white border-[#2f6a3f] shadow-md ring-2 ring-[#b2f2bb]'
+                    : 'bg-[#fdf7ff] text-[#201047] border-[#b2f2bb] hover:bg-[#b2f2bb]/40'
+                    }`}
                 >
                   <CuteMicIcon className="w-4.5 h-4.5" />
                   <span>Bolero Echo</span>
@@ -1120,11 +1120,10 @@ END:VCARD`;
 
                 <button
                   onClick={() => playSoundDemo('disco')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${
-                    playingAudio === 'disco'
-                      ? 'bg-purple-700 text-white border-purple-700 shadow-md ring-2 ring-purple-200'
-                      : 'bg-[#fdf7ff] text-[#201047] border-purple-200 hover:bg-purple-100/50'
-                  }`}
+                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'disco'
+                    ? 'bg-purple-700 text-white border-purple-700 shadow-md ring-2 ring-purple-200'
+                    : 'bg-[#fdf7ff] text-[#201047] border-purple-200 hover:bg-purple-100/50'
+                    }`}
                 >
                   <CuteSparkleDiscoIcon className="w-4.5 h-4.5" />
                   <span>Disco Remix</span>
@@ -1132,11 +1131,10 @@ END:VCARD`;
 
                 <button
                   onClick={() => playSoundDemo('acoustic')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${
-                    playingAudio === 'acoustic'
-                      ? 'bg-[#235a7c] text-white border-[#235a7c] shadow-md ring-2 ring-[#c9e6ff]'
-                      : 'bg-[#fdf7ff] text-[#201047] border-[#c9e6ff] hover:bg-[#c9e6ff]/40'
-                  }`}
+                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'acoustic'
+                    ? 'bg-[#235a7c] text-white border-[#235a7c] shadow-md ring-2 ring-[#c9e6ff]'
+                    : 'bg-[#fdf7ff] text-[#201047] border-[#c9e6ff] hover:bg-[#c9e6ff]/40'
+                    }`}
                 >
                   <CuteCoffeeCupIcon className="w-4.5 h-4.5" />
                   <span>Acoustic Chill</span>
@@ -1160,94 +1158,141 @@ END:VCARD`;
               </p>
             </div>
 
-            {/* Filter Tags & Add Review Button */}
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Filter Tags Bar - Full width 4-column on mobile */}
+            <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setReviewFilter('all')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                  reviewFilter === 'all'
-                    ? 'bg-[#864d61] text-white shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-[#eee4ff] border border-slate-200/60'
-                }`}
+                className={`w-full sm:w-auto px-1.5 sm:px-3.5 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer text-center justify-center flex items-center whitespace-nowrap ${reviewFilter === 'all'
+                  ? 'bg-[#864d61] text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:bg-[#eee4ff] border border-slate-200/60'
+                  }`}
               >
                 Tất cả ({reviewsList.length})
               </button>
-              
+
               <button
                 onClick={() => setReviewFilter('newest')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                  reviewFilter === 'newest'
-                    ? 'bg-[#864d61] text-white shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-[#eee4ff] border border-slate-200/60'
-                }`}
+                className={`w-full sm:w-auto px-1.5 sm:px-3.5 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${reviewFilter === 'newest'
+                  ? 'bg-[#864d61] text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:bg-[#eee4ff] border border-slate-200/60'
+                  }`}
               >
                 <span>Gần nhất</span>
               </button>
 
               <button
                 onClick={() => setReviewFilter('oldest')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                  reviewFilter === 'oldest'
-                    ? 'bg-[#864d61] text-white shadow-xs'
-                    : 'bg-white text-slate-600 hover:bg-[#eee4ff] border border-slate-200/60'
-                }`}
+                className={`w-full sm:w-auto px-1.5 sm:px-3.5 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-0.5 sm:gap-1 whitespace-nowrap ${reviewFilter === 'oldest'
+                  ? 'bg-[#864d61] text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:bg-[#eee4ff] border border-slate-200/60'
+                  }`}
               >
                 <span>Lâu nhất</span>
               </button>
 
-              <button
-                onClick={() => setReviewFilter('5star')}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                  reviewFilter === '5star'
+              {/* Star Rating Animated Dropdown */}
+              <div className="relative w-full sm:w-auto" ref={starDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowStarDropdown(!showStarDropdown)}
+                  className={`w-full sm:w-auto px-1.5 sm:px-3.5 py-2 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap ${['5star', '4star', '3star', '2star', '1star'].includes(reviewFilter) || showStarDropdown
                     ? 'bg-[#864d61] text-white shadow-xs'
                     : 'bg-white text-slate-600 hover:bg-[#eee4ff] border border-slate-200/60'
-                }`}
-              >
-                <CuteStarIcon filled={true} className="w-3.5 h-3.5" />
-                <span>5 Sao</span>
-              </button>
+                    }`}
+                >
+                  <CuteStarIcon filled={true} className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400 shrink-0" />
+                  <span className="truncate">
+                    {reviewFilter === '5star' ? '5 Sao' :
+                      reviewFilter === '4star' ? '4 Sao' :
+                        reviewFilter === '3star' ? '3 Sao' :
+                          reviewFilter === '2star' ? '2 Sao' :
+                            reviewFilter === '1star' ? '1 Sao' : 'Chọn Sao'}
+                  </span>
+                  <svg
+                    className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-200 shrink-0 ${showStarDropdown ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
 
-              <button
-                onClick={() => setShowAddReviewModal(true)}
-                className="px-4 py-1.5 rounded-full bg-[#b2f2bb] text-[#00210b] hover:bg-[#96d5a0] text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:scale-95 ml-auto sm:ml-0"
-              >
-                <CutePenToolIcon className="w-3.5 h-3.5 text-[#2f6a3f]" />
-                <span>Viết Đánh Giá</span>
-              </button>
+                {/* Animated Dropdown Menu with Smooth Unfold / Fold Transitions */}
+                <div
+                  className={`absolute top-full right-0 sm:left-0 sm:right-auto mt-2 w-36 sm:w-44 bg-white/95 backdrop-blur-md rounded-2xl p-1.5 shadow-[0_14px_36px_rgba(134,77,97,0.2)] border-2 border-[#ffd9e3] z-40 origin-top-right sm:origin-top-left transition-all duration-300 ease-out ${showStarDropdown
+                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
+                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
+                    }`}
+                >
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const filterKey = `${stars}star`;
+                    const isSelected = reviewFilter === filterKey;
+                    const count = reviewsList.filter(r => r.rating === stars).length;
+                    return (
+                      <button
+                        key={stars}
+                        type="button"
+                        onClick={() => {
+                          setReviewFilter(filterKey);
+                          setShowStarDropdown(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSelected
+                          ? 'bg-[#ffd9e3] text-[#864d61]'
+                          : 'hover:bg-[#f8f1ff] text-slate-700 hover:text-[#864d61]'
+                          }`}
+                      >
+                        <div className="flex items-center gap-1 shrink-0">
+                          <span className="flex text-amber-400">
+                            {Array.from({ length: stars }).map((_, i) => (
+                              <CuteStarIcon key={i} filled={true} className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                            ))}
+                          </span>
+                          <span className="text-[11px] sm:text-xs">{stars} Sao</span>
+                        </div>
+                        <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-semibold shrink-0">
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Masonry Review Columns */}
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          <div className="columns-2 lg:columns-3 gap-3 sm:gap-6 space-y-3 sm:space-y-6">
             {filteredReviews.map((rev) => {
               if (rev.colorScheme === 'imageCard') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#ffb7ce] rounded-[2rem] p-1.5 shadow-[0_12px_32px_rgba(134,77,97,0.15)] relative z-10 transition-transform duration-300 hover:scale-[1.02] border border-[#fab3ca]">
-                      <div className="relative w-full h-48 rounded-t-[1.7rem] overflow-hidden mb-2">
-                        <div 
+                    <div className="bg-[#ffb7ce] rounded-2xl sm:rounded-[2rem] p-1 sm:p-1.5 shadow-md sm:shadow-[0_12px_32px_rgba(134,77,97,0.15)] relative z-10 transition-transform duration-300 hover:scale-[1.02] border border-[#fab3ca]">
+                      <div className="relative w-full h-28 sm:h-48 rounded-t-xl sm:rounded-t-[1.7rem] overflow-hidden mb-1.5 sm:mb-2">
+                        <div
                           className="absolute inset-0 bg-cover bg-center"
                           style={{ backgroundImage: `url('${rev.bannerImage}')` }}
                         ></div>
                         <div className="absolute inset-0 bg-gradient-to-t from-[#ffb7ce] via-transparent to-transparent"></div>
-                        <div className="absolute bottom-3 left-4 flex gap-1">
+                        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-4 flex gap-0.5 sm:gap-1">
                           {[...Array(5)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-5 h-5 drop-shadow-xs" />
+                            <CuteStarIcon key={i} filled={true} className="w-3 h-3 sm:w-5 sm:h-5 drop-shadow-xs" />
                           ))}
                         </div>
                       </div>
-                      <div className="p-4 pt-1">
-                        <h4 className="font-headline text-lg sm:text-xl text-[#7b4458] mb-2">{rev.title || 'Buổi Tiệc Tuyệt Vời Nhất'}</h4>
-                        <p className="text-sm sm:text-base text-[#7b4458]/90 font-medium leading-relaxed">
+                      <div className="p-2 sm:p-4 pt-1">
+                        <h4 className="font-headline text-xs sm:text-xl text-[#7b4458] mb-1 sm:mb-2 line-clamp-1">{rev.title || 'Buổi Tiệc Tuyệt Vời Nhất'}</h4>
+                        <p className="text-[11px] sm:text-base text-[#7b4458]/90 font-medium leading-snug sm:leading-relaxed line-clamp-3 sm:line-clamp-none">
                           "{rev.comment}"
                         </p>
-                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-[#864d61]/15">
-                          <div className="w-11 h-11 rounded-full border-2 border-[#864d61] bg-white p-[1px] shadow-sm shrink-0 overflow-hidden">
+                        <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-[#864d61]/15">
+                          <div className="w-7 h-7 sm:w-11 sm:h-11 rounded-full border border-[#864d61] bg-white p-[1px] shadow-sm shrink-0 overflow-hidden">
                             <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                           </div>
-                          <div>
-                            <h3 className="font-headline text-sm text-[#7b4458]">{rev.name}</h3>
-                            <p className="text-xs font-bold text-[#7b4458]/70">{rev.role}</p>
+                          <div className="min-w-0">
+                            <h3 className="font-headline text-xs sm:text-sm text-[#7b4458] truncate">{rev.name}</h3>
+                            <p className="text-[9px] sm:text-xs font-bold text-[#7b4458]/70 truncate">{rev.role}</p>
                           </div>
                         </div>
                       </div>
@@ -1259,23 +1304,23 @@ END:VCARD`;
               if (rev.colorScheme === 'darkCard') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#201047] rounded-[2.5rem] p-6 shadow-xl relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-purple-900/40">
-                      <div className="absolute top-4 right-5 text-[#fab3ca] text-[50px] opacity-20 font-headline">"</div>
-                      <div className="flex gap-1 mb-4">
+                    <div className="bg-[#201047] rounded-2xl sm:rounded-[2.5rem] p-3.5 sm:p-6 shadow-xl relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-purple-900/40">
+                      <div className="absolute top-2 right-3 sm:top-4 sm:right-5 text-[#fab3ca] text-2xl sm:text-[50px] opacity-20 font-headline">"</div>
+                      <div className="flex gap-0.5 sm:gap-1 mb-2 sm:mb-4">
                         {[...Array(rev.rating)].map((_, i) => (
-                          <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
+                          <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-amber-300" />
                         ))}
                       </div>
-                      <p className="text-base text-[#f6eeff] font-medium leading-relaxed mb-4">
+                      <p className="text-[11px] sm:text-base text-[#f6eeff] font-medium leading-snug sm:leading-relaxed mb-2.5 sm:mb-4 line-clamp-4 sm:line-clamp-none">
                         "{rev.comment}"
                       </p>
-                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-purple-800/40">
-                        <div className="w-11 h-11 rounded-full border-2 border-[#ffb7ce] bg-white p-[1px] shrink-0 overflow-hidden">
+                      <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-purple-800/40">
+                        <div className="w-7 h-7 sm:w-11 sm:h-11 rounded-full border border-[#ffb7ce] bg-white p-[1px] shrink-0 overflow-hidden">
                           <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                         </div>
-                        <div>
-                          <h3 className="font-headline text-sm text-[#f6eeff]">{rev.name}</h3>
-                          <p className="text-xs font-bold text-purple-300">{rev.role}</p>
+                        <div className="min-w-0">
+                          <h3 className="font-headline text-xs sm:text-sm text-[#f6eeff] truncate">{rev.name}</h3>
+                          <p className="text-[9px] sm:text-xs font-bold text-purple-300 truncate">{rev.role}</p>
                         </div>
                       </div>
                     </div>
@@ -1286,23 +1331,23 @@ END:VCARD`;
               if (rev.colorScheme === 'whiteCard') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-white rounded-[2rem] p-6 shadow-[0_6px_20px_rgba(134,77,97,0.06)] border-2 border-[#ffd9e3] relative z-10 transition-transform duration-300 hover:-translate-y-2">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex gap-1">
+                    <div className="bg-white rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-6 shadow-[0_6px_20px_rgba(134,77,97,0.06)] border-2 border-[#ffd9e3] relative z-10 transition-transform duration-300 hover:-translate-y-2">
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <div className="flex gap-0.5 sm:gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-4.5 h-4.5" />
+                            <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
                           ))}
                         </div>
-                        <CuteHeartIcon className="w-4.5 h-4.5" />
+                        <CuteHeartIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
                       </div>
-                      <p className="text-sm sm:text-base text-[#201047] font-medium leading-relaxed mb-4 italic">
+                      <p className="text-[11px] sm:text-base text-[#201047] font-medium leading-snug sm:leading-relaxed mb-2.5 sm:mb-4 italic line-clamp-4 sm:line-clamp-none">
                         "{rev.comment}"
                       </p>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 sm:gap-3">
                         <CuteAvatarPill letter={rev.avatarLetter || 'K'} color={rev.avatarColor || 'blue'} />
-                        <div>
-                          <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                          <p className="text-xs font-bold text-slate-400">{rev.role}</p>
+                        <div className="min-w-0">
+                          <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
+                          <p className="text-[9px] sm:text-xs font-bold text-slate-400 truncate">{rev.role}</p>
                         </div>
                       </div>
                     </div>
@@ -1313,27 +1358,27 @@ END:VCARD`;
               if (rev.colorScheme === 'blue') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#c9e6ff]/50 rounded-[2.2rem] p-6 shadow-[0_8px_24px_rgba(35,90,124,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#9ed1f8]/50">
-                      <div className="absolute -bottom-3 right-10 w-7 h-7 bg-[#c9e6ff]/50 transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(35,90,124,0.04)] -z-10 border-r border-b border-[#9ed1f8]/50"></div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex gap-1">
+                    <div className="bg-[#c9e6ff]/50 rounded-2xl sm:rounded-[2.2rem] p-3.5 sm:p-6 shadow-[0_8px_24px_rgba(35,90,124,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#9ed1f8]/50">
+                      <div className="absolute -bottom-2.5 right-6 sm:right-10 w-5 h-5 sm:w-7 sm:h-7 bg-[#c9e6ff]/50 transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(35,90,124,0.04)] -z-10 border-r border-b border-[#9ed1f8]/50"></div>
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <div className="flex gap-0.5 sm:gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
+                            <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                           ))}
                         </div>
-                        <span className="text-xs font-bold text-[#235a7c] bg-[#c9e6ff] px-2.5 py-0.5 rounded-full border border-[#9ed1f8]">{rev.time}</span>
+                        <span className="text-[9px] sm:text-xs font-bold text-[#235a7c] bg-[#c9e6ff] px-1.5 sm:px-2.5 py-0.5 rounded-full border border-[#9ed1f8]">{rev.time}</span>
                       </div>
-                      <p className="text-sm sm:text-base text-[#0c4b6c] font-semibold leading-relaxed mb-2">
+                      <p className="text-[11px] sm:text-base text-[#0c4b6c] font-semibold leading-snug sm:leading-relaxed mb-1 sm:mb-2 line-clamp-4 sm:line-clamp-none">
                         "{rev.comment}"
                       </p>
                     </div>
-                    <div className="flex items-center flex-row-reverse gap-3 mt-4 pr-3 text-right">
-                      <div className="w-12 h-12 rounded-2xl border-[3px] border-[#9ed1f8] bg-white p-0.5 shadow-sm shrink-0 transform rotate-3 overflow-hidden">
-                        <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-xl" />
+                    <div className="flex items-center flex-row-reverse gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pr-1 sm:pr-3 text-right">
+                      <div className="w-7 h-7 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-[#9ed1f8] bg-white p-0.5 shadow-sm shrink-0 transform rotate-3 overflow-hidden">
+                        <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-lg sm:rounded-xl" />
                       </div>
-                      <div>
-                        <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                        <p className="text-xs font-bold text-[#2e6385]">{rev.role}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
+                        <p className="text-[9px] sm:text-xs font-bold text-[#2e6385] truncate">{rev.role}</p>
                       </div>
                     </div>
                   </article>
@@ -1343,32 +1388,32 @@ END:VCARD`;
               if (rev.colorScheme === 'green') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#b2f2bb]/50 rounded-[2rem] rounded-tr-none p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
-                      <div className="absolute -top-3 right-0 w-7 h-7 bg-[#b2f2bb]/50 transform rotate-45 rounded-xs -z-10 border-t border-r border-[#96d5a0]/50"></div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex gap-1">
+                    <div className="bg-[#b2f2bb]/50 rounded-2xl sm:rounded-[2rem] rounded-tr-none p-3.5 sm:p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
+                      <div className="absolute -top-2.5 right-0 w-5 h-5 sm:w-7 sm:h-7 bg-[#b2f2bb]/50 transform rotate-45 rounded-xs -z-10 border-t border-r border-[#96d5a0]/50"></div>
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <div className="flex gap-0.5 sm:gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
+                            <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                           ))}
                         </div>
                         {rev.verified && (
-                          <div className="px-2.5 py-0.5 bg-[#2f6a3f] text-white text-[11px] font-bold rounded-lg transform -rotate-2 flex items-center gap-1 shadow-xs">
-                            <CuteCheckIcon className="w-3.5 h-3.5" />
+                          <div className="px-1.5 sm:px-2.5 py-0.5 bg-[#2f6a3f] text-white text-[9px] sm:text-[11px] font-bold rounded-md sm:rounded-lg transform -rotate-2 flex items-center gap-0.5 sm:gap-1 shadow-xs">
+                            <CuteCheckIcon className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
                             <span>Đã Thuê</span>
                           </div>
                         )}
                       </div>
-                      <p className="text-sm sm:text-base text-[#00210b] font-semibold leading-relaxed mb-2">
+                      <p className="text-[11px] sm:text-base text-[#00210b] font-semibold leading-snug sm:leading-relaxed mb-1 sm:mb-2 line-clamp-4 sm:line-clamp-none">
                         "{rev.comment}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 mt-4 pl-3">
-                      <div className="w-12 h-12 rounded-full border-[3px] border-[#96d5a0] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
+                    <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pl-1 sm:pl-3">
+                      <div className="w-7 h-7 sm:w-12 sm:h-12 rounded-full border-2 sm:border-[3px] border-[#96d5a0] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
                         <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                       </div>
-                      <div>
-                        <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                        <p className="text-xs font-bold text-[#2f6a3f]">{rev.role}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
+                        <p className="text-[9px] sm:text-xs font-bold text-[#2f6a3f] truncate">{rev.role}</p>
                       </div>
                     </div>
                   </article>
@@ -1377,31 +1422,31 @@ END:VCARD`;
 
               return (
                 <article key={rev.id} className="break-inside-avoid relative">
-                  <div className="bg-[#f3eaff] rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
-                    <div className="absolute -bottom-3 left-10 w-7 h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex gap-1">
+                  <div className="bg-[#f3eaff] rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
+                    <div className="absolute -bottom-2.5 left-6 sm:left-10 w-5 h-5 sm:w-7 sm:h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
+                    <div className="flex items-center justify-between mb-2 sm:mb-3">
+                      <div className="flex gap-0.5 sm:gap-1">
                         {[...Array(rev.rating)].map((_, i) => (
-                          <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
+                          <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                         ))}
                       </div>
-                      <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-2.5 py-0.5 rounded-full border border-[#fab3ca]">{rev.time}</span>
+                      <span className="text-[9px] sm:text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-1.5 sm:px-2.5 py-0.5 rounded-full border border-[#fab3ca]">{rev.time}</span>
                     </div>
-                    <p className="text-sm sm:text-base text-[#201047] font-semibold leading-relaxed mb-2">
+                    <p className="text-[11px] sm:text-base text-[#201047] font-semibold leading-snug sm:leading-relaxed mb-1 sm:mb-2 line-clamp-4 sm:line-clamp-none">
                       "{rev.comment}"
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 mt-4 pl-3">
-                    <div className="w-12 h-12 rounded-full border-[3px] border-[#ffd9e3] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
+                  <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pl-1 sm:pl-3">
+                    <div className="w-7 h-7 sm:w-12 sm:h-12 rounded-full border-2 sm:border-[3px] border-[#ffd9e3] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
                       {rev.avatar ? (
                         <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                       ) : (
                         <CuteAvatarPill letter={rev.avatarLetter || 'U'} color={rev.avatarColor || 'pink'} />
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                      <p className="text-xs font-bold text-[#864d61]">{rev.role}</p>
+                    <div className="min-w-0">
+                      <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
+                      <p className="text-[9px] sm:text-xs font-bold text-[#864d61] truncate">{rev.role}</p>
                     </div>
                   </div>
                 </article>
@@ -1425,62 +1470,63 @@ END:VCARD`;
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {speakerPackages.map((pkg) => (
-              <div 
+              <div
                 key={pkg.id}
-                className={`relative rounded-[2.5rem] bg-white p-6 shadow-[0_10px_30px_rgba(134,77,97,0.08)] border-2 transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between ${
-                  pkg.popular ? 'border-[#864d61] ring-4 ring-[#ffd9e3]/60' : 'border-[#e9ddff]'
-                }`}
+                className={`relative rounded-3xl sm:rounded-[2.5rem] bg-white p-3.5 sm:p-6 shadow-[0_10px_30px_rgba(134,77,97,0.08)] border-2 transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between ${pkg.popular ? 'border-[#864d61] ring-2 sm:ring-4 ring-[#ffd9e3]/60' : 'border-[#e9ddff]'
+                  }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#864d61] text-white text-xs font-headline px-4 py-1 rounded-full shadow-md flex items-center gap-1">
-                    <CuteStarIcon filled={true} className="w-3.5 h-3.5" />
-                    <span>Khuyên Dùng Nhiều Nhất</span>
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#864d61] text-white text-[9px] sm:text-xs font-headline px-2.5 sm:px-4 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap">
+                    <CuteStarIcon filled={true} className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
+                    <span>Khuyên Dùng</span>
                   </div>
                 )}
 
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${pkg.badgeColor}`}>
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <span className={`text-[9px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border truncate max-w-[85px] sm:max-w-none ${pkg.badgeColor}`}>
                       {pkg.badge}
                     </span>
-                    <div className="w-10 h-10 rounded-2xl bg-[#f3eaff] text-[#864d61] flex items-center justify-center border border-[#ffd9e3]">
-                      <CuteSpeakerIcon className="w-5 h-5" />
+                    <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#f3eaff] text-[#864d61] flex items-center justify-center border border-[#ffd9e3] shrink-0">
+                      <CuteSpeakerIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
                     </div>
                   </div>
 
-                  <h3 className="font-headline text-xl text-[#201047] mb-1">{pkg.name}</h3>
-                  
-                  <div className="flex items-baseline gap-1 my-3">
-                    <span className="font-headline text-3xl text-[#864d61]">
-                      {pkg.hourlyRate.toLocaleString('vi-VN')}₫
-                    </span>
-                    <span className="text-xs font-bold text-slate-500">/ giờ</span>
-                    <span className="text-xs font-bold text-emerald-700 ml-auto bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                  <h3 className="font-headline text-sm sm:text-xl text-[#201047] mb-1 line-clamp-1">{pkg.name}</h3>
+
+                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-1 my-2 sm:my-3">
+                    <div className="flex items-baseline gap-1">
+                      <span className="font-headline text-lg sm:text-3xl text-[#864d61]">
+                        {pkg.hourlyRate.toLocaleString('vi-VN')}₫
+                      </span>
+                      <span className="text-[10px] sm:text-xs font-bold text-slate-500">/ giờ</span>
+                    </div>
+                    <span className="text-[9px] sm:text-xs font-bold text-emerald-700 sm:ml-auto bg-emerald-50 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg border border-emerald-200 w-fit">
                       {pkg.dailyRate.toLocaleString('vi-VN')}₫/ngày
                     </span>
                   </div>
 
                   {/* Specs Pill */}
-                  <div className="flex items-center gap-2 py-2 px-3 bg-[#fdf7ff] rounded-xl text-xs font-bold text-slate-600 mb-4 border border-[#e9ddff]">
-                    <span className="flex items-center gap-1 text-amber-700">
-                      <CuteLightningIcon className="w-4 h-4" />
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 py-1 sm:py-2 px-1.5 sm:px-3 bg-[#fdf7ff] rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold text-slate-600 mb-3 sm:mb-4 border border-[#e9ddff]">
+                    <span className="flex items-center gap-0.5 sm:gap-1 text-amber-700">
+                      <CuteLightningIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                       {pkg.power}
                     </span>
-                    <span className="text-slate-300">•</span>
-                    <span className="flex items-center gap-1 text-emerald-700">
-                      <CuteBatteryIcon className="w-4 h-4" />
+                    <span className="text-slate-300 hidden sm:inline">•</span>
+                    <span className="flex items-center gap-0.5 sm:gap-1 text-emerald-700">
+                      <CuteBatteryIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                       {pkg.battery}
                     </span>
                   </div>
 
                   {/* Features List */}
-                  <ul className="space-y-2 text-xs font-semibold text-[#514347] mb-6">
+                  <ul className="space-y-1 sm:space-y-2 text-[10px] sm:text-xs font-semibold text-[#514347] mb-3 sm:mb-6">
                     {pkg.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <CuteCheckIcon className="w-4 h-4 shrink-0 mt-0.5" />
-                        <span>{feat}</span>
+                      <li key={idx} className="flex items-start gap-1 sm:gap-2">
+                        <CuteCheckIcon className="w-3 h-3 sm:w-4 sm:h-4 shrink-0 mt-0.5" />
+                        <span className="line-clamp-2">{feat}</span>
                       </li>
                     ))}
                   </ul>
@@ -1488,9 +1534,9 @@ END:VCARD`;
 
                 <button
                   onClick={() => handleOpenRentSpeaker(pkg)}
-                  className={`w-full py-3.5 rounded-2xl font-headline text-sm shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2 ${pkg.buttonBg}`}
+                  className={`w-full py-2 sm:py-3.5 rounded-xl sm:rounded-2xl font-headline text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center justify-center gap-1 sm:gap-2 ${pkg.buttonBg}`}
                 >
-                  <CuteMicIcon className="w-4.5 h-4.5" />
+                  <CuteMicIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 shrink-0" />
                   <span>Thuê Loa Này</span>
                 </button>
               </div>
@@ -1513,32 +1559,29 @@ END:VCARD`;
             {faqs.map((faq, idx) => {
               const isOpen = openFaqIndex === idx;
               return (
-                <div 
+                <div
                   key={idx}
-                  className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden shadow-xs ${
-                    isOpen
-                      ? 'border-[#fab3ca] shadow-[0_8px_24px_rgba(134,77,97,0.1)] ring-2 ring-[#ffd9e3]/60 -translate-y-0.5'
-                      : 'border-[#e9ddff] hover:border-[#ffd9e3] hover:shadow-sm'
-                  }`}
+                  className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden shadow-xs ${isOpen
+                    ? 'border-[#fab3ca] shadow-[0_8px_24px_rgba(134,77,97,0.1)] ring-2 ring-[#ffd9e3]/60 -translate-y-0.5'
+                    : 'border-[#e9ddff] hover:border-[#ffd9e3] hover:shadow-sm'
+                    }`}
                 >
                   <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
                     className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 font-headline text-base text-[#201047] hover:bg-[#fdf7ff] transition-colors group cursor-pointer"
                   >
                     <span className="flex items-center gap-3">
-                      <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-extrabold shrink-0 transition-colors ${
-                        isOpen ? 'bg-[#864d61] text-white' : 'bg-[#ffd9e3] text-[#864d61]'
-                      }`}>
+                      <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-extrabold shrink-0 transition-colors ${isOpen ? 'bg-[#864d61] text-white' : 'bg-[#ffd9e3] text-[#864d61]'
+                        }`}>
                         {idx + 1}
                       </span>
                       <span className="font-headline font-bold text-sm sm:text-base text-[#201047]">{faq.q}</span>
                     </span>
 
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 shrink-0 ${
-                      isOpen 
-                        ? 'bg-[#ffd9e3] text-[#864d61] rotate-180' 
-                        : 'bg-[#fdf7ff] text-[#864d61] group-hover:bg-[#ffd9e3]/60'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 shrink-0 ${isOpen
+                      ? 'bg-[#ffd9e3] text-[#864d61] rotate-180'
+                      : 'bg-[#fdf7ff] text-[#864d61] group-hover:bg-[#ffd9e3]/60'
+                      }`}>
                       <svg className="w-4 h-4 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
@@ -1546,10 +1589,9 @@ END:VCARD`;
                   </button>
 
                   {/* Smooth Animated Height & Opacity Collapse Container */}
-                  <div 
-                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
-                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                    }`}
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                      }`}
                   >
                     <div className="overflow-hidden">
                       <div className="px-5 pb-5 pt-2 text-sm font-semibold text-[#514347] leading-relaxed border-t border-[#ffd9e3]/40 bg-[#fdf7ff]/70">
@@ -1568,50 +1610,50 @@ END:VCARD`;
 
         {/* ═══════════════ WHY CHOOSE US (ƯU ĐIỂM) ═══════════════ */}
         <section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-[#f3eaff] rounded-[3.5rem] p-8 sm:p-12 border-2 border-[#ffd9e3] shadow-[inset_0_4px_20px_rgba(255,255,255,0.9),0_10px_30px_rgba(134,77,97,0.06)]">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-              <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
+          <div className="bg-[#f3eaff] rounded-[2.5rem] sm:rounded-[3.5rem] p-4 sm:p-12 border-2 border-[#ffd9e3] shadow-[inset_0_4px_20px_rgba(255,255,255,0.9),0_10px_30px_rgba(134,77,97,0.06)]">
+            <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-10">
+              <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
                 Tại Sao Hơn 500+ Khách Hàng Chọn Locahome?
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform">
-                <div className="w-13 h-13 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center mb-4 border border-[#fab3ca]/60">
-                  <CuteLightningIcon className="w-7 h-7" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
+                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#fab3ca]/60 shrink-0">
+                  <CuteLightningIcon className="w-5 h-5 sm:w-7 sm:h-7" />
                 </div>
-                <h3 className="font-headline text-lg text-[#201047] mb-1.5">Giao Nhanh 30 Phút</h3>
-                <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed">
+                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">Giao Nhanh 30 Phút</h3>
+                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
                   Đội ngũ shipper hỏa tốc luôn sẵn sàng mang loa đến tận nhà ngay sau khi bạn chốt đơn.
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform">
-                <div className="w-13 h-13 rounded-2xl bg-[#b2f2bb] text-[#2f6a3f] flex items-center justify-center mb-4 border border-[#96d5a0]/60">
-                  <CuteMicIcon className="w-7 h-7" />
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
+                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#b2f2bb] text-[#2f6a3f] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#96d5a0]/60 shrink-0">
+                  <CuteMicIcon className="w-5 h-5 sm:w-7 sm:h-7" />
                 </div>
-                <h3 className="font-headline text-lg text-[#201047] mb-1.5">Mic Chống Hú 100%</h3>
-                <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed">
+                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">Mic Chống Hú 100%</h3>
+                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
                   Micro UHF chuẩn sân khấu bắt âm cực nhạy, hát nhẹ hơi, không lo rè hú chói tai.
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform">
-                <div className="w-13 h-13 rounded-2xl bg-[#c9e6ff] text-[#2e6385] flex items-center justify-center mb-4 border border-[#9ed1f8]/60">
-                  <CuteSwapIcon className="w-7 h-7" />
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
+                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#c9e6ff] text-[#2e6385] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#9ed1f8]/60 shrink-0">
+                  <CuteSwapIcon className="w-5 h-5 sm:w-7 sm:h-7" />
                 </div>
-                <h3 className="font-headline text-lg text-[#201047] mb-1.5">Đổi Loa Miễn Phí</h3>
-                <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed">
+                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">Đổi Loa Miễn Phí</h3>
+                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
                   Nếu không hài lòng hoặc âm thanh có vấn đề, chúng mình đổi loa mới ngay trong 15 phút!
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform">
-                <div className="w-13 h-13 rounded-2xl bg-[#eee4ff] text-[#864d61] flex items-center justify-center mb-4 border border-[#fab3ca]/60">
-                  <CuteQRIcon className="w-7 h-7" />
+              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
+                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#eee4ff] text-[#864d61] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#fab3ca]/60 shrink-0">
+                  <CuteQRIcon className="w-5 h-5 sm:w-7 sm:h-7" />
                 </div>
-                <h3 className="font-headline text-lg text-[#201047] mb-1.5">VietQR Tiện Lợi</h3>
-                <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed">
+                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">VietQR Tiện Lợi</h3>
+                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
                   Quét mã QR thanh toán tức thì qua mọi ngân hàng hoặc chọn trả tiền mặt khi nhận loa.
                 </p>
               </div>
@@ -1625,22 +1667,21 @@ END:VCARD`;
             <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#ffb7ce] rounded-[2rem] flex items-center justify-center shadow-[inset_0_4px_8px_rgba(255,255,255,0.5),0_8px_16px_rgba(134,77,97,0.2)] mb-6 transform rotate-[-10deg] hover:rotate-0 transition-transform border-2 border-white">
               <CuteMicIcon className="w-12 h-12" />
             </div>
-            
+
             <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61] mb-2">
               Sẵn Sàng Hát Mê Say Tối Nay?
             </h2>
-            
+
             <p className="text-[#514347] font-semibold text-sm sm:text-base max-w-md mb-8">
               Rủ bạn bè tụ tập, nhận ngay loa xịn và cùng nhau tạo nên những kỷ niệm thật vui nhộn nào!
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <button 
+              <button
                 onClick={handleSaveContact}
-                className="bg-[#864d61] text-white font-headline text-base sm:text-lg px-8 py-4 rounded-full clay-button-pink flex items-center gap-2 cursor-pointer active:scale-95 transition-transform"
+                className="bg-[#864d61] text-white font-headline text-base sm:text-lg px-8 py-4 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
                 title="Lưu số hotline Locahome vào danh bạ"
               >
-                <CutePhoneSaveIcon className="w-5 h-5 text-white" />
                 <span>Lưu Số Ngay</span>
               </button>
 
@@ -1661,12 +1702,12 @@ END:VCARD`;
           <div className="w-12 h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_6px_16px_rgba(134,77,97,0.2)] border border-[#fab3ca] hover:scale-105 transition-transform animate-squish">
             <CuteSpeakerIcon className="w-7 h-7" />
           </div>
-          
+
           <p className="font-headline text-lg text-[#864d61]">Locahome</p>
           <p className="text-sm font-semibold text-slate-500 max-w-md">
-            Chia sẻ âm thanh hạnh phúc đến mọi bữa tiệc. Dịch vụ cho thuê loa kéo uy tín, âm thanh đỉnh cao số 1 TP. Tuy Hòa & Phú Yên.
+            Chia sẻ âm thanh hạnh phúc đến mọi bữa tiệc. Thuê loa kẹo kéo uy tín, âm thanh chất lượng tốt nhất.
           </p>
-          
+
           <p className="text-xs font-bold text-[#864d61]/70 mt-2 tracking-wide">
             Locahome được phát triển bởi Hồ Văn Duy
           </p>
@@ -1852,26 +1893,32 @@ END:VCARD`;
 
       {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ ═══════════════ */}
       {showAddReviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white rounded-[2.5rem] max-w-md w-full p-6 sm:p-8 border-2 border-[#ffd9e3] shadow-2xl relative">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border border-[#fab3ca]">
-                  <CuteStarIcon filled={true} className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden animate-in zoom-in-90 slide-in-from-bottom-8 duration-300 ease-out">
+            {/* Top Color Accent Line */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#ffd9e3] via-[#c9e6ff] to-[#b2f2bb]"></div>
+
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border-2 border-[#fab3ca] shadow-xs animate-bounce">
+                  <CuteStarIcon filled={true} className="w-6 h-6 text-amber-400" />
                 </div>
-                <h3 className="font-headline text-xl text-[#864d61]">Viết Đánh Giá Của Bạn</h3>
+                <div>
+                  <h3 className="font-headline text-xl text-[#864d61]">Viết Đánh Giá Của Bạn</h3>
+                  <p className="text-xs font-semibold text-slate-500">Chia sẻ trải nghiệm chân thực cùng Locahome</p>
+                </div>
               </div>
               <button
                 onClick={() => setShowAddReviewModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold"
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition-all hover:rotate-90"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddReviewSubmit} className="flex flex-col gap-3">
+            <form onSubmit={handleAddReviewSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
                   Tên Của Bạn *
                 </label>
                 <input
@@ -1880,39 +1927,55 @@ END:VCARD`;
                   placeholder="Ví dụ: Hoàng Long, Mỹ Duyên..."
                   value={newReviewForm.name}
                   onChange={(e) => setNewReviewForm({ ...newReviewForm, name: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#864d61]"
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#864d61] focus:bg-white transition-all shadow-inner"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
                   Số Sao Đánh Giá
                 </label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      type="button"
-                      key={star}
-                      onClick={() => setNewReviewForm({ ...newReviewForm, rating: star })}
-                      className="p-1 hover:scale-125 transition-transform cursor-pointer"
-                    >
-                      <CuteStarIcon filled={star <= newReviewForm.rating} className="w-7 h-7" />
-                    </button>
-                  ))}
+                <div className="flex items-center gap-3 bg-[#fdf7ff] p-2.5 rounded-2xl border border-[#ffd9e3]">
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        type="button"
+                        key={star}
+                        onClick={(e) => {
+                          triggerParticleBurst(e.clientX, e.clientY);
+                          setNewReviewForm({ ...newReviewForm, rating: star });
+                        }}
+                        className="p-1 hover:scale-130 active:scale-90 transition-transform cursor-pointer"
+                        title={`${star} Sao`}
+                      >
+                        <CuteStarIcon
+                          filled={star <= newReviewForm.rating}
+                          className={`w-7 h-7 transition-colors ${star <= newReviewForm.rating ? 'text-amber-400 drop-shadow-xs' : 'text-slate-200 hover:text-amber-200'
+                            }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className="text-xs font-extrabold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0 ml-auto">
+                    {newReviewForm.rating === 5 ? 'Quá đã! 5⭐' :
+                      newReviewForm.rating === 4 ? 'Hài lòng 4⭐' :
+                        newReviewForm.rating === 3 ? 'Bình thường 3⭐' :
+                          newReviewForm.rating === 2 ? 'Tạm ổn 2⭐' : 'Cần cải thiện 1⭐'}
+                  </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1">
+                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
                   Nội Dung Cảm Nhận *
                 </label>
                 <textarea
                   rows={3}
                   required
-                  placeholder="Âm thanh thế nào? Micro hát có ưng ý không? Phục vụ có nhanh không..."
+                  placeholder="Âm thanh thế nào? Micro hát có ưng ý không? Nhân viên phục vụ nhiệt tình không..."
                   value={newReviewForm.comment}
                   onChange={(e) => setNewReviewForm({ ...newReviewForm, comment: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 font-medium text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#864d61]"
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 font-medium text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#864d61] focus:bg-white transition-all shadow-inner"
                 ></textarea>
               </div>
 
@@ -1920,15 +1983,16 @@ END:VCARD`;
                 <button
                   type="button"
                   onClick={() => setShowAddReviewModal(false)}
-                  className="flex-1 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 font-headline text-xs text-slate-700"
+                  className="flex-1 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-headline text-xs text-slate-700 transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-2xl bg-[#864d61] text-white font-headline text-xs clay-button-pink"
+                  className="flex-1 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs clay-button-pink flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform"
                 >
-                  Gửi Đánh Giá
+                  <CutePenToolIcon className="w-4 h-4 text-white" />
+                  <span>Gửi Đánh Giá</span>
                 </button>
               </div>
             </form>
