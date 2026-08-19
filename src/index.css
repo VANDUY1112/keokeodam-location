@@ -214,3 +214,23 @@
   transform: translateY(5px);
   box-shadow: 0 0 0 #1b4b27;
 }
+
+/* ══════════ SEAMLESS RUNNING TEXT (MARQUEE) ══════════ */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

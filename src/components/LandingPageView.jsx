@@ -846,13 +846,67 @@ END:VCARD`;
       <div className="fixed top-1/3 left-0 w-[450px] h-[450px] bg-[#c9e6ff]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-65 -translate-x-1/3 pointer-events-none z-0"></div>
       <div className="fixed bottom-0 right-1/4 w-[600px] h-[600px] bg-[#b2f2bb]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/3 pointer-events-none z-0"></div>
 
-      {/* ═══════════════ TOP PROMO FLASH BAR ═══════════════ */}
-      <div className="bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#c9e6ff] text-[#360b1e] py-2 px-4 text-center font-bold text-xs sm:text-sm shadow-xs border-b border-[#fab3ca]/40 flex items-center justify-center gap-2 relative z-50">
-        <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
-        <span>
-          <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR • Freeship bán kính 5km!
-        </span>
-        <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0 hidden sm:inline" />
+      {/* ═══════════════ TOP PROMO FLASH BAR (SEAMLESS RUNNING MARQUEE) ═══════════════ */}
+      <div className="bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#c9e6ff] text-[#360b1e] py-2 shadow-xs border-b border-[#fab3ca]/40 overflow-hidden relative z-50 select-none">
+        <div className="animate-marquee items-center gap-8 text-xs sm:text-sm font-bold whitespace-nowrap">
+          {/* Ticker Set 1 */}
+          <div className="flex items-center gap-8 shrink-0">
+            <span className="flex items-center gap-1.5">
+              <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
+              <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
+              <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
+              <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
+              <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
+              <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+          </div>
+
+          {/* Ticker Set 2 (Duplicate for seamless infinite scrolling) */}
+          <div className="flex items-center gap-8 shrink-0">
+            <span className="flex items-center gap-1.5">
+              <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
+              <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
+              <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
+              <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
+              <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+            <span className="flex items-center gap-1.5">
+              <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
+              <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
+            </span>
+            <span className="text-[#864d61]/40">•</span>
+          </div>
+        </div>
       </div>
 
       {/* ═══════════════ HEADER ═══════════════ */}
