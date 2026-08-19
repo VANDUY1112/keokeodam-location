@@ -457,7 +457,7 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
                     </span>
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${
-                        item.status === 'Đã duyệt'
+                        item.status === 'Đã duyệt' || item.status === 'Thành công'
                           ? 'bg-slate-900 text-white border-slate-900'
                           : 'bg-slate-100 text-slate-700 border-slate-200'
                       }`}
@@ -500,7 +500,7 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
                     </td>
                     <td className="py-4 text-center whitespace-nowrap">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs lg:text-sm font-bold border ${
-                        item.status === 'Đã duyệt'
+                        item.status === 'Đã duyệt' || item.status === 'Thành công'
                           ? 'bg-slate-900 text-white border-slate-900'
                           : 'bg-slate-100 text-slate-700 border-slate-200'
                       }`}>

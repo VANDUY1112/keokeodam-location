@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Circle, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Circle, CircleMarker, Marker, Popup, Polyline, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-// Generate dynamic hotspots around a central GPS point
+// Generate dynamic hotspots around a central GPS point with individual trip dots inside each zone
 export function generateHotspotsAround(centerLat, centerLng) {
-  return [
+  const list = [
     {
       id: 'hs-1',
       name: 'Khu Nhà Hàng - Tiệc Cưới Lân Cận',
@@ -70,6 +70,30 @@ export function generateHotspotsAround(centerLat, centerLng) {
       badgeText: '7 chuyến',
     },
   ];
+
+  return list.map((hs) => {
+    // Generate individual trip dots scattered naturally within the zone's circular area
+    const tripDots = [];
+    const radiusDeg = (hs.radius * 0.72) / 111000;
+    for (let i = 0; i < hs.rentalCount; i++) {
+      const angle = i * 2.39996 + (hs.id.charCodeAt(3) || 1);
+      const r = Math.sqrt((i + 0.55) / hs.rentalCount) * radiusDeg;
+      const dotLat = hs.lat + r * Math.cos(angle);
+      const dotLng = hs.lng + (r * Math.sin(angle)) / Math.cos((hs.lat * Math.PI) / 180);
+      tripDots.push({
+        id: `${hs.id}-dot-${i + 1}`,
+        tripNumber: i + 1,
+        lat: dotLat,
+        lng: dotLng,
+        speaker: i % 2 === 0 ? hs.popularSpeaker : 'Loa Kéo Bass 40 (800W)',
+        cost: i % 2 === 0 ? '600.000 ₫' : '450.000 ₫',
+      });
+    }
+    return {
+      ...hs,
+      tripDots,
+    };
+  });
 }
 
 // User current GPS pin
@@ -77,14 +101,14 @@ const userCurrentLocationIcon = L.divIcon({
   className: 'custom-map-pin',
   html: `
     <div class="relative flex items-center justify-center">
-      <div class="absolute w-12 h-12 rounded-full bg-sky-500/30 animate-ping"></div>
-      <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-white shadow-2xl flex items-center justify-center text-white font-bold">
-        <span class="material-symbols-outlined text-[20px] text-sky-400">my_location</span>
+      <div class="absolute w-10 h-10 rounded-full bg-slate-900/20 animate-ping"></div>
+      <div class="w-9 h-9 rounded-full bg-slate-900 border-2 border-white shadow-2xl flex items-center justify-center text-white font-bold">
+        <span class="material-symbols-outlined text-[18px] text-white">my_location</span>
       </div>
     </div>
   `,
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
 });
 
 // Helper to create custom Hotspot Icon (showing "X chuyến")
@@ -146,7 +170,7 @@ export default function DashboardMiniMap({
     <div className="w-full flex flex-col gap-3.5 bg-surface-container-lowest rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
       {/* ══════════ 1. HEADER & FULL-LINE CONTROLS (NO WRAPPER BACKGROUND) ══════════ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
+        <h2 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
           Phân Bố Khách Thuê Loa Trọng Điểm
         </h2>
 
@@ -162,7 +186,7 @@ export default function DashboardMiniMap({
             }`}
             title="Căn bản đồ về Tâm vị trí GPS của bạn"
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0 animate-pulse"></span>
+            <span className={`w-2 h-2 rounded-full shrink-0 ${selectedHotspotId === null ? 'bg-white' : 'bg-slate-400'}`}></span>
             <span className="truncate">Tâm</span>
           </button>
 
@@ -173,7 +197,7 @@ export default function DashboardMiniMap({
             className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-800 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
             title="Lấy lại GPS vị trí bạn đang đứng"
           >
-            <span className={`material-symbols-outlined text-[16px] text-sky-600 ${isLocating ? 'animate-spin' : ''}`}>
+            <span className={`material-symbols-outlined text-[16px] text-slate-700 ${isLocating ? 'animate-spin' : ''}`}>
               {isLocating ? 'sync' : 'my_location'}
             </span>
             <span className="truncate">{isLocating ? 'Đang tìm...' : 'Lấy GPS'}</span>
@@ -185,7 +209,7 @@ export default function DashboardMiniMap({
             className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
             title="Chuyển chế độ xem bản đồ"
           >
-            <span className="material-symbols-outlined text-[16px] text-primary">
+            <span className="material-symbols-outlined text-[16px] text-slate-700">
               {tileMode === 'street' ? 'satellite_alt' : 'map'}
             </span>
             <span className="truncate">{tileMode === 'street' ? 'Vệ tinh' : 'Đường'}</span>
@@ -201,10 +225,12 @@ export default function DashboardMiniMap({
             <button
               key={hs.id}
               onClick={() => onSelectHotspot && onSelectHotspot(hs.id)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${isSelected
+              className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${
+                isSelected
                   ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
                   : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
-                }`}
+              }`}
+              title="Bấm để trỏ tới điểm này trên bản đồ"
             >
               <div className="flex items-center gap-2 min-w-0">
                 <span
@@ -223,7 +249,7 @@ export default function DashboardMiniMap({
         })}
       </div>
 
-      {/* ══════════ 3. MAP CANVAS ══════════ */}
+      {/* ══════════ 3. MAP CANVAS WITH INDIVIDUAL TRIP DOTS IN EACH ZONE ══════════ */}
       <div className="w-full h-[400px] sm:h-[460px] lg:h-[490px] relative rounded-2xl overflow-hidden shadow-inner border border-slate-200/90">
         <MapContainer
           center={defaultCenter}
@@ -269,7 +295,7 @@ export default function DashboardMiniMap({
               <Popup>
                 <div className="p-1.5 text-xs">
                   <p className="font-bold text-slate-900 flex items-center gap-1">
-                    <span className="text-sky-500">🔵</span> Vị Trí Của Bạn (Tâm GPS)
+                    <span>📍</span> Vị Trí Của Bạn (Tâm GPS)
                   </p>
                   <p className="text-slate-600 mt-1">Điểm xuất phát chở loa</p>
                   <p className="text-slate-400 text-[10.5px]">
@@ -285,22 +311,21 @@ export default function DashboardMiniMap({
             const isSelected = selectedHotspotId === hotspot.id;
             return (
               <React.Fragment key={hotspot.id}>
+                {/* Zone Circle Boundary */}
                 <Circle
                   center={[hotspot.lat, hotspot.lng]}
                   radius={hotspot.radius}
                   pathOptions={{
                     color: hotspot.color,
                     fillColor: hotspot.color,
-                    fillOpacity: isSelected ? 0.35 : 0.18,
+                    fillOpacity: isSelected ? 0.30 : 0.15,
                     weight: isSelected ? 3 : 1.5,
                     dashArray: '4, 4',
                   }}
-                />
-                <Marker
-                  position={[hotspot.lat, hotspot.lng]}
-                  icon={createHotspotIcon(hotspot, isSelected)}
                   eventHandlers={{
-                    click: () => onSelectHotspot && onSelectHotspot(hotspot.id),
+                    click: () => {
+                      if (onSelectHotspot) onSelectHotspot(hotspot.id);
+                    },
                   }}
                 >
                   <Popup>
@@ -311,14 +336,41 @@ export default function DashboardMiniMap({
                       </div>
                       <div className="space-y-1 text-slate-600">
                         <p>📏 <strong>Khoảng cách:</strong> <span className="font-bold text-slate-900">~ {hotspot.distance} ({hotspot.direction})</span></p>
-                        <p>🔥 <strong>Mật độ thuê:</strong> <span className="font-bold text-slate-900">{hotspot.rentalCount} chuyến</span></p>
+                        <p>🔥 <strong>Mật độ thuê:</strong> <span className="font-bold text-slate-900">{hotspot.rentalCount} chuyến ({hotspot.tripDots?.length || 0} điểm giao)</span></p>
                         <p>💰 <strong>Tổng thu:</strong> <span className="font-bold text-emerald-600">{hotspot.revenue}</span></p>
                         <p>🔊 <strong>Loa chuộng:</strong> {hotspot.popularSpeaker}</p>
                         <p className="text-[10.5px] text-slate-400 mt-1">⏰ Giờ cao điểm: {hotspot.peakHours}</p>
                       </div>
                     </div>
                   </Popup>
-                </Marker>
+                </Circle>
+
+                {/* Individual Trip Dots inside this zone (Mỗi chấm = 1 chuyến đã thuê) */}
+                {hotspot.tripDots &&
+                  hotspot.tripDots.map((dot) => (
+                    <CircleMarker
+                      key={dot.id}
+                      center={[dot.lat, dot.lng]}
+                      radius={isSelected ? 5.5 : 4.5}
+                      pathOptions={{
+                        color: '#ffffff',
+                        weight: 1.5,
+                        fillColor: hotspot.color,
+                        fillOpacity: isSelected ? 1 : 0.85,
+                      }}
+                      eventHandlers={{
+                        click: () => {
+                          if (onSelectHotspot) onSelectHotspot(hotspot.id);
+                        },
+                      }}
+                    >
+                      <Tooltip direction="top" offset={[0, -5]} opacity={0.95}>
+                        <div className="text-[11px] font-semibold text-slate-900">
+                          Chuyến #{dot.tripNumber} • {dot.speaker} ({dot.cost})
+                        </div>
+                      </Tooltip>
+                    </CircleMarker>
+                  ))}
               </React.Fragment>
             );
           })}

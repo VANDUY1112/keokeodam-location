@@ -228,10 +228,10 @@ export default function DashboardView({
         {/* Left Column: Recent Trips */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xl lg:text-2xl font-bold text-on-surface">Chuyến Đi Gần Đây</h3>
+            <h3 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-on-surface">Chuyến Gần Đây</h3>
             <button
               onClick={() => onNavigateToTab('history')}
-              className="text-primary font-bold text-sm lg:text-base hover:underline transition-all"
+              className="text-primary font-bold text-xs sm:text-sm lg:text-base hover:underline transition-all"
             >
               Xem Tất Cả
             </button>
@@ -240,7 +240,7 @@ export default function DashboardView({
           <div className="flex flex-col gap-3">
             {trips.length === 0 ? (
               <div className="bg-surface-container-lowest p-6 rounded-2xl border border-slate-200/90 text-center text-slate-500 text-sm">
-                Chưa có chuyến đi nào gần đây
+                Chưa có chuyến nào gần đây
               </div>
             ) : (
               trips.slice(0, 4).map((trip) => (
@@ -259,7 +259,7 @@ export default function DashboardView({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="px-3 py-1 font-bold rounded-lg border border-slate-200/80 bg-slate-100 text-slate-700 text-xs sm:text-[13px] lg:text-[14px] whitespace-nowrap shrink-0">
+                    <span className="text-[10.5px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-900 text-white whitespace-nowrap shadow-xs">
                       {trip.status || 'Hoàn thành'}
                     </span>
                     <span className="material-symbols-outlined text-slate-400 text-[18px] sm:text-[22px] group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">
@@ -272,13 +272,13 @@ export default function DashboardView({
           </div>
         </div>
 
-        {/* Right Column: Recent Expenses */}
+        {/* Right Column: Recent Revenue */}
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xl lg:text-2xl font-bold text-on-surface">Chi Phí Gần Đây</h3>
+            <h3 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-on-surface">Doanh Thu Gần Đây</h3>
             <button
               onClick={() => onNavigateToTab('expenses')}
-              className="text-primary font-bold text-sm lg:text-base hover:underline transition-all"
+              className="text-primary font-bold text-xs sm:text-sm lg:text-base hover:underline transition-all"
             >
               Xem Tất Cả
             </button>
@@ -287,7 +287,7 @@ export default function DashboardView({
           <div className="flex flex-col gap-3">
             {expenses.length === 0 ? (
               <div className="bg-surface-container-lowest p-6 rounded-2xl border border-slate-200/90 text-center text-slate-500 text-sm">
-                Chưa có chi phí nào gần đây
+                Chưa có doanh thu nào gần đây
               </div>
             ) : (
               expenses.slice(0, 4).map((item) => (
@@ -298,9 +298,9 @@ export default function DashboardView({
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div
-                      className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-slate-100 text-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all border border-slate-200/60 shadow-xs shrink-0 ${item.hoverColor || 'group-hover:bg-primary group-hover:text-white'}`}
+                      className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-slate-100 text-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all border border-slate-200/60 shadow-xs shrink-0 group-hover:bg-slate-900 group-hover:text-white"
                     >
-                      <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{item.icon || 'receipt_long'}</span>
+                      <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{item.icon || 'qr_code_2'}</span>
                     </div>
                     <div className="flex flex-col min-w-0 flex-1">
                       <span className="text-sm sm:text-base lg:text-[17px] font-bold text-on-surface truncate leading-snug">{item.title}</span>
@@ -311,7 +311,7 @@ export default function DashboardView({
                     <span className="font-display font-extrabold text-sm sm:text-base lg:text-lg text-on-surface whitespace-nowrap">
                       {formatVND(item.amount)}
                     </span>
-                    <span className="text-xs sm:text-[13px] lg:text-[14px] font-medium mt-0.5 text-slate-500 whitespace-nowrap">
+                    <span className="text-[10.5px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-900 text-white mt-1 whitespace-nowrap shadow-xs">
                       {item.status}
                     </span>
                   </div>

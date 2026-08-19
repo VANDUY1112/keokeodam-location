@@ -14,32 +14,32 @@ import { INITIAL_SPEAKERS } from './data/speakersData';
 const INITIAL_EXPENSES = [
   {
     id: 1,
-    title: 'Thu tiền thuê loa - Anh Hoàng (Tiệc Sinh Nhật)',
-    subtitle: 'Hôm nay • Gói Loa Bass 40 (800W)',
-    amount: '450.000 ₫',
-    status: 'Đã duyệt',
+    title: 'KEO KEO DAM nhan 500.000',
+    subtitle: 'Thành công lúc 15:30:25',
+    amount: '500.000 ₫',
+    status: 'Thành công',
     statusColor: 'text-secondary',
-    icon: 'speaker',
+    icon: 'qr_code_2',
     hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
   },
   {
     id: 2,
-    title: 'Đổ xăng xe máy giao loa - Trạm Petrolimex',
-    subtitle: 'Hôm qua • Ship 4 đơn nội thành',
-    amount: '120.000 ₫',
-    status: 'Đã duyệt',
+    title: 'KEO KEO DAM nhan 620.000',
+    subtitle: 'Thành công lúc 14:15:10',
+    amount: '620.000 ₫',
+    status: 'Thành công',
     statusColor: 'text-secondary',
-    icon: 'local_gas_station',
+    icon: 'qr_code_2',
     hoverColor: 'group-hover:bg-tertiary/10 group-hover:text-tertiary',
   },
   {
     id: 3,
-    title: 'Thu tiền thuê loa - Chị Mai (Tân Gia Q.7)',
-    subtitle: '24 Th10 • Gói Loa Đôi Bass 50 (1500W)',
-    amount: '620.000 ₫',
-    status: 'Đã duyệt',
+    title: 'KEO KEO DAM nhan 850.000',
+    subtitle: 'Thành công lúc 18:45:02',
+    amount: '850.000 ₫',
+    status: 'Thành công',
     statusColor: 'text-secondary',
-    icon: 'volume_up',
+    icon: 'qr_code_2',
     hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
   },
 ];
@@ -883,12 +883,18 @@ export default function App() {
         setToast={setToast}
         onConfirmPayment={(data) => {
           // Add income record to expenses list
+          const now = new Date();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          const seconds = String(now.getSeconds()).padStart(2, '0');
+          const timeStr = `${hours}:${minutes}:${seconds}`;
+          const formattedAmt = formatVND(data.amount).replace(' ₫', '');
           const incomeRecord = {
             id: Date.now(),
-            title: `Thu tiền VietQR - ${data.note}`,
-            subtitle: `Vừa xong • Chuyển khoản VietQR Napas 247`,
+            title: `KEO KEO DAM nhan ${formattedAmt}`,
+            subtitle: `Thành công lúc ${timeStr}`,
             amount: formatVND(data.amount),
-            status: 'Đã duyệt',
+            status: 'Thành công',
             statusColor: 'text-secondary',
             icon: 'qr_code_2',
             hoverColor: 'group-hover:bg-emerald-500/10 group-hover:text-emerald-600',
