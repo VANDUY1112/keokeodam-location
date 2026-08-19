@@ -1667,19 +1667,7 @@ END:VCARD`;
             Chia sẻ âm thanh hạnh phúc đến mọi bữa tiệc. Dịch vụ cho thuê loa kéo uy tín, âm thanh đỉnh cao số 1 TP. Tuy Hòa & Phú Yên.
           </p>
           
-          <div className="flex gap-3 mt-2">
-            <span className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#864d61] cursor-pointer hover:scale-110 hover:shadow-md transition-all border border-[#ffd9e3]" title="UI/UX Vector Design">
-              <CutePenToolIcon className="w-5 h-5" />
-            </span>
-            <span className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#2f6a3f] cursor-pointer hover:scale-110 hover:shadow-md transition-all border border-[#b2f2bb]" title="Design System & Components">
-              <CuteLayersIcon className="w-5 h-5" />
-            </span>
-            <span className="w-10 h-10 rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#235a7c] cursor-pointer hover:scale-110 hover:shadow-md transition-all border border-[#c9e6ff]" title="Frontend Tech Development">
-              <CuteCodeIcon className="w-5 h-5" />
-            </span>
-          </div>
-
-          <p className="text-xs font-bold text-[#864d61]/70 mt-4 tracking-wide">
+          <p className="text-xs font-bold text-[#864d61]/70 mt-2 tracking-wide">
             Locahome được phát triển bởi Hồ Văn Duy
           </p>
         </div>
