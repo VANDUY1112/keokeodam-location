@@ -846,171 +846,174 @@ END:VCARD`;
       <div className="fixed top-1/3 left-0 w-[450px] h-[450px] bg-[#c9e6ff]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-65 -translate-x-1/3 pointer-events-none z-0"></div>
       <div className="fixed bottom-0 right-1/4 w-[600px] h-[600px] bg-[#b2f2bb]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/3 pointer-events-none z-0"></div>
 
-      {/* ═══════════════ TOP PROMO FLASH BAR (SEAMLESS RUNNING MARQUEE) ═══════════════ */}
-      <div className="bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#c9e6ff] text-[#360b1e] py-2 shadow-xs border-b border-[#fab3ca]/40 overflow-hidden relative z-50 select-none">
-        <div className="animate-marquee items-center gap-8 text-xs sm:text-sm font-bold whitespace-nowrap">
-          {/* Ticker Set 1 */}
-          <div className="flex items-center gap-8 shrink-0">
-            <span className="flex items-center gap-1.5">
-              <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
-              <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
-              <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
-              <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
-              <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
-              <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-          </div>
+      {/* ═══════════════ STICKY TOP WRAPPER (MARQUEE + HEADER) ═══════════════ */}
+      <div className="sticky top-0 z-50 w-full shadow-[0_4px_24px_rgba(134,77,97,0.08)]">
+        {/* TOP PROMO FLASH BAR (SEAMLESS RUNNING MARQUEE) */}
+        <div className="bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#c9e6ff] text-[#360b1e] py-1.5 border-b border-[#fab3ca]/40 overflow-hidden select-none">
+          <div className="animate-marquee items-center gap-8 text-xs sm:text-sm font-bold whitespace-nowrap">
+            {/* Ticker Set 1 */}
+            <div className="flex items-center gap-8 shrink-0">
+              <span className="flex items-center gap-1.5">
+                <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
+                <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
+                <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
+                <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
+                <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
+                <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+            </div>
 
-          {/* Ticker Set 2 (Duplicate for seamless infinite scrolling) */}
-          <div className="flex items-center gap-8 shrink-0">
-            <span className="flex items-center gap-1.5">
-              <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
-              <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
-              <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
-              <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
-              <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
-            </span>
-            <span className="text-[#864d61]/40">•</span>
-            <span className="flex items-center gap-1.5">
-              <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
-              <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
-            </span>
-            <span className="text-[#864d61]/40">•</span>
+            {/* Ticker Set 2 (Duplicate for seamless infinite scrolling) */}
+            <div className="flex items-center gap-8 shrink-0">
+              <span className="flex items-center gap-1.5">
+                <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
+                <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
+                <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
+                <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
+                <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+              <span className="flex items-center gap-1.5">
+                <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
+                <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
+              </span>
+              <span className="text-[#864d61]/40">•</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ═══════════════ HEADER ═══════════════ */}
-      <header className="w-full z-40 bg-[#fdf7ff] border-b border-[#864d61]/10 shadow-[0_4px_24px_rgba(134,77,97,0.04)]">
-        <div className="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_4px_12px_rgba(134,77,97,0.15)] group-hover:scale-105 transition-transform animate-squish border border-[#fab3ca] shrink-0">
-              <CuteSpeakerIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+        {/* HEADER */}
+        <header className="w-full bg-[#fdf7ff]/95 backdrop-blur-xl border-b border-[#864d61]/10">
+          <div className="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_4px_12px_rgba(134,77,97,0.15)] group-hover:scale-105 transition-transform animate-squish border border-[#fab3ca] shrink-0">
+                <CuteSpeakerIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+              </div>
+              <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block">Locahome</span>
             </div>
-            <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block">Locahome</span>
-          </div>
 
-          {/* Clean Kawaii Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-white/70 backdrop-blur-md p-1.5 rounded-full border border-[#864d61]/10 shadow-xs">
-            <a 
-              href="#reviews"
-              onClick={() => setActiveNav('reviews')}
-              className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                activeNav === 'reviews' 
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-              }`}
-            >
-              <CuteStarIcon filled={activeNav === 'reviews'} className="w-4 h-4" />
-              <span>Đánh Giá</span>
-            </a>
-            <a 
-              href="#speakers"
-              onClick={() => setActiveNav('speakers')}
-              className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                activeNav === 'speakers' 
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-              }`}
-            >
-              <CuteSpeakerIcon className="w-4 h-4" />
-              <span>Bảng Giá Loa</span>
-            </a>
-            <a 
-              href="#sound-demo"
-              onClick={() => setActiveNav('sound-demo')}
-              className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                activeNav === 'sound-demo' 
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-              }`}
-            >
-              <CuteMusicNotesDecor className="w-4 h-4" />
-              <span>Thử Âm Thanh</span>
-            </a>
-            <a 
-              href="#gallery"
-              onClick={() => setActiveNav('gallery')}
-              className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                activeNav === 'gallery' 
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-              }`}
-            >
-              <CuteCameraIcon className="w-4 h-4" />
-              <span>Góc Sống Ảo</span>
-            </a>
-            <a 
-              href="#faq"
-              onClick={() => setActiveNav('faq')}
-              className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                activeNav === 'faq' 
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-              }`}
-            >
-              <CuteHeartIcon filled={activeNav === 'faq'} className="w-4 h-4" />
-              <span>Hỏi Đáp</span>
-            </a>
-          </nav>
-
-          {/* Action CTAs */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {onNavigateToAdmin && (
-              <button
-                onClick={onNavigateToAdmin}
-                className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f3eaff] hover:bg-[#e9ddff] text-[#201047] font-bold text-xs border border-[#864d61]/15 transition-all shadow-xs"
-                title="Vào trang quản trị dàn loa"
+            {/* Clean Kawaii Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1.5 bg-white/70 backdrop-blur-md p-1.5 rounded-full border border-[#864d61]/10 shadow-xs">
+              <a 
+                href="#reviews"
+                onClick={() => setActiveNav('reviews')}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
+                  activeNav === 'reviews' 
+                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
+                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                }`}
+              >
+                <CuteStarIcon filled={activeNav === 'reviews'} className="w-4 h-4" />
+                <span>Đánh Giá</span>
+              </a>
+              <a 
+                href="#speakers"
+                onClick={() => setActiveNav('speakers')}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
+                  activeNav === 'speakers' 
+                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
+                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                }`}
               >
                 <CuteSpeakerIcon className="w-4 h-4" />
-                <span>Quản Trị</span>
-              </button>
-            )}
+                <span>Bảng Giá Loa</span>
+              </a>
+              <a 
+                href="#sound-demo"
+                onClick={() => setActiveNav('sound-demo')}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
+                  activeNav === 'sound-demo' 
+                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
+                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                }`}
+              >
+                <CuteMusicNotesDecor className="w-4 h-4" />
+                <span>Thử Âm Thanh</span>
+              </a>
+              <a 
+                href="#gallery"
+                onClick={() => setActiveNav('gallery')}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
+                  activeNav === 'gallery' 
+                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
+                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                }`}
+              >
+                <CuteCameraIcon className="w-4 h-4" />
+                <span>Góc Sống Ảo</span>
+              </a>
+              <a 
+                href="#faq"
+                onClick={() => setActiveNav('faq')}
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
+                  activeNav === 'faq' 
+                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
+                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                }`}
+              >
+                <CuteHeartIcon filled={activeNav === 'faq'} className="w-4 h-4" />
+                <span>Hỏi Đáp</span>
+              </a>
+            </nav>
 
-            <button
-              onClick={() => {
-                setSelectedSpeakerForBooking('puffy-bass-pro');
-                setShowBookingModal(true);
-              }}
-              className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md"
-              title="Đặt thuê loa giao nhanh 30 phút"
-            >
-              <CuteMicIcon className="w-4 h-4 shrink-0" />
-              <span>Thuê Loa Ngay</span>
-            </button>
+            {/* Action CTAs */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {onNavigateToAdmin && (
+                <button
+                  onClick={onNavigateToAdmin}
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f3eaff] hover:bg-[#e9ddff] text-[#201047] font-bold text-xs border border-[#864d61]/15 transition-all shadow-xs"
+                  title="Vào trang quản trị dàn loa"
+                >
+                  <CuteSpeakerIcon className="w-4 h-4" />
+                  <span>Quản Trị</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => {
+                  setSelectedSpeakerForBooking('puffy-bass-pro');
+                  setShowBookingModal(true);
+                }}
+                className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center gap-1.5 cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md"
+                title="Đặt thuê loa giao nhanh 30 phút"
+              >
+                <CuteMicIcon className="w-4 h-4 shrink-0" />
+                <span>Thuê Loa Ngay</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {/* ═══════════════ MAIN CONTENT ═══════════════ */}
       <main className="pt-6 pb-20 relative z-10">
