@@ -42,8 +42,8 @@ export default function ReceiptModal({ isOpen, onClose, rentalRecord, homeLocati
               KEOKEODAM PRO
             </div>
             <div className="text-[12px] text-gray-600 font-medium">Dịch Vụ Cho Thuê Loa Kẹo Kéo Theo Tiếng</div>
-            <div className="text-[11px] text-gray-500 mt-0.5">Hotline: 0908 123 456 - 0912 345 678</div>
-            <div className="text-[10px] text-gray-400">Đ/C: Số 45 Đường Số 8, Linh Xuân, TP. Thủ Đức</div>
+            <div className="text-[11px] text-gray-500 mt-0.5">Hotline: 0368 115 592</div>
+            <div className="text-[10px] text-gray-400">Đ/C: Đường Hùng Vương, P. 7, TP. Tuy Hòa, Phú Yên</div>
           </div>
 
           {/* Receipt Title */}

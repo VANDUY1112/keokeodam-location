@@ -96,8 +96,8 @@ export default function OverviewView({
     const homeMarker = L.marker([homeLat, homeLng], { icon: homeIcon }).addTo(map);
     homeMarker.bindPopup(`
       <div style="font-family:sans-serif; padding:4px; font-size:13px;">
-        <strong style="color:#b5000b; font-size:14px;">Kho Nhà KeoKeoDam Pro</strong>
-        <p style="margin:3px 0 0 0; color:#475569;">Số 45 Đường Số 8, P. Linh Xuân, TP. Thủ Đức</p>
+        <strong style="color:#b5000b; font-size:14px;">Kho Tổng Locahome</strong>
+        <p style="margin:3px 0 0 0; color:#475569;">Đường Hùng Vương, P. 7, TP. Tuy Hòa, Phú Yên</p>
       </div>
     `);
 
@@ -690,7 +690,7 @@ export default function OverviewView({
           </div>
 
           <div className="px-5 py-2.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[12.5px] text-slate-500 font-medium">
-            <span className="truncate">Kho: 45 Đ. Số 8, Linh Xuân, Thủ Đức</span>
+            <span className="truncate">Kho: Hùng Vương, P. 7, Tuy Hòa, Phú Yên</span>
             <span className="font-mono font-bold text-slate-800 shrink-0">Tổng {totalDistance.toFixed(1)} km</span>
           </div>
         </div>

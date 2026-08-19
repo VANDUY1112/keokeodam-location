@@ -1,8 +1,8 @@
 export const HOME_LOCATION = {
-  name: "Nhà & Kho Loa Chính",
-  address: "Số 45 Đường Số 8, Linh Xuân, TP. Thủ Đức, TP. Hồ Chí Minh",
-  lat: 10.8752,
-  lng: 106.7725,
+  name: "Nhà & Kho Loa Chính Locahome",
+  address: "Đường Hùng Vương, Phường 7, TP. Tuy Hòa, Tỉnh Phú Yên",
+  lat: 13.0955,
+  lng: 109.3087,
   coords: { x: 50, y: 50 } // Center of map
 };
 

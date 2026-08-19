@@ -138,7 +138,7 @@ export default function Sidebar({
           </span>
         </div>
         <p className="text-[13px] text-on-surface-variant truncate">
-          45 Đ. Số 8, Linh Xuân, Thủ Đức
+          Hùng Vương, P. 7, Tuy Hòa, Phú Yên
         </p>
       </div>
 

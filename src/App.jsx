@@ -8,6 +8,7 @@ import SettingsView from './components/SettingsView';
 import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
 import VietQRModal from './components/VietQRModal';
+import LandingPageView from './components/LandingPageView';
 import { formatVND, parseVNDNumber } from './utils/format';
 import { INITIAL_SPEAKERS } from './data/speakersData';
 
@@ -259,6 +260,7 @@ export default function App() {
   };
 
   const navItems = [
+    { id: 'landing', label: 'Trang Khách (Landing)', icon: 'celebration', highlight: true },
     { id: 'dashboard', label: 'Tổng Quan', icon: 'dashboard' },
     { id: 'tracking', label: 'Giao Loa & GPS', icon: 'two_wheeler' },
     { id: 'expenses', label: 'Doanh Thu & Chi Phí', icon: 'payments' },
@@ -266,6 +268,44 @@ export default function App() {
     { id: 'reports', label: 'Báo Cáo & Thống Kê', icon: 'assessment' },
     { id: 'settings', label: 'Cài Đặt', icon: 'settings' },
   ];
+
+  if (activeTab === 'landing') {
+    return (
+      <div className="min-h-screen bg-[#fdf7ff]">
+        <LandingPageView
+          onNavigateToAdmin={() => setActiveTab('dashboard')}
+          onOpenVietQR={openVietQR}
+          onAddBooking={(booking) => {
+            handleAddTrip({
+              title: `Đơn Khách: ${booking.customerName} - ${booking.customerPhone}`,
+              subtitle: `Mới Đặt • ${booking.speakerName} • ${booking.duration}`,
+              cost: booking.totalAmount,
+              speakerName: booking.speakerName,
+              customerName: booking.customerName,
+              status: 'Đã nhận đơn',
+              statusBadge: 'bg-pink-50 text-pink-700 border-pink-200/60',
+              icon: 'speaker',
+            });
+            setToast({
+              title: '🎉 Đã Nhận Đơn Thuê Mới!',
+              message: `${booking.customerName} vừa đặt thuê ${booking.speakerName}!`,
+              type: 'success',
+            });
+          }}
+        />
+
+        {/* VietQR Modal */}
+        {showVietQRModal && (
+          <VietQRModal
+            isOpen={showVietQRModal}
+            onClose={() => setShowVietQRModal(false)}
+            amount={vietQRData.amount}
+            note={vietQRData.note}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background font-body-md text-on-background min-h-screen">
@@ -291,16 +331,35 @@ export default function App() {
               className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-200 group text-left ${
                 activeTab === item.id
                   ? 'bg-primary text-white shadow-md font-bold'
-                  : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-semibold'
+                  : item.highlight 
+                    ? 'bg-[#ffb7ce]/30 text-[#864d61] hover:bg-[#ffb7ce]/50 font-bold border border-[#ffd9e3]'
+                    : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-semibold'
               }`}
             >
-              <span className={`material-symbols-outlined text-[24px] transition-transform ${activeTab === item.id ? 'text-white' : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-900'}`}>
+              <span className={`material-symbols-outlined text-[24px] transition-transform ${
+                activeTab === item.id 
+                  ? 'text-white' 
+                  : item.highlight 
+                    ? 'text-[#864d61]' 
+                    : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-900'
+              }`}>
                 {item.icon}
               </span>
               <span className="text-[15px] lg:text-base">{item.label}</span>
             </button>
           ))}
         </nav>
+
+        {/* Quick Customer Landing Preview in Sidebar Footer */}
+        <div className="p-4 border-t border-slate-200/60">
+          <button
+            onClick={() => setActiveTab('landing')}
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#ffd9e3] hover:bg-[#ffb7ce] text-[#864d61] font-bold text-sm shadow-sm transition-all"
+          >
+            <span className="material-symbols-outlined text-[20px]">celebration</span>
+            <span>Xem Trang Khách Cute</span>
+          </button>
+        </div>
       </aside>
 
       {/* ═══════════════ MOBILE DRAWER MENU (PREMIUM SLIDE & BLUR) ═══════════════ */}
@@ -396,6 +455,16 @@ export default function App() {
 
           {/* Right Header: VietQR Quick Button, Notifications & Profile Dropdown */}
           <div className="flex items-center gap-2.5 sm:gap-4">
+            {/* Quick Landing Page Button */}
+            <button
+              onClick={() => setActiveTab('landing')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#ffd9e3] hover:bg-[#ffb7ce] text-[#864d61] font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all border border-[#fab3ca]"
+              title="Xem trang Landing Page khách hàng"
+            >
+              <span className="material-symbols-outlined text-[18px]">celebration</span>
+              <span className="hidden sm:inline">Trang Khách Cute</span>
+            </button>
+
             {/* Quick VietQR Button */}
             <button
               onClick={() => openVietQR(280000, 'LOCAHOME THUE LOA')}

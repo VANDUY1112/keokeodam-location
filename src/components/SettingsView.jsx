@@ -38,7 +38,7 @@ export default function SettingsView({
 }) {
   // Store info state
   const [storeName, setStoreName] = useState(() => localStorage.getItem('kko_store_name') || 'Dịch Vụ Cho Thuê Loa Kéo KeoKeoDam');
-  const [storePhone, setStorePhone] = useState(() => localStorage.getItem('kko_store_phone') || '0908 123 456');
+  const [storePhone, setStorePhone] = useState(() => localStorage.getItem('kko_store_phone') || '0368 115 592');
   const [warehouseAddress, setWarehouseAddress] = useState(() => localStorage.getItem('kko_warehouse_address') || HOME_LOCATION.address);
   const [warehouseLat, setWarehouseLat] = useState(() => localStorage.getItem('kko_warehouse_lat') || String(HOME_LOCATION.lat || 10.8752));
   const [warehouseLng, setWarehouseLng] = useState(() => localStorage.getItem('kko_warehouse_lng') || String(HOME_LOCATION.lng || 106.7725));
