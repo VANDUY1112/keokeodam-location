@@ -919,17 +919,6 @@ END:VCARD`;
 
             {/* Action CTAs */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {onNavigateToAdmin && (
-                <button
-                  onClick={onNavigateToAdmin}
-                  className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#f3eaff] hover:bg-[#e9ddff] text-[#201047] font-bold text-xs border border-[#864d61]/15 transition-all shadow-xs"
-                  title="Vào trang quản trị dàn loa"
-                >
-                  <CuteSpeakerIcon className="w-4 h-4" />
-                  <span>Quản Trị</span>
-                </button>
-              )}
-
               <button
                 onClick={() => {
                   setSelectedSpeakerForBooking('puffy-bass-pro');
