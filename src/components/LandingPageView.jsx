@@ -950,7 +950,7 @@ END:VCARD`;
       <div className="h-[92px] sm:h-[110px] w-full pointer-events-none"></div>
 
       {/* ═══════════════ MAIN CONTENT ═══════════════ */}
-      <main className="pt-6 pb-20 relative z-10">
+      <main className="pt-4 pb-2 relative z-10">
         {/* HERO BANNER SECTION */}
         <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
           <div className="flex flex-col items-center text-center gap-6">
@@ -1631,7 +1631,7 @@ END:VCARD`;
         </section>
 
         {/* ═══════════════ BOTTOM CTA BANNER ═══════════════ */}
-        <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+        <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 text-center">
           <div className="bg-[#f8f1ff] rounded-[3.5rem] p-8 sm:p-14 shadow-[inset_0_4px_24px_rgba(255,255,255,0.9),0_8px_32px_rgba(134,77,97,0.08)] flex flex-col items-center border-[4px] border-white">
             <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#ffb7ce] rounded-[2rem] flex items-center justify-center shadow-[inset_0_4px_8px_rgba(255,255,255,0.5),0_8px_16px_rgba(134,77,97,0.2)] mb-6 transform rotate-[-10deg] hover:rotate-0 transition-transform border-2 border-white">
               <CuteMicIcon className="w-12 h-12" />
@@ -1667,7 +1667,7 @@ END:VCARD`;
       </main>
 
       {/* ═══════════════ FOOTER ═══════════════ */}
-      <footer className="bg-[#f8f1ff] border-t border-[#864d61]/10 py-12">
+      <footer className="bg-[#f8f1ff] border-t border-[#864d61]/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-4">
           <div className="w-12 h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_6px_16px_rgba(134,77,97,0.2)] border border-[#fab3ca] hover:scale-105 transition-transform animate-squish">
             <CuteSpeakerIcon className="w-7 h-7" />
