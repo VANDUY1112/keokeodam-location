@@ -369,8 +369,6 @@ export default function LandingPageView({
   });
 
   const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [likedPhotos, setLikedPhotos] = useState({ 1: 142, 2: 98, 3: 215, 4: 176 });
-  const [userHasLiked, setUserHasLiked] = useState({});
 
   // Trigger floating heart particles
   const triggerParticleBurst = (x = window.innerWidth / 2, y = window.innerHeight / 2) => {
@@ -618,46 +616,6 @@ export default function LandingPageView({
     }
   ]);
 
-  // Photo Wall Moments
-  const photoMoments = [
-    {
-      id: 1,
-      title: 'Sinh Nhật 25 Tuổi Rực Rỡ',
-      subtitle: 'Quẩy cùng bạn bè tại Biển Tuy Hòa - Phú Yên',
-      image: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80',
-      tag: 'Birthday Party',
-      tagColor: 'bg-pink-100 text-pink-700 border border-pink-200',
-      rotate: '-rotate-2'
-    },
-    {
-      id: 2,
-      title: 'Bolero Chiều Mưa Ấm Cúng',
-      subtitle: 'Gia đình sum họp chiều mưa Sông Cầu',
-      image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
-      tag: 'Family Karaoke',
-      tagColor: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-      rotate: 'rotate-2'
-    },
-    {
-      id: 3,
-      title: 'Team Building Bãi Xép Cực Cháy',
-      subtitle: 'Mega Puff 1200W quẩy thâu đêm',
-      image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=600&auto=format&fit=crop&q=80',
-      tag: 'Company Event',
-      tagColor: 'bg-blue-100 text-blue-700 border border-blue-200',
-      rotate: '-rotate-1'
-    },
-    {
-      id: 4,
-      title: 'Khai Trương Tiệm Trà Sữa',
-      subtitle: 'Loa Bass 40 hút trọn khách hàng qua đường',
-      image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80',
-      tag: 'Opening Store',
-      tagColor: 'bg-purple-100 text-purple-700 border border-purple-200',
-      rotate: 'rotate-3'
-    }
-  ];
-
   // FAQ Questions Data
   const faqs = [
     {
@@ -694,21 +652,6 @@ export default function LandingPageView({
       if (reviewFilter === 'newest') return b.id - a.id;
       return 0;
     });
-
-  const toggleLikePhoto = (id, e) => {
-    if (e) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      triggerParticleBurst(rect.left + 20, rect.top - 10);
-    }
-    setUserHasLiked(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
-    setLikedPhotos(prev => ({
-      ...prev,
-      [id]: prev[id] + (userHasLiked[id] ? -1 : 1)
-    }));
-  };
 
   const handleOpenRentSpeaker = (pkg) => {
     setSelectedSpeakerForBooking(pkg.id);
@@ -959,18 +902,6 @@ END:VCARD`;
               >
                 <CuteMusicNotesDecor className="w-4 h-4" />
                 <span>Thử Âm Thanh</span>
-              </a>
-              <a 
-                href="#gallery"
-                onClick={() => setActiveNav('gallery')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${
-                  activeNav === 'gallery' 
-                    ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs' 
-                    : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
-                }`}
-              >
-                <CuteCameraIcon className="w-4 h-4" />
-                <span>Góc Sống Ảo</span>
               </a>
               <a 
                 href="#faq"
@@ -1573,62 +1504,6 @@ END:VCARD`;
                   <CuteMicIcon className="w-4.5 h-4.5" />
                   <span>Thuê Loa Này</span>
                 </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ═══════════════ PHOTO WALL (GÓC SỐNG ẢO) ═══════════════ */}
-        <section id="gallery" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-[#c9e6ff] rounded-full text-[#0c4b6c] text-xs font-bold uppercase tracking-wider mb-2">
-                <CuteCameraIcon className="w-4 h-4" />
-                <span>Photo Wall</span>
-              </div>
-              <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
-                Góc Sống Ảo & Khoảnh Khắc Bùng Cháy
-              </h2>
-              <p className="text-[#514347] font-semibold text-sm sm:text-base mt-1">
-                Âm nhạc là cầu nối gắn kết niềm vui giữa gia đình, bạn bè và đồng nghiệp.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {photoMoments.map((photo) => (
-              <div 
-                key={photo.id}
-                className={`bg-white rounded-3xl p-3.5 shadow-lg border border-[#e9ddff] transform transition-transform duration-300 hover:rotate-0 hover:scale-105 ${photo.rotate}`}
-              >
-                <div className="relative h-56 rounded-2xl overflow-hidden mb-3 group">
-                  <img 
-                    src={photo.image} 
-                    alt={photo.title} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${photo.tagColor} shadow-xs`}>
-                      {photo.tag}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="px-1">
-                  <h4 className="font-headline text-base text-[#201047] leading-snug">{photo.title}</h4>
-                  <p className="text-xs text-slate-500 font-semibold mt-0.5">{photo.subtitle}</p>
-                  
-                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                    <button 
-                      onClick={(e) => toggleLikePhoto(photo.id, e)}
-                      className="flex items-center gap-1.5 text-xs font-bold text-rose-500 hover:scale-110 transition-transform cursor-pointer"
-                    >
-                      <CuteHeartIcon filled={!!userHasLiked[photo.id]} className="w-4.5 h-4.5" />
-                      <span>{likedPhotos[photo.id]} Tim</span>
-                    </button>
-                    <span className="text-[11px] text-slate-400 font-bold">Locahome Moments</span>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
