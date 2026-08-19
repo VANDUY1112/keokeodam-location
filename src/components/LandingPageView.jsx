@@ -846,8 +846,8 @@ END:VCARD`;
       <div className="fixed top-1/3 left-0 w-[450px] h-[450px] bg-[#c9e6ff]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-65 -translate-x-1/3 pointer-events-none z-0"></div>
       <div className="fixed bottom-0 right-1/4 w-[600px] h-[600px] bg-[#b2f2bb]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/3 pointer-events-none z-0"></div>
 
-      {/* ═══════════════ STICKY TOP WRAPPER (MARQUEE + HEADER) ═══════════════ */}
-      <div className="sticky top-0 z-50 w-full shadow-[0_4px_24px_rgba(134,77,97,0.08)]">
+      {/* ═══════════════ PERMANENT FIXED TOP WRAPPER (MARQUEE + HEADER) ═══════════════ */}
+      <div className="fixed top-0 left-0 right-0 z-50 w-full shadow-[0_4px_24px_rgba(134,77,97,0.08)]">
         {/* TOP PROMO FLASH BAR (SEAMLESS RUNNING MARQUEE) */}
         <div className="bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#c9e6ff] text-[#360b1e] py-1.5 border-b border-[#fab3ca]/40 overflow-hidden select-none">
           <div className="animate-marquee items-center gap-8 text-xs sm:text-sm font-bold whitespace-nowrap">
@@ -1014,6 +1014,9 @@ END:VCARD`;
           </div>
         </header>
       </div>
+
+      {/* Spacer to prevent content from going behind fixed header */}
+      <div className="h-[92px] sm:h-[110px] w-full pointer-events-none"></div>
 
       {/* ═══════════════ MAIN CONTENT ═══════════════ */}
       <main className="pt-6 pb-20 relative z-10">
