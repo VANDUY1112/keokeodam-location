@@ -71,7 +71,14 @@ export function generateHotspotsAround(centerLat, centerLng) {
     },
   ];
 
-  return list.map((hs) => {
+  const CUSTOMER_NAMES = [
+    'Tuấn', 'Minh Trí', 'Anh Hoàng', 'Chị Lan', 'Hương Cau',
+    'Anh Thành', 'Bảo', 'Đức Huy', 'Quốc Bảo', 'Chị Mai',
+    'Anh Hùng', 'Văn Duy', 'Phúc', 'Ngọc', 'Tấn Phát',
+    'Chị Phương', 'Khánh', 'Anh Long', 'Lộc Vừng', 'Thanh Hải'
+  ];
+
+  return list.map((hs, hsIdx) => {
     // Generate individual trip dots scattered naturally within the zone's circular area
     const tripDots = [];
     const radiusDeg = (hs.radius * 0.72) / 111000;
@@ -80,9 +87,11 @@ export function generateHotspotsAround(centerLat, centerLng) {
       const r = Math.sqrt((i + 0.55) / hs.rentalCount) * radiusDeg;
       const dotLat = hs.lat + r * Math.cos(angle);
       const dotLng = hs.lng + (r * Math.sin(angle)) / Math.cos((hs.lat * Math.PI) / 180);
+      const customerName = CUSTOMER_NAMES[(i + hsIdx * 4) % CUSTOMER_NAMES.length];
       tripDots.push({
         id: `${hs.id}-dot-${i + 1}`,
         tripNumber: i + 1,
+        customerName: customerName,
         lat: dotLat,
         lng: dotLng,
         speaker: i % 2 === 0 ? hs.popularSpeaker : 'Loa Kéo Bass 40 (800W)',
@@ -351,12 +360,12 @@ export default function DashboardMiniMap({
                     <CircleMarker
                       key={dot.id}
                       center={[dot.lat, dot.lng]}
-                      radius={isSelected ? 5.5 : 4.5}
+                      radius={isSelected ? 6 : 5}
                       pathOptions={{
                         color: '#ffffff',
-                        weight: 1.5,
+                        weight: 2,
                         fillColor: hotspot.color,
-                        fillOpacity: isSelected ? 1 : 0.85,
+                        fillOpacity: isSelected ? 1 : 0.9,
                       }}
                       eventHandlers={{
                         click: () => {
@@ -364,9 +373,16 @@ export default function DashboardMiniMap({
                         },
                       }}
                     >
-                      <Tooltip direction="top" offset={[0, -5]} opacity={0.95}>
-                        <div className="text-[11px] font-semibold text-slate-900">
-                          Chuyến #{dot.tripNumber} • {dot.speaker} ({dot.cost})
+                      <Popup>
+                        <div className="py-0.5 px-1.5 text-center min-w-[40px]">
+                          <span className="text-xs font-black text-slate-900 leading-none whitespace-nowrap">
+                            {dot.customerName}
+                          </span>
+                        </div>
+                      </Popup>
+                      <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
+                        <div className="text-[11px] font-bold text-slate-900 whitespace-nowrap">
+                          {dot.customerName}
                         </div>
                       </Tooltip>
                     </CircleMarker>
