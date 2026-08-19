@@ -3,7 +3,7 @@ import {
   Download, 
   DollarSign, 
   Calendar, 
-  Route, 
+  Milestone, 
   TrendingUp, 
   Speaker,
   BarChart3,
@@ -259,7 +259,7 @@ export default function ReportsView({
               Quãng đường ship
             </span>
             <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-              <Route className="w-5 h-5" />
+              <Milestone className="w-5 h-5" />
             </div>
           </div>
 

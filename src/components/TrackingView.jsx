@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Milestone } from 'lucide-react';
 import LiveRouteMap, { MAP_LAYERS } from './LiveRouteMap';
 import { formatVND } from '../utils/format';
 
@@ -388,7 +389,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
             <div className="bg-surface-container-lowest rounded-2xl p-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <span className="text-slate-900 font-bold text-sm lg:text-base">Tổng quãng đường</span>
-                <span className="material-symbols-outlined text-xl text-slate-500">near_me</span>
+                <Milestone className="w-5 h-5 text-slate-500" />
               </div>
               <div className="mt-2">
                 <span className="text-2xl lg:text-3xl font-black text-slate-900">

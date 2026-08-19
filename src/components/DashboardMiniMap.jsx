@@ -1,182 +1,328 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Circle, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-// HCM Sample route coordinates from Warehouse to 128 Dien Bien Phu
-const SAMPLE_ROUTE = [
-  { lat: 10.7769, lng: 106.7009 }, // Kho Loa Kẹo Kéo (Quận 1)
-  { lat: 10.7812, lng: 106.6985 },
-  { lat: 10.7865, lng: 106.6952 },
-  { lat: 10.7901, lng: 106.6970 },
-  { lat: 10.7942, lng: 106.7015 }, // Điểm giao: 128 Điện Biên Phủ (Bình Thạnh)
-];
+// Generate dynamic hotspots around a central GPS point
+export function generateHotspotsAround(centerLat, centerLng) {
+  return [
+    {
+      id: 'hs-1',
+      name: 'Khu Nhà Hàng - Tiệc Cưới Lân Cận',
+      shortName: 'Nhà Hàng Tiệc Cưới',
+      direction: 'Phía Bắc',
+      distance: '650m',
+      lat: centerLat + 0.0055,
+      lng: centerLng + 0.0035,
+      rentalCount: 18,
+      revenue: '8.200.000 ₫',
+      popularSpeaker: 'Loa Đôi Bass 50 Khủng (1500W)',
+      peakHours: '18:00 - 22:30 (Cuối tuần)',
+      color: '#ef4444', // Red
+      radius: 360,
+      badgeText: '18 chuyến',
+    },
+    {
+      id: 'hs-2',
+      name: 'Khu Dân Cư - Phố Ẩm Thực',
+      shortName: 'Phố Ẩm Thực',
+      direction: 'Phía Đông',
+      distance: '1.1 km',
+      lat: centerLat - 0.0042,
+      lng: centerLng + 0.0085,
+      rentalCount: 12,
+      revenue: '5.400.000 ₫',
+      popularSpeaker: 'Loa Kéo Bass 40 (800W)',
+      peakHours: '17:30 - 21:30',
+      color: '#f59e0b', // Amber
+      radius: 300,
+      badgeText: '12 chuyến',
+    },
+    {
+      id: 'hs-3',
+      name: 'Khu Quán Ăn Sân Vườn',
+      shortName: 'Quán Sân Vườn',
+      direction: 'Phía Tây',
+      distance: '800m',
+      lat: centerLat + 0.0038,
+      lng: centerLng - 0.0065,
+      rentalCount: 9,
+      revenue: '4.100.000 ₫',
+      popularSpeaker: 'Loa Kéo Bass 40',
+      peakHours: '19:00 - 23:00',
+      color: '#3b82f6', // Blue
+      radius: 260,
+      badgeText: '9 chuyến',
+    },
+    {
+      id: 'hs-4',
+      name: 'Khu Biệt Thự / Tiệc Gia Đình',
+      shortName: 'Khu Biệt Thự',
+      direction: 'Phía Nam',
+      distance: '1.5 km',
+      lat: centerLat - 0.0080,
+      lng: centerLng - 0.0040,
+      rentalCount: 7,
+      revenue: '3.200.000 ₫',
+      popularSpeaker: 'Loa Đôi Bass 50',
+      peakHours: '16:00 - 20:00',
+      color: '#10b981', // Emerald
+      radius: 240,
+      badgeText: '7 chuyến',
+    },
+  ];
+}
 
-const WAREHOUSE_POS = SAMPLE_ROUTE[0];
-const DESTINATION_POS = SAMPLE_ROUTE[SAMPLE_ROUTE.length - 1];
-const SHIPPER_POS = SAMPLE_ROUTE[3]; // Currently at step 3
-
-// Custom DivIcons
-const warehouseIcon = L.divIcon({
+// User current GPS pin
+const userCurrentLocationIcon = L.divIcon({
   className: 'custom-map-pin',
   html: `
     <div class="relative flex items-center justify-center">
-      <div class="w-8 h-8 rounded-full bg-slate-900 border-2 border-white shadow-xl flex items-center justify-center text-white font-bold">
-        <span class="material-symbols-outlined text-[16px]">warehouse</span>
+      <div class="absolute w-12 h-12 rounded-full bg-sky-500/30 animate-ping"></div>
+      <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-white shadow-2xl flex items-center justify-center text-white font-bold">
+        <span class="material-symbols-outlined text-[20px] text-sky-400">my_location</span>
       </div>
     </div>
   `,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
 });
 
-const shipperIcon = L.divIcon({
-  className: 'custom-map-pin',
-  html: `
-    <div class="relative flex items-center justify-center">
-      <div class="absolute w-10 h-10 rounded-full bg-blue-500/30 animate-ping"></div>
-      <div class="w-9 h-9 rounded-full bg-blue-600 border-2 border-white shadow-2xl flex items-center justify-center text-white">
-        <span class="material-symbols-outlined text-[18px]">two_wheeler</span>
+// Helper to create custom Hotspot Icon (showing "X chuyến")
+function createHotspotIcon(hotspot, isSelected) {
+  return L.divIcon({
+    className: 'custom-map-pin',
+    html: `
+      <div class="relative flex items-center justify-center group cursor-pointer ${isSelected ? 'scale-110' : ''}">
+        <div class="absolute w-8 h-8 rounded-full ${isSelected ? 'animate-ping opacity-90' : 'opacity-40'}" style="background-color: ${hotspot.color}"></div>
+        <div class="px-2.5 py-1 rounded-full text-white font-black text-xs shadow-xl flex items-center gap-1 border-2 ${isSelected ? 'border-white ring-2 ring-slate-900' : 'border-white'} whitespace-nowrap" style="background-color: ${hotspot.color}">
+          <span class="material-symbols-outlined text-[13px]">local_fire_department</span>
+          <span>${hotspot.badgeText}</span>
+        </div>
       </div>
-    </div>
-  `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-});
+    `,
+    iconSize: [85, 32],
+    iconAnchor: [42, 16],
+  });
+}
 
-const destinationIcon = L.divIcon({
-  className: 'custom-map-pin',
-  html: `
-    <div class="relative flex items-center justify-center">
-      <div class="absolute w-10 h-10 rounded-full bg-rose-500/30 animate-pulse"></div>
-      <div class="w-9 h-9 rounded-full bg-rose-600 border-2 border-white shadow-2xl flex items-center justify-center text-white">
-        <span class="material-symbols-outlined text-[18px]">location_on</span>
-      </div>
-    </div>
-  `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 32],
-});
-
-function MapBoundsController() {
+function MapBoundsController({ userCoords, hotspots, selectedHotspot }) {
   const map = useMap();
   useEffect(() => {
     if (!map) return;
-    const bounds = L.latLngBounds(SAMPLE_ROUTE.map((p) => [p.lat, p.lng]));
-    map.fitBounds(bounds, { padding: [40, 40], animate: false });
-  }, [map]);
+    if (selectedHotspot) {
+      map.flyTo([selectedHotspot.lat, selectedHotspot.lng], 15.5, { duration: 0.8 });
+    } else if (userCoords) {
+      const allPoints = [
+        [userCoords.lat, userCoords.lng],
+        ...hotspots.map((p) => [p.lat, p.lng]),
+      ];
+      const bounds = L.latLngBounds(allPoints);
+      map.fitBounds(bounds, { padding: [50, 50], animate: false });
+    }
+  }, [map, userCoords, hotspots, selectedHotspot]);
   return null;
 }
 
-export default function DashboardMiniMap({ onNavigateToTracking }) {
+export default function DashboardMiniMap({
+  userCoords,
+  hotspots = [],
+  selectedHotspotId,
+  onSelectHotspot,
+  onRequestGPS,
+  isLocating,
+  onNavigateToTab,
+}) {
   const [tileMode, setTileMode] = useState('street'); // 'street' | 'satellite'
+  const selectedHotspot = hotspots.find((h) => h.id === selectedHotspotId);
 
   const tileUrl =
     tileMode === 'satellite'
       ? 'https://mt1.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}'
       : 'https://mt1.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}';
 
+  const defaultCenter = userCoords ? [userCoords.lat, userCoords.lng] : [10.780, 106.698];
+
   return (
-    <div className="w-full h-full min-h-[320px] lg:min-h-[360px] relative rounded-2xl overflow-hidden shadow-inner border border-slate-200/90 group">
-      {/* ─── Leaflet Map Container ─── */}
-      <MapContainer
-        center={[10.785, 106.698]}
-        zoom={16}
-        zoomControl={false}
-        scrollWheelZoom={false}
-        attributionControl={false}
-        className="w-full h-full z-0"
-        style={{ minHeight: '320px', height: '100%', background: '#e2e8f0' }}
-      >
-        <MapBoundsController />
-        <TileLayer
-          url={tileUrl}
-          maxZoom={22}
-          maxNativeZoom={20}
-          subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
-        />
+    <div className="w-full flex flex-col gap-3.5 bg-surface-container-lowest rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
+      {/* ══════════ 1. HEADER & FULL-LINE CONTROLS (NO WRAPPER BACKGROUND) ══════════ */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
+          Phân Bố Khách Thuê Loa Trọng Điểm
+        </h2>
 
-        {/* Route Line Glow (Background) */}
-        <Polyline
-          positions={SAMPLE_ROUTE.map((p) => [p.lat, p.lng])}
-          pathOptions={{
-            color: '#38bdf8',
-            weight: 8,
-            opacity: 0.5,
-            lineCap: 'round',
-            lineJoin: 'round',
-          }}
-        />
+        {/* Full-line Controls without wrapper background */}
+        <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+          {/* Tâm GPS Button */}
+          <button
+            onClick={() => onSelectHotspot && onSelectHotspot(null)}
+            className={`col-span-1 px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border ${
+              selectedHotspotId === null
+                ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
+                : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
+            }`}
+            title="Căn bản đồ về Tâm vị trí GPS của bạn"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0 animate-pulse"></span>
+            <span className="truncate">Tâm</span>
+          </button>
 
-        {/* Route Line Main (Foreground) */}
-        <Polyline
-          positions={SAMPLE_ROUTE.map((p) => [p.lat, p.lng])}
-          pathOptions={{
-            color: '#0284c7',
-            weight: 5,
-            opacity: 0.9,
-            dashArray: '8, 8',
-            lineCap: 'round',
-            lineJoin: 'round',
-          }}
-        />
+          {/* Lấy GPS Button */}
+          <button
+            onClick={onRequestGPS}
+            disabled={isLocating}
+            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-800 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+            title="Lấy lại GPS vị trí bạn đang đứng"
+          >
+            <span className={`material-symbols-outlined text-[16px] text-sky-600 ${isLocating ? 'animate-spin' : ''}`}>
+              {isLocating ? 'sync' : 'my_location'}
+            </span>
+            <span className="truncate">{isLocating ? 'Đang tìm...' : 'Lấy GPS'}</span>
+          </button>
 
-        {/* Warehouse Marker */}
-        <Marker position={[WAREHOUSE_POS.lat, WAREHOUSE_POS.lng]} icon={warehouseIcon}>
-          <Popup>
-            <div className="p-1 text-xs">
-              <p className="font-bold text-slate-900">Kho Loa Kẹo Kéo Express</p>
-              <p className="text-slate-500">Điểm xuất phát giao hàng</p>
-            </div>
-          </Popup>
-        </Marker>
+          {/* Vệ tinh / Đường phố */}
+          <button
+            onClick={() => setTileMode(tileMode === 'street' ? 'satellite' : 'street')}
+            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+            title="Chuyển chế độ xem bản đồ"
+          >
+            <span className="material-symbols-outlined text-[16px] text-primary">
+              {tileMode === 'street' ? 'satellite_alt' : 'map'}
+            </span>
+            <span className="truncate">{tileMode === 'street' ? 'Vệ tinh' : 'Đường'}</span>
+          </button>
+        </div>
+      </div>
 
-        {/* Shipper Marker */}
-        <Marker position={[SHIPPER_POS.lat, SHIPPER_POS.lng]} icon={shipperIcon}>
-          <Popup>
-            <div className="p-1 text-xs">
-              <p className="font-bold text-blue-700">🛵 Xe Giao Loa Đang Chạy</p>
-              <p className="text-slate-600">Vận tốc: 35 km/h • Đang đến gần</p>
-            </div>
-          </Popup>
-        </Marker>
+      {/* ══════════ 2. 4-HOTSPOT BUTTONS (FULL LINE, NO WRAPPER BACKGROUND) ══════════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-2 w-full">
+        {hotspots.map((hs) => {
+          const isSelected = selectedHotspotId === hs.id;
+          return (
+            <button
+              key={hs.id}
+              onClick={() => onSelectHotspot && onSelectHotspot(hs.id)}
+              className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${isSelected
+                  ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
+                  : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
+                }`}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: hs.color }}
+                ></span>
+                <span className="font-bold truncate">
+                  {hs.rentalCount} chuyến
+                </span>
+              </div>
+              <span className={`text-[11px] font-normal shrink-0 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                ~ {hs.distance}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-        {/* Destination Marker */}
-        <Marker position={[DESTINATION_POS.lat, DESTINATION_POS.lng]} icon={destinationIcon}>
-          <Popup>
-            <div className="p-1 text-xs">
-              <p className="font-bold text-rose-700">📍 Tiệc Tân Gia - Anh Nam</p>
-              <p className="text-slate-600">128 Điện Biên Phủ, P.15, Bình Thạnh</p>
-            </div>
-          </Popup>
-        </Marker>
-      </MapContainer>
-
-      {/* ─── Top Map Controls Overlay ─── */}
-      <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-white/90 backdrop-blur-md p-1 rounded-xl shadow-md border border-slate-200/80">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setTileMode(tileMode === 'street' ? 'satellite' : 'street');
-          }}
-          className="px-2.5 py-1 text-xs font-bold rounded-lg text-slate-700 hover:bg-slate-100 transition-all flex items-center gap-1"
-          title="Chuyển chế độ xem bản đồ"
+      {/* ══════════ 3. MAP CANVAS ══════════ */}
+      <div className="w-full h-[400px] sm:h-[460px] lg:h-[490px] relative rounded-2xl overflow-hidden shadow-inner border border-slate-200/90">
+        <MapContainer
+          center={defaultCenter}
+          zoom={14}
+          zoomControl={false}
+          scrollWheelZoom={false}
+          attributionControl={false}
+          className="w-full h-full z-0"
+          style={{ minHeight: '100%', height: '100%', background: '#e2e8f0' }}
         >
-          <span className="material-symbols-outlined text-[16px] text-primary">
-            {tileMode === 'street' ? 'satellite_alt' : 'map'}
-          </span>
-          <span>{tileMode === 'street' ? 'Vệ tinh' : 'Đường phố'}</span>
-        </button>
+          <MapBoundsController
+            userCoords={userCoords}
+            hotspots={hotspots}
+            selectedHotspot={selectedHotspot}
+          />
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigateToTracking && onNavigateToTracking();
-          }}
-          className="p-1 rounded-lg text-slate-700 hover:bg-slate-100 transition-all flex items-center justify-center"
-          title="Mở toàn màn hình theo dõi"
-        >
-          <span className="material-symbols-outlined text-[18px]">open_in_full</span>
-        </button>
+          <TileLayer
+            url={tileUrl}
+            maxZoom={22}
+            maxNativeZoom={20}
+            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+          />
+
+          {/* Connecting line from user to selected hotspot */}
+          {userCoords && selectedHotspot && (
+            <Polyline
+              positions={[
+                [userCoords.lat, userCoords.lng],
+                [selectedHotspot.lat, selectedHotspot.lng],
+              ]}
+              pathOptions={{
+                color: selectedHotspot.color,
+                weight: 3.5,
+                opacity: 0.85,
+                dashArray: '6, 6',
+              }}
+            />
+          )}
+
+          {/* User Current / Warehouse GPS Marker */}
+          {userCoords && (
+            <Marker position={[userCoords.lat, userCoords.lng]} icon={userCurrentLocationIcon}>
+              <Popup>
+                <div className="p-1.5 text-xs">
+                  <p className="font-bold text-slate-900 flex items-center gap-1">
+                    <span className="text-sky-500">🔵</span> Vị Trí Của Bạn (Tâm GPS)
+                  </p>
+                  <p className="text-slate-600 mt-1">Điểm xuất phát chở loa</p>
+                  <p className="text-slate-400 text-[10.5px]">
+                    Tọa độ: {userCoords.lat.toFixed(4)}, {userCoords.lng.toFixed(4)}
+                  </p>
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {/* Hotspot Circles & Markers around user */}
+          {hotspots.map((hotspot) => {
+            const isSelected = selectedHotspotId === hotspot.id;
+            return (
+              <React.Fragment key={hotspot.id}>
+                <Circle
+                  center={[hotspot.lat, hotspot.lng]}
+                  radius={hotspot.radius}
+                  pathOptions={{
+                    color: hotspot.color,
+                    fillColor: hotspot.color,
+                    fillOpacity: isSelected ? 0.35 : 0.18,
+                    weight: isSelected ? 3 : 1.5,
+                    dashArray: '4, 4',
+                  }}
+                />
+                <Marker
+                  position={[hotspot.lat, hotspot.lng]}
+                  icon={createHotspotIcon(hotspot, isSelected)}
+                  eventHandlers={{
+                    click: () => onSelectHotspot && onSelectHotspot(hotspot.id),
+                  }}
+                >
+                  <Popup>
+                    <div className="p-1.5 text-xs max-w-[220px]">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-900 border-b border-slate-100 pb-1 mb-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: hotspot.color }}></span>
+                        <span className="truncate">{hotspot.name}</span>
+                      </div>
+                      <div className="space-y-1 text-slate-600">
+                        <p>📏 <strong>Khoảng cách:</strong> <span className="font-bold text-slate-900">~ {hotspot.distance} ({hotspot.direction})</span></p>
+                        <p>🔥 <strong>Mật độ thuê:</strong> <span className="font-bold text-slate-900">{hotspot.rentalCount} chuyến</span></p>
+                        <p>💰 <strong>Tổng thu:</strong> <span className="font-bold text-emerald-600">{hotspot.revenue}</span></p>
+                        <p>🔊 <strong>Loa chuộng:</strong> {hotspot.popularSpeaker}</p>
+                        <p className="text-[10.5px] text-slate-400 mt-1">⏰ Giờ cao điểm: {hotspot.peakHours}</p>
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              </React.Fragment>
+            );
+          })}
+        </MapContainer>
       </div>
     </div>
   );

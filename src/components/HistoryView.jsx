@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Milestone } from 'lucide-react';
 import LiveRouteMap from './LiveRouteMap';
 import { formatVND } from '../utils/format';
 
@@ -99,9 +100,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               Tổng quãng đường
             </span>
             <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
-                near_me
-              </span>
+              <Milestone className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
             </div>
           </div>
 

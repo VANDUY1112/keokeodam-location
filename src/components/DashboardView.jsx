@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Milestone, Flame, TrendingUp, ChevronRight } from 'lucide-react';
 import { formatVND, parseVNDNumber } from '../utils/format';
-import DashboardMiniMap from './DashboardMiniMap';
+import DashboardMiniMap, { generateHotspotsAround } from './DashboardMiniMap';
 
 export default function DashboardView({
   expenses = [],
@@ -9,6 +10,66 @@ export default function DashboardView({
   onOpenItinerary,
   onNavigateToTab,
 }) {
+  const [selectedHotspotId, setSelectedHotspotId] = useState('hs-1');
+  const [isLocating, setIsLocating] = useState(false);
+
+  // Initialize user coordinates from localStorage or default
+  const [userCoords, setUserCoords] = useState(() => {
+    const savedLat = localStorage.getItem('kko_warehouse_lat');
+    const savedLng = localStorage.getItem('kko_warehouse_lng');
+    if (savedLat && savedLng) {
+      return { lat: parseFloat(savedLat), lng: parseFloat(savedLng) };
+    }
+    return { lat: 10.7769, lng: 106.7009 }; // Default center
+  });
+
+  // Request actual user GPS
+  const handleRequestGPS = () => {
+    if (!navigator.geolocation) {
+      alert('Trình duyệt của bạn không hỗ trợ định vị GPS.');
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserCoords(coords);
+        localStorage.setItem('kko_warehouse_lat', String(coords.lat));
+        localStorage.setItem('kko_warehouse_lng', String(coords.lng));
+        setIsLocating(false);
+      },
+      (error) => {
+        console.warn('Lỗi định vị GPS:', error);
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  };
+
+  // Auto request on initial load
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserCoords(coords);
+          localStorage.setItem('kko_warehouse_lat', String(coords.lat));
+          localStorage.setItem('kko_warehouse_lng', String(coords.lng));
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 6000 }
+      );
+    }
+  }, []);
+
+  const hotspots = generateHotspotsAround(userCoords.lat, userCoords.lng);
+
   // Compute dynamic stats from actual data
   const totalDistanceNum = trips.reduce((acc, t) => {
     const d = parseFloat(t.distanceKm) || (t.subtitle?.match(/(\d+([\.,]\d+)?)\s*km/) ? parseFloat(t.subtitle.match(/(\d+([\.,]\d+)?)\s*km/)[1]) : 0);
@@ -32,9 +93,7 @@ export default function DashboardView({
               Tổng quãng đường
             </span>
             <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
-                near_me
-              </span>
+              <Milestone className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
             </div>
           </div>
 
@@ -151,70 +210,17 @@ export default function DashboardView({
         </div>
       </div>
 
-      {/* ══════════ HERO ASSIGNMENT CARD: LOA KẸO KÉO ══════════ */}
-      <div className="w-full bg-surface-container-lowest rounded-3xl p-6 lg:p-8 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)] relative overflow-hidden flex flex-col lg:flex-row gap-6 lg:gap-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-transparent to-slate-50/60 pointer-events-none"></div>
-
-        <div className="flex-1 flex flex-col z-10">
-          <div className="flex items-center gap-3 mb-3 flex-wrap">
-            <span className="px-3.5 py-1.5 bg-slate-100 border border-slate-200/80 text-slate-800 font-bold rounded-xl text-xs sm:text-sm lg:text-[15px]">
-              Đơn Thuê Loa Tiêu Biểu
-            </span>
-            <span className="text-slate-600 font-medium text-xs sm:text-sm lg:text-[15px] flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[18px] sm:text-[20px]">schedule</span> Bàn giao lúc 08:30
-            </span>
-          </div>
-
-          <h2 className="text-xl sm:text-2xl lg:text-[26px] font-bold text-slate-900 leading-snug tracking-tight mb-2">
-            Tiệc Tân Gia - Anh Nam
-          </h2>
-
-          <p className="text-slate-600 text-sm sm:text-base lg:text-[17px] font-normal leading-relaxed mb-4 max-w-xl">
-            Cho thuê dàn loa kéo đôi Bass 50 công suất 1500W kèm 2 mic kim loại UHF + phí cước ship tận nhà.
-          </p>
-
-          <div className="grid grid-cols-2 gap-y-3.5 gap-x-4 sm:gap-x-8 mt-auto pt-3 border-t border-slate-100">
-            <div className="flex flex-col">
-              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Khách hàng</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5">Anh Nam</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Tổng giờ thuê</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5">24 Giờ</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Số điện thoại</span>
-              <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 tracking-normal">0912.345.678</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-slate-500 text-xs sm:text-sm lg:text-[15px] font-medium">Tổng tiền thu từ khách</span>
-              <span className="text-lg sm:text-xl lg:text-2xl font-extrabold text-slate-900 mt-0.5">575.000 ₫</span>
-            </div>
-          </div>
-
-          <div className="mt-4 sm:mt-5 grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
-            <button
-              onClick={() => onNavigateToTab && onNavigateToTab('history')}
-              className="bg-slate-900 text-white font-semibold text-xs sm:text-sm px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:bg-slate-800 transition-all shadow-xs active:scale-95 flex items-center justify-center gap-1.5"
-            >
-              <span className="material-symbols-outlined text-[17px] sm:text-[19px] shrink-0">visibility</span>
-              <span className="truncate">Xem Chi Tiết</span>
-            </button>
-
-            <button
-              onClick={() => onNavigateToTab && onNavigateToTab('tracking')}
-              className="bg-slate-100 border border-slate-200/90 text-slate-800 font-semibold text-xs sm:text-sm px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-1.5"
-            >
-              <span className="material-symbols-outlined text-[17px] sm:text-[19px] text-slate-700 shrink-0">replay</span>
-              <span className="truncate">Thuê Lại Loa</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Right Map Box: Live Leaflet Interactive Map */}
-        <div className="w-full lg:w-[46%] rounded-2xl overflow-hidden relative shadow-md border border-slate-200/90 z-10 min-h-[320px] lg:min-h-[360px] flex flex-col">
-          <DashboardMiniMap onNavigateToTracking={() => onNavigateToTab && onNavigateToTab('tracking')} />
-        </div>
+      {/* ══════════ FULL-WIDTH HERO MAP: BẢN ĐỒ MẬT ĐỘ THUÊ LOA QUANH BẠN ══════════ */}
+      <div className="w-full">
+        <DashboardMiniMap
+          userCoords={userCoords}
+          hotspots={hotspots}
+          selectedHotspotId={selectedHotspotId}
+          onSelectHotspot={(id) => setSelectedHotspotId(id)}
+          onRequestGPS={handleRequestGPS}
+          isLocating={isLocating}
+          onNavigateToTab={onNavigateToTab}
+        />
       </div>
 
       {/* ══════════ 2-COLUMN SECTION: TRIPS & EXPENSES ══════════ */}
@@ -232,31 +238,37 @@ export default function DashboardView({
           </div>
 
           <div className="flex flex-col gap-3">
-            {trips.map((trip) => (
-              <div
-                key={trip.id}
-                onClick={() => onNavigateToTab('tracking')}
-                className="bg-surface-container-lowest p-3.5 sm:p-4 lg:p-5 rounded-2xl flex items-center justify-between hover:bg-slate-50 transition-all cursor-pointer group border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_4px_16px_rgba(11,28,48,0.06)] gap-3"
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-slate-100 text-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all border border-slate-200/90 shadow-xs shrink-0">
-                    <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{trip.icon || 'speaker'}</span>
-                  </div>
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-sm sm:text-base lg:text-[17px] font-bold text-on-surface truncate leading-snug">{trip.title}</span>
-                    <span className="text-xs sm:text-[13px] lg:text-[14px] text-slate-500 font-medium mt-0.5 truncate">{trip.subtitle}</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="px-3 py-1 font-bold rounded-lg border border-slate-200/80 bg-slate-100 text-slate-700 text-xs sm:text-[13px] lg:text-[14px] whitespace-nowrap shrink-0">
-                    {trip.status || 'Hoàn thành'}
-                  </span>
-                  <span className="material-symbols-outlined text-slate-400 text-[18px] sm:text-[22px] group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">
-                    chevron_right
-                  </span>
-                </div>
+            {trips.length === 0 ? (
+              <div className="bg-surface-container-lowest p-6 rounded-2xl border border-slate-200/90 text-center text-slate-500 text-sm">
+                Chưa có chuyến đi nào gần đây
               </div>
-            ))}
+            ) : (
+              trips.slice(0, 4).map((trip) => (
+                <div
+                  key={trip.id}
+                  onClick={() => onNavigateToTab('tracking')}
+                  className="bg-surface-container-lowest p-3.5 sm:p-4 lg:p-5 rounded-2xl flex items-center justify-between hover:bg-slate-50 transition-all cursor-pointer group border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_4px_16px_rgba(11,28,48,0.06)] gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-slate-100 text-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all border border-slate-200/90 shadow-xs shrink-0">
+                      <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{trip.icon || 'speaker'}</span>
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="text-sm sm:text-base lg:text-[17px] font-bold text-on-surface truncate leading-snug">{trip.title}</span>
+                      <span className="text-xs sm:text-[13px] lg:text-[14px] text-slate-500 font-medium mt-0.5 truncate">{trip.subtitle}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="px-3 py-1 font-bold rounded-lg border border-slate-200/80 bg-slate-100 text-slate-700 text-xs sm:text-[13px] lg:text-[14px] whitespace-nowrap shrink-0">
+                      {trip.status || 'Hoàn thành'}
+                    </span>
+                    <span className="material-symbols-outlined text-slate-400 text-[18px] sm:text-[22px] group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0">
+                      chevron_right
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -273,33 +285,39 @@ export default function DashboardView({
           </div>
 
           <div className="flex flex-col gap-3">
-            {expenses.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => onNavigateToTab('expenses')}
-                className="bg-surface-container-lowest p-3.5 sm:p-4 lg:p-5 rounded-2xl flex items-center justify-between hover:bg-slate-50 transition-all cursor-pointer group border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_4px_16px_rgba(11,28,48,0.06)] gap-3"
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div
-                    className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-slate-100 text-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all border border-slate-200/60 shadow-xs shrink-0 ${item.hoverColor || 'group-hover:bg-primary group-hover:text-white'}`}
-                  >
-                    <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{item.icon || 'receipt_long'}</span>
-                  </div>
-                  <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-sm sm:text-base lg:text-[17px] font-bold text-on-surface truncate leading-snug">{item.title}</span>
-                    <span className="text-xs sm:text-[13px] lg:text-[14px] text-slate-500 font-medium mt-0.5 truncate">{item.subtitle}</span>
-                  </div>
-                </div>
-                <div className="flex flex-col items-end shrink-0 pl-1">
-                  <span className="font-display font-extrabold text-sm sm:text-base lg:text-lg text-on-surface whitespace-nowrap">
-                    {formatVND(item.amount)}
-                  </span>
-                  <span className="text-xs sm:text-[13px] lg:text-[14px] font-medium mt-0.5 text-slate-500 whitespace-nowrap">
-                    {item.status}
-                  </span>
-                </div>
+            {expenses.length === 0 ? (
+              <div className="bg-surface-container-lowest p-6 rounded-2xl border border-slate-200/90 text-center text-slate-500 text-sm">
+                Chưa có chi phí nào gần đây
               </div>
-            ))}
+            ) : (
+              expenses.slice(0, 4).map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => onNavigateToTab('expenses')}
+                  className="bg-surface-container-lowest p-3.5 sm:p-4 lg:p-5 rounded-2xl flex items-center justify-between hover:bg-slate-50 transition-all cursor-pointer group border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_4px_16px_rgba(11,28,48,0.06)] gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div
+                      className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-slate-100 text-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all border border-slate-200/60 shadow-xs shrink-0 ${item.hoverColor || 'group-hover:bg-primary group-hover:text-white'}`}
+                    >
+                      <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{item.icon || 'receipt_long'}</span>
+                    </div>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="text-sm sm:text-base lg:text-[17px] font-bold text-on-surface truncate leading-snug">{item.title}</span>
+                      <span className="text-xs sm:text-[13px] lg:text-[14px] text-slate-500 font-medium mt-0.5 truncate">{item.subtitle}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 pl-1">
+                    <span className="font-display font-extrabold text-sm sm:text-base lg:text-lg text-on-surface whitespace-nowrap">
+                      {formatVND(item.amount)}
+                    </span>
+                    <span className="text-xs sm:text-[13px] lg:text-[14px] font-medium mt-0.5 text-slate-500 whitespace-nowrap">
+                      {item.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

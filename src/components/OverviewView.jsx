@@ -22,7 +22,8 @@ import {
   Sparkles,
   Zap,
   Activity,
-  Compass
+  Compass,
+  Milestone
 } from 'lucide-react';
 
 export default function OverviewView({ 
@@ -325,7 +326,7 @@ export default function OverviewView({
               </div>
             </div>
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/60 text-amber-600 flex items-center justify-center border border-amber-200/60 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-              <MapPin className="w-5 h-5 stroke-[2.4]" />
+              <Milestone className="w-5 h-5 stroke-[2.4]" />
             </div>
           </div>
 
