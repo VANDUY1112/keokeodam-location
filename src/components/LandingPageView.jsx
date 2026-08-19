@@ -910,7 +910,7 @@ END:VCARD`;
       </div>
 
       {/* ═══════════════ HEADER ═══════════════ */}
-      <header className="sticky top-0 w-full z-40 bg-[#fdf7ff]/90 backdrop-blur-2xl border-b border-[#864d61]/10 shadow-[0_4px_24px_rgba(134,77,97,0.08)]">
+      <header className="w-full z-40 bg-[#fdf7ff] border-b border-[#864d61]/10 shadow-[0_4px_24px_rgba(134,77,97,0.04)]">
         <div className="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
           {/* Logo */}
           <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
