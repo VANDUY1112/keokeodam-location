@@ -1027,44 +1027,69 @@ export default function LandingPageView({
                 </button>
               </div>
 
-              {/* Trust Badges */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-10 max-w-4xl mx-auto">
-                <div className="relative h-[76px] sm:h-[84px] bg-gradient-to-br from-[#fff2f5] to-[#fdf7ff] rounded-2xl border-2 border-[#ffd9e3] overflow-hidden shadow-sm hover:scale-105 transition-all flex items-center justify-center p-2 group cursor-pointer">
-                  <img src="/bia.png" alt="Bia" className="h-full w-auto max-w-[60%] object-contain group-hover:scale-115 transition-transform duration-300 drop-shadow-sm shrink-0" />
-                  <div className="flex-1 text-center">
-                    <span className="font-headline text-base sm:text-lg text-[#864d61]">
+              {/* Party Combo Visual Showcase - Ảnh Tràn Viền 100% Cực Kỳ Sướng Mắt */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-6 mt-12 max-w-5xl mx-auto w-full">
+                {/* Card 1: Bia */}
+                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ffd9e3] bg-gradient-to-b from-[#ffe5ee] via-[#fff0f5] to-[#ffd6e4] shadow-[0_12px_28px_rgba(134,77,97,0.12)] hover:shadow-[0_20px_45px_rgba(134,77,97,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between p-3 sm:p-4 group cursor-pointer select-none">
+                  <div className="flex-1 w-full flex items-center justify-center pt-2">
+                    <img
+                      src="/bia.png"
+                      alt="Bia"
+                      className="h-[92%] w-auto object-contain drop-shadow-[0_12px_20px_rgba(134,77,97,0.25)] group-hover:scale-120 group-hover:rotate-[-5deg] transition-all duration-500 ease-out"
+                    />
+                  </div>
+                  <div className="relative z-10 w-full text-center">
+                    <span className="block w-full py-1.5 px-3 bg-white/85 backdrop-blur-md border border-[#ffd9e3] rounded-2xl text-[#864d61] font-headline text-sm sm:text-base shadow-xs group-hover:bg-[#864d61] group-hover:text-white transition-colors duration-300">
                       Bia
                     </span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white/90 rounded-2xl border border-[#864d61]/10 flex items-center gap-3 shadow-sm hover:scale-105 transition-transform">
-                  <div className="w-11 h-11 rounded-2xl bg-[#b2f2bb] flex items-center justify-center shrink-0 border border-[#96d5a0]/50 shadow-xs">
-                    <CuteMicIcon className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-500">2 Micro xịn</p>
-                    <p className="text-sm font-extrabold text-[#201047]">Hát nhẹ chống hú</p>
+                {/* Card 2: Mồi - Tràn viền 100% */}
+                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#b2f2bb] shadow-[0_12px_28px_rgba(47,106,63,0.12)] hover:shadow-[0_20px_45px_rgba(47,106,63,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none">
+                  <img
+                    src="/moi.png"
+                    alt="Mồi"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+
+                  <div className="relative z-10 w-full text-center">
+                    <span className="block w-full py-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/30 rounded-2xl text-white font-headline text-sm sm:text-base shadow-sm group-hover:bg-[#2f6a3f] group-hover:border-[#2f6a3f] transition-all duration-300">
+                      Mồi
+                    </span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white/90 rounded-2xl border border-[#864d61]/10 flex items-center gap-3 shadow-sm hover:scale-105 transition-transform">
-                  <div className="w-11 h-11 rounded-2xl bg-[#c9e6ff] flex items-center justify-center shrink-0 border border-[#9ed1f8]/50 shadow-xs">
-                    <CuteBatteryIcon className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-500">Pin trâu</p>
-                    <p className="text-sm font-extrabold text-[#201047]">Hát 8-12 tiếng</p>
+                {/* Card 3: Bạn Bè - Tràn viền 100% */}
+                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#c9e6ff] shadow-[0_12px_28px_rgba(35,90,124,0.12)] hover:shadow-[0_20px_45px_rgba(35,90,124,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none">
+                  <img
+                    src="/friend.png"
+                    alt="Bạn bè"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+
+                  <div className="relative z-10 w-full text-center">
+                    <span className="block w-full py-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/30 rounded-2xl text-white font-headline text-sm sm:text-base shadow-sm group-hover:bg-[#235a7c] group-hover:border-[#235a7c] transition-all duration-300">
+                      Mấy ní
+                    </span>
                   </div>
                 </div>
 
-                <div className="p-3.5 bg-white/90 rounded-2xl border border-[#864d61]/10 flex items-center gap-3 shadow-sm hover:scale-105 transition-transform">
-                  <div className="w-11 h-11 rounded-2xl bg-[#eee4ff] flex items-center justify-center shrink-0 border border-[#d5c2c6]/50 shadow-xs">
-                    <CuteStarIcon filled={true} className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-500">Đánh giá 4.9★</p>
-                    <p className="text-sm font-extrabold text-[#201047]">500+ Khách khen</p>
+                {/* Card 4: Say - Tràn viền 100% */}
+                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ebd4ff] shadow-[0_12px_28px_rgba(107,33,168,0.12)] hover:shadow-[0_20px_45px_rgba(107,33,168,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none">
+                  <img 
+                    src="/say.png" 
+                    alt="Say" 
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                  
+                  <div className="relative z-10 w-full text-center">
+                    <span className="block w-full py-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/30 rounded-2xl text-white font-headline text-sm sm:text-base shadow-sm group-hover:bg-purple-800 group-hover:border-purple-800 transition-all duration-300">
+                      Say
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1092,7 +1117,7 @@ export default function LandingPageView({
               {/* Right Demo Buttons: 1 ảnh 1 dòng trên Mobile, 2 cột trên Tablet/Desktop */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 w-full md:w-[480px]">
                 {[
-                  { id: 'nhan', name: 'Tháp Nhạn', location: 'Tháp Nhạn Cổ Kính • Tuy Hòa', img: '/anh4.png', color: 'from-[#864d61]/90', ring: 'ring-[#864d61]' },
+                  { id: 'nhan', name: 'Tháp Nhạn', location: 'Tháp Nhạn Cổ Kính • Tuy Hòa', img: '/anh8.png', color: 'from-[#864d61]/90', ring: 'ring-[#864d61]' },
                   { id: 'nghinhphong', name: 'Tháp Nghinh Phong', location: 'Tháp Nghinh Phong • Tuy Hòa', img: '/anh5.png', color: 'from-[#2f6a3f]/90', ring: 'ring-[#2f6a3f]' },
                   { id: 'honyen', name: 'Hòn Yến', location: 'Hòn Yến Biển Xanh • Tuy An', img: '/anh6.png', color: 'from-purple-950/90', ring: 'ring-purple-700' },
                   { id: 'muidien', name: 'Hải Đăng Mũi Điện', location: 'Hải Đăng Mũi Điện • Bãi Môn', img: '/anh7.png', color: 'from-[#235a7c]/90', ring: 'ring-[#235a7c]' }
