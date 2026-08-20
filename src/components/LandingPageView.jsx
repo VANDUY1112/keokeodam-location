@@ -1030,7 +1030,10 @@ export default function LandingPageView({
               {/* Party Combo Visual Showcase - Ảnh Tràn Viền 100% Cực Kỳ Sướng Mắt */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-6 mt-12 max-w-5xl mx-auto w-full">
                 {/* Card 1: Bia */}
-                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ffd9e3] bg-gradient-to-b from-[#ffe5ee] via-[#fff0f5] to-[#ffd6e4] shadow-[0_12px_28px_rgba(134,77,97,0.12)] hover:shadow-[0_20px_45px_rgba(134,77,97,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-between p-3 sm:p-4 group cursor-pointer select-none">
+                <div 
+                  onClick={() => setZoomImageModal({ id: 'bia', location: 'Bia Tươi Mát Lạnh', img: '/bia.png' })}
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ffd9e3] bg-gradient-to-b from-[#ffe5ee] via-[#fff0f5] to-[#ffd6e4] shadow-[0_12px_28px_rgba(134,77,97,0.12)] hover:shadow-[0_20px_45px_rgba(134,77,97,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-between p-3 sm:p-4 group cursor-pointer select-none"
+                >
                   <div className="flex-1 w-full flex items-center justify-center pt-2">
                     <img
                       src="/bia.png"
@@ -1046,7 +1049,10 @@ export default function LandingPageView({
                 </div>
 
                 {/* Card 2: Mồi - Tràn viền 100% */}
-                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#b2f2bb] shadow-[0_12px_28px_rgba(47,106,63,0.12)] hover:shadow-[0_20px_45px_rgba(47,106,63,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none">
+                <div 
+                  onClick={() => setZoomImageModal({ id: 'moi', location: 'Mồi Ngon Phú Yên', img: '/moi.png' })}
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#b2f2bb] shadow-[0_12px_28px_rgba(47,106,63,0.12)] hover:shadow-[0_20px_45px_rgba(47,106,63,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
+                >
                   <img
                     src="/moi.png"
                     alt="Mồi"
@@ -1062,7 +1068,10 @@ export default function LandingPageView({
                 </div>
 
                 {/* Card 3: Bạn Bè - Tràn viền 100% */}
-                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#c9e6ff] shadow-[0_12px_28px_rgba(35,90,124,0.12)] hover:shadow-[0_20px_45px_rgba(35,90,124,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none">
+                <div 
+                  onClick={() => setZoomImageModal({ id: 'friend', location: 'Hội Mấy Ní Ca Hát', img: '/friend.png' })}
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#c9e6ff] shadow-[0_12px_28px_rgba(35,90,124,0.12)] hover:shadow-[0_20px_45px_rgba(35,90,124,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
+                >
                   <img
                     src="/friend.png"
                     alt="Bạn bè"
@@ -1078,7 +1087,10 @@ export default function LandingPageView({
                 </div>
 
                 {/* Card 4: Say - Tràn viền 100% */}
-                <div className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ebd4ff] shadow-[0_12px_28px_rgba(107,33,168,0.12)] hover:shadow-[0_20px_45px_rgba(107,33,168,0.25)] hover:-translate-y-2 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none">
+                <div 
+                  onClick={() => setZoomImageModal({ id: 'say', location: 'Hát Hò Vui Say Mê', img: '/say.png' })}
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ebd4ff] shadow-[0_12px_28px_rgba(107,33,168,0.12)] hover:shadow-[0_20px_45px_rgba(107,33,168,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
+                >
                   <img 
                     src="/say.png" 
                     alt="Say" 
@@ -1709,11 +1721,15 @@ export default function LandingPageView({
             <h3 className="font-headline text-xl sm:text-3xl text-rose-700 leading-snug mb-5 sm:mb-7 text-center">
               Lưu ý! Đã uống rượu bia thì không lái xe.
             </h3>
-            <div className="w-full max-w-2xl rounded-3xl overflow-hidden border-2 border-white/80 shadow-md bg-white">
+            <div 
+              onClick={() => setZoomImageModal({ id: 'congan', location: 'Lưu ý! Đã uống rượu bia thì không lái xe.', img: '/congan.png' })}
+              className="w-full max-w-2xl rounded-3xl overflow-hidden border-2 border-white/80 shadow-md bg-white cursor-pointer hover:shadow-2xl active:scale-95 transition-all group select-none"
+              title="Chạm để phóng to"
+            >
               <img
                 src="/congan.png"
                 alt="Chú công an nhắc nhở an toàn giao thông"
-                className="w-full h-auto max-h-[480px] object-contain hover:scale-105 transition-transform duration-500 block mx-auto"
+                className="w-full h-auto max-h-[480px] object-contain group-hover:scale-105 transition-transform duration-500 block mx-auto"
               />
             </div>
           </div>
