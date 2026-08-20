@@ -981,8 +981,8 @@ export default function LandingPageView({
             <div className="w-full max-w-4xl rounded-[2.8rem] overflow-hidden shadow-[0_16px_40px_rgba(134,77,97,0.14)] border-4 border-white">
               <div className="relative w-full aspect-[1774/887] overflow-hidden bg-[#201047]">
                 <img
-                  src="/anh1.png"
-                  alt="Locahome Chibi Mascot Banner"
+                  src="/beach.png"
+                  alt="Locahome Beach Banner"
                   className="w-full h-full object-cover scale-[1.07] hover:scale-[1.1] transition-transform duration-700 block"
                 />
               </div>
