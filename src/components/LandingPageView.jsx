@@ -319,6 +319,23 @@ export function CuteCodeIcon({ className = "w-5 h-5" }) {
   );
 }
 
+export function CuteReviewChatIcon({ className = "w-6 h-6" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3C6.477 3 2 6.92 2 11.75C2 14.17 3.12 16.36 4.96 17.92L4.03 21.05C3.93 21.39 4.29 21.68 4.6 21.5L8.43 19.34C9.56 19.76 10.75 20 12 20C17.523 20 22 16.08 22 11.25C22 6.42 17.523 3 12 3Z" fill="url(#chat-bubble-grad)" stroke="#864d61" strokeWidth="1.6" strokeLinejoin="round" />
+      <circle cx="8" cy="11.5" r="1.3" fill="#864d61" />
+      <circle cx="12" cy="11.5" r="1.3" fill="#864d61" />
+      <circle cx="16" cy="11.5" r="1.3" fill="#864d61" />
+      <defs>
+        <linearGradient id="chat-bubble-grad" x1="2" y1="3" x2="22" y2="21" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ffd9e3" />
+          <stop offset="1" stopColor="#ffeef4" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 export function CuteAvatarPill({ name = "User", letter = "U", color = "pink", className = "" }) {
   const bgStyles = {
     pink: "bg-gradient-to-br from-[#ffd9e3] to-[#ffb7ce] text-[#864d61] border-[#fab3ca]",
@@ -398,6 +415,7 @@ export default function LandingPageView({
   const [ownerNameInput, setOwnerNameInput] = useState('Kẹo Kéo Dặm');
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState({});
+  const [isLoadingReviews, setIsLoadingReviews] = useState(true);
 
   const toggleReplyExpand = (reviewId) => {
     setExpandedReplies((prev) => ({
@@ -410,12 +428,16 @@ export default function LandingPageView({
   useEffect(() => {
     const fetchReviewsFromBackend = async () => {
       try {
+        setIsLoadingReviews(true);
         const res = await api.getReviews();
-        if (res?.data?.reviews && Array.isArray(res.data.reviews) && res.data.reviews.length > 0) {
-          setReviewsList(res.data.reviews);
+        if (res && res.data) {
+          const list = Array.isArray(res.data) ? res.data : (res.data.reviews || []);
+          setReviewsList(list);
         }
       } catch (err) {
-        console.warn('Backend reviews offline or unavailable, using initial data:', err.message);
+        console.warn('Backend reviews offline or unavailable:', err.message);
+      } finally {
+        setIsLoadingReviews(false);
       }
     };
     fetchReviewsFromBackend();
@@ -589,98 +611,8 @@ export default function LandingPageView({
     }
   ];
 
-  // Reviews Data
-  const [reviewsList, setReviewsList] = useState([
-    {
-      id: 'REV-1',
-      name: 'Trần Văn Nam',
-      role: 'Thuê Puffy Bass Pro',
-      category: 'karaoke',
-      time: '19:30 19/08/2026',
-      rating: 5,
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBG39jxglMBvLSQP8WYNkmznOolrZS8IKVbiCnb14ABWu84BCV_Awt5FmaZ7eOgs0aN_yEGHcKfRswVx7dgGKCjSneartsqRRlyiRwywkXlHZQ-R_ZqGyEndlrBfP_phDzuaQz5uTuO0sDyW8l84RRVYchvsTRJzK-OjUzwmR6Ww1OIM2Z8HuxK1pxu9xzgAS_Le50pPfL-LQcRhZl6fnBnixRKUfdomciUZBpiqHJyEV1b3BuVgyVF',
-      comment: 'Âm bass đập cực chắc, pin trâu hát cả đêm không hết! Thật sự rất bất ngờ với ngoại hình nhỏ bé mà âm thanh khủng thế này.',
-      colorScheme: 'pink',
-      ownerReply: 'Dạ cảm ơn anh Nam nhiều ạ! Dòng Bass Pro 40 bên em chuyên trị các dòng nhạc sôi động và bolero. Lần tới thuê alo em giảm giá ưu đãi khách quen nhé anh ❤️',
-      ownerReplyAt: '20:10 19/08/2026',
-      ownerReplyBy: 'Kẹo Kéo Dặm'
-    },
-    {
-      id: 'REV-2',
-      name: 'Lê Thị Mai',
-      role: 'Cứu Hộ Tiệc Sinh Nhật',
-      category: 'party',
-      time: '14:15 18/08/2026',
-      rating: 5,
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDViO73UAoF3-TwSek3tM-NwCVDgAkSME_ATkVbzHd6E7q49HiMURLPXkE7jOAn8wHCMUL9uy2nT6QiYtUMb6fSd9n84vxHtgA_9FOJqmfYLprQHuFSQpATZQeZJmP_O-ojrTIcaVktaRItYXqnOe6i6lR-cc2GKPEK027sOShe1xVVlOPztso3s6BqRuZqr9_3X5huU_xsjMnuP4rV14_Jdat8lx1d9cUlqZpv07P3erTfO5Fqcfql',
-      comment: 'Dịch vụ siêu nhanh! Mình gọi điện đặt gấp, 30 phút sau loa đã có mặt tại nhà. Các bạn nhân viên siêu dễ thương và nhiệt tình hướng dẫn.',
-      colorScheme: 'blue',
-      ownerReply: 'Locahome luôn cam kết giao hỏa tốc 30 phút bất kể mưa nắng ạ. Chúc chị Mai có một sinh nhật thật nhiều niềm vui và hạnh phúc nhé!',
-      ownerReplyAt: '15:00 18/08/2026',
-      ownerReplyBy: 'Kẹo Kéo Dặm'
-    },
-    {
-      id: 'REV-3',
-      name: 'Nguyễn Tấn Đạt',
-      role: 'Hát Bolero Cuối Tuần',
-      category: 'karaoke',
-      time: '20:00 17/08/2026',
-      rating: 4,
-      verified: true,
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCxtDafNm7kkFj56vltInH7glM_OI-Pmpxu4t3jtCldR1E5Q01z9Sph6dej69uZcePS4qi0J__9t3HXYuREQEKWSXHdy8457eFHhdikvjNMfOlcQKd6Fv8I6RKFcKFXIj5JkJie2uIdg3-Nn35rkNI6fOtG9sMBDZoQSiTI_lRN5-zbifZqRZseAwFJMSD3giXDUV7_jHtDgBFInDv6FqMJHE0UgGaskeXZiqFf3dX1WI5Sm_RsA19f',
-      comment: 'Mic hát cực nhẹ, không bị hú dù đứng gần loa. Phù hợp cho những ai đam mê bolero như gia đình mình cuối tuần.',
-      colorScheme: 'green',
-      ownerReply: null,
-      ownerReplyAt: null,
-      ownerReplyBy: null
-    },
-    {
-      id: 'REV-4',
-      name: 'Sarah J.',
-      role: 'Chủ Tiệc Birthday',
-      category: 'party',
-      time: '21:30 16/08/2026',
-      rating: 5,
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBCQYPFv-WTIF8HKSwFaCz2WzJp51sU6xR2sN-3XNgWLJU3eFIGhqCNAArpwq11_FMzKP9qCCrxyCCMP0YIMakgjL68j47OJwcTKc3F5JZTOBiMlL4MiyqUYzlNlOi2gSDd953GAsD3ER5cmLfzZHNkVHItWwm_833unxG7xgMblN3Y2aWLsHbRYmx6eIw1Ten2jy6koYp9jo0J8yHdBazaGAzkxnAmKBKUgIcyMdQGKv8cqu9yyCrM',
-      bannerImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAeMXmIMPw2bEqBuBSF_-hbAsvy7I3USk5EK0WSaanKsmvrbSSeI0DwWRKwHSuxAKBl-Sod5xC3RfKG24XO8QUbjMHjGOyRkEU70hOw8wLTB9sPEUV6-69lHd66kOj_SEwKAcTrHiCa2NFZA0N4DNcejMWpl4kut_QqFbg3CLXJITlP3SbrO0ETo3n2SdJjgNQkTuPQtJd0y2Q2KCCSaKZ3rcAWFxpgX7vmv6bzXF9zdyUZDQHQqQin',
-      title: 'Buổi Tiệc Tuyệt Vời Nhất',
-      comment: 'Mình thuê dàn Mega Puff cho tiệc sinh nhật. Âm thanh cực đỉnh, bass rung sàn mà loa lại nhìn quá đỗi đáng yêu, bạn bè chụp ảnh selfie check-in suốt buổi!',
-      colorScheme: 'imageCard',
-      ownerReply: null,
-      ownerReplyAt: null,
-      ownerReplyBy: null
-    },
-    {
-      id: 'REV-5',
-      name: 'Kimberly W.',
-      role: 'Gia Đình Chung Cư',
-      category: 'karaoke',
-      time: '11:20 15/08/2026',
-      rating: 5,
-      avatar: null,
-      avatarLetter: 'K',
-      avatarColor: 'blue',
-      comment: 'Loa nhỏ gọn xinh xắn để trong phòng khách rất sang. Âm thanh trong trẻo, mở phim nghe như rạp chiếu bóng!',
-      colorScheme: 'whiteCard',
-      ownerReply: null,
-      ownerReplyAt: null,
-      ownerReplyBy: null
-    },
-    {
-      id: 'REV-6',
-      name: 'Alex Chen',
-      role: 'Quản Lý Nhân Sự (HR)',
-      category: 'company',
-      time: '09:45 13/08/2026',
-      rating: 5,
-      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAf9RwyMAsqXVrzUYdyVkyDLsATlf0LhZRQU9sENL6o5dY1NrYaknEIVH4In5iuZv4FDmpBzniReRwWXg7YnyHufFMIaHwl9MTFpMMqOpIFsVG8K-8kDwyvi9agIomt3JUH4OBKkHRpA7FXzwqzu5GVBaSKL8uytdPb4BeSQDwMO3cA6nL-pcUBJjYprUBwtQx-eDqZtTqcDB8ok40gPO8zE1MLFikoGQNRM5t_NmM6qwtnl_iTd7UG',
-      comment: 'Cả công ty thuê dàn đôi đi dã ngoại. Mọi người hát hò gắn kết vui vẻ từ chiều đến khuya, pin loa dùng mãi không hết.',
-      colorScheme: 'darkCard',
-      ownerReply: null,
-      ownerReplyAt: null,
-      ownerReplyBy: null
-    }
-  ]);
+  // Reviews Data - Real Data from Backend
+  const [reviewsList, setReviewsList] = useState([]);
 
   // FAQ Questions Data
   const faqs = [
@@ -1059,45 +991,41 @@ export default function LandingPageView({
               <a
                 href="#reviews"
                 onClick={() => setActiveNav('reviews')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'reviews'
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'reviews'
                   ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
                   : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
                   }`}
               >
-                <CuteStarIcon filled={activeNav === 'reviews'} className="w-4 h-4" />
                 <span>Đánh Giá</span>
               </a>
               <a
                 href="#speakers"
                 onClick={() => setActiveNav('speakers')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'speakers'
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'speakers'
                   ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
                   : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
                   }`}
               >
-                <CuteSpeakerIcon className="w-4 h-4" />
                 <span>Bảng Giá Loa</span>
               </a>
               <a
                 href="#sound-demo"
                 onClick={() => setActiveNav('sound-demo')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'sound-demo'
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'sound-demo'
                   ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
                   : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
                   }`}
               >
-                <CuteMusicNotesDecor className="w-4 h-4" />
                 <span>Vi vu</span>
               </a>
               <a
                 href="#faq"
                 onClick={() => setActiveNav('faq')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-1.5 ${activeNav === 'faq'
+                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'faq'
                   ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
                   : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
                   }`}
               >
-                <CuteHeartIcon filled={activeNav === 'faq'} className="w-4 h-4" />
                 <span>Hỏi Đáp</span>
               </a>
             </nav>
@@ -1432,258 +1360,332 @@ export default function LandingPageView({
             </div>
           </div>
 
-          {/* Masonry Review Columns */}
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-            {filteredReviews.map((rev) => {
-              // Reusable Owner Reply Component Block
-              const renderOwnerReplyBlock = () => {
-                const isExpanded = Boolean(expandedReplies[rev.id]);
+          {/* Masonry Review Columns / Empty State / Loading */}
+          {isLoadingReviews ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="bg-white/80 rounded-[2rem] p-6 border border-[#ffd9e3] animate-pulse space-y-4 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 bg-amber-100/70 rounded-full w-24"></div>
+                    <div className="h-4 bg-slate-100 rounded-full w-20"></div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-3.5 bg-slate-100 rounded-full w-full"></div>
+                    <div className="h-3.5 bg-slate-100 rounded-full w-4/5"></div>
+                  </div>
+                  <div className="flex items-center gap-3 pt-2">
+                    <div className="w-12 h-12 rounded-full bg-slate-100"></div>
+                    <div className="h-4 bg-slate-100 rounded-full w-28"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredReviews.length === 0 ? (
+            <div className="bg-white/90 backdrop-blur-md rounded-[2.5rem] p-8 sm:p-12 text-center border-2 border-dashed border-[#fab3ca] shadow-[0_12px_36px_rgba(134,77,97,0.06)] max-w-xl mx-auto my-6 flex flex-col items-center animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#ffd9e3] via-[#ffecf2] to-[#ffe5ee] border-2 border-[#fab3ca] flex items-center justify-center mb-4 shadow-xs">
+                <CuteReviewChatIcon className="w-10 h-10 text-[#864d61]" />
+              </div>
+              <h3 className="font-headline text-xl sm:text-2xl text-[#864d61] mb-2">
+                Chưa có nhận xét nào
+              </h3>
+              <p className="text-xs sm:text-sm font-semibold text-slate-500 max-w-md mb-6 leading-relaxed">
+                {reviewFilter !== 'all' && reviewFilter !== 'newest' && reviewFilter !== 'oldest'
+                  ? 'Chưa có đánh giá nào trong bộ lọc này. Hãy thử chọn bộ lọc khác hoặc là người đầu tiên để lại cảm nhận nhé!'
+                  : 'Hãy là người đầu tiên chia sẻ cảm nhận trải nghiệm thuê loa tại Kẹo Kéo Dặm nhé!'}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowAddReviewModal(true)}
+                className="px-6 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-95 transition-all duration-300 flex items-center gap-2 cursor-pointer clay-button-pink"
+              >
+                <span>Viết đánh giá ngay</span>
+              </button>
+            </div>
+          ) : (
+            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+              {filteredReviews.map((rev) => {
+                // Reusable Owner Reply Component Block
+                const renderOwnerReplyBlock = () => {
+                  const isExpanded = Boolean(expandedReplies[rev.id]);
 
-                return (
-                  <div className="mt-2.5 relative pl-5 sm:pl-7">
-                    {/* Thread Connector Curve */}
-                    <div className="absolute left-2 top-0 bottom-4 w-3.5 border-l-2 border-b-2 border-[#fab3ca]/70 rounded-bl-xl pointer-events-none"></div>
+                  return (
+                    <div className="mt-2.5 relative pl-5 sm:pl-7">
+                      {/* Thread Connector Curve */}
+                      <div className="absolute left-2 top-0 bottom-4 w-3.5 border-l-2 border-b-2 border-[#fab3ca]/70 rounded-bl-xl pointer-events-none"></div>
 
-                    {rev.ownerReply ? (
-                      <div className="relative z-10 space-y-1.5">
-                        <div className="flex items-center">
-                          <button
-                            type="button"
-                            onClick={() => toggleReplyExpand(rev.id)}
-                            className="text-[11px] font-headline font-bold text-[#864d61] bg-[#ffd9e3]/90 hover:bg-[#ffd9e3] px-3 py-1 rounded-full border border-[#fab3ca] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 hover:scale-105"
-                          >
-                            <span>{isExpanded ? 'Ẩn phản hồi' : 'Xem phản hồi'}</span>
-                            <svg
-                              className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
+                      {rev.ownerReply ? (
+                        <div className="relative z-10 space-y-1.5">
+                          <div className="flex items-center">
+                            <button
+                              type="button"
+                              onClick={() => toggleReplyExpand(rev.id)}
+                              className="text-[11px] font-headline font-bold text-[#864d61] bg-[#ffd9e3]/90 hover:bg-[#ffd9e3] px-3 py-1 rounded-full border border-[#fab3ca] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 hover:scale-105"
                             >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
-                        </div>
+                              <span>{isExpanded ? 'Ẩn phản hồi' : 'Xem phản hồi'}</span>
+                              <svg
+                                className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                          </div>
 
-                        <div
-                          className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
-                            }`}
-                        >
-                          <div className="overflow-hidden">
-                            <div className="bg-white/95 backdrop-blur-xs rounded-2xl rounded-tl-sm p-3.5 shadow-sm border border-[#fab3ca]/80 transition-all duration-300 relative mt-1">
-                              {/* Connector Speech Tail */}
-                              <div className="absolute -top-1.5 left-3 w-3 h-3 bg-white transform rotate-45 border-t border-l border-[#fab3ca]/80"></div>
+                          <div
+                            className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+                              }`}
+                          >
+                            <div className="overflow-hidden">
+                              <div className="bg-white/95 backdrop-blur-xs rounded-2xl rounded-tl-sm p-3.5 shadow-sm border border-[#fab3ca]/80 transition-all duration-300 relative mt-1">
+                                {/* Connector Speech Tail */}
+                                <div className="absolute -top-1.5 left-3 w-3 h-3 bg-white transform rotate-45 border-t border-l border-[#fab3ca]/80"></div>
 
-                              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap relative z-10">
-                                <div className="flex items-center gap-2">
-                                  <img
-                                    src="/anh3.png"
-                                    alt="Kẹo Kéo Dặm"
-                                    className="w-6 h-6 rounded-full object-cover border border-[#fab3ca] shadow-2xs shrink-0"
-                                  />
-                                  <span className="font-headline font-bold text-xs text-[#864d61]">
-                                    {rev.ownerReplyBy || 'Kẹo Kéo Dặm'}
-                                  </span>
+                                <div className="flex items-center justify-between gap-2 mb-2 flex-wrap relative z-10">
+                                  <div className="flex items-center gap-2">
+                                    <img
+                                      src="/anh3.png"
+                                      alt="Kẹo Kéo Dặm"
+                                      className="w-6 h-6 rounded-full object-cover border border-[#fab3ca] shadow-2xs shrink-0"
+                                    />
+                                    <span className="font-headline font-bold text-xs text-[#864d61]">
+                                      {rev.ownerReplyBy || 'Kẹo Kéo Dặm'}
+                                    </span>
+                                  </div>
+                                  {rev.ownerReplyAt && (
+                                    <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-2.5 py-0.5 rounded-full border border-[#fab3ca] shadow-2xs">
+                                      {rev.ownerReplyAt}
+                                    </span>
+                                  )}
                                 </div>
-                                {rev.ownerReplyAt && (
-                                  <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-2.5 py-0.5 rounded-full border border-[#fab3ca] shadow-2xs">
-                                    {rev.ownerReplyAt}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs sm:text-[13px] text-[#514347] font-medium leading-relaxed bg-[#fdf7ff] p-2.5 rounded-xl border border-[#ffd9e3]/60 relative z-10">
-                                {rev.ownerReply}
-                              </p>
-                              <div className="flex justify-end mt-1.5 relative z-10">
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenReplyModal(rev)}
-                                  className="text-[11px] font-bold text-[#864d61] hover:underline cursor-pointer transition-colors"
-                                >
-                                  <span>Sửa phản hồi</span>
-                                </button>
+                                <p className="text-xs sm:text-[13px] text-[#514347] font-medium leading-relaxed bg-[#fdf7ff] p-2.5 rounded-xl border border-[#ffd9e3]/60 relative z-10">
+                                  {rev.ownerReply}
+                                </p>
+                                <div className="flex justify-end mt-1.5 relative z-10">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenReplyModal(rev)}
+                                    className="text-[11px] font-bold text-[#864d61] hover:underline cursor-pointer transition-colors"
+                                  >
+                                    <span>Sửa phản hồi</span>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="relative z-10 flex items-center justify-between py-1">
-                        <span className="text-[11px] font-semibold text-slate-400 bg-slate-100/90 px-2.5 py-0.5 rounded-full border border-slate-200/70 select-none">
-                          Chưa phản hồi
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleOpenReplyModal(rev)}
-                          className="text-[11px] font-bold text-[#864d61] hover:text-[#512332] hover:underline cursor-pointer transition-colors ml-auto"
-                        >
-                          <span>Trả lời</span>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              };
+                      ) : (
+                        <div className="relative z-10 flex items-center justify-between py-1">
+                          <span className="text-[11px] font-semibold text-slate-400 bg-slate-100/90 px-2.5 py-0.5 rounded-full border border-slate-200/70 select-none">
+                            Chưa phản hồi
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenReplyModal(rev)}
+                            className="text-[11px] font-bold text-[#864d61] hover:text-[#512332] hover:underline cursor-pointer transition-colors ml-auto"
+                          >
+                            <span>Trả lời</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                };
 
-              if (rev.colorScheme === 'imageCard') {
-                return (
-                  <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#ffb7ce] rounded-[2rem] p-1.5 shadow-[0_12px_32px_rgba(134,77,97,0.15)] relative z-10 transition-transform duration-300 hover:scale-[1.02] border border-[#fab3ca]">
-                      <div className="relative w-full h-48 rounded-t-[1.7rem] overflow-hidden mb-2">
-                        <div
-                          className="absolute inset-0 bg-cover bg-center"
-                          style={{ backgroundImage: `url('${rev.bannerImage}')` }}
-                        ></div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#ffb7ce] via-transparent to-transparent"></div>
-                        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                if (rev.colorScheme === 'imageCard') {
+                  return (
+                    <article key={rev.id} className="break-inside-avoid relative">
+                      <div className="bg-[#ffb7ce] rounded-[2rem] p-1.5 shadow-[0_12px_32px_rgba(134,77,97,0.15)] relative z-10 transition-transform duration-300 hover:scale-[1.02] border border-[#fab3ca]">
+                        <div className="relative w-full h-48 rounded-t-[1.7rem] overflow-hidden mb-2">
+                          <div
+                            className="absolute inset-0 bg-cover bg-center"
+                            style={{ backgroundImage: `url('${rev.bannerImage}')` }}
+                          ></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#ffb7ce] via-transparent to-transparent"></div>
+                          <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                            <div className="flex gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <CuteStarIcon key={i} filled={true} className="w-5 h-5 drop-shadow-xs" />
+                              ))}
+                            </div>
+                            {rev.time && (
+                              <span className="text-xs font-bold text-[#7b4458] bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-[#fab3ca]/60 shadow-xs">
+                                {rev.time}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="p-4 pt-1">
+                          <h4 className="font-headline text-lg sm:text-xl text-[#7b4458] mb-2">{rev.title || 'Buổi Tiệc Tuyệt Vời Nhất'}</h4>
+                          <p className="text-sm sm:text-base text-[#7b4458]/90 font-medium leading-relaxed">
+                            "{rev.comment}"
+                          </p>
+                          <div className="flex items-center gap-3 mt-4 pt-3 border-t border-[#864d61]/15">
+                            <div className="w-11 h-11 rounded-full border-2 border-[#864d61] bg-white shadow-sm shrink-0 overflow-hidden">
+                              <img src={rev.avatar || '/pink.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
+                            </div>
+                            <div>
+                              <h3 className="font-headline text-sm text-[#7b4458]">{rev.name}</h3>
+                            </div>
+                          </div>
+                          {renderOwnerReplyBlock()}
+                        </div>
+                      </div>
+                    </article>
+                  );
+                }
+
+                if (rev.colorScheme === 'darkCard') {
+                  return (
+                    <article key={rev.id} className="break-inside-avoid relative">
+                      <div className="bg-[#201047] rounded-[2.5rem] p-6 shadow-xl relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-purple-900/40">
+                        <div className="flex items-center justify-between mb-4">
                           <div className="flex gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <CuteStarIcon key={i} filled={true} className="w-5 h-5 drop-shadow-xs" />
+                            {[...Array(rev.rating)].map((_, i) => (
+                              <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
                             ))}
                           </div>
                           {rev.time && (
-                            <span className="text-xs font-bold text-[#7b4458] bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-[#fab3ca]/60 shadow-xs">
+                            <span className="text-xs font-bold text-purple-200 bg-purple-900/80 px-2.5 py-0.5 rounded-full border border-purple-700/60 shadow-xs">
                               {rev.time}
                             </span>
                           )}
                         </div>
-                      </div>
-                      <div className="p-4 pt-1">
-                        <h4 className="font-headline text-lg sm:text-xl text-[#7b4458] mb-2">{rev.title || 'Buổi Tiệc Tuyệt Vời Nhất'}</h4>
-                        <p className="text-sm sm:text-base text-[#7b4458]/90 font-medium leading-relaxed">
+                        <p className="text-base text-[#f6eeff] font-medium leading-relaxed mb-4">
                           "{rev.comment}"
                         </p>
-                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-[#864d61]/15">
-                          <div className="w-11 h-11 rounded-full border-2 border-[#864d61] bg-white shadow-sm shrink-0 overflow-hidden">
+                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-purple-800/40">
+                          <div className="w-11 h-11 rounded-full border-2 border-[#ffb7ce] bg-white shrink-0 overflow-hidden">
                             <img src={rev.avatar || '/pink.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                           </div>
                           <div>
-                            <h3 className="font-headline text-sm text-[#7b4458]">{rev.name}</h3>
+                            <h3 className="font-headline text-sm text-[#f6eeff]">{rev.name}</h3>
                           </div>
                         </div>
                         {renderOwnerReplyBlock()}
                       </div>
-                    </div>
-                  </article>
-                );
-              }
+                    </article>
+                  );
+                }
 
-              if (rev.colorScheme === 'darkCard') {
-                return (
-                  <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#201047] rounded-[2.5rem] p-6 shadow-xl relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-purple-900/40">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex gap-1">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
-                          ))}
+                if (rev.colorScheme === 'whiteCard') {
+                  return (
+                    <article key={rev.id} className="break-inside-avoid relative">
+                      <div className="bg-white rounded-[2rem] p-6 shadow-[0_6px_20px_rgba(134,77,97,0.06)] border-2 border-[#ffd9e3] relative z-10 transition-transform duration-300 hover:-translate-y-2">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex gap-1">
+                            {[...Array(rev.rating)].map((_, i) => (
+                              <CuteStarIcon key={i} filled={true} className="w-4.5 h-4.5" />
+                            ))}
+                          </div>
+                          {rev.time && (
+                            <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3]/70 px-2.5 py-0.5 rounded-full border border-[#fab3ca]/60 shadow-xs">
+                              {rev.time}
+                            </span>
+                          )}
                         </div>
-                        {rev.time && (
-                          <span className="text-xs font-bold text-purple-200 bg-purple-900/80 px-2.5 py-0.5 rounded-full border border-purple-700/60 shadow-xs">
-                            {rev.time}
-                          </span>
-                        )}
+                        <p className="text-sm sm:text-base text-[#201047] font-medium leading-relaxed mb-4 italic">
+                          "{rev.comment}"
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <CuteAvatarPill name={rev.name} letter={rev.avatarLetter || 'K'} color={rev.avatarColor || rev.colorScheme || 'pink'} />
+                          <div>
+                            <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
+                          </div>
+                        </div>
+                        {renderOwnerReplyBlock()}
                       </div>
-                      <p className="text-base text-[#f6eeff] font-medium leading-relaxed mb-4">
-                        "{rev.comment}"
-                      </p>
-                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-purple-800/40">
-                        <div className="w-11 h-11 rounded-full border-2 border-[#ffb7ce] bg-white shrink-0 overflow-hidden">
-                          <img src={rev.avatar || '/pink.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
-                        </div>
-                        <div>
-                          <h3 className="font-headline text-sm text-[#f6eeff]">{rev.name}</h3>
-                        </div>
-                      </div>
-                      {renderOwnerReplyBlock()}
-                    </div>
-                  </article>
-                );
-              }
+                    </article>
+                  );
+                }
 
-              if (rev.colorScheme === 'whiteCard') {
-                return (
-                  <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-white rounded-[2rem] p-6 shadow-[0_6px_20px_rgba(134,77,97,0.06)] border-2 border-[#ffd9e3] relative z-10 transition-transform duration-300 hover:-translate-y-2">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex gap-1">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-4.5 h-4.5" />
-                          ))}
+                if (rev.colorScheme === 'blue') {
+                  return (
+                    <article key={rev.id} className="break-inside-avoid relative">
+                      <div className="bg-[#c9e6ff]/50 rounded-[2.2rem] p-6 shadow-[0_8px_24px_rgba(35,90,124,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#9ed1f8]/50">
+                        <div className="absolute -bottom-3 right-10 w-7 h-7 bg-[#c9e6ff]/50 transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(35,90,124,0.04)] -z-10 border-r border-b border-[#9ed1f8]/50"></div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex gap-1">
+                            {[...Array(rev.rating)].map((_, i) => (
+                              <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
+                            ))}
+                          </div>
+                          <span className="text-xs font-bold text-[#235a7c] bg-[#c9e6ff] px-2.5 py-0.5 rounded-full border border-[#9ed1f8]">{rev.time}</span>
                         </div>
-                        {rev.time && (
-                          <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3]/70 px-2.5 py-0.5 rounded-full border border-[#fab3ca]/60 shadow-xs">
-                            {rev.time}
-                          </span>
-                        )}
+                        <p className="text-sm sm:text-base text-[#0c4b6c] font-semibold leading-relaxed mb-2">
+                          "{rev.comment}"
+                        </p>
                       </div>
-                      <p className="text-sm sm:text-base text-[#201047] font-medium leading-relaxed mb-4 italic">
-                        "{rev.comment}"
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <CuteAvatarPill name={rev.name} letter={rev.avatarLetter || 'K'} color={rev.avatarColor || rev.colorScheme || 'pink'} />
+                      <div className="flex items-center flex-row-reverse gap-3 mt-4 pr-3 text-right">
+                        <div className="w-12 h-12 rounded-2xl border-[3px] border-[#9ed1f8] bg-white shadow-sm shrink-0 transform rotate-3 overflow-hidden">
+                          <img src={rev.avatar || '/blue.png'} alt={rev.name} className="w-full h-full object-cover rounded-xl" />
+                        </div>
                         <div>
                           <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
                         </div>
                       </div>
                       {renderOwnerReplyBlock()}
-                    </div>
-                  </article>
-                );
-              }
+                    </article>
+                  );
+                }
 
-              if (rev.colorScheme === 'blue') {
+                if (rev.colorScheme === 'green') {
+                  return (
+                    <article key={rev.id} className="break-inside-avoid relative">
+                      <div className="bg-[#b2f2bb]/50 rounded-[2rem] rounded-tr-none p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
+                        <div className="absolute -top-3 right-0 w-7 h-7 bg-[#b2f2bb]/50 transform rotate-45 rounded-xs -z-10 border-t border-r border-[#96d5a0]/50"></div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex gap-1">
+                            {[...Array(rev.rating)].map((_, i) => (
+                              <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
+                            ))}
+                          </div>
+                          <span className="text-xs font-bold text-[#2f6a3f] bg-[#b2f2bb] px-2.5 py-0.5 rounded-full border border-[#96d5a0] flex items-center gap-1 shadow-xs">
+                            {rev.time}
+                          </span>
+                        </div>
+                        <p className="text-sm sm:text-base text-[#00210b] font-semibold leading-relaxed mb-2">
+                          "{rev.comment}"
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 mt-4 pl-3">
+                        <div className="w-12 h-12 rounded-full border-[3px] border-[#96d5a0] bg-white shadow-sm shrink-0 overflow-hidden">
+                          <img src={rev.avatar || '/green.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
+                        </div>
+                        <div>
+                          <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
+                        </div>
+                      </div>
+                      {renderOwnerReplyBlock()}
+                    </article>
+                  );
+                }
+
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#c9e6ff]/50 rounded-[2.2rem] p-6 shadow-[0_8px_24px_rgba(35,90,124,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#9ed1f8]/50">
-                      <div className="absolute -bottom-3 right-10 w-7 h-7 bg-[#c9e6ff]/50 transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(35,90,124,0.04)] -z-10 border-r border-b border-[#9ed1f8]/50"></div>
+                    <div className="bg-[#f3eaff] rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
+                      <div className="absolute -bottom-3 left-10 w-7 h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
                             <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
                           ))}
                         </div>
-                        <span className="text-xs font-bold text-[#235a7c] bg-[#c9e6ff] px-2.5 py-0.5 rounded-full border border-[#9ed1f8]">{rev.time}</span>
+                        <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-2.5 py-0.5 rounded-full border border-[#fab3ca]">{rev.time}</span>
                       </div>
-                      <p className="text-sm sm:text-base text-[#0c4b6c] font-semibold leading-relaxed mb-2">
-                        "{rev.comment}"
-                      </p>
-                    </div>
-                    <div className="flex items-center flex-row-reverse gap-3 mt-4 pr-3 text-right">
-                      <div className="w-12 h-12 rounded-2xl border-[3px] border-[#9ed1f8] bg-white shadow-sm shrink-0 transform rotate-3 overflow-hidden">
-                        <img src={rev.avatar || '/blue.png'} alt={rev.name} className="w-full h-full object-cover rounded-xl" />
-                      </div>
-                      <div>
-                        <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                      </div>
-                    </div>
-                    {renderOwnerReplyBlock()}
-                  </article>
-                );
-              }
-
-              if (rev.colorScheme === 'green') {
-                return (
-                  <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#b2f2bb]/50 rounded-[2rem] rounded-tr-none p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
-                      <div className="absolute -top-3 right-0 w-7 h-7 bg-[#b2f2bb]/50 transform rotate-45 rounded-xs -z-10 border-t border-r border-[#96d5a0]/50"></div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex gap-1">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
-                          ))}
-                        </div>
-                        <span className="text-xs font-bold text-[#2f6a3f] bg-[#b2f2bb] px-2.5 py-0.5 rounded-full border border-[#96d5a0] flex items-center gap-1 shadow-xs">
-                          {rev.time}
-                        </span>
-                      </div>
-                      <p className="text-sm sm:text-base text-[#00210b] font-semibold leading-relaxed mb-2">
+                      <p className="text-sm sm:text-base text-[#201047] font-semibold leading-relaxed mb-2">
                         "{rev.comment}"
                       </p>
                     </div>
                     <div className="flex items-center gap-3 mt-4 pl-3">
-                      <div className="w-12 h-12 rounded-full border-[3px] border-[#96d5a0] bg-white shadow-sm shrink-0 overflow-hidden">
-                        <img src={rev.avatar || '/green.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
+                      <div className="w-12 h-12 rounded-full border-[3px] border-[#ffd9e3] bg-white shadow-sm shrink-0 overflow-hidden">
+                        {rev.avatar ? (
+                          <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
+                        ) : (
+                          <CuteAvatarPill name={rev.name} letter={rev.avatarLetter || 'U'} color={rev.avatarColor || rev.colorScheme || 'pink'} />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
@@ -1692,41 +1694,9 @@ export default function LandingPageView({
                     {renderOwnerReplyBlock()}
                   </article>
                 );
-              }
-
-              return (
-                <article key={rev.id} className="break-inside-avoid relative">
-                  <div className="bg-[#f3eaff] rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
-                    <div className="absolute -bottom-3 left-10 w-7 h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex gap-1">
-                        {[...Array(rev.rating)].map((_, i) => (
-                          <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
-                        ))}
-                      </div>
-                      <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-2.5 py-0.5 rounded-full border border-[#fab3ca]">{rev.time}</span>
-                    </div>
-                    <p className="text-sm sm:text-base text-[#201047] font-semibold leading-relaxed mb-2">
-                      "{rev.comment}"
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 mt-4 pl-3">
-                    <div className="w-12 h-12 rounded-full border-[3px] border-[#ffd9e3] bg-white shadow-sm shrink-0 overflow-hidden">
-                      {rev.avatar ? (
-                        <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
-                      ) : (
-                        <CuteAvatarPill name={rev.name} letter={rev.avatarLetter || 'U'} color={rev.avatarColor || rev.colorScheme || 'pink'} />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                    </div>
-                  </div>
-                  {renderOwnerReplyBlock()}
-                </article>
-              );
-            })}
-          </div>
+              })}
+            </div>
+          )}
         </section>
 
         {/* ═══════════════ SPEAKER FLEET & PRICING PACKAGES ═══════════════ */}
@@ -2002,7 +1972,7 @@ export default function LandingPageView({
           </p>
 
           <p className="text-xs font-bold text-[#864d61]/70 mt-2 tracking-wide">
-            Locahome được phát triển bởi Hồ Văn Duy
+            Được phát triển bởi Hồ Văn Duy
           </p>
         </div>
       </footer>
