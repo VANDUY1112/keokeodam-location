@@ -1029,13 +1029,12 @@ export default function LandingPageView({
 
               {/* Trust Badges */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-10 max-w-4xl mx-auto">
-                <div className="p-3.5 bg-white/90 rounded-2xl border border-[#864d61]/10 flex items-center gap-3 shadow-sm hover:scale-105 transition-transform">
-                  <div className="w-11 h-11 rounded-2xl bg-[#ffd9e3] flex items-center justify-center shrink-0 border border-[#fab3ca]/50 shadow-xs">
-                    <CuteLightningIcon className="w-6 h-6" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-xs font-bold text-slate-500">Giao hỏa tốc</p>
-                    <p className="text-sm font-extrabold text-[#201047]">30 Phút tới nơi</p>
+                <div className="relative h-[76px] sm:h-[84px] bg-gradient-to-br from-[#fff2f5] to-[#fdf7ff] rounded-2xl border-2 border-[#ffd9e3] overflow-hidden shadow-sm hover:scale-105 transition-all flex items-center justify-center p-2 group cursor-pointer">
+                  <img src="/bia.png" alt="Bia" className="h-full w-auto max-w-[60%] object-contain group-hover:scale-115 transition-transform duration-300 drop-shadow-sm shrink-0" />
+                  <div className="flex-1 text-center">
+                    <span className="font-headline text-base sm:text-lg text-[#864d61]">
+                      Bia
+                    </span>
                   </div>
                 </div>
 
@@ -1675,6 +1674,22 @@ export default function LandingPageView({
               >
                 <span>Hotline: 0368.115.592</span>
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════ SAFETY NOTICE SECTION (ĐÃ UỐNG RƯỢU BIA THÌ KHÔNG LÁI XE) ═══════════════ */}
+        <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+          <div className="bg-gradient-to-br from-[#fff5f5] via-[#fff0f3] to-[#fff8f0] rounded-[2.8rem] p-6 sm:p-10 border-2 border-[#ffd9e3] shadow-[0_12px_36px_rgba(134,77,97,0.08)] flex flex-col items-center">
+            <h3 className="font-headline text-xl sm:text-3xl text-rose-700 leading-snug mb-5 sm:mb-7 text-center">
+              Lưu ý! Đã uống rượu bia thì không lái xe.
+            </h3>
+            <div className="w-full max-w-2xl rounded-3xl overflow-hidden border-2 border-white/80 shadow-md bg-white">
+              <img
+                src="/congan.png"
+                alt="Chú công an nhắc nhở an toàn giao thông"
+                className="w-full h-auto max-h-[480px] object-contain hover:scale-105 transition-transform duration-500 block mx-auto"
+              />
             </div>
           </div>
         </section>
