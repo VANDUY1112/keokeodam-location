@@ -155,6 +155,32 @@ class ApiService {
       body: JSON.stringify(settings)
     });
   }
+
+  // ─── Customer Reviews & Owner Replies ───
+  async getReviews(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/reviews${query ? `?${query}` : ''}`);
+  }
+
+  async createReview(data) {
+    return this.request('/reviews', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async replyReview(id, replyText, ownerName = 'Chủ quán Locahome (Hồ Văn Duy)') {
+    return this.request(`/reviews/${id}/reply`, {
+      method: 'PATCH',
+      body: JSON.stringify({ replyText, ownerName })
+    });
+  }
+
+  async deleteReview(id) {
+    return this.request(`/reviews/${id}`, {
+      method: 'DELETE'
+    });
+  }
 }
 
 export const api = new ApiService();

@@ -559,7 +559,7 @@ export default function LandingPageView({
       name: 'Trần Văn Nam',
       role: 'Thuê Puffy Bass Pro',
       category: 'karaoke',
-      time: '1 ngày trước',
+      time: '19:30 19/08/2026',
       rating: 5,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBG39jxglMBvLSQP8WYNkmznOolrZS8IKVbiCnb14ABWu84BCV_Awt5FmaZ7eOgs0aN_yEGHcKfRswVx7dgGKCjSneartsqRRlyiRwywkXlHZQ-R_ZqGyEndlrBfP_phDzuaQz5uTuO0sDyW8l84RRVYchvsTRJzK-OjUzwmR6Ww1OIM2Z8HuxK1pxu9xzgAS_Le50pPfL-LQcRhZl6fnBnixRKUfdomciUZBpiqHJyEV1b3BuVgyVF',
       comment: 'Âm bass đập cực chắc, pin trâu hát cả đêm không hết! Thật sự rất bất ngờ với ngoại hình nhỏ bé mà âm thanh khủng thế này.',
@@ -570,7 +570,7 @@ export default function LandingPageView({
       name: 'Lê Thị Mai',
       role: 'Cứu Hộ Tiệc Sinh Nhật',
       category: 'party',
-      time: '2 ngày trước',
+      time: '14:15 18/08/2026',
       rating: 5,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDViO73UAoF3-TwSek3tM-NwCVDgAkSME_ATkVbzHd6E7q49HiMURLPXkE7jOAn8wHCMUL9uy2nT6QiYtUMb6fSd9n84vxHtgA_9FOJqmfYLprQHuFSQpATZQeZJmP_O-ojrTIcaVktaRItYXqnOe6i6lR-cc2GKPEK027sOShe1xVVlOPztso3s6BqRuZqr9_3X5huU_xsjMnuP4rV14_Jdat8lx1d9cUlqZpv07P3erTfO5Fqcfql',
       comment: 'Dịch vụ siêu nhanh! Mình gọi điện đặt gấp, 30 phút sau loa đã có mặt tại nhà. Các bạn nhân viên siêu dễ thương và nhiệt tình hướng dẫn.',
@@ -581,7 +581,7 @@ export default function LandingPageView({
       name: 'Nguyễn Tấn Đạt',
       role: 'Hát Bolero Cuối Tuần',
       category: 'karaoke',
-      time: '3 ngày trước',
+      time: '20:00 17/08/2026',
       rating: 4,
       verified: true,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCxtDafNm7kkFj56vltInH7glM_OI-Pmpxu4t3jtCldR1E5Q01z9Sph6dej69uZcePS4qi0J__9t3HXYuREQEKWSXHdy8457eFHhdikvjNMfOlcQKd6Fv8I6RKFcKFXIj5JkJie2uIdg3-Nn35rkNI6fOtG9sMBDZoQSiTI_lRN5-zbifZqRZseAwFJMSD3giXDUV7_jHtDgBFInDv6FqMJHE0UgGaskeXZiqFf3dX1WI5Sm_RsA19f',
@@ -593,7 +593,7 @@ export default function LandingPageView({
       name: 'Sarah J.',
       role: 'Chủ Tiệc Birthday',
       category: 'party',
-      time: '4 ngày trước',
+      time: '21:30 16/08/2026',
       rating: 5,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBCQYPFv-WTIF8HKSwFaCz2WzJp51sU6xR2sN-3XNgWLJU3eFIGhqCNAArpwq11_FMzKP9qCCrxyCCMP0YIMakgjL68j47OJwcTKc3F5JZTOBiMlL4MiyqUYzlNlOi2gSDd953GAsD3ER5cmLfzZHNkVHItWwm_833unxG7xgMblN3Y2aWLsHbRYmx6eIw1Ten2jy6koYp9jo0J8yHdBazaGAzkxnAmKBKUgIcyMdQGKv8cqu9yyCrM',
       bannerImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAeMXmIMPw2bEqBuBSF_-hbAsvy7I3USk5EK0WSaanKsmvrbSSeI0DwWRKwHSuxAKBl-Sod5xC3RfKG24XO8QUbjMHjGOyRkEU70hOw8wLTB9sPEUV6-69lHd66kOj_SEwKAcTrHiCa2NFZA0N4DNcejMWpl4kut_QqFbg3CLXJITlP3SbrO0ETo3n2SdJjgNQkTuPQtJd0y2Q2KCCSaKZ3rcAWFxpgX7vmv6bzXF9zdyUZDQHQqQin',
@@ -606,7 +606,7 @@ export default function LandingPageView({
       name: 'Kimberly W.',
       role: 'Gia Đình Chung Cư',
       category: 'karaoke',
-      time: '5 ngày trước',
+      time: '11:20 15/08/2026',
       rating: 5,
       avatar: null,
       avatarLetter: 'K',
@@ -619,7 +619,7 @@ export default function LandingPageView({
       name: 'Alex Chen',
       role: 'Quản Lý Nhân Sự (HR)',
       category: 'company',
-      time: '1 tuần trước',
+      time: '09:45 13/08/2026',
       rating: 5,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAf9RwyMAsqXVrzUYdyVkyDLsATlf0LhZRQU9sENL6o5dY1NrYaknEIVH4In5iuZv4FDmpBzniReRwWXg7YnyHufFMIaHwl9MTFpMMqOpIFsVG8K-8kDwyvi9agIomt3JUH4OBKkHRpA7FXzwqzu5GVBaSKL8uytdPb4BeSQDwMO3cA6nL-pcUBJjYprUBwtQx-eDqZtTqcDB8ok40gPO8zE1MLFikoGQNRM5t_NmM6qwtnl_iTd7UG',
       comment: 'Cả công ty thuê dàn đôi đi dã ngoại. Mọi người hát hò gắn kết vui vẻ từ chiều đến khuya, pin loa dùng mãi không hết.',
@@ -774,12 +774,16 @@ export default function LandingPageView({
       return;
     }
 
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const formattedPostTime = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
     const newRev = {
       id: Date.now(),
       name: newReviewForm.name.trim(),
       role: newReviewForm.role || 'Khách hàng thân thiết',
       category: newReviewForm.category,
-      time: 'Vừa xong',
+      time: formattedPostTime,
       rating: Number(newReviewForm.rating),
       verified: true,
       avatar: null,
@@ -1295,10 +1299,17 @@ export default function LandingPageView({
                           style={{ backgroundImage: `url('${rev.bannerImage}')` }}
                         ></div>
                         <div className="absolute inset-0 bg-gradient-to-t from-[#ffb7ce] via-transparent to-transparent"></div>
-                        <div className="absolute bottom-3 left-4 flex gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-5 h-5 drop-shadow-xs" />
-                          ))}
+                        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                          <div className="flex gap-1">
+                            {[...Array(5)].map((_, i) => (
+                              <CuteStarIcon key={i} filled={true} className="w-5 h-5 drop-shadow-xs" />
+                            ))}
+                          </div>
+                          {rev.time && (
+                            <span className="text-xs font-bold text-[#7b4458] bg-white/90 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-[#fab3ca]/60 shadow-xs">
+                              {rev.time}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="p-4 pt-1">
@@ -1325,11 +1336,17 @@ export default function LandingPageView({
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
                     <div className="bg-[#201047] rounded-[2.5rem] p-6 shadow-xl relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-purple-900/40">
-                      <div className="absolute top-4 right-5 text-[#fab3ca] text-[50px] opacity-20 font-headline">"</div>
-                      <div className="flex gap-1 mb-4">
-                        {[...Array(rev.rating)].map((_, i) => (
-                          <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
-                        ))}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex gap-1">
+                          {[...Array(rev.rating)].map((_, i) => (
+                            <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
+                          ))}
+                        </div>
+                        {rev.time && (
+                          <span className="text-xs font-bold text-purple-200 bg-purple-900/80 px-2.5 py-0.5 rounded-full border border-purple-700/60 shadow-xs">
+                            {rev.time}
+                          </span>
+                        )}
                       </div>
                       <p className="text-base text-[#f6eeff] font-medium leading-relaxed mb-4">
                         "{rev.comment}"
@@ -1358,7 +1375,11 @@ export default function LandingPageView({
                             <CuteStarIcon key={i} filled={true} className="w-4.5 h-4.5" />
                           ))}
                         </div>
-                        <CuteHeartIcon className="w-4.5 h-4.5" />
+                        {rev.time && (
+                          <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3]/70 px-2.5 py-0.5 rounded-full border border-[#fab3ca]/60 shadow-xs">
+                            {rev.time}
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm sm:text-base text-[#201047] font-medium leading-relaxed mb-4 italic">
                         "{rev.comment}"
@@ -1416,12 +1437,9 @@ export default function LandingPageView({
                             <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
                           ))}
                         </div>
-                        {rev.verified && (
-                          <div className="px-2.5 py-0.5 bg-[#2f6a3f] text-white text-[11px] font-bold rounded-lg transform -rotate-2 flex items-center gap-1 shadow-xs">
-                            <CuteCheckIcon className="w-3.5 h-3.5" />
-                            <span>Đã Thuê</span>
-                          </div>
-                        )}
+                        <span className="text-xs font-bold text-[#2f6a3f] bg-[#b2f2bb] px-2.5 py-0.5 rounded-full border border-[#96d5a0] flex items-center gap-1 shadow-xs">
+                          {rev.time}
+                        </span>
                       </div>
                       <p className="text-sm sm:text-base text-[#00210b] font-semibold leading-relaxed mb-2">
                         "{rev.comment}"
@@ -1554,9 +1572,8 @@ export default function LandingPageView({
 
                 <button
                   onClick={() => handleOpenRentSpeaker(pkg)}
-                  className={`w-full py-2 sm:py-3.5 rounded-xl sm:rounded-2xl font-headline text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center justify-center gap-1 sm:gap-2 ${pkg.buttonBg}`}
+                  className={`w-full py-2 sm:py-3.5 rounded-xl sm:rounded-2xl font-headline text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center justify-center ${pkg.buttonBg}`}
                 >
-                  <CuteMicIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 shrink-0" />
                   <span>Thuê Loa Này</span>
                 </button>
               </div>

@@ -3,7 +3,7 @@ import http from 'http';
 import cookieParser from 'cookie-parser';
 import { config } from './config/index.js';
 import { initDatabase } from './database/db.js';
-import { seedDatabase } from './database/seed.js';
+import { seedDatabase, seedReviewsIfEmpty } from './database/seed.js';
 import { corsMiddleware, helmetMiddleware, apiRateLimiter, errorHandler } from './middlewares/security.js';
 import { router } from './routes/index.js';
 import { initWebSocketServer } from './socket/gpsSocket.js';
@@ -11,6 +11,7 @@ import { initWebSocketServer } from './socket/gpsSocket.js';
 // Initialize Database & Seed
 initDatabase();
 await seedDatabase();
+seedReviewsIfEmpty();
 
 const app = express();
 const server = http.createServer(app);

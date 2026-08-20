@@ -273,5 +273,158 @@ export async function seedDatabase() {
     overspeedThresholdKmH: 50
   }));
 
+  // 6. Seed Customer Reviews & Owner Replies
+  seedReviewsIfEmpty();
+
   console.log('✅ Seeding completed successfully.');
+}
+
+export function seedReviewsIfEmpty() {
+  try {
+    const reviewCount = db.prepare('SELECT COUNT(*) as count FROM reviews').get().count;
+    if (reviewCount > 0) return;
+
+    console.log('📝 Seeding initial reviews & owner replies...');
+    const insertReview = db.prepare(`
+      INSERT INTO reviews (
+        id, name, role, rating, category, comment, avatar_url,
+        avatar_letter, avatar_color, color_scheme, title, banner_image,
+        verified, post_time_formatted, owner_reply, owner_reply_at, owner_reply_by, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const initialReviews = [
+      {
+        id: 'REV-1',
+        name: 'Trần Văn Nam',
+        role: 'Thuê Puffy Bass Pro',
+        category: 'karaoke',
+        rating: 5,
+        comment: 'Âm bass đập cực chắc, pin trâu hát cả đêm không hết! Thật sự rất bất ngờ với ngoại hình nhỏ bé mà âm thanh khủng thế này.',
+        avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBG39jxglMBvLSQP8WYNkmznOolrZS8IKVbiCnb14ABWu84BCV_Awt5FmaZ7eOgs0aN_yEGHcKfRswVx7dgGKCjSneartsqRRlyiRwywkXlHZQ-R_ZqGyEndlrBfP_phDzuaQz5uTuO0sDyW8l84RRVYchvsTRJzK-OjUzwmR6Ww1OIM2Z8HuxK1pxu9xzgAS_Le50pPfL-LQcRhZl6fnBnixRKUfdomciUZBpiqHJyEV1b3BuVgyVF',
+        avatar_letter: 'N',
+        avatar_color: 'pink',
+        color_scheme: 'pink',
+        title: null,
+        banner_image: null,
+        verified: 1,
+        post_time_formatted: '19:30 19/08/2026',
+        owner_reply: 'Dạ cảm ơn anh Nam nhiều ạ! Dòng Bass Pro 40 bên em chuyên trị các dòng nhạc sôi động và bolero. Lần tới thuê alo em giảm giá ưu đãi khách quen nhé anh ❤️',
+        owner_reply_at: '20:10 19/08/2026',
+        owner_reply_by: 'Chủ quán Locahome (Hồ Văn Duy)',
+        created_at: '2026-08-19 19:30:00'
+      },
+      {
+        id: 'REV-2',
+        name: 'Lê Thị Mai',
+        role: 'Cứu Hộ Tiệc Sinh Nhật',
+        category: 'party',
+        rating: 5,
+        comment: 'Dịch vụ siêu nhanh! Mình gọi điện đặt gấp, 30 phút sau loa đã có mặt tại nhà. Các bạn nhân viên siêu dễ thương và nhiệt tình hướng dẫn.',
+        avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDViO73UAoF3-TwSek3tM-NwCVDgAkSME_ATkVbzHd6E7q49HiMURLPXkE7jOAn8wHCMUL9uy2nT6QiYtUMb6fSd9n84vxHtgA_9FOJqmfYLprQHuFSQpATZQeZJmP_O-ojrTIcaVktaRItYXqnOe6i6lR-cc2GKPEK027sOShe1xVVlOPztso3s6BqRuZqr9_3X5huU_xsjMnuP4rV14_Jdat8lx1d9cUlqZpv07P3erTfO5Fqcfql',
+        avatar_letter: 'M',
+        avatar_color: 'blue',
+        color_scheme: 'blue',
+        title: null,
+        banner_image: null,
+        verified: 1,
+        post_time_formatted: '14:15 18/08/2026',
+        owner_reply: 'Locahome luôn cam kết giao hỏa tốc 30 phút bất kể mưa nắng ạ. Chúc chị Mai có một sinh nhật thật nhiều niềm vui và hạnh phúc nhé!',
+        owner_reply_at: '15:00 18/08/2026',
+        owner_reply_by: 'Chủ quán Locahome (Hồ Văn Duy)',
+        created_at: '2026-08-18 14:15:00'
+      },
+      {
+        id: 'REV-3',
+        name: 'Nguyễn Tấn Đạt',
+        role: 'Hát Bolero Cuối Tuần',
+        category: 'karaoke',
+        rating: 4,
+        comment: 'Mic hát cực nhẹ, không bị hú dù đứng gần loa. Phù hợp cho những ai đam mê bolero như gia đình mình cuối tuần.',
+        avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCxtDafNm7kkFj56vltInH7glM_OI-Pmpxu4t3jtCldR1E5Q01z9Sph6dej69uZcePS4qi0J__9t3HXYuREQEKWSXHdy8457eFHhdikvjNMfOlcQKd6Fv8I6RKFcKFXIj5JkJie2uIdg3-Nn35rkNI6fOtG9sMBDZoQSiTI_lRN5-zbifZqRZseAwFJMSD3giXDUV7_jHtDgBFInDv6FqMJHE0UgGaskeXZiqFf3dX1WI5Sm_RsA19f',
+        avatar_letter: 'Đ',
+        avatar_color: 'green',
+        color_scheme: 'green',
+        title: null,
+        banner_image: null,
+        verified: 1,
+        post_time_formatted: '20:00 17/08/2026',
+        owner_reply: null,
+        owner_reply_at: null,
+        owner_reply_by: null,
+        created_at: '2026-08-17 20:00:00'
+      },
+      {
+        id: 'REV-4',
+        name: 'Sarah J.',
+        role: 'Chủ Tiệc Birthday',
+        category: 'party',
+        rating: 5,
+        comment: 'Mình thuê dàn Mega Puff cho tiệc sinh nhật. Âm thanh cực đỉnh, bass rung sàn mà loa lại nhìn quá đỗi đáng yêu, bạn bè chụp ảnh selfie check-in suốt buổi!',
+        avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBCQYPFv-WTIF8HKSwFaCz2WzJp51sU6xR2sN-3XNgWLJU3eFIGhqCNAArpwq11_FMzKP9qCCrxyCCMP0YIMakgjL68j47OJwcTKc3F5JZTOBiMlL4MiyqUYzlNlOi2gSDd953GAsD3ER5cmLfzZHNkVHItWwm_833unxG7xgMblN3Y2aWLsHbRYmx6eIw1Ten2jy6koYp9jo0J8yHdBazaGAzkxnAmKBKUgIcyMdQGKv8cqu9yyCrM',
+        avatar_letter: 'S',
+        avatar_color: 'pink',
+        color_scheme: 'imageCard',
+        title: 'Buổi Tiệc Tuyệt Vời Nhất',
+        banner_image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAeMXmIMPw2bEqBuBSF_-hbAsvy7I3USk5EK0WSaanKsmvrbSSeI0DwWRKwHSuxAKBl-Sod5xC3RfKG24XO8QUbjMHjGOyRkEU70hOw8wLTB9sPEUV6-69lHd66kOj_SEwKAcTrHiCa2NFZA0N4DNcejMWpl4kut_QqFbg3CLXJITlP3SbrO0ETo3n2SdJjgNQkTuPQtJd0y2Q2KCCSaKZ3rcAWFxpgX7vmv6bzXF9zdyUZDQHQqQin',
+        verified: 1,
+        post_time_formatted: '21:30 16/08/2026',
+        owner_reply: null,
+        owner_reply_at: null,
+        owner_reply_by: null,
+        created_at: '2026-08-16 21:30:00'
+      },
+      {
+        id: 'REV-5',
+        name: 'Kimberly W.',
+        role: 'Gia Đình Chung Cư',
+        category: 'karaoke',
+        rating: 5,
+        comment: 'Loa nhỏ gọn xinh xắn để trong phòng khách rất sang. Âm thanh trong trẻo, mở phim nghe như rạp chiếu bóng!',
+        avatar_url: null,
+        avatar_letter: 'K',
+        avatar_color: 'blue',
+        color_scheme: 'whiteCard',
+        title: null,
+        banner_image: null,
+        verified: 1,
+        post_time_formatted: '11:20 15/08/2026',
+        owner_reply: null,
+        owner_reply_at: null,
+        owner_reply_by: null,
+        created_at: '2026-08-15 11:20:00'
+      },
+      {
+        id: 'REV-6',
+        name: 'Alex Chen',
+        role: 'Quản Lý Nhân Sự (HR)',
+        category: 'company',
+        rating: 5,
+        comment: 'Cả công ty thuê dàn đôi đi dã ngoại. Mọi người hát hò gắn kết vui vẻ từ chiều đến khuya, pin loa dùng mãi không hết.',
+        avatar_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAf9RwyMAsqXVrzUYdyVkyDLsATlf0LhZRQU9sENL6o5dY1NrYaknEIVH4In5iuZv4FDmpBzniReRwWXg7YnyHufFMIaHwl9MTFpMMqOpIFsVG8K-8kDwyvi9agIomt3JUH4OBKkHRpA7FXzwqzu5GVBaSKL8uytdPb4BeSQDwMO3cA6nL-pcUBJjYprUBwtQx-eDqZtTqcDB8ok40gPO8zE1MLFikoGQNRM5t_NmM6qwtnl_iTd7UG',
+        avatar_letter: 'A',
+        avatar_color: 'purple',
+        color_scheme: 'darkCard',
+        title: null,
+        banner_image: null,
+        verified: 1,
+        post_time_formatted: '09:45 13/08/2026',
+        owner_reply: null,
+        owner_reply_at: null,
+        owner_reply_by: null,
+        created_at: '2026-08-13 09:45:00'
+      }
+    ];
+
+    for (const r of initialReviews) {
+      insertReview.run(
+        r.id, r.name, r.role, r.rating, r.category, r.comment,
+        r.avatar_url, r.avatar_letter, r.avatar_color, r.color_scheme,
+        r.title, r.banner_image, r.verified, r.post_time_formatted,
+        r.owner_reply, r.owner_reply_at, r.owner_reply_by, r.created_at
+      );
+    }
+  } catch (err) {
+    console.warn('[Seed Reviews Warning]:', err.message);
+  }
 }

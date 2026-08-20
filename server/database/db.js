@@ -122,5 +122,28 @@ export function initDatabase() {
       value TEXT NOT NULL,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- 8. CUSTOMER REVIEWS & OWNER REPLIES TABLE
+    CREATE TABLE IF NOT EXISTS reviews (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      role TEXT DEFAULT 'Khách hàng thân thiết',
+      rating INTEGER NOT NULL DEFAULT 5,
+      category TEXT DEFAULT 'karaoke',
+      comment TEXT NOT NULL,
+      avatar_url TEXT,
+      avatar_letter TEXT,
+      avatar_color TEXT DEFAULT 'pink',
+      color_scheme TEXT DEFAULT 'pink',
+      title TEXT,
+      banner_image TEXT,
+      verified INTEGER NOT NULL DEFAULT 1,
+      post_time_formatted TEXT,
+      owner_reply TEXT,
+      owner_reply_at DATETIME,
+      owner_reply_by TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 }
