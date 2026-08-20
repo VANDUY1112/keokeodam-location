@@ -169,7 +169,7 @@ class ApiService {
     });
   }
 
-  async replyReview(id, replyText, ownerName = 'Chủ quán Locahome (Hồ Văn Duy)') {
+  async replyReview(id, replyText, ownerName = 'Kẹo Kéo Dặm') {
     return this.request(`/reviews/${id}/reply`, {
       method: 'PATCH',
       body: JSON.stringify({ replyText, ownerName })

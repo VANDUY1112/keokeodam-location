@@ -311,7 +311,7 @@ export function seedReviewsIfEmpty() {
         post_time_formatted: '19:30 19/08/2026',
         owner_reply: 'Dạ cảm ơn anh Nam nhiều ạ! Dòng Bass Pro 40 bên em chuyên trị các dòng nhạc sôi động và bolero. Lần tới thuê alo em giảm giá ưu đãi khách quen nhé anh ❤️',
         owner_reply_at: '20:10 19/08/2026',
-        owner_reply_by: 'Chủ quán Locahome (Hồ Văn Duy)',
+        owner_reply_by: 'Kẹo Kéo Dặm',
         created_at: '2026-08-19 19:30:00'
       },
       {
@@ -331,7 +331,7 @@ export function seedReviewsIfEmpty() {
         post_time_formatted: '14:15 18/08/2026',
         owner_reply: 'Locahome luôn cam kết giao hỏa tốc 30 phút bất kể mưa nắng ạ. Chúc chị Mai có một sinh nhật thật nhiều niềm vui và hạnh phúc nhé!',
         owner_reply_at: '15:00 18/08/2026',
-        owner_reply_by: 'Chủ quán Locahome (Hồ Văn Duy)',
+        owner_reply_by: 'Kẹo Kéo Dặm',
         created_at: '2026-08-18 14:15:00'
       },
       {

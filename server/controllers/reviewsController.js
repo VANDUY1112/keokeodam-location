@@ -92,7 +92,8 @@ export class ReviewsController {
       const colorSchemes = ['pink', 'blue', 'green'];
       const avatarColor = data.avatarColor || avatarColors[Math.floor(Math.random() * avatarColors.length)];
       const colorScheme = data.colorScheme || colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
-      const rating = Number(data.rating) || 5;
+      const defaultAvatarForColor = colorScheme === 'green' ? '/green.png' : colorScheme === 'blue' ? '/blue.png' : '/pink.png';
+      const avatarUrl = data.avatar || data.avatarUrl || data.avatar_url || defaultAvatarForColor;
 
       const stmt = db.prepare(`
         INSERT INTO reviews (
@@ -105,11 +106,11 @@ export class ReviewsController {
       stmt.run(
         id,
         data.name.trim(),
-        data.role || 'Khách thuê loa',
+        '',
         rating,
         data.category || 'karaoke',
         data.comment.trim(),
-        data.avatar || null,
+        avatarUrl,
         avatarLetter,
         avatarColor,
         colorScheme,
@@ -148,7 +149,7 @@ export class ReviewsController {
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
       const replyTime = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
-      const responder = ownerName || 'Chủ quán Locahome';
+      const responder = ownerName || 'Kẹo Kéo Dặm';
 
       const cleanReply = replyText ? replyText.trim() : null;
 

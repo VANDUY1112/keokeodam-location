@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { api } from '../services/api.js';
 
 // ══════════════════════════════════════════════════════════
 // 💖 KAWAII VECTOR ICONS (CUTE, 3D GLOSSY & POLISHED SVGS)
@@ -318,17 +319,23 @@ export function CuteCodeIcon({ className = "w-5 h-5" }) {
   );
 }
 
-export function CuteAvatarPill({ letter = "K", color = "pink" }) {
+export function CuteAvatarPill({ name = "User", letter = "U", color = "pink", className = "" }) {
   const bgStyles = {
-    pink: "bg-gradient-to-br from-pink-200 to-rose-300 text-[#864d61] border-pink-300",
-    blue: "bg-gradient-to-br from-sky-200 to-blue-300 text-[#235a7c] border-sky-300",
-    green: "bg-gradient-to-br from-emerald-200 to-teal-300 text-[#2f6a3f] border-emerald-300",
-    purple: "bg-gradient-to-br from-purple-200 to-indigo-300 text-purple-800 border-purple-300"
+    pink: "bg-gradient-to-br from-[#ffd9e3] to-[#ffb7ce] text-[#864d61] border-[#fab3ca]",
+    blue: "bg-gradient-to-br from-[#c9e6ff] to-[#9ed1f8] text-[#235a7c] border-[#9ed1f8]",
+    green: "bg-gradient-to-br from-[#b2f2bb] to-[#8ce99a] text-[#2f6a3f] border-[#96d5a0]",
+    purple: "bg-gradient-to-br from-[#ebd4ff] to-[#d0bfff] text-purple-800 border-purple-300"
   };
 
+  const avatarSrc = color === 'green' ? '/green.png' : color === 'blue' ? '/blue.png' : '/pink.png';
+
   return (
-    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-headline text-base font-extrabold shadow-sm border-2 ${bgStyles[color] || bgStyles.pink}`}>
-      {letter}
+    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-headline text-base font-extrabold shadow-sm border-2 overflow-hidden bg-white ${bgStyles[color] || bgStyles.pink} ${className}`}>
+      <img
+        src={avatarSrc}
+        alt={name}
+        className="w-full h-full object-cover rounded-full"
+      />
     </div>
   );
 }
@@ -383,6 +390,36 @@ export default function LandingPageView({
 
   const [bookingFormTouched, setBookingFormTouched] = useState({ name: false, phone: false, address: false });
   const [bookingFormShake, setBookingFormShake] = useState(false);
+
+  // 👑 Owner Reply Modal State
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [targetReviewForReply, setTargetReviewForReply] = useState(null);
+  const [ownerReplyInput, setOwnerReplyInput] = useState('');
+  const [ownerNameInput, setOwnerNameInput] = useState('Kẹo Kéo Dặm');
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+  const [expandedReplies, setExpandedReplies] = useState({});
+
+  const toggleReplyExpand = (reviewId) => {
+    setExpandedReplies((prev) => ({
+      ...prev,
+      [reviewId]: !prev[reviewId]
+    }));
+  };
+
+  // Load reviews from backend API on mount
+  useEffect(() => {
+    const fetchReviewsFromBackend = async () => {
+      try {
+        const res = await api.getReviews();
+        if (res?.data?.reviews && Array.isArray(res.data.reviews) && res.data.reviews.length > 0) {
+          setReviewsList(res.data.reviews);
+        }
+      } catch (err) {
+        console.warn('Backend reviews offline or unavailable, using initial data:', err.message);
+      }
+    };
+    fetchReviewsFromBackend();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -481,7 +518,7 @@ export default function LandingPageView({
       image: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&auto=format&fit=crop&q=80',
       color: 'from-amber-50 to-orange-100/60',
       accentColor: 'text-amber-700',
-      buttonBg: 'bg-[#ffb7ce] text-[#360b1e]',
+      buttonBg: 'bg-[#864d61] text-white',
       features: [
         'Trọng lượng chỉ 4.5kg xách tay gọn gàng',
         '2 Micro UHF hợp kim chống hú cực tốt',
@@ -522,7 +559,7 @@ export default function LandingPageView({
       image: 'https://images.unsplash.com/photo-1520523839898-50712825e617?w=600&auto=format&fit=crop&q=80',
       color: 'from-blue-50 to-sky-100/70',
       accentColor: 'text-[#235a7c]',
-      buttonBg: 'bg-[#235a7c] text-white',
+      buttonBg: 'bg-[#864d61] text-white',
       features: [
         'Hệ thống 2 Bass 50cm kép siêu uy lực',
         'Âm thanh phủ rộng 300m² tiệc 30-80 người',
@@ -542,7 +579,7 @@ export default function LandingPageView({
       image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80',
       color: 'from-purple-50 to-violet-100/70',
       accentColor: 'text-purple-800',
-      buttonBg: 'bg-purple-700 text-white',
+      buttonBg: 'bg-[#864d61] text-white',
       features: [
         'Vòng Led RGB cảm biến theo nhịp bass cực chill',
         'Chế độ DJ Effect biến không gian thành sàn quẩy',
@@ -555,7 +592,7 @@ export default function LandingPageView({
   // Reviews Data
   const [reviewsList, setReviewsList] = useState([
     {
-      id: 1,
+      id: 'REV-1',
       name: 'Trần Văn Nam',
       role: 'Thuê Puffy Bass Pro',
       category: 'karaoke',
@@ -563,10 +600,13 @@ export default function LandingPageView({
       rating: 5,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBG39jxglMBvLSQP8WYNkmznOolrZS8IKVbiCnb14ABWu84BCV_Awt5FmaZ7eOgs0aN_yEGHcKfRswVx7dgGKCjSneartsqRRlyiRwywkXlHZQ-R_ZqGyEndlrBfP_phDzuaQz5uTuO0sDyW8l84RRVYchvsTRJzK-OjUzwmR6Ww1OIM2Z8HuxK1pxu9xzgAS_Le50pPfL-LQcRhZl6fnBnixRKUfdomciUZBpiqHJyEV1b3BuVgyVF',
       comment: 'Âm bass đập cực chắc, pin trâu hát cả đêm không hết! Thật sự rất bất ngờ với ngoại hình nhỏ bé mà âm thanh khủng thế này.',
-      colorScheme: 'pink'
+      colorScheme: 'pink',
+      ownerReply: 'Dạ cảm ơn anh Nam nhiều ạ! Dòng Bass Pro 40 bên em chuyên trị các dòng nhạc sôi động và bolero. Lần tới thuê alo em giảm giá ưu đãi khách quen nhé anh ❤️',
+      ownerReplyAt: '20:10 19/08/2026',
+      ownerReplyBy: 'Kẹo Kéo Dặm'
     },
     {
-      id: 2,
+      id: 'REV-2',
       name: 'Lê Thị Mai',
       role: 'Cứu Hộ Tiệc Sinh Nhật',
       category: 'party',
@@ -574,10 +614,13 @@ export default function LandingPageView({
       rating: 5,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDViO73UAoF3-TwSek3tM-NwCVDgAkSME_ATkVbzHd6E7q49HiMURLPXkE7jOAn8wHCMUL9uy2nT6QiYtUMb6fSd9n84vxHtgA_9FOJqmfYLprQHuFSQpATZQeZJmP_O-ojrTIcaVktaRItYXqnOe6i6lR-cc2GKPEK027sOShe1xVVlOPztso3s6BqRuZqr9_3X5huU_xsjMnuP4rV14_Jdat8lx1d9cUlqZpv07P3erTfO5Fqcfql',
       comment: 'Dịch vụ siêu nhanh! Mình gọi điện đặt gấp, 30 phút sau loa đã có mặt tại nhà. Các bạn nhân viên siêu dễ thương và nhiệt tình hướng dẫn.',
-      colorScheme: 'blue'
+      colorScheme: 'blue',
+      ownerReply: 'Locahome luôn cam kết giao hỏa tốc 30 phút bất kể mưa nắng ạ. Chúc chị Mai có một sinh nhật thật nhiều niềm vui và hạnh phúc nhé!',
+      ownerReplyAt: '15:00 18/08/2026',
+      ownerReplyBy: 'Kẹo Kéo Dặm'
     },
     {
-      id: 3,
+      id: 'REV-3',
       name: 'Nguyễn Tấn Đạt',
       role: 'Hát Bolero Cuối Tuần',
       category: 'karaoke',
@@ -586,10 +629,13 @@ export default function LandingPageView({
       verified: true,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCxtDafNm7kkFj56vltInH7glM_OI-Pmpxu4t3jtCldR1E5Q01z9Sph6dej69uZcePS4qi0J__9t3HXYuREQEKWSXHdy8457eFHhdikvjNMfOlcQKd6Fv8I6RKFcKFXIj5JkJie2uIdg3-Nn35rkNI6fOtG9sMBDZoQSiTI_lRN5-zbifZqRZseAwFJMSD3giXDUV7_jHtDgBFInDv6FqMJHE0UgGaskeXZiqFf3dX1WI5Sm_RsA19f',
       comment: 'Mic hát cực nhẹ, không bị hú dù đứng gần loa. Phù hợp cho những ai đam mê bolero như gia đình mình cuối tuần.',
-      colorScheme: 'green'
+      colorScheme: 'green',
+      ownerReply: null,
+      ownerReplyAt: null,
+      ownerReplyBy: null
     },
     {
-      id: 4,
+      id: 'REV-4',
       name: 'Sarah J.',
       role: 'Chủ Tiệc Birthday',
       category: 'party',
@@ -599,10 +645,13 @@ export default function LandingPageView({
       bannerImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAeMXmIMPw2bEqBuBSF_-hbAsvy7I3USk5EK0WSaanKsmvrbSSeI0DwWRKwHSuxAKBl-Sod5xC3RfKG24XO8QUbjMHjGOyRkEU70hOw8wLTB9sPEUV6-69lHd66kOj_SEwKAcTrHiCa2NFZA0N4DNcejMWpl4kut_QqFbg3CLXJITlP3SbrO0ETo3n2SdJjgNQkTuPQtJd0y2Q2KCCSaKZ3rcAWFxpgX7vmv6bzXF9zdyUZDQHQqQin',
       title: 'Buổi Tiệc Tuyệt Vời Nhất',
       comment: 'Mình thuê dàn Mega Puff cho tiệc sinh nhật. Âm thanh cực đỉnh, bass rung sàn mà loa lại nhìn quá đỗi đáng yêu, bạn bè chụp ảnh selfie check-in suốt buổi!',
-      colorScheme: 'imageCard'
+      colorScheme: 'imageCard',
+      ownerReply: null,
+      ownerReplyAt: null,
+      ownerReplyBy: null
     },
     {
-      id: 5,
+      id: 'REV-5',
       name: 'Kimberly W.',
       role: 'Gia Đình Chung Cư',
       category: 'karaoke',
@@ -612,10 +661,13 @@ export default function LandingPageView({
       avatarLetter: 'K',
       avatarColor: 'blue',
       comment: 'Loa nhỏ gọn xinh xắn để trong phòng khách rất sang. Âm thanh trong trẻo, mở phim nghe như rạp chiếu bóng!',
-      colorScheme: 'whiteCard'
+      colorScheme: 'whiteCard',
+      ownerReply: null,
+      ownerReplyAt: null,
+      ownerReplyBy: null
     },
     {
-      id: 6,
+      id: 'REV-6',
       name: 'Alex Chen',
       role: 'Quản Lý Nhân Sự (HR)',
       category: 'company',
@@ -623,7 +675,10 @@ export default function LandingPageView({
       rating: 5,
       avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAf9RwyMAsqXVrzUYdyVkyDLsATlf0LhZRQU9sENL6o5dY1NrYaknEIVH4In5iuZv4FDmpBzniReRwWXg7YnyHufFMIaHwl9MTFpMMqOpIFsVG8K-8kDwyvi9agIomt3JUH4OBKkHRpA7FXzwqzu5GVBaSKL8uytdPb4BeSQDwMO3cA6nL-pcUBJjYprUBwtQx-eDqZtTqcDB8ok40gPO8zE1MLFikoGQNRM5t_NmM6qwtnl_iTd7UG',
       comment: 'Cả công ty thuê dàn đôi đi dã ngoại. Mọi người hát hò gắn kết vui vẻ từ chiều đến khuya, pin loa dùng mãi không hết.',
-      colorScheme: 'darkCard'
+      colorScheme: 'darkCard',
+      ownerReply: null,
+      ownerReplyAt: null,
+      ownerReplyBy: null
     }
   ]);
 
@@ -662,8 +717,8 @@ export default function LandingPageView({
       return true;
     })
     .sort((a, b) => {
-      if (reviewFilter === 'oldest') return a.id - b.id;
-      if (reviewFilter === 'newest') return b.id - a.id;
+      if (reviewFilter === 'oldest') return (a.id > b.id ? 1 : -1);
+      if (reviewFilter === 'newest') return (a.id < b.id ? 1 : -1);
       return 0;
     });
 
@@ -758,10 +813,11 @@ export default function LandingPageView({
     rating: 5,
     role: 'Khách thuê loa',
     comment: '',
-    category: 'karaoke'
+    category: 'karaoke',
+    colorScheme: 'pink'
   });
 
-  const handleAddReviewSubmit = (e) => {
+  const handleAddReviewSubmit = async (e) => {
     e.preventDefault();
     setReviewFormTouched({ name: true, comment: true });
 
@@ -778,27 +834,40 @@ export default function LandingPageView({
     const pad = (n) => String(n).padStart(2, '0');
     const formattedPostTime = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
 
+    const chosenColor = newReviewForm.colorScheme || 'pink';
+    const defaultAvatarForColor = chosenColor === 'green' ? '/green.png' : chosenColor === 'blue' ? '/blue.png' : '/pink.png';
+
     const newRev = {
-      id: Date.now(),
+      id: `REV-${Date.now()}`,
       name: newReviewForm.name.trim(),
-      role: newReviewForm.role || 'Khách hàng thân thiết',
       category: newReviewForm.category,
       time: formattedPostTime,
       rating: Number(newReviewForm.rating),
       verified: true,
-      avatar: null,
+      avatar: defaultAvatarForColor,
       avatarLetter: newReviewForm.name.trim().charAt(0).toUpperCase(),
-      avatarColor: ['pink', 'blue', 'green', 'purple'][Math.floor(Math.random() * 4)],
+      avatarColor: chosenColor,
       comment: newReviewForm.comment.trim(),
-      colorScheme: ['pink', 'blue', 'green'][Math.floor(Math.random() * 3)]
+      colorScheme: chosenColor,
+      ownerReply: null,
+      ownerReplyAt: null,
+      ownerReplyBy: null
     };
 
-    setReviewsList([newRev, ...reviewsList]);
+    // Optimistic UI update
+    setReviewsList((prev) => [newRev, ...prev]);
     setSubmittedReviewInfo({
       name: newReviewForm.name.trim(),
       rating: Number(newReviewForm.rating)
     });
     setReviewSuccess(true);
+
+    // Call Backend API
+    try {
+      await api.createReview(newRev);
+    } catch (err) {
+      console.warn('Backend sync failed, saved in local state', err);
+    }
 
     // After 1800ms, start closing modal smoothly with 300ms exit animation
     setTimeout(() => {
@@ -813,10 +882,88 @@ export default function LandingPageView({
         rating: 5,
         role: 'Khách thuê loa',
         comment: '',
-        category: 'karaoke'
+        category: 'karaoke',
+        colorScheme: 'pink'
       });
       setReviewFormTouched({ name: false, comment: false });
     }, 2200);
+  };
+
+  // 👑 Owner Reply Handlers
+  const handleOpenReplyModal = (rev) => {
+    setTargetReviewForReply(rev);
+    setOwnerReplyInput(rev.ownerReply || '');
+    setOwnerNameInput(rev.ownerReplyBy || 'Kẹo Kéo Dặm');
+    setShowReplyModal(true);
+  };
+
+  const handleSaveOwnerReply = async (e) => {
+    e.preventDefault();
+    if (!targetReviewForReply) return;
+
+    setIsSubmittingReply(true);
+    const replyText = ownerReplyInput.trim();
+    const ownerName = ownerNameInput.trim() || 'Kẹo Kéo Dặm';
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const formattedReplyTime = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
+    // Optimistically update in state
+    setReviewsList((prev) =>
+      prev.map((r) => {
+        if (r.id === targetReviewForReply.id) {
+          return {
+            ...r,
+            ownerReply: replyText || null,
+            ownerReplyAt: replyText ? formattedReplyTime : null,
+            ownerReplyBy: replyText ? ownerName : null
+          };
+        }
+        return r;
+      })
+    );
+
+    // Sync with backend API
+    try {
+      await api.replyReview(targetReviewForReply.id, replyText, ownerName);
+    } catch (err) {
+      console.warn('Error saving owner reply to backend:', err);
+    } finally {
+      setIsSubmittingReply(false);
+      setShowReplyModal(false);
+      setTargetReviewForReply(null);
+      setOwnerReplyInput('');
+    }
+  };
+
+  const handleDeleteOwnerReply = async () => {
+    if (!targetReviewForReply) return;
+    setIsSubmittingReply(true);
+
+    setReviewsList((prev) =>
+      prev.map((r) => {
+        if (r.id === targetReviewForReply.id) {
+          return {
+            ...r,
+            ownerReply: null,
+            ownerReplyAt: null,
+            ownerReplyBy: null
+          };
+        }
+        return r;
+      })
+    );
+
+    try {
+      await api.replyReview(targetReviewForReply.id, '', '');
+    } catch (err) {
+      console.warn('Error deleting owner reply on backend:', err);
+    } finally {
+      setIsSubmittingReply(false);
+      setShowReplyModal(false);
+      setTargetReviewForReply(null);
+      setOwnerReplyInput('');
+    }
   };
 
   return (
@@ -1034,7 +1181,7 @@ export default function LandingPageView({
               {/* Party Combo Visual Showcase - Ảnh Tràn Viền 100% Cực Kỳ Sướng Mắt */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-6 mt-12 max-w-5xl mx-auto w-full">
                 {/* Card 1: Bia */}
-                <div 
+                <div
                   onClick={() => setZoomImageModal({ id: 'bia', location: 'Bia Tươi Mát Lạnh', img: '/bia.png' })}
                   className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ffd9e3] bg-gradient-to-b from-[#ffe5ee] via-[#fff0f5] to-[#ffd6e4] shadow-[0_12px_28px_rgba(134,77,97,0.12)] hover:shadow-[0_20px_45px_rgba(134,77,97,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-between p-3 sm:p-4 group cursor-pointer select-none"
                 >
@@ -1053,7 +1200,7 @@ export default function LandingPageView({
                 </div>
 
                 {/* Card 2: Mồi - Tràn viền 100% */}
-                <div 
+                <div
                   onClick={() => setZoomImageModal({ id: 'moi', location: 'Mồi Ngon Phú Yên', img: '/moi.png' })}
                   className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#b2f2bb] shadow-[0_12px_28px_rgba(47,106,63,0.12)] hover:shadow-[0_20px_45px_rgba(47,106,63,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
                 >
@@ -1072,7 +1219,7 @@ export default function LandingPageView({
                 </div>
 
                 {/* Card 3: Bạn Bè - Tràn viền 100% */}
-                <div 
+                <div
                   onClick={() => setZoomImageModal({ id: 'friend', location: 'Hội Mấy Ní Ca Hát', img: '/friend.png' })}
                   className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#c9e6ff] shadow-[0_12px_28px_rgba(35,90,124,0.12)] hover:shadow-[0_20px_45px_rgba(35,90,124,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
                 >
@@ -1091,17 +1238,17 @@ export default function LandingPageView({
                 </div>
 
                 {/* Card 4: Say - Tràn viền 100% */}
-                <div 
+                <div
                   onClick={() => setZoomImageModal({ id: 'say', location: 'Hát Hò Vui Say Mê', img: '/say.png' })}
                   className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ebd4ff] shadow-[0_12px_28px_rgba(107,33,168,0.12)] hover:shadow-[0_20px_45px_rgba(107,33,168,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
                 >
-                  <img 
-                    src="/say.png" 
-                    alt="Say" 
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out" 
+                  <img
+                    src="/say.png"
+                    alt="Say"
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                  
+
                   <div className="relative z-10 w-full text-center">
                     <span className="block w-full py-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/30 rounded-2xl text-white font-headline text-sm sm:text-base shadow-sm group-hover:bg-purple-800 group-hover:border-purple-800 transition-all duration-300">
                       Say
@@ -1121,8 +1268,7 @@ export default function LandingPageView({
 
               {/* Left text */}
               <div className="text-center md:text-left">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#ffd9e3] rounded-full text-[#864d61] text-xs font-bold uppercase tracking-wider mb-2">
-                  <CuteMusicNotesDecor className="w-4 h-4" />
+                <div className="inline-flex items-center px-3.5 py-1 bg-[#ffd9e3] rounded-full text-[#864d61] text-[13px] font-bold tracking-wide mb-2">
                   <span>Ngắm một tí nhé! rồi hát tiếp</span>
                 </div>
                 <h3 className="font-headline text-2xl sm:text-3xl text-[#864d61] max-w-md leading-snug">
@@ -1289,6 +1435,96 @@ export default function LandingPageView({
           {/* Masonry Review Columns */}
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {filteredReviews.map((rev) => {
+              // Reusable Owner Reply Component Block
+              const renderOwnerReplyBlock = () => {
+                const isExpanded = Boolean(expandedReplies[rev.id]);
+
+                return (
+                  <div className="mt-2.5 relative pl-5 sm:pl-7">
+                    {/* Thread Connector Curve */}
+                    <div className="absolute left-2 top-0 bottom-4 w-3.5 border-l-2 border-b-2 border-[#fab3ca]/70 rounded-bl-xl pointer-events-none"></div>
+
+                    {rev.ownerReply ? (
+                      <div className="relative z-10 space-y-1.5">
+                        <div className="flex items-center">
+                          <button
+                            type="button"
+                            onClick={() => toggleReplyExpand(rev.id)}
+                            className="text-[11px] font-headline font-bold text-[#864d61] bg-[#ffd9e3]/90 hover:bg-[#ffd9e3] px-3 py-1 rounded-full border border-[#fab3ca] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95 hover:scale-105"
+                          >
+                            <span>{isExpanded ? 'Ẩn phản hồi' : 'Xem phản hồi'}</span>
+                            <svg
+                              className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        <div
+                          className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-2' : 'grid-rows-[0fr] opacity-0 mt-0 pointer-events-none'
+                            }`}
+                        >
+                          <div className="overflow-hidden">
+                            <div className="bg-white/95 backdrop-blur-xs rounded-2xl rounded-tl-sm p-3.5 shadow-sm border border-[#fab3ca]/80 transition-all duration-300 relative mt-1">
+                              {/* Connector Speech Tail */}
+                              <div className="absolute -top-1.5 left-3 w-3 h-3 bg-white transform rotate-45 border-t border-l border-[#fab3ca]/80"></div>
+
+                              <div className="flex items-center justify-between gap-2 mb-2 flex-wrap relative z-10">
+                                <div className="flex items-center gap-2">
+                                  <img
+                                    src="/anh3.png"
+                                    alt="Kẹo Kéo Dặm"
+                                    className="w-6 h-6 rounded-full object-cover border border-[#fab3ca] shadow-2xs shrink-0"
+                                  />
+                                  <span className="font-headline font-bold text-xs text-[#864d61]">
+                                    {rev.ownerReplyBy || 'Kẹo Kéo Dặm'}
+                                  </span>
+                                </div>
+                                {rev.ownerReplyAt && (
+                                  <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-2.5 py-0.5 rounded-full border border-[#fab3ca] shadow-2xs">
+                                    {rev.ownerReplyAt}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs sm:text-[13px] text-[#514347] font-medium leading-relaxed bg-[#fdf7ff] p-2.5 rounded-xl border border-[#ffd9e3]/60 relative z-10">
+                                {rev.ownerReply}
+                              </p>
+                              <div className="flex justify-end mt-1.5 relative z-10">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenReplyModal(rev)}
+                                  className="text-[11px] font-bold text-[#864d61] hover:underline cursor-pointer transition-colors"
+                                >
+                                  <span>Sửa phản hồi</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative z-10 flex items-center justify-between py-1">
+                        <span className="text-[11px] font-semibold text-slate-400 bg-slate-100/90 px-2.5 py-0.5 rounded-full border border-slate-200/70 select-none">
+                          Chưa phản hồi
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenReplyModal(rev)}
+                          className="text-[11px] font-bold text-[#864d61] hover:text-[#512332] hover:underline cursor-pointer transition-colors ml-auto"
+                        >
+                          <span>Trả lời</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
               if (rev.colorScheme === 'imageCard') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
@@ -1318,14 +1554,14 @@ export default function LandingPageView({
                           "{rev.comment}"
                         </p>
                         <div className="flex items-center gap-3 mt-4 pt-3 border-t border-[#864d61]/15">
-                          <div className="w-11 h-11 rounded-full border-2 border-[#864d61] bg-white p-[1px] shadow-sm shrink-0 overflow-hidden">
-                            <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
+                          <div className="w-11 h-11 rounded-full border-2 border-[#864d61] bg-white shadow-sm shrink-0 overflow-hidden">
+                            <img src={rev.avatar || '/pink.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                           </div>
                           <div>
                             <h3 className="font-headline text-sm text-[#7b4458]">{rev.name}</h3>
-                            <p className="text-xs font-bold text-[#7b4458]/70">{rev.role}</p>
                           </div>
                         </div>
+                        {renderOwnerReplyBlock()}
                       </div>
                     </div>
                   </article>
@@ -1352,14 +1588,14 @@ export default function LandingPageView({
                         "{rev.comment}"
                       </p>
                       <div className="flex items-center gap-3 mt-4 pt-3 border-t border-purple-800/40">
-                        <div className="w-11 h-11 rounded-full border-2 border-[#ffb7ce] bg-white p-[1px] shrink-0 overflow-hidden">
-                          <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
+                        <div className="w-11 h-11 rounded-full border-2 border-[#ffb7ce] bg-white shrink-0 overflow-hidden">
+                          <img src={rev.avatar || '/pink.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                         </div>
                         <div>
                           <h3 className="font-headline text-sm text-[#f6eeff]">{rev.name}</h3>
-                          <p className="text-xs font-bold text-purple-300">{rev.role}</p>
                         </div>
                       </div>
+                      {renderOwnerReplyBlock()}
                     </div>
                   </article>
                 );
@@ -1385,12 +1621,12 @@ export default function LandingPageView({
                         "{rev.comment}"
                       </p>
                       <div className="flex items-center gap-3">
-                        <CuteAvatarPill letter={rev.avatarLetter || 'K'} color={rev.avatarColor || 'blue'} />
+                        <CuteAvatarPill name={rev.name} letter={rev.avatarLetter || 'K'} color={rev.avatarColor || rev.colorScheme || 'pink'} />
                         <div>
                           <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                          <p className="text-xs font-bold text-slate-400">{rev.role}</p>
                         </div>
                       </div>
+                      {renderOwnerReplyBlock()}
                     </div>
                   </article>
                 );
@@ -1414,14 +1650,14 @@ export default function LandingPageView({
                       </p>
                     </div>
                     <div className="flex items-center flex-row-reverse gap-3 mt-4 pr-3 text-right">
-                      <div className="w-12 h-12 rounded-2xl border-[3px] border-[#9ed1f8] bg-white p-0.5 shadow-sm shrink-0 transform rotate-3 overflow-hidden">
-                        <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-xl" />
+                      <div className="w-12 h-12 rounded-2xl border-[3px] border-[#9ed1f8] bg-white shadow-sm shrink-0 transform rotate-3 overflow-hidden">
+                        <img src={rev.avatar || '/blue.png'} alt={rev.name} className="w-full h-full object-cover rounded-xl" />
                       </div>
                       <div>
                         <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                        <p className="text-xs font-bold text-[#2e6385]">{rev.role}</p>
                       </div>
                     </div>
+                    {renderOwnerReplyBlock()}
                   </article>
                 );
               }
@@ -1446,14 +1682,14 @@ export default function LandingPageView({
                       </p>
                     </div>
                     <div className="flex items-center gap-3 mt-4 pl-3">
-                      <div className="w-12 h-12 rounded-full border-[3px] border-[#96d5a0] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
-                        <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
+                      <div className="w-12 h-12 rounded-full border-[3px] border-[#96d5a0] bg-white shadow-sm shrink-0 overflow-hidden">
+                        <img src={rev.avatar || '/green.png'} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                       </div>
                       <div>
                         <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                        <p className="text-xs font-bold text-[#2f6a3f]">{rev.role}</p>
                       </div>
                     </div>
+                    {renderOwnerReplyBlock()}
                   </article>
                 );
               }
@@ -1475,18 +1711,18 @@ export default function LandingPageView({
                     </p>
                   </div>
                   <div className="flex items-center gap-3 mt-4 pl-3">
-                    <div className="w-12 h-12 rounded-full border-[3px] border-[#ffd9e3] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
+                    <div className="w-12 h-12 rounded-full border-[3px] border-[#ffd9e3] bg-white shadow-sm shrink-0 overflow-hidden">
                       {rev.avatar ? (
                         <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                       ) : (
-                        <CuteAvatarPill letter={rev.avatarLetter || 'U'} color={rev.avatarColor || 'pink'} />
+                        <CuteAvatarPill name={rev.name} letter={rev.avatarLetter || 'U'} color={rev.avatarColor || rev.colorScheme || 'pink'} />
                       )}
                     </div>
                     <div>
                       <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
-                      <p className="text-xs font-bold text-[#864d61]">{rev.role}</p>
                     </div>
                   </div>
+                  {renderOwnerReplyBlock()}
                 </article>
               );
             })}
@@ -1585,11 +1821,9 @@ export default function LandingPageView({
         <section id="faq" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
-              Câu Hỏi Thường Gặp Khi Thuê Loa
+              Câu hỏi hằng ngày
             </h2>
-            <p className="text-sm sm:text-base font-semibold text-[#514347] mt-1">
-              Mọi điều bạn cần biết trước khi đặt thuê loa tại Locahome.
-            </p>
+
           </div>
 
           <div className="space-y-3.5">
@@ -1738,7 +1972,7 @@ export default function LandingPageView({
             <h3 className="font-headline text-xl sm:text-3xl text-rose-700 leading-snug mb-5 sm:mb-7 text-center">
               Lưu ý! Đã uống rượu bia thì không lái xe.
             </h3>
-            <div 
+            <div
               onClick={() => setZoomImageModal({ id: 'congan', location: 'Lưu ý! Đã uống rượu bia thì không lái xe.', img: '/congan.png' })}
               className="w-full max-w-2xl rounded-3xl overflow-hidden border-2 border-white/80 shadow-md bg-white cursor-pointer hover:shadow-2xl active:scale-95 transition-all group select-none"
               title="Chạm để phóng to"
@@ -2047,8 +2281,8 @@ export default function LandingPageView({
                 {/* Field: Name */}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider">
-                      Tên Của Bạn <span className="text-rose-500">*</span>
+                    <label className="block text-[13px] font-headline text-[#201047]">
+                      Tên của bạn<span className="text-rose-500">*</span>
                     </label>
                     {reviewFormTouched.name && newReviewForm.name.trim() && (
                       <span className="text-[13px] font-bold text-emerald-600">
@@ -2081,8 +2315,8 @@ export default function LandingPageView({
 
                 {/* Field: Star Rating */}
                 <div>
-                  <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
-                    Số Sao Đánh Giá
+                  <label className="block text-[13px] font-headline text-[#201047] mb-1.5">
+                    Số sao đánh giá
                   </label>
                   <div className="flex items-center gap-3 bg-[#fdf7ff] p-2.5 rounded-2xl border border-[#ffd9e3]">
                     <div className="flex gap-1">
@@ -2113,11 +2347,54 @@ export default function LandingPageView({
                   </div>
                 </div>
 
+                {/* Field: Chọn Màu Nền Thẻ Đánh Giá */}
+                <div>
+                  <label className="block text-[13px] font-headline text-[#201047] mb-1.5">
+                    Chọn màu nền thẻ đánh giá
+                  </label>
+                  <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+                    {[
+                      {
+                        id: 'pink',
+                        name: 'Hồng',
+                        activeClass: 'bg-[#864d61] text-white border-[#864d61] shadow-md shadow-[#864d61]/30 ring-2 ring-[#864d61]/20 scale-[1.03]',
+                        inactiveClass: 'bg-[#ffd9e3]/40 border-[#fab3ca]/60 text-[#864d61] hover:bg-[#ffd9e3]/80 hover:border-[#fab3ca]'
+                      },
+                      {
+                        id: 'blue',
+                        name: 'Xanh Dương',
+                        activeClass: 'bg-[#235a7c] text-white border-[#235a7c] shadow-md shadow-[#235a7c]/30 ring-2 ring-[#235a7c]/20 scale-[1.03]',
+                        inactiveClass: 'bg-[#c9e6ff]/40 border-[#9ed1f8]/60 text-[#235a7c] hover:bg-[#c9e6ff]/80 hover:border-[#9ed1f8]'
+                      },
+                      {
+                        id: 'green',
+                        name: 'Xanh Lá',
+                        activeClass: 'bg-[#2f6a3f] text-white border-[#2f6a3f] shadow-md shadow-[#2f6a3f]/30 ring-2 ring-[#2f6a3f]/20 scale-[1.03]',
+                        inactiveClass: 'bg-[#b2f2bb]/40 border-[#96d5a0]/60 text-[#2f6a3f] hover:bg-[#b2f2bb]/80 hover:border-[#96d5a0]'
+                      }
+                    ].map((theme) => {
+                      const isSelected = (newReviewForm.colorScheme || 'pink') === theme.id;
+                      return (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          onClick={() => setNewReviewForm({ ...newReviewForm, colorScheme: theme.id })}
+                          className={`flex items-center justify-center gap-1 py-2.5 px-2 rounded-2xl border-2 font-headline font-bold text-xs sm:text-[13px] transition-all duration-200 cursor-pointer ${isSelected ? theme.activeClass : theme.inactiveClass
+                            }`}
+                        >
+                          {isSelected && <span className="text-xs font-black">✓</span>}
+                          <span>{theme.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Field: Comment */}
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
-                    <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider">
-                      Nội Dung Cảm Nhận <span className="text-rose-500">*</span>
+                    <label className="block text-[13px] font-headline text-[#201047]">
+                      Nội dung cảm nhận<span className="text-rose-500">*</span>
                     </label>
                     <span className={`text-[12px] font-bold ${newReviewForm.comment.trim().length >= 5 ? 'text-emerald-600' : 'text-slate-400'}`}>
                       {newReviewForm.comment.trim().length}/300 ký tự
@@ -2216,6 +2493,152 @@ export default function LandingPageView({
           )}
         </div>
       </div>
+
+      {/* ═══════════════ MODAL: CHỦ QUÁN TRẢ LỜI ĐÁNH GIÁ (OWNER REPLY MODAL) ═══════════════ */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ease-out ${showReplyModal && targetReviewForReply
+          ? 'opacity-100 pointer-events-auto visible bg-black/65 backdrop-blur-md'
+          : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
+          }`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setShowReplyModal(false);
+        }}
+      >
+        <div
+          className={`bg-white rounded-[2.5rem] max-w-lg w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-300 ease-out transform ${showReplyModal && targetReviewForReply
+            ? 'scale-100 translate-y-0 opacity-100'
+            : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
+            }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Top Rainbow Accent Line */}
+          <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#b2f2bb]"></div>
+
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-[#fab3ca] shadow-xs shrink-0 bg-white">
+                <img src="/anh3.png" alt="Kẹo Kéo Dặm" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h3 className="font-headline text-lg sm:text-xl text-[#864d61]">
+                  {targetReviewForReply?.ownerReply ? 'Chỉnh Sửa Phản Hồi' : 'Phản Hồi Đánh Giá Của Khách'}
+                </h3>
+                <p className="text-xs font-semibold text-slate-500">
+                  Câu trả lời sẽ được hiển thị công khai ngay dưới đánh giá
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowReplyModal(false)}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm cursor-pointer transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Customer Review Summary Box */}
+          {targetReviewForReply && (
+            <div className="bg-[#fdf7ff] rounded-2xl p-3.5 mb-4 border border-[#ffd9e3]/80">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="font-headline text-xs font-bold text-[#201047]">
+                  {targetReviewForReply.name}
+                </span>
+                <div className="flex gap-0.5 text-amber-400">
+                  {[...Array(targetReviewForReply.rating || 5)].map((_, i) => (
+                    <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs text-[#514347] italic line-clamp-2">
+                "{targetReviewForReply.comment}"
+              </p>
+            </div>
+          )}
+
+          <form onSubmit={handleSaveOwnerReply} className="flex flex-col gap-3.5">
+            {/* Field: Responder Name */}
+            <div>
+              <label className="block text-[13px] font-headline text-[#201047] mb-1">
+                Tên / Danh xưng của bạn
+              </label>
+              <input
+                type="text"
+                value={ownerNameInput}
+                onChange={(e) => setOwnerNameInput(e.target.value)}
+                placeholder="VD: Kẹo Kéo Dặm"
+                className="w-full px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-900 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white focus:outline-none transition-all"
+              />
+            </div>
+
+            {/* Quick Suggestion Chips */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 mb-1.5">
+                Gợi ý mẫu câu nhanh:
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  'Dạ cảm ơn bạn nhiều ạ! Hẹn gặp lại bạn vào những buổi tiệc sau nhé ❤️',
+                  'Locahome luôn cam kết giao hỏa tốc 30 phút. Chúc bạn hát vui vẻ!',
+                  'Cảm ơn quý khách đã tin tưởng và ủng hộ dàn loa của tụi mình ạ! 🎶'
+                ].map((sample, idx) => (
+                  <button
+                    type="button"
+                    key={idx}
+                    onClick={() => setOwnerReplyInput(sample)}
+                    className="text-[10px] sm:text-[11px] font-medium bg-[#f8f1ff] hover:bg-[#ffd9e3] text-[#864d61] px-2.5 py-1 rounded-lg border border-[#ffd9e3] transition-colors text-left cursor-pointer"
+                  >
+                    + {sample.slice(0, 32)}...
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Field: Reply Content */}
+            <div>
+              <label className="block text-[13px] font-headline text-[#201047] mb-1">
+                Nội dung trả lời <span className="text-rose-500">*</span>
+              </label>
+              <textarea
+                rows={3}
+                value={ownerReplyInput}
+                onChange={(e) => setOwnerReplyInput(e.target.value)}
+                placeholder="Nhập lời cảm ơn, giải đáp hoặc phản hồi tới khách hàng..."
+                className="w-full px-3.5 py-2.5 rounded-2xl font-medium text-xs sm:text-sm text-slate-900 bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white focus:outline-none transition-all shadow-inner"
+                required
+              ></textarea>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              {targetReviewForReply?.ownerReply && (
+                <button
+                  type="button"
+                  onClick={handleDeleteOwnerReply}
+                  disabled={isSubmittingReply}
+                  className="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-headline text-xs border border-rose-200 transition-colors cursor-pointer"
+                >
+                  Xóa Phản Hồi
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowReplyModal(false)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-headline text-xs text-slate-700 transition-colors cursor-pointer"
+              >
+                Đóng
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmittingReply || !ownerReplyInput.trim()}
+                className="flex-1 py-2.5 rounded-xl bg-[#864d61] hover:bg-[#723f51] text-white font-headline text-xs clay-button-pink shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {isSubmittingReply ? 'Đang lưu...' : 'Lưu Phản Hồi'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
+
