@@ -980,10 +980,10 @@ export default function LandingPageView({
             >
               <img
                 src="/anh3.png"
-                alt="Locahome"
+                alt="Dặm"
                 className="w-12 h-12 sm:w-14 sm:h-14 object-contain shrink-0 group-hover:scale-110 group-active:scale-95 transition-all duration-300 drop-shadow-[0_4px_10px_rgba(134,77,97,0.18)]"
               />
-              <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block">Locahome</span>
+              <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block">Dặm</span>
             </div>
 
             {/* Clean Kawaii Navigation Links */}
@@ -1959,14 +1959,18 @@ export default function LandingPageView({
 
       {/* ═══════════════ FOOTER ═══════════════ */}
       <footer className="bg-[#f8f1ff] border-t border-[#864d61]/10 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-4">
-          <img
-            src="/anh3.png"
-            alt="Locahome"
-            className="w-14 h-14 object-contain hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_12px_rgba(134,77,97,0.18)]"
-          />
-
-          <p className="font-headline text-lg text-[#864d61]">Locahome</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-3">
+          <div
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <img
+              src="/anh3.png"
+              alt="Dặm"
+              className="w-10 h-10 sm:w-12 sm:h-12 object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_10px_rgba(134,77,97,0.18)]"
+            />
+            <span className="font-headline text-[20px] text-[#864d61] tracking-tight">Dặm</span>
+          </div>
           <p className="text-sm font-semibold text-slate-500 max-w-md">
             Chia sẻ âm thanh hạnh phúc đến mọi bữa tiệc. Thuê loa kẹo kéo uy tín, âm thanh chất lượng tốt nhất.
           </p>
