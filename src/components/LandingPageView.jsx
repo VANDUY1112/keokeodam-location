@@ -372,6 +372,14 @@ export default function LandingPageView({
   const [showStarDropdown, setShowStarDropdown] = useState(false);
   const starDropdownRef = useRef(null);
 
+  // Form validation states
+  const [reviewFormTouched, setReviewFormTouched] = useState({ name: false, comment: false });
+  const [reviewFormShake, setReviewFormShake] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+
+  const [bookingFormTouched, setBookingFormTouched] = useState({ name: false, phone: false, address: false });
+  const [bookingFormShake, setBookingFormShake] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (starDropdownRef.current && !starDropdownRef.current.contains(event.target)) {
@@ -382,21 +390,8 @@ export default function LandingPageView({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Trigger floating heart particles
-  const triggerParticleBurst = (x = window.innerWidth / 2, y = window.innerHeight / 2) => {
-    const emojis = ['💖', '✨', '🌸', '⭐', '🎶', '🎀'];
-    const newItems = Array.from({ length: 8 }).map((_, i) => ({
-      id: Date.now() + i,
-      x: x + (Math.random() * 80 - 40),
-      y: y + (Math.random() * 40 - 20),
-      emoji: emojis[Math.floor(Math.random() * emojis.length)],
-      delay: Math.random() * 0.2
-    }));
-    setFloatingParticles(prev => [...prev, ...newItems]);
-    setTimeout(() => {
-      setFloatingParticles(prev => prev.filter(p => !newItems.some(n => n.id === p.id)));
-    }, 1800);
-  };
+  // Floating particles disabled per user preference
+  const triggerParticleBurst = () => {};
 
   // Play cute synthetic Web Audio chime demo
   const playSoundDemo = (type) => {
@@ -708,16 +703,26 @@ export default function LandingPageView({
 
   const handleBookingSubmit = (e) => {
     e.preventDefault();
-    if (!bookingFormData.name || !bookingFormData.phone) return;
+    setBookingFormTouched({ name: true, phone: true, address: true });
 
-    triggerParticleBurst();
+    const phoneClean = bookingFormData.phone.replace(/[\s.-]/g, '');
+    const isPhoneValid = /^(0[3|5|7|8|9])[0-9]{8}$/.test(phoneClean);
+    const isNameValid = Boolean(bookingFormData.name.trim());
+    const isAddressValid = Boolean(bookingFormData.address.trim());
+
+    if (!isNameValid || !isPhoneValid || !isAddressValid) {
+      setBookingFormShake(true);
+      setTimeout(() => setBookingFormShake(false), 500);
+      return;
+    }
+
     const totalEstimate = (bookingFormData.durationHours * bookingFormData.pricePerHour) + 20000;
 
     if (onAddBooking) {
       onAddBooking({
-        customerName: bookingFormData.name,
-        customerPhone: bookingFormData.phone,
-        address: bookingFormData.address || 'Giao tận nơi TP. Tuy Hòa / Phú Yên',
+        customerName: bookingFormData.name.trim(),
+        customerPhone: phoneClean,
+        address: bookingFormData.address.trim(),
         speakerName: bookingFormData.speakerType,
         totalAmount: totalEstimate,
         duration: `${bookingFormData.durationHours} giờ`,
@@ -740,6 +745,7 @@ export default function LandingPageView({
         speakerType: 'Puffy Bass Pro 40 (800W) - Best Seller',
         pricePerHour: 80000
       });
+      setBookingFormTouched({ name: false, phone: false, address: false });
     }, 2200);
   };
 
@@ -753,56 +759,51 @@ export default function LandingPageView({
 
   const handleAddReviewSubmit = (e) => {
     e.preventDefault();
-    if (!newReviewForm.name || !newReviewForm.comment) return;
+    setReviewFormTouched({ name: true, comment: true });
 
-    triggerParticleBurst();
+    const isNameValid = Boolean(newReviewForm.name.trim());
+    const isCommentValid = Boolean(newReviewForm.comment.trim() && newReviewForm.comment.trim().length >= 5);
+
+    if (!isNameValid || !isCommentValid) {
+      setReviewFormShake(true);
+      setTimeout(() => setReviewFormShake(false), 500);
+      return;
+    }
+
     const newRev = {
       id: Date.now(),
-      name: newReviewForm.name,
+      name: newReviewForm.name.trim(),
       role: newReviewForm.role || 'Khách hàng thân thiết',
       category: newReviewForm.category,
       time: 'Vừa xong',
       rating: Number(newReviewForm.rating),
       verified: true,
       avatar: null,
-      avatarLetter: newReviewForm.name.charAt(0).toUpperCase(),
+      avatarLetter: newReviewForm.name.trim().charAt(0).toUpperCase(),
       avatarColor: ['pink', 'blue', 'green', 'purple'][Math.floor(Math.random() * 4)],
-      comment: newReviewForm.comment,
+      comment: newReviewForm.comment.trim(),
       colorScheme: ['pink', 'blue', 'green'][Math.floor(Math.random() * 3)]
     };
 
     setReviewsList([newRev, ...reviewsList]);
-    setShowAddReviewModal(false);
-    setNewReviewForm({
-      name: '',
-      rating: 5,
-      role: 'Khách thuê loa',
-      comment: '',
-      category: 'karaoke'
-    });
+    setReviewSuccess(true);
+
+    setTimeout(() => {
+      setReviewSuccess(false);
+      setShowAddReviewModal(false);
+      setNewReviewForm({
+        name: '',
+        rating: 5,
+        role: 'Khách thuê loa',
+        comment: '',
+        category: 'karaoke'
+      });
+      setReviewFormTouched({ name: false, comment: false });
+    }, 1600);
   };
 
   return (
     <div className="bg-[#fdf7ff] min-h-screen font-cute text-[#201047] selection:bg-[#ffb7ce] selection:text-[#360b1e] relative overflow-x-hidden">
-      {/* Floating Particles Overlay */}
-      <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
-        {floatingParticles.map(p => (
-          <span
-            key={p.id}
-            className="absolute text-2xl animate-bounce transition-all duration-1000 ease-out"
-            style={{
-              left: p.x,
-              top: p.y,
-              animationDuration: '1.2s',
-              transform: 'translateY(-60px) scale(1.3)',
-              opacity: 0.9
-            }}
-          >
-            {p.emoji}
-          </span>
-        ))}
-      </div>
-
       {/* Background Pastel Blobs */}
       <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-[#ffd9e3]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 -translate-y-1/3 translate-x-1/3 pointer-events-none z-0"></div>
       <div className="fixed top-1/3 left-0 w-[450px] h-[450px] bg-[#c9e6ff]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-65 -translate-x-1/3 pointer-events-none z-0"></div>
@@ -878,8 +879,8 @@ export default function LandingPageView({
           <div className="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
             {/* Logo */}
             <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_4px_12px_rgba(134,77,97,0.15)] group-hover:scale-105 transition-transform animate-squish border border-[#fab3ca] shrink-0">
-                <CuteSpeakerIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_4px_12px_rgba(134,77,97,0.15)] group-hover:scale-105 transition-transform animate-squish border border-[#fab3ca] shrink-0 overflow-hidden">
+                <img src="/anh2.png" alt="Locahome" className="w-full h-full object-cover rounded-2xl" />
               </div>
               <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block">Locahome</span>
             </div>
@@ -1263,36 +1264,36 @@ export default function LandingPageView({
           </div>
 
           {/* Masonry Review Columns */}
-          <div className="columns-2 lg:columns-3 gap-3 sm:gap-6 space-y-3 sm:space-y-6">
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {filteredReviews.map((rev) => {
               if (rev.colorScheme === 'imageCard') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#ffb7ce] rounded-2xl sm:rounded-[2rem] p-1 sm:p-1.5 shadow-md sm:shadow-[0_12px_32px_rgba(134,77,97,0.15)] relative z-10 transition-transform duration-300 hover:scale-[1.02] border border-[#fab3ca]">
-                      <div className="relative w-full h-28 sm:h-48 rounded-t-xl sm:rounded-t-[1.7rem] overflow-hidden mb-1.5 sm:mb-2">
+                    <div className="bg-[#ffb7ce] rounded-[2rem] p-1.5 shadow-[0_12px_32px_rgba(134,77,97,0.15)] relative z-10 transition-transform duration-300 hover:scale-[1.02] border border-[#fab3ca]">
+                      <div className="relative w-full h-48 rounded-t-[1.7rem] overflow-hidden mb-2">
                         <div
                           className="absolute inset-0 bg-cover bg-center"
                           style={{ backgroundImage: `url('${rev.bannerImage}')` }}
                         ></div>
                         <div className="absolute inset-0 bg-gradient-to-t from-[#ffb7ce] via-transparent to-transparent"></div>
-                        <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-4 flex gap-0.5 sm:gap-1">
+                        <div className="absolute bottom-3 left-4 flex gap-1">
                           {[...Array(5)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-3 h-3 sm:w-5 sm:h-5 drop-shadow-xs" />
+                            <CuteStarIcon key={i} filled={true} className="w-5 h-5 drop-shadow-xs" />
                           ))}
                         </div>
                       </div>
-                      <div className="p-2 sm:p-4 pt-1">
-                        <h4 className="font-headline text-xs sm:text-xl text-[#7b4458] mb-1 sm:mb-2 line-clamp-1">{rev.title || 'Buổi Tiệc Tuyệt Vời Nhất'}</h4>
-                        <p className="text-[11px] sm:text-base text-[#7b4458]/90 font-medium leading-snug sm:leading-relaxed line-clamp-3 sm:line-clamp-none">
+                      <div className="p-4 pt-1">
+                        <h4 className="font-headline text-lg sm:text-xl text-[#7b4458] mb-2">{rev.title || 'Buổi Tiệc Tuyệt Vời Nhất'}</h4>
+                        <p className="text-sm sm:text-base text-[#7b4458]/90 font-medium leading-relaxed">
                           "{rev.comment}"
                         </p>
-                        <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-[#864d61]/15">
-                          <div className="w-7 h-7 sm:w-11 sm:h-11 rounded-full border border-[#864d61] bg-white p-[1px] shadow-sm shrink-0 overflow-hidden">
+                        <div className="flex items-center gap-3 mt-4 pt-3 border-t border-[#864d61]/15">
+                          <div className="w-11 h-11 rounded-full border-2 border-[#864d61] bg-white p-[1px] shadow-sm shrink-0 overflow-hidden">
                             <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                           </div>
-                          <div className="min-w-0">
-                            <h3 className="font-headline text-xs sm:text-sm text-[#7b4458] truncate">{rev.name}</h3>
-                            <p className="text-[9px] sm:text-xs font-bold text-[#7b4458]/70 truncate">{rev.role}</p>
+                          <div>
+                            <h3 className="font-headline text-sm text-[#7b4458]">{rev.name}</h3>
+                            <p className="text-xs font-bold text-[#7b4458]/70">{rev.role}</p>
                           </div>
                         </div>
                       </div>
@@ -1304,23 +1305,23 @@ export default function LandingPageView({
               if (rev.colorScheme === 'darkCard') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#201047] rounded-2xl sm:rounded-[2.5rem] p-3.5 sm:p-6 shadow-xl relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-purple-900/40">
-                      <div className="absolute top-2 right-3 sm:top-4 sm:right-5 text-[#fab3ca] text-2xl sm:text-[50px] opacity-20 font-headline">"</div>
-                      <div className="flex gap-0.5 sm:gap-1 mb-2 sm:mb-4">
+                    <div className="bg-[#201047] rounded-[2.5rem] p-6 shadow-xl relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-purple-900/40">
+                      <div className="absolute top-4 right-5 text-[#fab3ca] text-[50px] opacity-20 font-headline">"</div>
+                      <div className="flex gap-1 mb-4">
                         {[...Array(rev.rating)].map((_, i) => (
-                          <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-amber-300" />
+                          <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
                         ))}
                       </div>
-                      <p className="text-[11px] sm:text-base text-[#f6eeff] font-medium leading-snug sm:leading-relaxed mb-2.5 sm:mb-4 line-clamp-4 sm:line-clamp-none">
+                      <p className="text-base text-[#f6eeff] font-medium leading-relaxed mb-4">
                         "{rev.comment}"
                       </p>
-                      <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pt-2 sm:pt-3 border-t border-purple-800/40">
-                        <div className="w-7 h-7 sm:w-11 sm:h-11 rounded-full border border-[#ffb7ce] bg-white p-[1px] shrink-0 overflow-hidden">
+                      <div className="flex items-center gap-3 mt-4 pt-3 border-t border-purple-800/40">
+                        <div className="w-11 h-11 rounded-full border-2 border-[#ffb7ce] bg-white p-[1px] shrink-0 overflow-hidden">
                           <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                         </div>
-                        <div className="min-w-0">
-                          <h3 className="font-headline text-xs sm:text-sm text-[#f6eeff] truncate">{rev.name}</h3>
-                          <p className="text-[9px] sm:text-xs font-bold text-purple-300 truncate">{rev.role}</p>
+                        <div>
+                          <h3 className="font-headline text-sm text-[#f6eeff]">{rev.name}</h3>
+                          <p className="text-xs font-bold text-purple-300">{rev.role}</p>
                         </div>
                       </div>
                     </div>
@@ -1331,23 +1332,23 @@ export default function LandingPageView({
               if (rev.colorScheme === 'whiteCard') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-white rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-6 shadow-[0_6px_20px_rgba(134,77,97,0.06)] border-2 border-[#ffd9e3] relative z-10 transition-transform duration-300 hover:-translate-y-2">
-                      <div className="flex items-center justify-between mb-2 sm:mb-3">
-                        <div className="flex gap-0.5 sm:gap-1">
+                    <div className="bg-white rounded-[2rem] p-6 shadow-[0_6px_20px_rgba(134,77,97,0.06)] border-2 border-[#ffd9e3] relative z-10 transition-transform duration-300 hover:-translate-y-2">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
+                            <CuteStarIcon key={i} filled={true} className="w-4.5 h-4.5" />
                           ))}
                         </div>
-                        <CuteHeartIcon className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5" />
+                        <CuteHeartIcon className="w-4.5 h-4.5" />
                       </div>
-                      <p className="text-[11px] sm:text-base text-[#201047] font-medium leading-snug sm:leading-relaxed mb-2.5 sm:mb-4 italic line-clamp-4 sm:line-clamp-none">
+                      <p className="text-sm sm:text-base text-[#201047] font-medium leading-relaxed mb-4 italic">
                         "{rev.comment}"
                       </p>
-                      <div className="flex items-center gap-1.5 sm:gap-3">
+                      <div className="flex items-center gap-3">
                         <CuteAvatarPill letter={rev.avatarLetter || 'K'} color={rev.avatarColor || 'blue'} />
-                        <div className="min-w-0">
-                          <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
-                          <p className="text-[9px] sm:text-xs font-bold text-slate-400 truncate">{rev.role}</p>
+                        <div>
+                          <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
+                          <p className="text-xs font-bold text-slate-400">{rev.role}</p>
                         </div>
                       </div>
                     </div>
@@ -1358,27 +1359,27 @@ export default function LandingPageView({
               if (rev.colorScheme === 'blue') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#c9e6ff]/50 rounded-2xl sm:rounded-[2.2rem] p-3.5 sm:p-6 shadow-[0_8px_24px_rgba(35,90,124,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#9ed1f8]/50">
-                      <div className="absolute -bottom-2.5 right-6 sm:right-10 w-5 h-5 sm:w-7 sm:h-7 bg-[#c9e6ff]/50 transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(35,90,124,0.04)] -z-10 border-r border-b border-[#9ed1f8]/50"></div>
-                      <div className="flex items-center justify-between mb-2 sm:mb-3">
-                        <div className="flex gap-0.5 sm:gap-1">
+                    <div className="bg-[#c9e6ff]/50 rounded-[2.2rem] p-6 shadow-[0_8px_24px_rgba(35,90,124,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#9ed1f8]/50">
+                      <div className="absolute -bottom-3 right-10 w-7 h-7 bg-[#c9e6ff]/50 transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(35,90,124,0.04)] -z-10 border-r border-b border-[#9ed1f8]/50"></div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                            <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
                           ))}
                         </div>
-                        <span className="text-[9px] sm:text-xs font-bold text-[#235a7c] bg-[#c9e6ff] px-1.5 sm:px-2.5 py-0.5 rounded-full border border-[#9ed1f8]">{rev.time}</span>
+                        <span className="text-xs font-bold text-[#235a7c] bg-[#c9e6ff] px-2.5 py-0.5 rounded-full border border-[#9ed1f8]">{rev.time}</span>
                       </div>
-                      <p className="text-[11px] sm:text-base text-[#0c4b6c] font-semibold leading-snug sm:leading-relaxed mb-1 sm:mb-2 line-clamp-4 sm:line-clamp-none">
+                      <p className="text-sm sm:text-base text-[#0c4b6c] font-semibold leading-relaxed mb-2">
                         "{rev.comment}"
                       </p>
                     </div>
-                    <div className="flex items-center flex-row-reverse gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pr-1 sm:pr-3 text-right">
-                      <div className="w-7 h-7 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl border-2 sm:border-[3px] border-[#9ed1f8] bg-white p-0.5 shadow-sm shrink-0 transform rotate-3 overflow-hidden">
-                        <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-lg sm:rounded-xl" />
+                    <div className="flex items-center flex-row-reverse gap-3 mt-4 pr-3 text-right">
+                      <div className="w-12 h-12 rounded-2xl border-[3px] border-[#9ed1f8] bg-white p-0.5 shadow-sm shrink-0 transform rotate-3 overflow-hidden">
+                        <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-xl" />
                       </div>
-                      <div className="min-w-0">
-                        <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
-                        <p className="text-[9px] sm:text-xs font-bold text-[#2e6385] truncate">{rev.role}</p>
+                      <div>
+                        <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
+                        <p className="text-xs font-bold text-[#2e6385]">{rev.role}</p>
                       </div>
                     </div>
                   </article>
@@ -1388,32 +1389,32 @@ export default function LandingPageView({
               if (rev.colorScheme === 'green') {
                 return (
                   <article key={rev.id} className="break-inside-avoid relative">
-                    <div className="bg-[#b2f2bb]/50 rounded-2xl sm:rounded-[2rem] rounded-tr-none p-3.5 sm:p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
-                      <div className="absolute -top-2.5 right-0 w-5 h-5 sm:w-7 sm:h-7 bg-[#b2f2bb]/50 transform rotate-45 rounded-xs -z-10 border-t border-r border-[#96d5a0]/50"></div>
-                      <div className="flex items-center justify-between mb-2 sm:mb-3">
-                        <div className="flex gap-0.5 sm:gap-1">
+                    <div className="bg-[#b2f2bb]/50 rounded-[2rem] rounded-tr-none p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
+                      <div className="absolute -top-3 right-0 w-7 h-7 bg-[#b2f2bb]/50 transform rotate-45 rounded-xs -z-10 border-t border-r border-[#96d5a0]/50"></div>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
-                            <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                            <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
                           ))}
                         </div>
                         {rev.verified && (
-                          <div className="px-1.5 sm:px-2.5 py-0.5 bg-[#2f6a3f] text-white text-[9px] sm:text-[11px] font-bold rounded-md sm:rounded-lg transform -rotate-2 flex items-center gap-0.5 sm:gap-1 shadow-xs">
-                            <CuteCheckIcon className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+                          <div className="px-2.5 py-0.5 bg-[#2f6a3f] text-white text-[11px] font-bold rounded-lg transform -rotate-2 flex items-center gap-1 shadow-xs">
+                            <CuteCheckIcon className="w-3.5 h-3.5" />
                             <span>Đã Thuê</span>
                           </div>
                         )}
                       </div>
-                      <p className="text-[11px] sm:text-base text-[#00210b] font-semibold leading-snug sm:leading-relaxed mb-1 sm:mb-2 line-clamp-4 sm:line-clamp-none">
+                      <p className="text-sm sm:text-base text-[#00210b] font-semibold leading-relaxed mb-2">
                         "{rev.comment}"
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pl-1 sm:pl-3">
-                      <div className="w-7 h-7 sm:w-12 sm:h-12 rounded-full border-2 sm:border-[3px] border-[#96d5a0] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
+                    <div className="flex items-center gap-3 mt-4 pl-3">
+                      <div className="w-12 h-12 rounded-full border-[3px] border-[#96d5a0] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
                         <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                       </div>
-                      <div className="min-w-0">
-                        <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
-                        <p className="text-[9px] sm:text-xs font-bold text-[#2f6a3f] truncate">{rev.role}</p>
+                      <div>
+                        <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
+                        <p className="text-xs font-bold text-[#2f6a3f]">{rev.role}</p>
                       </div>
                     </div>
                   </article>
@@ -1422,31 +1423,31 @@ export default function LandingPageView({
 
               return (
                 <article key={rev.id} className="break-inside-avoid relative">
-                  <div className="bg-[#f3eaff] rounded-2xl sm:rounded-[2rem] p-3.5 sm:p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
-                    <div className="absolute -bottom-2.5 left-6 sm:left-10 w-5 h-5 sm:w-7 sm:h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
-                    <div className="flex items-center justify-between mb-2 sm:mb-3">
-                      <div className="flex gap-0.5 sm:gap-1">
+                  <div className="bg-[#f3eaff] rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
+                    <div className="absolute -bottom-3 left-10 w-7 h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex gap-1">
                         {[...Array(rev.rating)].map((_, i) => (
-                          <CuteStarIcon key={i} filled={true} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                          <CuteStarIcon key={i} filled={true} className="w-5 h-5" />
                         ))}
                       </div>
-                      <span className="text-[9px] sm:text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-1.5 sm:px-2.5 py-0.5 rounded-full border border-[#fab3ca]">{rev.time}</span>
+                      <span className="text-xs font-bold text-[#864d61] bg-[#ffd9e3] px-2.5 py-0.5 rounded-full border border-[#fab3ca]">{rev.time}</span>
                     </div>
-                    <p className="text-[11px] sm:text-base text-[#201047] font-semibold leading-snug sm:leading-relaxed mb-1 sm:mb-2 line-clamp-4 sm:line-clamp-none">
+                    <p className="text-sm sm:text-base text-[#201047] font-semibold leading-relaxed mb-2">
                       "{rev.comment}"
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 sm:gap-3 mt-2.5 sm:mt-4 pl-1 sm:pl-3">
-                    <div className="w-7 h-7 sm:w-12 sm:h-12 rounded-full border-2 sm:border-[3px] border-[#ffd9e3] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
+                  <div className="flex items-center gap-3 mt-4 pl-3">
+                    <div className="w-12 h-12 rounded-full border-[3px] border-[#ffd9e3] bg-white p-0.5 shadow-sm shrink-0 overflow-hidden">
                       {rev.avatar ? (
                         <img src={rev.avatar} alt={rev.name} className="w-full h-full object-cover rounded-full" />
                       ) : (
                         <CuteAvatarPill letter={rev.avatarLetter || 'U'} color={rev.avatarColor || 'pink'} />
                       )}
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="font-headline text-xs sm:text-sm text-[#201047] truncate">{rev.name}</h3>
-                      <p className="text-[9px] sm:text-xs font-bold text-[#864d61] truncate">{rev.role}</p>
+                    <div>
+                      <h3 className="font-headline text-sm text-[#201047]">{rev.name}</h3>
+                      <p className="text-xs font-bold text-[#864d61]">{rev.role}</p>
                     </div>
                   </div>
                 </article>
@@ -1699,8 +1700,8 @@ export default function LandingPageView({
       {/* ═══════════════ FOOTER ═══════════════ */}
       <footer className="bg-[#f8f1ff] border-t border-[#864d61]/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_6px_16px_rgba(134,77,97,0.2)] border border-[#fab3ca] hover:scale-105 transition-transform animate-squish">
-            <CuteSpeakerIcon className="w-7 h-7" />
+          <div className="w-12 h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_6px_16px_rgba(134,77,97,0.2)] border border-[#fab3ca] hover:scale-105 transition-transform animate-squish overflow-hidden">
+            <img src="/anh2.png" alt="Locahome" className="w-full h-full object-cover rounded-2xl" />
           </div>
 
           <p className="font-headline text-lg text-[#864d61]">Locahome</p>
@@ -1748,7 +1749,7 @@ export default function LandingPageView({
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleBookingSubmit} className="flex flex-col gap-3.5">
+              <form onSubmit={handleBookingSubmit} className={`flex flex-col gap-3.5 ${bookingFormShake ? 'animate-shake' : ''}`}>
                 {/* Speaker Package Selector */}
                 <div>
                   <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1">
@@ -1776,46 +1777,97 @@ export default function LandingPageView({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1">
-                      Họ Và Tên Của Bạn *
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider">
+                        Họ Và Tên <span className="text-rose-500">*</span>
+                      </label>
+                      {bookingFormTouched.name && bookingFormData.name.trim() && (
+                        <span className="text-[13px] font-bold text-emerald-600">Hợp lệ</span>
+                      )}
+                    </div>
                     <input
                       type="text"
-                      required
                       placeholder="Ví dụ: Anh Nam, Chị Mai"
                       value={bookingFormData.name}
-                      onChange={(e) => setBookingFormData({ ...bookingFormData, name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm text-slate-900 focus:ring-2 focus:ring-[#864d61] focus:outline-none"
+                      onBlur={() => setBookingFormTouched(prev => ({ ...prev, name: true }))}
+                      onChange={(e) => {
+                        setBookingFormData({ ...bookingFormData, name: e.target.value });
+                        if (!bookingFormTouched.name) setBookingFormTouched(prev => ({ ...prev, name: true }));
+                      }}
+                      className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${
+                        bookingFormTouched.name && !bookingFormData.name.trim()
+                          ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                          : bookingFormTouched.name && bookingFormData.name.trim()
+                            ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                            : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
+                      }`}
                     />
+                    {bookingFormTouched.name && !bookingFormData.name.trim() && (
+                      <p className="text-[13px] font-bold text-rose-600 mt-1">Vui lòng nhập họ tên</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1">
-                      Số Điện Thoại Nhận Loa *
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider">
+                        Số Điện Thoại <span className="text-rose-500">*</span>
+                      </label>
+                      {bookingFormTouched.phone && /^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, '')) && (
+                        <span className="text-[13px] font-bold text-emerald-600">Hợp lệ</span>
+                      )}
+                    </div>
                     <input
                       type="tel"
-                      required
                       placeholder="0368.xxx.xxx"
                       value={bookingFormData.phone}
-                      onChange={(e) => setBookingFormData({ ...bookingFormData, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm text-slate-900 focus:ring-2 focus:ring-[#864d61] focus:outline-none"
+                      onBlur={() => setBookingFormTouched(prev => ({ ...prev, phone: true }))}
+                      onChange={(e) => {
+                        setBookingFormData({ ...bookingFormData, phone: e.target.value });
+                        if (!bookingFormTouched.phone) setBookingFormTouched(prev => ({ ...prev, phone: true }));
+                      }}
+                      className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${
+                        bookingFormTouched.phone && !/^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, ''))
+                          ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                          : bookingFormTouched.phone && /^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, ''))
+                            ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                            : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
+                      }`}
                     />
+                    {bookingFormTouched.phone && !/^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, '')) && (
+                      <p className="text-[13px] font-bold text-rose-600 mt-1">SĐT không hợp lệ (VD: 0368115592)</p>
+                    )}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1">
-                    Địa Chỉ Giao Loa Tận Nơi
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider">
+                      Địa Chỉ Giao Loa Tận Nơi <span className="text-rose-500">*</span>
+                    </label>
+                    {bookingFormTouched.address && bookingFormData.address.trim() && (
+                      <span className="text-[13px] font-bold text-emerald-600">Hợp lệ</span>
+                    )}
+                  </div>
                   <input
                     type="text"
-                    required
-                    placeholder="Số nhà, tên đường, phường, quận..."
+                    placeholder="Số nhà, tên đường, phường, quận/huyện..."
                     value={bookingFormData.address}
-                    onChange={(e) => setBookingFormData({ ...bookingFormData, address: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm text-slate-900 focus:ring-2 focus:ring-[#864d61] focus:outline-none"
+                    onBlur={() => setBookingFormTouched(prev => ({ ...prev, address: true }))}
+                    onChange={(e) => {
+                      setBookingFormData({ ...bookingFormData, address: e.target.value });
+                      if (!bookingFormTouched.address) setBookingFormTouched(prev => ({ ...prev, address: true }));
+                    }}
+                    className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${
+                      bookingFormTouched.address && !bookingFormData.address.trim()
+                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                        : bookingFormTouched.address && bookingFormData.address.trim()
+                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
+                    }`}
                   />
+                  {bookingFormTouched.address && !bookingFormData.address.trim() && (
+                    <p className="text-[13px] font-bold text-rose-600 mt-1">Vui lòng nhập địa chỉ giao loa</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -1891,114 +1943,181 @@ export default function LandingPageView({
         </div>
       )}
 
-      {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ ═══════════════ */}
-      {showAddReviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden animate-in zoom-in-90 slide-in-from-bottom-8 duration-300 ease-out">
-            {/* Top Color Accent Line */}
-            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#ffd9e3] via-[#c9e6ff] to-[#b2f2bb]"></div>
+      {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ (HIỆU ỨNG MỞ & ĐÓNG MƯỢT MÀ) ═══════════════ */}
+      <div 
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ease-out ${
+          showAddReviewModal 
+            ? 'opacity-100 pointer-events-auto visible bg-black/60 backdrop-blur-md' 
+            : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
+        }`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setShowAddReviewModal(false);
+        }}
+      >
+        <div 
+          className={`bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-300 ease-out transform ${
+            showAddReviewModal 
+              ? 'scale-100 translate-y-0 opacity-100' 
+              : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Top Color Accent Line */}
+          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#ffd9e3] via-[#c9e6ff] to-[#b2f2bb]"></div>
 
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border-2 border-[#fab3ca] shadow-xs animate-bounce">
+          {reviewSuccess ? (
+            <div className="py-8 text-center flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
+              <div className="w-18 h-18 rounded-3xl bg-[#b2f2bb] text-[#2f6a3f] flex items-center justify-center mb-4 border-2 border-[#96d5a0] shadow-md animate-bounce">
+                <CuteCheckIcon className="w-10 h-10" />
+              </div>
+              <h3 className="font-headline text-2xl text-[#864d61] mb-1.5">Gửi Đánh Giá Thành Công!</h3>
+              <p className="text-sm font-semibold text-[#514347] max-w-xs">
+                Cảm ơn bạn <span className="font-bold text-[#201047]">"{newReviewForm.name}"</span> đã chia sẻ trải nghiệm chân thực cùng Locahome.
+              </p>
+              <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full text-xs font-bold text-amber-700 border border-amber-200">
+                <CuteStarIcon filled={true} className="w-4 h-4 text-amber-400" />
+                <span>Đánh giá {newReviewForm.rating} sao đã được ghi nhận</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-12 h-12 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border-2 border-[#fab3ca] shadow-xs shrink-0">
                   <CuteStarIcon filled={true} className="w-6 h-6 text-amber-400" />
                 </div>
+                <h3 className="font-headline text-xl text-[#864d61]">Viết Đánh Giá Của Bạn</h3>
+              </div>
+
+              <form onSubmit={handleAddReviewSubmit} className={`flex flex-col gap-4 ${reviewFormShake ? 'animate-shake' : ''}`}>
+                {/* Field: Name */}
                 <div>
-                  <h3 className="font-headline text-xl text-[#864d61]">Viết Đánh Giá Của Bạn</h3>
-                  <p className="text-xs font-semibold text-slate-500">Chia sẻ trải nghiệm chân thực cùng Locahome</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowAddReviewModal(false)}
-                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold transition-all hover:rotate-90"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleAddReviewSubmit} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
-                  Tên Của Bạn *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Hoàng Long, Mỹ Duyên..."
-                  value={newReviewForm.name}
-                  onChange={(e) => setNewReviewForm({ ...newReviewForm, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#864d61] focus:bg-white transition-all shadow-inner"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
-                  Số Sao Đánh Giá
-                </label>
-                <div className="flex items-center gap-3 bg-[#fdf7ff] p-2.5 rounded-2xl border border-[#ffd9e3]">
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        type="button"
-                        key={star}
-                        onClick={(e) => {
-                          triggerParticleBurst(e.clientX, e.clientY);
-                          setNewReviewForm({ ...newReviewForm, rating: star });
-                        }}
-                        className="p-1 hover:scale-130 active:scale-90 transition-transform cursor-pointer"
-                        title={`${star} Sao`}
-                      >
-                        <CuteStarIcon
-                          filled={star <= newReviewForm.rating}
-                          className={`w-7 h-7 transition-colors ${star <= newReviewForm.rating ? 'text-amber-400 drop-shadow-xs' : 'text-slate-200 hover:text-amber-200'
-                            }`}
-                        />
-                      </button>
-                    ))}
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider">
+                      Tên Của Bạn <span className="text-rose-500">*</span>
+                    </label>
+                    {reviewFormTouched.name && newReviewForm.name.trim() && (
+                      <span className="text-[13px] font-bold text-emerald-600">
+                        Hợp lệ
+                      </span>
+                    )}
                   </div>
-                  <span className="text-xs font-extrabold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0 ml-auto">
-                    {newReviewForm.rating === 5 ? 'Quá đã! 5⭐' :
-                      newReviewForm.rating === 4 ? 'Hài lòng 4⭐' :
-                        newReviewForm.rating === 3 ? 'Bình thường 3⭐' :
-                          newReviewForm.rating === 2 ? 'Tạm ổn 2⭐' : 'Cần cải thiện 1⭐'}
-                  </span>
+                  <input
+                    type="text"
+                    placeholder="Nhập tên của bạn..."
+                    value={newReviewForm.name}
+                    onBlur={() => setReviewFormTouched(prev => ({ ...prev, name: true }))}
+                    onChange={(e) => {
+                      setNewReviewForm({ ...newReviewForm, name: e.target.value });
+                      if (!reviewFormTouched.name) setReviewFormTouched(prev => ({ ...prev, name: true }));
+                    }}
+                    className={`w-full px-4 py-3 rounded-2xl font-bold text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${
+                      reviewFormTouched.name && !newReviewForm.name.trim()
+                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                        : reviewFormTouched.name && newReviewForm.name.trim()
+                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white'
+                    }`}
+                  />
+                  {reviewFormTouched.name && !newReviewForm.name.trim() && (
+                    <p className="text-[13px] font-bold text-rose-600 mt-1 animate-in fade-in slide-in-from-top-1">
+                      Vui lòng nhập tên của bạn
+                    </p>
+                  )}
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
-                  Nội Dung Cảm Nhận *
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Âm thanh thế nào? Micro hát có ưng ý không? Nhân viên phục vụ nhiệt tình không..."
-                  value={newReviewForm.comment}
-                  onChange={(e) => setNewReviewForm({ ...newReviewForm, comment: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 font-medium text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#864d61] focus:bg-white transition-all shadow-inner"
-                ></textarea>
-              </div>
+                {/* Field: Star Rating */}
+                <div>
+                  <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider mb-1.5">
+                    Số Sao Đánh Giá
+                  </label>
+                  <div className="flex items-center gap-3 bg-[#fdf7ff] p-2.5 rounded-2xl border border-[#ffd9e3]">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => {
+                            setNewReviewForm({ ...newReviewForm, rating: star });
+                          }}
+                          className="p-1 hover:scale-125 active:scale-90 transition-transform cursor-pointer"
+                          title={`${star} Sao`}
+                        >
+                          <CuteStarIcon
+                            filled={star <= newReviewForm.rating}
+                            className={`w-7 h-7 transition-colors ${
+                              star <= newReviewForm.rating ? 'text-amber-400 drop-shadow-xs' : 'text-slate-200 hover:text-amber-200'
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <span className="text-xs font-extrabold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0 ml-auto">
+                      {newReviewForm.rating === 5 ? 'Quá đã! 5⭐' :
+                        newReviewForm.rating === 4 ? 'Hài lòng 4⭐' :
+                          newReviewForm.rating === 3 ? 'Bình thường 3⭐' :
+                            newReviewForm.rating === 2 ? 'Tạm ổn 2⭐' : 'Cần cải thiện 1⭐'}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="flex gap-3 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddReviewModal(false)}
-                  className="flex-1 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-headline text-xs text-slate-700 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs clay-button-pink flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform"
-                >
-                  <CutePenToolIcon className="w-4 h-4 text-white" />
-                  <span>Gửi Đánh Giá</span>
-                </button>
-              </div>
-            </form>
-          </div>
+                {/* Field: Comment */}
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="block text-xs font-headline text-[#201047] uppercase tracking-wider">
+                      Nội Dung Cảm Nhận <span className="text-rose-500">*</span>
+                    </label>
+                    <span className={`text-[12px] font-bold ${newReviewForm.comment.trim().length >= 5 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      {newReviewForm.comment.trim().length}/300 ký tự
+                    </span>
+                  </div>
+                  <textarea
+                    rows={3}
+                    maxLength={300}
+                    placeholder="Viết cảm nhận, đánh giá..."
+                    value={newReviewForm.comment}
+                    onBlur={() => setReviewFormTouched(prev => ({ ...prev, comment: true }))}
+                    onChange={(e) => {
+                      setNewReviewForm({ ...newReviewForm, comment: e.target.value });
+                      if (!reviewFormTouched.comment) setReviewFormTouched(prev => ({ ...prev, comment: true }));
+                    }}
+                    className={`w-full px-4 py-3 rounded-2xl font-medium text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${
+                      reviewFormTouched.comment && (!newReviewForm.comment.trim() || newReviewForm.comment.trim().length < 5)
+                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                        : reviewFormTouched.comment && newReviewForm.comment.trim().length >= 5
+                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white'
+                    }`}
+                  ></textarea>
+                  {reviewFormTouched.comment && (!newReviewForm.comment.trim() || newReviewForm.comment.trim().length < 5) && (
+                    <p className="text-[13px] font-bold text-rose-600 mt-1 animate-in fade-in slide-in-from-top-1">
+                      {newReviewForm.comment.trim().length === 0 ? 'Vui lòng nhập cảm nhận của bạn' : 'Nội dung cảm nhận nên có ít nhất 5 ký tự'}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddReviewModal(false);
+                      setReviewFormTouched({ name: false, comment: false });
+                    }}
+                    className="flex-1 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-headline text-xs text-slate-700 transition-colors cursor-pointer"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs clay-button-pink flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform cursor-pointer"
+                  >
+                    <span>Gửi Đánh Giá</span>
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
