@@ -376,6 +376,10 @@ export default function LandingPageView({
   const [reviewFormTouched, setReviewFormTouched] = useState({ name: false, comment: false });
   const [reviewFormShake, setReviewFormShake] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [submittedReviewInfo, setSubmittedReviewInfo] = useState({ name: '', rating: 5 });
+
+  // Lightbox Zoom Modal for Scenic Photos
+  const [zoomImageModal, setZoomImageModal] = useState(null);
 
   const [bookingFormTouched, setBookingFormTouched] = useState({ name: false, phone: false, address: false });
   const [bookingFormShake, setBookingFormShake] = useState(false);
@@ -391,7 +395,7 @@ export default function LandingPageView({
   }, []);
 
   // Floating particles disabled per user preference
-  const triggerParticleBurst = () => {};
+  const triggerParticleBurst = () => { };
 
   // Play cute synthetic Web Audio chime demo
   const playSoundDemo = (type) => {
@@ -786,11 +790,20 @@ export default function LandingPageView({
     };
 
     setReviewsList([newRev, ...reviewsList]);
+    setSubmittedReviewInfo({
+      name: newReviewForm.name.trim(),
+      rating: Number(newReviewForm.rating)
+    });
     setReviewSuccess(true);
 
+    // After 1800ms, start closing modal smoothly with 300ms exit animation
+    setTimeout(() => {
+      setShowAddReviewModal(false);
+    }, 1800);
+
+    // After modal has fully finished exiting (2200ms), reset state
     setTimeout(() => {
       setReviewSuccess(false);
-      setShowAddReviewModal(false);
       setNewReviewForm({
         name: '',
         rating: 5,
@@ -799,7 +812,7 @@ export default function LandingPageView({
         category: 'karaoke'
       });
       setReviewFormTouched({ name: false, comment: false });
-    }, 1600);
+    }, 2200);
   };
 
   return (
@@ -878,10 +891,15 @@ export default function LandingPageView({
         <header className="w-full bg-[#fdf7ff]/95 backdrop-blur-xl border-b border-[#864d61]/10">
           <div className="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
             {/* Logo */}
-            <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_4px_12px_rgba(134,77,97,0.15)] group-hover:scale-105 transition-transform animate-squish border border-[#fab3ca] shrink-0 overflow-hidden">
-                <img src="/anh2.png" alt="Locahome" className="w-full h-full object-cover rounded-2xl" />
-              </div>
+            <div
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            >
+              <img
+                src="/anh3.png"
+                alt="Locahome"
+                className="w-12 h-12 sm:w-14 sm:h-14 object-contain shrink-0 group-hover:scale-110 group-active:scale-95 transition-all duration-300 drop-shadow-[0_4px_10px_rgba(134,77,97,0.18)]"
+              />
               <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block">Locahome</span>
             </div>
 
@@ -918,7 +936,7 @@ export default function LandingPageView({
                   }`}
               >
                 <CuteMusicNotesDecor className="w-4 h-4" />
-                <span>Thử Âm Thanh</span>
+                <span>Vi vu</span>
               </a>
               <a
                 href="#faq"
@@ -995,7 +1013,7 @@ export default function LandingPageView({
                   }}
                   className="bg-[#864d61] text-white font-headline text-base px-8 py-3.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md"
                 >
-                  <span>Chọn Loa Thuê Ngay</span>
+                  <span>Thuê Loa Ngay</span>
                 </button>
 
                 <button
@@ -1005,7 +1023,7 @@ export default function LandingPageView({
                   }}
                   className="bg-[#b2f2bb] text-[#00210b] font-headline text-base px-7 py-3.5 rounded-full clay-button-green flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md"
                 >
-                  <span>Nghe Thử Âm Thanh</span>
+                  <span>Vi vu</span>
                 </button>
               </div>
 
@@ -1061,85 +1079,50 @@ export default function LandingPageView({
           <div className="bg-white/90 rounded-[3rem] p-6 sm:p-10 border-2 border-[#ffd9e3] shadow-[0_12px_36px_rgba(134,77,97,0.08)]">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
 
-              {/* Left text & Equalizer bars */}
+              {/* Left text */}
               <div className="text-center md:text-left">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#ffd9e3] rounded-full text-[#864d61] text-xs font-bold uppercase tracking-wider mb-2">
                   <CuteMusicNotesDecor className="w-4 h-4" />
-                  <span>Trải Nghiệm Trực Tiếp</span>
+                  <span>Ngắm một tí nhé! rồi hát tiếp</span>
                 </div>
-                <h3 className="font-headline text-2xl sm:text-3xl text-[#864d61]">
-                  Nghe Thử Chất Âm Locahome
+                <h3 className="font-headline text-2xl sm:text-3xl text-[#864d61] max-w-md leading-snug">
+                  Cùng nẫu vi vu một tí rồi dô bia nha!
                 </h3>
-                <p className="text-sm font-semibold text-[#514347] mt-1 max-w-md">
-                  Bấm để nghe thử các chế độ âm thanh tinh chỉnh riêng cho Karaoke, Bolero và Nhạc Quẩy!
-                </p>
-
-                {/* Animated Equalizer Waves */}
-                <div className="flex items-end gap-1.5 h-10 mt-4 justify-center md:justify-start">
-                  {[40, 75, 55, 95, 60, 85, 45, 100, 70, 50, 90, 65].map((h, idx) => (
-                    <span
-                      key={idx}
-                      className={`w-1.5 rounded-full transition-all duration-300 ${playingAudio
-                        ? 'bg-[#864d61] animate-pulse'
-                        : 'bg-[#ffd9e3]'
-                        }`}
-                      style={{
-                        height: playingAudio ? `${(h * (Math.sin(idx + Date.now() / 200) + 1.5)) / 2}%` : '25%',
-                        minHeight: '6px'
-                      }}
-                    ></span>
-                  ))}
-                  <span className="text-xs font-bold text-[#864d61] ml-2 self-center">
-                    {playingAudio ? '🎵 Đang phát demo...' : 'Sẵn sàng phát'}
-                  </span>
-                </div>
               </div>
 
-              {/* Right Demo Buttons */}
-              <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
-                <button
-                  onClick={() => playSoundDemo('bass')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'bass'
-                    ? 'bg-[#864d61] text-white border-[#864d61] shadow-md ring-2 ring-[#ffd9e3]'
-                    : 'bg-[#fdf7ff] text-[#201047] border-[#ffd9e3] hover:bg-[#ffd9e3]/40'
-                    }`}
-                >
-                  <CuteAudioWaveIcon className="w-4.5 h-4.5" />
-                  <span>Super Bass 40</span>
-                </button>
+              {/* Right Demo Buttons: 1 ảnh 1 dòng trên Mobile, 2 cột trên Tablet/Desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 w-full md:w-[480px]">
+                {[
+                  { id: 'nhan', name: 'Tháp Nhạn', location: 'Tháp Nhạn Cổ Kính • Tuy Hòa', img: '/anh4.png', color: 'from-[#864d61]/90', ring: 'ring-[#864d61]' },
+                  { id: 'nghinhphong', name: 'Tháp Nghinh Phong', location: 'Tháp Nghinh Phong • Tuy Hòa', img: '/anh5.png', color: 'from-[#2f6a3f]/90', ring: 'ring-[#2f6a3f]' },
+                  { id: 'honyen', name: 'Hòn Yến', location: 'Hòn Yến Biển Xanh • Tuy An', img: '/anh6.png', color: 'from-purple-950/90', ring: 'ring-purple-700' },
+                  { id: 'muidien', name: 'Hải Đăng Mũi Điện', location: 'Hải Đăng Mũi Điện • Bãi Môn', img: '/anh7.png', color: 'from-[#235a7c]/90', ring: 'ring-[#235a7c]' }
+                ].map((item) => {
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setZoomImageModal(item)}
+                      className="relative aspect-[16/10] sm:aspect-[4/3] rounded-3xl overflow-hidden border-2 border-[#ffd9e3] hover:border-[#864d61]/60 transition-all duration-300 active:scale-90 hover:scale-[1.03] cursor-pointer group shadow-sm hover:shadow-2xl select-none"
+                    >
+                      <img
+                        src={item.img}
+                        alt={item.location}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-112 group-active:scale-95 transition-transform duration-500 ease-out"
+                      />
+                      <div className={`absolute inset-0 bg-gradient-to-t ${item.color} via-black/20 to-transparent opacity-85 group-hover:opacity-95 transition-opacity`}></div>
 
-                <button
-                  onClick={() => playSoundDemo('bolero')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'bolero'
-                    ? 'bg-[#2f6a3f] text-white border-[#2f6a3f] shadow-md ring-2 ring-[#b2f2bb]'
-                    : 'bg-[#fdf7ff] text-[#201047] border-[#b2f2bb] hover:bg-[#b2f2bb]/40'
-                    }`}
-                >
-                  <CuteMicIcon className="w-4.5 h-4.5" />
-                  <span>Bolero Echo</span>
-                </button>
+                      {/* Click effect ripple highlight */}
+                      <div className="absolute inset-0 bg-white/0 group-active:bg-white/25 transition-colors pointer-events-none"></div>
 
-                <button
-                  onClick={() => playSoundDemo('disco')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'disco'
-                    ? 'bg-purple-700 text-white border-purple-700 shadow-md ring-2 ring-purple-200'
-                    : 'bg-[#fdf7ff] text-[#201047] border-purple-200 hover:bg-purple-100/50'
-                    }`}
-                >
-                  <CuteSparkleDiscoIcon className="w-4.5 h-4.5" />
-                  <span>Disco Remix</span>
-                </button>
-
-                <button
-                  onClick={() => playSoundDemo('acoustic')}
-                  className={`px-4 py-3.5 rounded-2xl font-headline text-xs sm:text-sm flex items-center justify-center gap-2 border-2 transition-all active:scale-95 ${playingAudio === 'acoustic'
-                    ? 'bg-[#235a7c] text-white border-[#235a7c] shadow-md ring-2 ring-[#c9e6ff]'
-                    : 'bg-[#fdf7ff] text-[#201047] border-[#c9e6ff] hover:bg-[#c9e6ff]/40'
-                    }`}
-                >
-                  <CuteCoffeeCupIcon className="w-4.5 h-4.5" />
-                  <span>Acoustic Chill</span>
-                </button>
+                      {/* Bottom Info: Chỉ hiển thị tên danh lam thắng cảnh */}
+                      <div className="absolute bottom-2.5 left-3 right-3 text-left">
+                        <span className="font-headline text-sm sm:text-base text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] block truncate group-hover:translate-x-1 transition-transform">
+                          {item.location}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
             </div>
@@ -1152,7 +1135,7 @@ export default function LandingPageView({
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
             <div>
               <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
-                Cảm Nhận Từ Hội Đam Mê Ca Hát
+                Cảm nhận của các nẫu
               </h2>
               <p className="text-[#514347] font-semibold text-sm sm:text-base mt-1">
                 Mọi đánh giá đều thể hiện sự minh bạch, rõ ràng trong quá trình trải nghiệm.
@@ -1207,7 +1190,7 @@ export default function LandingPageView({
                       reviewFilter === '4star' ? '4 Sao' :
                         reviewFilter === '3star' ? '3 Sao' :
                           reviewFilter === '2star' ? '2 Sao' :
-                            reviewFilter === '1star' ? '1 Sao' : 'Chọn Sao'}
+                            reviewFilter === '1star' ? '1 Sao' : 'Sao'}
                   </span>
                   <svg
                     className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform duration-200 shrink-0 ${showStarDropdown ? 'rotate-180' : ''}`}
@@ -1463,8 +1446,8 @@ export default function LandingPageView({
               <CuteSpeakerIcon className="w-4 h-4" />
               <span>Bảng Giá Thuê Loa Siêu Xinh</span>
             </div>
-            <h2 className="font-headline text-3xl sm:text-4xl text-[#864d61]">
-              Chọn Dàn Loa Hợp Gu Cho Buổi Tiệc
+            <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
+              Những dàn loa cho các nẫu
             </h2>
             <p className="text-[#514347] font-semibold text-sm sm:text-base mt-2">
               Tất cả các gói đều bao gồm 2 micro không dây UHF cao cấp, pin dự phòng và hỗ trợ test âm thanh tận nơi!
@@ -1700,9 +1683,11 @@ export default function LandingPageView({
       {/* ═══════════════ FOOTER ═══════════════ */}
       <footer className="bg-[#f8f1ff] border-t border-[#864d61]/10 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-[#ffd9e3] rounded-2xl flex items-center justify-center shadow-[inset_0_3px_6px_rgba(255,255,255,0.9),0_6px_16px_rgba(134,77,97,0.2)] border border-[#fab3ca] hover:scale-105 transition-transform animate-squish overflow-hidden">
-            <img src="/anh2.png" alt="Locahome" className="w-full h-full object-cover rounded-2xl" />
-          </div>
+          <img
+            src="/anh3.png"
+            alt="Locahome"
+            className="w-14 h-14 object-contain hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_12px_rgba(134,77,97,0.18)]"
+          />
 
           <p className="font-headline text-lg text-[#864d61]">Locahome</p>
           <p className="text-sm font-semibold text-slate-500 max-w-md">
@@ -1794,13 +1779,12 @@ export default function LandingPageView({
                         setBookingFormData({ ...bookingFormData, name: e.target.value });
                         if (!bookingFormTouched.name) setBookingFormTouched(prev => ({ ...prev, name: true }));
                       }}
-                      className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${
-                        bookingFormTouched.name && !bookingFormData.name.trim()
-                          ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
-                          : bookingFormTouched.name && bookingFormData.name.trim()
-                            ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-                            : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
-                      }`}
+                      className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${bookingFormTouched.name && !bookingFormData.name.trim()
+                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                        : bookingFormTouched.name && bookingFormData.name.trim()
+                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
+                        }`}
                     />
                     {bookingFormTouched.name && !bookingFormData.name.trim() && (
                       <p className="text-[13px] font-bold text-rose-600 mt-1">Vui lòng nhập họ tên</p>
@@ -1825,13 +1809,12 @@ export default function LandingPageView({
                         setBookingFormData({ ...bookingFormData, phone: e.target.value });
                         if (!bookingFormTouched.phone) setBookingFormTouched(prev => ({ ...prev, phone: true }));
                       }}
-                      className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${
-                        bookingFormTouched.phone && !/^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, ''))
-                          ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
-                          : bookingFormTouched.phone && /^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, ''))
-                            ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-                            : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
-                      }`}
+                      className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${bookingFormTouched.phone && !/^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, ''))
+                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                        : bookingFormTouched.phone && /^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, ''))
+                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
+                        }`}
                     />
                     {bookingFormTouched.phone && !/^(0[3|5|7|8|9])[0-9]{8}$/.test(bookingFormData.phone.replace(/[\s.-]/g, '')) && (
                       <p className="text-[13px] font-bold text-rose-600 mt-1">SĐT không hợp lệ (VD: 0368115592)</p>
@@ -1857,13 +1840,12 @@ export default function LandingPageView({
                       setBookingFormData({ ...bookingFormData, address: e.target.value });
                       if (!bookingFormTouched.address) setBookingFormTouched(prev => ({ ...prev, address: true }));
                     }}
-                    className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${
-                      bookingFormTouched.address && !bookingFormData.address.trim()
-                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
-                        : bookingFormTouched.address && bookingFormData.address.trim()
-                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
-                    }`}
+                    className={`w-full px-4 py-2.5 rounded-2xl font-bold text-sm text-slate-900 transition-all focus:outline-none ${bookingFormTouched.address && !bookingFormData.address.trim()
+                      ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                      : bookingFormTouched.address && bookingFormData.address.trim()
+                        ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                        : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61]'
+                      }`}
                   />
                   {bookingFormTouched.address && !bookingFormData.address.trim() && (
                     <p className="text-[13px] font-bold text-rose-600 mt-1">Vui lòng nhập địa chỉ giao loa</p>
@@ -1944,39 +1926,39 @@ export default function LandingPageView({
       )}
 
       {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ (HIỆU ỨNG MỞ & ĐÓNG MƯỢT MÀ) ═══════════════ */}
-      <div 
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ease-out ${
-          showAddReviewModal 
-            ? 'opacity-100 pointer-events-auto visible bg-black/60 backdrop-blur-md' 
-            : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
-        }`}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ease-out ${showAddReviewModal
+          ? 'opacity-100 pointer-events-auto visible bg-black/60 backdrop-blur-md'
+          : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
+          }`}
         onClick={(e) => {
           if (e.target === e.currentTarget) setShowAddReviewModal(false);
         }}
       >
-        <div 
-          className={`bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-300 ease-out transform ${
-            showAddReviewModal 
-              ? 'scale-100 translate-y-0 opacity-100' 
-              : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
-          }`}
+        <div
+          className={`bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-300 ease-out transform ${showAddReviewModal
+            ? 'scale-100 translate-y-0 opacity-100'
+            : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
+            }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Color Accent Line */}
           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#ffd9e3] via-[#c9e6ff] to-[#b2f2bb]"></div>
 
           {reviewSuccess ? (
-            <div className="py-8 text-center flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
-              <div className="w-18 h-18 rounded-3xl bg-[#b2f2bb] text-[#2f6a3f] flex items-center justify-center mb-4 border-2 border-[#96d5a0] shadow-md animate-bounce">
-                <CuteCheckIcon className="w-10 h-10" />
+            <div className="py-8 text-center flex flex-col items-center justify-center animate-in zoom-in-75 fade-in duration-400 ease-out">
+              <div className="w-20 h-20 rounded-3xl bg-[#b2f2bb] text-[#2f6a3f] flex items-center justify-center mb-4 border-3 border-[#96d5a0] shadow-[0_12px_28px_rgba(47,106,63,0.2)] animate-bounce">
+                <CuteCheckIcon className="w-11 h-11" />
               </div>
-              <h3 className="font-headline text-2xl text-[#864d61] mb-1.5">Gửi Đánh Giá Thành Công!</h3>
-              <p className="text-sm font-semibold text-[#514347] max-w-xs">
-                Cảm ơn bạn <span className="font-bold text-[#201047]">"{newReviewForm.name}"</span> đã chia sẻ trải nghiệm chân thực cùng Locahome.
+              <h3 className="font-headline text-2xl text-[#864d61] mb-2 animate-in slide-in-from-bottom-2 duration-300">
+                Gửi Đánh Giá Thành Công!
+              </h3>
+              <p className="text-sm font-semibold text-[#514347] max-w-xs leading-relaxed">
+                Cảm ơn bạn <span className="font-bold text-[#201047]">"{submittedReviewInfo.name}"</span> đã chia sẻ trải nghiệm chân thực cùng Locahome.
               </p>
-              <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full text-xs font-bold text-amber-700 border border-amber-200">
+              <div className="mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 bg-amber-50 rounded-full text-xs font-bold text-amber-700 border border-amber-200 shadow-xs animate-in zoom-in-90 duration-300 delay-100">
                 <CuteStarIcon filled={true} className="w-4 h-4 text-amber-400" />
-                <span>Đánh giá {newReviewForm.rating} sao đã được ghi nhận</span>
+                <span>Đánh giá {submittedReviewInfo.rating} sao đã được ghi nhận</span>
               </div>
             </div>
           ) : (
@@ -2010,13 +1992,12 @@ export default function LandingPageView({
                       setNewReviewForm({ ...newReviewForm, name: e.target.value });
                       if (!reviewFormTouched.name) setReviewFormTouched(prev => ({ ...prev, name: true }));
                     }}
-                    className={`w-full px-4 py-3 rounded-2xl font-bold text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${
-                      reviewFormTouched.name && !newReviewForm.name.trim()
-                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
-                        : reviewFormTouched.name && newReviewForm.name.trim()
-                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-2xl font-bold text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${reviewFormTouched.name && !newReviewForm.name.trim()
+                      ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                      : reviewFormTouched.name && newReviewForm.name.trim()
+                        ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                        : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white'
+                      }`}
                   />
                   {reviewFormTouched.name && !newReviewForm.name.trim() && (
                     <p className="text-[13px] font-bold text-rose-600 mt-1 animate-in fade-in slide-in-from-top-1">
@@ -2044,9 +2025,8 @@ export default function LandingPageView({
                         >
                           <CuteStarIcon
                             filled={star <= newReviewForm.rating}
-                            className={`w-7 h-7 transition-colors ${
-                              star <= newReviewForm.rating ? 'text-amber-400 drop-shadow-xs' : 'text-slate-200 hover:text-amber-200'
-                            }`}
+                            className={`w-7 h-7 transition-colors ${star <= newReviewForm.rating ? 'text-amber-400 drop-shadow-xs' : 'text-slate-200 hover:text-amber-200'
+                              }`}
                           />
                         </button>
                       ))}
@@ -2080,13 +2060,12 @@ export default function LandingPageView({
                       setNewReviewForm({ ...newReviewForm, comment: e.target.value });
                       if (!reviewFormTouched.comment) setReviewFormTouched(prev => ({ ...prev, comment: true }));
                     }}
-                    className={`w-full px-4 py-3 rounded-2xl font-medium text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${
-                      reviewFormTouched.comment && (!newReviewForm.comment.trim() || newReviewForm.comment.trim().length < 5)
-                        ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
-                        : reviewFormTouched.comment && newReviewForm.comment.trim().length >= 5
-                          ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-                          : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-2xl font-medium text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${reviewFormTouched.comment && (!newReviewForm.comment.trim() || newReviewForm.comment.trim().length < 5)
+                      ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
+                      : reviewFormTouched.comment && newReviewForm.comment.trim().length >= 5
+                        ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                        : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white'
+                      }`}
                   ></textarea>
                   {reviewFormTouched.comment && (!newReviewForm.comment.trim() || newReviewForm.comment.trim().length < 5) && (
                     <p className="text-[13px] font-bold text-rose-600 mt-1 animate-in fade-in slide-in-from-top-1">
@@ -2115,6 +2094,52 @@ export default function LandingPageView({
                 </div>
               </form>
             </>
+          )}
+        </div>
+      </div>
+
+      {/* ═══════════════ MODAL: LIGHTBOX XEM FULL ẢNH VI VU PHÚ YÊN (HIỆU ỨNG MỞ & ĐÓNG) ═══════════════ */}
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 transition-all duration-300 ease-out ${zoomImageModal
+          ? 'opacity-100 pointer-events-auto visible bg-black/85 backdrop-blur-md'
+          : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
+          }`}
+        onClick={() => setZoomImageModal(null)}
+      >
+        <div
+          className={`relative max-w-3xl w-full max-h-[92vh] flex flex-col items-center justify-center transition-all duration-300 ease-out transform ${zoomImageModal
+            ? 'scale-100 translate-y-0 opacity-100'
+            : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
+            }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setZoomImageModal(null)}
+            className="absolute -top-12 right-0 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center font-bold text-lg transition-all backdrop-blur-md cursor-pointer z-10 hover:scale-110 active:scale-90"
+            title="Đóng (Esc)"
+          >
+            ✕
+          </button>
+
+          {/* Main Full Uncropped Image */}
+          {zoomImageModal && (
+            <div className="w-full flex flex-col items-center justify-center animate-photo-pop">
+              <div className="relative rounded-3xl overflow-hidden border-2 border-white/20 shadow-[0_25px_60px_rgba(0,0,0,0.6)] bg-black/40 flex items-center justify-center max-h-[72vh] w-full">
+                <img
+                  src={zoomImageModal.img}
+                  alt={zoomImageModal.location}
+                  className="max-h-[72vh] w-auto max-w-full object-contain rounded-3xl"
+                />
+              </div>
+
+              {/* Info bar below photo: Chỉ để tên danh lam thắng cảnh */}
+              <div className="mt-3 w-full bg-white/15 backdrop-blur-xl px-5 py-3 rounded-2xl border border-white/20 text-white shadow-lg text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <h4 className="font-headline text-base sm:text-lg text-white drop-shadow-sm">
+                  {zoomImageModal.location}
+                </h4>
+              </div>
+            </div>
           )}
         </div>
       </div>
