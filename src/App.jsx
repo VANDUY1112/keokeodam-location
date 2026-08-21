@@ -10,87 +10,7 @@ import MobileCurvedNavBar from './components/MobileCurvedNavBar';
 import VietQRModal from './components/VietQRModal';
 import LandingPageView from './components/LandingPageView';
 import { formatVND, parseVNDNumber } from './utils/format';
-import { INITIAL_SPEAKERS } from './data/speakersData';
-
-const INITIAL_EXPENSES = [
-  {
-    id: 1,
-    title: 'KEO KEO DAM nhan 500.000',
-    subtitle: 'Thành công lúc 15:30:25',
-    amount: '500.000 ₫',
-    status: 'Thành công',
-    statusColor: 'text-secondary',
-    icon: 'qr_code_2',
-    hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
-  },
-  {
-    id: 2,
-    title: 'KEO KEO DAM nhan 620.000',
-    subtitle: 'Thành công lúc 14:15:10',
-    amount: '620.000 ₫',
-    status: 'Thành công',
-    statusColor: 'text-secondary',
-    icon: 'qr_code_2',
-    hoverColor: 'group-hover:bg-tertiary/10 group-hover:text-tertiary',
-  },
-  {
-    id: 3,
-    title: 'KEO KEO DAM nhan 850.000',
-    subtitle: 'Thành công lúc 18:45:02',
-    amount: '850.000 ₫',
-    status: 'Thành công',
-    statusColor: 'text-secondary',
-    icon: 'qr_code_2',
-    hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
-  },
-];
-
-const INITIAL_TRIPS = [
-  {
-    id: 1,
-    title: 'Giao Loa: Anh Hoàng - 0903.111.222',
-    subtitle: 'Hôm nay • 5.2 km • Loa Bass 40 (800W)',
-    distanceKm: 5.2,
-    duration: '00:18:30',
-    cost: 428000,
-    speakerName: 'Loa Kéo Bass 40 (800W)',
-    customerName: 'Anh Hoàng',
-    status: 'Đã bàn giao',
-    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-    icon: 'speaker',
-    pathCoordinates: [
-      { lat: 10.7769, lng: 106.7009 },
-      { lat: 10.7801, lng: 106.7052 },
-      { lat: 10.7845, lng: 106.7112 },
-    ],
-  },
-  {
-    id: 2,
-    title: 'Giao Loa: Chị Mai - 0918.333.444',
-    subtitle: 'Hôm qua • 8.4 km • Loa Đôi Bass 50',
-    distanceKm: 8.4,
-    duration: '00:26:45',
-    cost: 626000,
-    speakerName: 'Loa Kéo Đôi Bass 50 Khủng (1500W)',
-    customerName: 'Chị Mai',
-    status: 'Đã bàn giao',
-    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-    icon: 'volume_up',
-  },
-  {
-    id: 3,
-    title: 'Giao Loa: Anh Nam - 0912.345.678',
-    subtitle: '24 Th10 • 3.8 km • Loa Bass 40',
-    distanceKm: 3.8,
-    duration: '00:14:10',
-    cost: 407000,
-    speakerName: 'Loa Kéo Bass 40',
-    customerName: 'Anh Nam',
-    status: 'Đã bàn giao',
-    statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-    icon: 'speaker',
-  },
-];
+import { api } from './services/api.js';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -101,7 +21,7 @@ export default function App() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
-  // Persistent State with LocalStorage & Automatic VNĐ format sanitization
+  // Persistent State with backend API + LocalStorage fallback
   const [expenses, setExpenses] = useState(() => {
     try {
       const saved = localStorage.getItem('expensely_expenses');
@@ -112,25 +32,102 @@ export default function App() {
           amount: formatVND(item.amount),
         }));
       }
-      return INITIAL_EXPENSES;
+      return [];
     } catch {
-      return INITIAL_EXPENSES;
+      return [];
     }
   });
 
   const [trips, setTrips] = useState(() => {
     try {
       const saved = localStorage.getItem('expensely_trips');
-      return saved ? JSON.parse(saved) : INITIAL_TRIPS;
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return INITIAL_TRIPS;
+      return [];
     }
   });
 
-  const [speakers, setSpeakers] = useState(INITIAL_SPEAKERS);
+  const [speakers, setSpeakers] = useState([]);
   const [toast, setToast] = useState(null);
   const [showVietQRModal, setShowVietQRModal] = useState(false);
   const [vietQRData, setVietQRData] = useState({ amount: 280000, note: 'LOCAHOME THUE LOA' });
+
+  // Initial Real Data Loading from Backend SQLite API
+  useEffect(() => {
+    const loadRealData = async () => {
+      try {
+        const [expRes, rentRes, spkRes] = await Promise.allSettled([
+          api.getExpenses(),
+          api.getRentals(),
+          api.getSpeakers()
+        ]);
+
+        if (expRes.status === 'fulfilled' && expRes.value?.data?.expenses) {
+          const apiExp = expRes.value.data.expenses.map(e => ({
+            id: e.id,
+            title: e.title,
+            subtitle: e.subtitle || 'Hôm nay',
+            amount: formatVND(e.amount),
+            status: e.status || 'Đã duyệt',
+            statusColor: e.status === 'Chờ duyệt' ? 'text-surface-tint' : 'text-secondary',
+            icon: e.icon || 'receipt',
+            hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
+            category: e.category
+          }));
+          if (apiExp.length > 0) {
+            setExpenses(apiExp);
+          }
+        }
+
+        if (rentRes.status === 'fulfilled' && Array.isArray(rentRes.value?.data)) {
+          const calcDist = (lat, lng, hours = 4) => {
+            if (!lat || !lng) return parseFloat((hours * 1.8).toFixed(1));
+            const wLat = 10.8505, wLng = 106.7718;
+            const dLat = (lat - wLat) * 111;
+            const dLng = (lng - wLng) * 111 * Math.cos((wLat * Math.PI) / 180);
+            const dist = Math.sqrt(dLat * dLat + dLng * dLng) * 1.35;
+            return dist > 0.5 ? parseFloat(dist.toFixed(1)) : parseFloat((hours * 1.8).toFixed(1));
+          };
+
+          const apiTrips = rentRes.value.data.map(r => {
+            const dist = calcDist(r.destLat, r.destLng, r.durationHours);
+            return {
+              id: r.id,
+              title: `Giao Loa: ${r.customerName} - ${r.customerPhone}`,
+              subtitle: `${r.speakerName || 'Loa Kéo'} • ${dist} km • ${r.durationHours}h • ${formatVND(r.totalAmount)}`,
+              distanceKm: dist,
+              duration: `${r.durationHours}h`,
+              cost: r.totalAmount,
+              speakerName: r.speakerName || 'Loa Kéo',
+              customerName: r.customerName,
+              status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Đã bàn giao' : 'Đã huỷ',
+              statusBadge: r.status === 'active'
+                ? 'bg-amber-50 text-amber-700 border-amber-200/60'
+                : r.status === 'completed'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                  : 'bg-red-50 text-red-700 border-red-200/60',
+              icon: 'speaker',
+              pathCoordinates: [
+                { lat: 10.8505, lng: 106.7718 },
+                { lat: r.destLat || 10.8522, lng: r.destLng || 106.7725 }
+              ]
+            };
+          });
+          if (apiTrips.length > 0) {
+            setTrips(apiTrips);
+          }
+        }
+
+        if (spkRes.status === 'fulfilled' && Array.isArray(spkRes.value?.data) && spkRes.value.data.length > 0) {
+          setSpeakers(spkRes.value.data);
+        }
+      } catch (err) {
+        console.warn('Real data loading notice:', err.message);
+      }
+    };
+
+    loadRealData();
+  }, []);
 
   const openVietQR = (amount = 280000, note = 'LOCAHOME THUE LOA') => {
     setVietQRData({ amount, note });
@@ -181,12 +178,12 @@ export default function App() {
 
   const [newExpense, setNewExpense] = useState({
     title: '',
-    project: 'Dự án Phoenix',
+    project: 'Dịch vụ Kẹo Kéo Dặm',
     amount: '',
     category: 'Ăn uống',
   });
 
-  const handleAddExpense = (e) => {
+  const handleAddExpense = async (e) => {
     e.preventDefault();
     if (!newExpense.title || !newExpense.amount) return;
 
@@ -207,18 +204,33 @@ export default function App() {
     const formattedAmount = formatVND(rawNum);
 
     const item = {
-      id: Date.now(),
+      id: `EXP-${Date.now().toString().slice(-6)}`,
       title: newExpense.title,
       subtitle: `Hôm nay • ${newExpense.project}`,
       amount: formattedAmount,
-      status: 'Chờ duyệt',
-      statusColor: 'text-surface-tint',
+      status: 'Đã duyệt',
+      statusColor: 'text-secondary',
       icon,
       hoverColor,
+      category: newExpense.category
     };
 
+    // Save to real SQLite backend API
+    try {
+      await api.createExpense({
+        title: newExpense.title,
+        amount: rawNum,
+        category: newExpense.category,
+        subtitle: `Hôm nay • ${newExpense.project}`,
+        icon,
+        status: 'Đã duyệt'
+      });
+    } catch (err) {
+      console.warn('Could not save to backend API:', err.message);
+    }
+
     setExpenses([item, ...expenses]);
-    setNewExpense({ title: '', project: 'Dự án Phoenix', amount: '', category: 'Ăn uống' });
+    setNewExpense({ title: '', project: 'Dịch vụ Kẹo Kéo Dặm', amount: '', category: 'Ăn uống' });
     setShowLogExpenseModal(false);
   };
 
@@ -226,7 +238,12 @@ export default function App() {
     setTrips((prev) => [newTrip, ...prev]);
   };
 
-  const handleDeleteTrip = (tripId) => {
+  const handleDeleteTrip = async (tripId) => {
+    try {
+      await api.updateRentalStatus(tripId, 'cancelled');
+    } catch (e) {
+      console.warn('Cancel rental in backend:', e.message);
+    }
     setTrips((prev) => prev.filter((t) => t.id !== tripId));
   };
 
@@ -243,7 +260,12 @@ export default function App() {
   });
 
   const [userName, setUserName] = useState(() => {
-    return localStorage.getItem('expensely_user_name') || 'Alex Johnson';
+    const saved = localStorage.getItem('expensely_user_name');
+    if (!saved || saved === 'Alex Johnson') {
+      localStorage.setItem('expensely_user_name', 'Trần Anh Tuấn');
+      return 'Trần Anh Tuấn';
+    }
+    return saved;
   });
 
   const AVATAR_PRESETS = [
@@ -684,7 +706,7 @@ export default function App() {
                 </div>
                 <div>
                   <h3 className="text-xl font-extrabold text-on-surface">Ghi Nhận Chi Phí Mới</h3>
-                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Dự án Phoenix</p>
+                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Dịch vụ Kẹo Kéo Dặm</p>
                 </div>
               </div>
               <button
@@ -755,7 +777,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ═══════════════ MODAL: XEM LỊCH TRÌNH ═══════════════ */}
+      {/* ═══════════════ MODAL: XEM LỊCH TRÌNH GIAO NHẬN LOA ═══════════════ */}
       {showItineraryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-surface-container-lowest rounded-3xl max-w-lg w-full p-6 lg:p-8 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
@@ -765,8 +787,8 @@ export default function App() {
                   <span className="material-symbols-outlined text-[26px]">map</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-extrabold text-on-surface">Lịch Trình Dự Án Phoenix</h3>
-                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Frankfurt • Kế hoạch 3 ngày</p>
+                  <h3 className="text-xl font-extrabold text-on-surface">Lộ Trình Giao Nhận Loa</h3>
+                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Kế hoạch phục vụ hôm nay • Kẹo Kéo Dặm</p>
                 </div>
               </div>
               <button
@@ -783,8 +805,8 @@ export default function App() {
                   01
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-base font-bold text-on-surface">Ngày 1: Họp Khởi Động Với Khách Hàng</h4>
-                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Làm việc với ban quản trị Acme Corp, kiểm toán hệ thống & lắp đặt tủ rack.</p>
+                  <h4 className="text-base font-bold text-on-surface">Ca Sáng: Bàn Giao Loa Khai Trương & Tiệc Trưa</h4>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Giao dàn Loa Bass 40 Nanomax kèm 2 micro UHF sạc đầy pin và hướng dẫn kết nối Bluetooth.</p>
                   <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-secondary/10 text-secondary text-xs font-bold">Đã hoàn thành</span>
                 </div>
               </div>
@@ -794,20 +816,20 @@ export default function App() {
                   02
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-base font-bold text-on-surface">Ngày 2: Triển Khai Phần Cứng Giai Đoạn 2</h4>
-                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Cấu hình máy chủ, thiết lập đường truyền telemetry tốc độ cao & kiểm thử.</p>
-                  <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold">Đang thực hiện (Dự kiến 45p)</span>
+                  <h4 className="text-base font-bold text-on-surface">Ca Chiều Tối: Phục Vụ Tiệc Sinh Nhật & Karaoke</h4>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Điều phối loa Đôi Bass 50 công suất lớn, căn chỉnh Echo & Reverb chuyên nghiệp.</p>
+                  <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold">Đang phục vụ</span>
                 </div>
               </div>
 
-              <div className="flex gap-4 items-start opacity-70">
+              <div className="flex gap-4 items-start opacity-80">
                 <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-extrabold text-sm shrink-0 mt-0.5">
                   03
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-base font-bold text-on-surface">Ngày 3: Đào Tạo Nhân Sự & Bàn Giao</h4>
-                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Bàn giao tài liệu hướng dẫn, buổi huấn luyện nhân viên và khởi hành về.</p>
-                  <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold">Sắp tới</span>
+                  <h4 className="text-base font-bold text-on-surface">Ca Đêm: Thu Hồi Thiết Bị & Sạc Pin Bảo Dưỡng</h4>
+                  <p className="text-xs lg:text-sm text-slate-600 mt-1">Nhận lại loa, kiểm tra micro, vệ sinh màng loa và cắm sạc bình ắc quy tại kho tổng.</p>
+                  <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold">Dự kiến 22:30</span>
                 </div>
               </div>
             </div>
@@ -850,9 +872,9 @@ export default function App() {
         >
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-base text-slate-900">Thông Báo</span>
+              <span className="font-bold text-base text-slate-900">Thông Báo Hệ Thống</span>
               <span className="text-[11px] font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                3 mới
+                {Math.max(1, trips.length)} đơn
               </span>
             </div>
             <button
@@ -864,7 +886,7 @@ export default function App() {
           </div>
 
           <div className="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar">
-            {/* Notification 1 */}
+            {/* Notification 1: Recent Rental */}
             <div
               onClick={() => {
                 setActiveTab('history');
@@ -877,16 +899,16 @@ export default function App() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đơn thuê mới hoàn tất</span>
-                  <span className="text-[10px] text-slate-400 font-medium shrink-0">5p trước</span>
+                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đơn thuê loa hoạt động</span>
+                  <span className="text-[10px] text-slate-400 font-medium shrink-0">Hôm nay</span>
                 </div>
                 <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                  Loa Bass 40 Nanomax đã bàn giao thành công cho khách Anh Hoàng (Tiệc Sinh Nhật).
+                  {trips.length > 0 ? trips[0].title : 'Hệ thống Kẹo Kéo Dặm sẵn sàng tiếp nhận đơn đặt mới.'}
                 </p>
               </div>
             </div>
 
-            {/* Notification 2 */}
+            {/* Notification 2: Speaker Fleet Status */}
             <div
               onClick={() => {
                 setActiveTab('tracking');
@@ -895,20 +917,20 @@ export default function App() {
               className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
             >
               <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="material-symbols-outlined text-[18px]">battery_alert</span>
+                <span className="material-symbols-outlined text-[18px]">speaker</span>
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Nhắc pin loa LKK-04</span>
-                  <span className="text-[10px] text-slate-400 font-medium shrink-0">25p trước</span>
+                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Kho thiết bị sẵn sàng</span>
+                  <span className="text-[10px] text-slate-400 font-medium shrink-0">Trực tiếp</span>
                 </div>
                 <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                  Pin loa Dalton 600W còn 55%, đã thuê hơn 4 tiếng tại Kha Vạn Cân.
+                  {speakers.length > 0 ? `Đang quản lý ${speakers.length} dàn loa kéo công suất lớn tại kho tổng.` : 'Đã kết nối cơ sở dữ liệu kho loa.'}
                 </p>
               </div>
             </div>
 
-            {/* Notification 3 */}
+            {/* Notification 3: Expenses Record */}
             <div
               onClick={() => {
                 setActiveTab('expenses');
@@ -921,11 +943,11 @@ export default function App() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đã duyệt chi phí xăng xe</span>
-                  <span className="text-[10px] text-slate-400 font-medium shrink-0">1h trước</span>
+                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Sổ thu chi & Hóa đơn</span>
+                  <span className="text-[10px] text-slate-400 font-medium shrink-0">Cập nhật</span>
                 </div>
                 <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                  Hóa đơn 120.000 ₫ trạm xăng Petrolimex đã được cập nhật vào sổ chi tiêu.
+                  {expenses.length > 0 ? `Đã ghi nhận ${expenses.length} khoản chi phí vận hành.` : 'Chưa có khoản chi phát sinh.'}
                 </p>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Download, 
   DollarSign, 
@@ -14,72 +14,8 @@ import {
   CheckCircle2,
   Printer
 } from 'lucide-react';
-import { RECENT_RENTAL_LOGS } from '../data/speakersData';
 import { formatVND } from '../utils/format';
-
-const REPORT_DATA = {
-  '7d': {
-    label: '7 Ngày Qua',
-    revenue: 11950000,
-    growth: '+18% so với tuần trước',
-    rentalsCount: 38,
-    avgHours: '3.8h / ca',
-    distanceKm: 215.4,
-    shippingIncome: 920000,
-    avgPerRental: 314500,
-    peakDay: 'Thứ 7 (2.850.000 ₫)',
-    chartData: [
-      { label: 'T2', name: 'Thứ 2', revenue: 850000, orders: 3, height: '30%' },
-      { label: 'T3', name: 'Thứ 3', revenue: 1150000, orders: 4, height: '40%' },
-      { label: 'T4', name: 'Thứ 4', revenue: 980000, orders: 3, height: '35%' },
-      { label: 'T5', name: 'Thứ 5', revenue: 1420000, orders: 5, height: '50%' },
-      { label: 'T6', name: 'Thứ 6', revenue: 2100000, orders: 7, height: '74%' },
-      { label: 'T7', name: 'Thứ 7', revenue: 2850000, orders: 9, height: '100%', peak: true },
-      { label: 'CN', name: 'Chủ Nhật', revenue: 2600000, orders: 7, height: '91%', peak: true },
-    ]
-  },
-  '30d': {
-    label: '30 Ngày Qua',
-    revenue: 48600000,
-    growth: '+12% so với tháng trước',
-    rentalsCount: 152,
-    avgHours: '4.1h / ca',
-    distanceKm: 842.0,
-    shippingIncome: 3680000,
-    avgPerRental: 319700,
-    peakDay: 'Tuần 4 (14.200.000 ₫)',
-    chartData: [
-      { label: 'Tuần 1', name: 'Tuần 1 (01 - 07)', revenue: 10400000, orders: 34, height: '73%' },
-      { label: 'Tuần 2', name: 'Tuần 2 (08 - 14)', revenue: 11800000, orders: 37, height: '83%' },
-      { label: 'Tuần 3', name: 'Tuần 3 (15 - 21)', revenue: 12200000, orders: 39, height: '86%' },
-      { label: 'Tuần 4', name: 'Tuần 4 (22 - 30)', revenue: 14200000, orders: 42, height: '100%', peak: true },
-    ]
-  },
-  'ytd': {
-    label: 'Từ Đầu Năm (YTD)',
-    revenue: 285400000,
-    growth: '+25% so với cùng kỳ',
-    rentalsCount: 890,
-    avgHours: '4.0h / ca',
-    distanceKm: 4920.5,
-    shippingIncome: 21500000,
-    avgPerRental: 320600,
-    peakDay: 'Tháng 12 (42.500.000 ₫)',
-    chartData: [
-      { label: 'Q1', name: 'Quý 1', revenue: 58000000, orders: 180, height: '62%' },
-      { label: 'Q2', name: 'Quý 2', revenue: 64500000, orders: 205, height: '69%' },
-      { label: 'Q3', name: 'Quý 3', revenue: 69000000, orders: 215, height: '74%' },
-      { label: 'Q4', name: 'Quý 4', revenue: 93900000, orders: 290, height: '100%', peak: true },
-    ]
-  }
-};
-
-const CATEGORY_SHARE = [
-  { name: 'Loa Bass 50 Đôi Khủng (1200W)', percent: 38, revenue: 22400000, count: 62 },
-  { name: 'Loa Bass 40 Nanomax (800W)', percent: 26, revenue: 16200000, count: 54 },
-  { name: 'Loa 4 Tấc Đôi Sân Khấu (1000W)', percent: 22, revenue: 13500000, count: 41 },
-  { name: 'Loa Xách Tay & Bass 30', percent: 14, revenue: 8900000, count: 35 },
-];
+import { api } from '../services/api.js';
 
 // ─── Smooth Animated Number Component ───
 function AnimatedCounter({ value, formatter = (v) => Math.round(v).toLocaleString('vi-VN'), duration = 450 }) {
@@ -128,7 +64,70 @@ export default function ReportsView({
   const [activeChartIdx, setActiveChartIdx] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const currentData = REPORT_DATA[timeRange] || REPORT_DATA['7d'];
+  // Backend API report state & rentals
+  const [apiReportData, setApiReportData] = useState(null);
+  const [realRentals, setRealRentals] = useState([]);
+  const [isLoadingApi, setIsLoadingApi] = useState(false);
+
+  // Fetch reports and rentals from backend API
+  useEffect(() => {
+    const fetchReportAndRentals = async () => {
+      setIsLoadingApi(true);
+      try {
+        const [repRes, rentRes] = await Promise.allSettled([
+          api.getReportsSummary(timeRange),
+          api.getRentals()
+        ]);
+
+        if (repRes.status === 'fulfilled' && repRes.value?.data) {
+          setApiReportData(repRes.value.data);
+        }
+        if (rentRes.status === 'fulfilled' && Array.isArray(rentRes.value?.data)) {
+          setRealRentals(rentRes.value.data.map(r => ({
+            id: r.id,
+            speakerId: r.speakerId || 'LKK-01',
+            speakerName: r.speakerName || 'Loa Kéo',
+            customerName: r.customerName || 'Khách hàng',
+            address: r.address || '',
+            date: r.startTime ? new Date(r.startTime).toLocaleDateString('vi-VN') : 'Hôm nay',
+            durationHours: r.durationHours || 4,
+            revenue: r.totalAmount || 0,
+            status: r.status === 'active' ? 'Đang thuê' : 'Hoàn thành'
+          })));
+        }
+      } catch (err) {
+        console.warn('Reports API fetch error:', err.message);
+      } finally {
+        setIsLoadingApi(false);
+      }
+    };
+    fetchReportAndRentals();
+  }, [timeRange]);
+
+  const currentData = {
+    label: timeRange === '7d' ? '7 Ngày Qua' : timeRange === '30d' ? '30 Ngày Qua' : 'Năm Nay (YTD)',
+    revenue: apiReportData?.summary?.totalRevenue || 0,
+    growth: '+15% so với kỳ trước',
+    rentalsCount: apiReportData?.summary?.totalRentals || realRentals.length,
+    avgHours: apiReportData?.summary?.avgDurationHours ? `${apiReportData.summary.avgDurationHours}h / ca` : '4.0h / ca',
+    distanceKm: apiReportData?.summary?.distanceKm || 0,
+    shippingIncome: apiReportData?.summary?.shippingIncome || 0,
+    avgPerRental: apiReportData?.summary?.avgPerRental || 0,
+    peakDay: 'Cuối tuần',
+    chartData: (apiReportData?.chartData && apiReportData.chartData.length > 0)
+      ? apiReportData.chartData
+      : [
+          { label: 'T2', name: 'Thứ 2', revenue: 0, orders: 0, height: '10%' },
+          { label: 'T3', name: 'Thứ 3', revenue: 0, orders: 0, height: '10%' },
+          { label: 'T4', name: 'Thứ 4', revenue: 0, orders: 0, height: '10%' },
+          { label: 'T5', name: 'Thứ 5', revenue: 0, orders: 0, height: '10%' },
+          { label: 'T6', name: 'Thứ 6', revenue: 0, orders: 0, height: '10%' },
+          { label: 'T7', name: 'Thứ 7', revenue: 0, orders: 0, height: '10%' },
+          { label: 'CN', name: 'Chủ Nhật', revenue: 0, orders: 0, height: '10%' },
+        ]
+  };
+
+  const currentCategoryShare = apiReportData?.categoryShare || [];
 
   const handleExport = (format) => {
     if (setToast) {
@@ -140,12 +139,12 @@ export default function ReportsView({
     }
   };
 
-  const filteredLogs = RECENT_RENTAL_LOGS.filter(
+  const filteredLogs = realRentals.filter(
     (log) =>
-      log.speakerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.speakerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.address.toLowerCase().includes(searchTerm.toLowerCase())
+      (log.speakerId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (log.speakerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (log.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (log.address || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -453,33 +452,39 @@ export default function ReportsView({
 
             {/* Category Progress Bars */}
             <div className="space-y-4">
-              {CATEGORY_SHARE.map((cat, idx) => (
-                <div key={idx} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs sm:text-sm">
-                    <span className="font-bold text-slate-800 truncate pr-2">{cat.name}</span>
-                    <span className="font-black text-slate-900 shrink-0">{cat.percent}%</span>
-                  </div>
-                  {/* Progress track */}
-                  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        idx === 0
-                          ? 'bg-slate-900'
-                          : idx === 1
-                          ? 'bg-slate-700'
-                          : idx === 2
-                          ? 'bg-slate-500'
-                          : 'bg-slate-400'
-                      }`}
-                      style={{ width: `${cat.percent}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-500">
-                    <span>{cat.count} ca thuê</span>
-                    <span className="font-medium">{formatVND(cat.revenue)}</span>
-                  </div>
+              {currentCategoryShare.length === 0 ? (
+                <div className="py-6 text-center text-slate-400 text-xs font-semibold">
+                  Chưa có dữ liệu cơ cấu thiết bị
                 </div>
-              ))}
+              ) : (
+                currentCategoryShare.map((cat, idx) => (
+                  <div key={idx} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
+                      <span className="font-bold text-slate-800 truncate pr-2">{cat.name}</span>
+                      <span className="font-black text-slate-900 shrink-0">{cat.percent}%</span>
+                    </div>
+                    {/* Progress track */}
+                    <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          idx === 0
+                            ? 'bg-slate-900'
+                            : idx === 1
+                            ? 'bg-slate-700'
+                            : idx === 2
+                            ? 'bg-slate-500'
+                            : 'bg-slate-400'
+                        }`}
+                        style={{ width: `${cat.percent}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>{cat.count} ca thuê</span>
+                      <span className="font-medium">{formatVND(cat.revenue)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

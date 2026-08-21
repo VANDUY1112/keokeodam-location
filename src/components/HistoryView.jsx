@@ -1,13 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Milestone } from 'lucide-react';
 import LiveRouteMap from './LiveRouteMap';
 import { formatVND } from '../utils/format';
+import { api } from '../services/api.js';
 
 export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTracking, onOpenVietQR }) {
   const [selectedTripForMap, setSelectedTripForMap] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredTrips = trips.filter(
+  // Backend API rentals state
+  const [apiRentals, setApiRentals] = useState([]);
+  const [isLoadingApi, setIsLoadingApi] = useState(true);
+
+  // Fetch rental history from backend API
+  useEffect(() => {
+    const fetchRentals = async () => {
+      setIsLoadingApi(true);
+      try {
+        const res = await api.getRentals();
+        if (res?.data && Array.isArray(res.data)) {
+          const calcDist = (lat, lng, hours = 4) => {
+            if (!lat || !lng) return parseFloat((hours * 1.8).toFixed(1));
+            const wLat = 10.8505, wLng = 106.7718;
+            const dLat = (lat - wLat) * 111;
+            const dLng = (lng - wLng) * 111 * Math.cos((wLat * Math.PI) / 180);
+            const dist = Math.sqrt(dLat * dLat + dLng * dLng) * 1.35;
+            return dist > 0.5 ? parseFloat(dist.toFixed(1)) : parseFloat((hours * 1.8).toFixed(1));
+          };
+
+          setApiRentals(res.data.map(r => {
+            const dist = calcDist(r.destLat, r.destLng, r.durationHours);
+            return {
+              id: r.id,
+              title: `Giao Loa: ${r.customerName} - ${r.customerPhone}`,
+              subtitle: `${r.speakerName || 'Loa Kéo'} • ${dist} km • ${r.durationHours}h • ${formatVND(r.totalAmount)}`,
+              distanceKm: dist,
+              duration: `${r.durationHours}h`,
+              cost: r.totalAmount,
+              speakerName: r.speakerName || 'Loa Kéo',
+              customerName: r.customerName,
+              status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Đã bàn giao' : 'Đã huỷ',
+              statusBadge: r.status === 'active'
+                ? 'bg-amber-50 text-amber-700 border-amber-200/60'
+                : r.status === 'completed'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                  : 'bg-red-50 text-red-700 border-red-200/60',
+              icon: 'speaker',
+              address: r.address,
+              note: r.note,
+              createdAt: r.createdAt,
+              pathCoordinates: [
+                { lat: 10.8505, lng: 106.7718 },
+                { lat: r.destLat || 10.8522, lng: r.destLng || 106.7725 }
+              ]
+            };
+          }));
+        }
+      } catch (err) {
+        console.warn('Rentals API offline, using local data:', err.message);
+      } finally {
+        setIsLoadingApi(false);
+      }
+    };
+    fetchRentals();
+  }, []);
+
+  // Merge API and local trips (API first, then local, deduplicated by id)
+  const mergedTrips = (() => {
+    if (apiRentals.length === 0) return trips;
+    const apiIds = new Set(apiRentals.map(r => r.id));
+    const localOnly = trips.filter(t => !apiIds.has(t.id));
+    return [...apiRentals, ...localOnly];
+  })();
+
+  const filteredTrips = mergedTrips.filter(
     (t) =>
       (t.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (t.subtitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -16,12 +82,12 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
   );
 
   // Stats calculation
-  const totalDistance = trips.reduce((acc, t) => {
+  const totalDistance = mergedTrips.reduce((acc, t) => {
     const d = parseFloat(t.distanceKm) || (t.subtitle?.match(/(\d+([\.,]\d+)?)\s*km/) ? parseFloat(t.subtitle.match(/(\d+([\.,]\d+)?)\s*km/)[1]) : 0);
     return acc + d;
   }, 0);
 
-  const totalRevenue = trips.reduce((acc, t) => {
+  const totalRevenue = mergedTrips.reduce((acc, t) => {
     const rawCost = typeof t.cost === 'number' ? t.cost : (parseFloat(String(t.cost || 0).replace(/[^\d]/g, '')) || 0);
     return acc + rawCost;
   }, 0);
@@ -218,9 +284,34 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                   </div>
 
                   {/* Status badge (Desktop) */}
-                  <span className="hidden sm:inline-block text-xs font-bold px-2.5 py-1 rounded-lg border bg-slate-900 text-white border-slate-900 whitespace-nowrap">
+                  <span className={`hidden sm:inline-block text-xs font-bold px-2.5 py-1 rounded-lg border whitespace-nowrap ${
+                    trip.status === 'Đang thuê'
+                      ? 'bg-amber-50 text-amber-800 border-amber-300'
+                      : trip.status === 'Đã bàn giao' || trip.status === 'Hoàn thành'
+                        ? 'bg-slate-900 text-white border-slate-900'
+                        : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}>
                     {trip.status || 'Hoàn thành'}
                   </span>
+
+                  {/* Complete / Return action for active rental */}
+                  {trip.status === 'Đang thuê' && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          await api.updateRentalStatus(trip.id, 'completed');
+                          setApiRentals(prev => prev.map(r => r.id === trip.id ? { ...r, status: 'Đã bàn giao' } : r));
+                        } catch (err) {
+                          console.warn('Complete rental error:', err.message);
+                        }
+                      }}
+                      className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center gap-1 transition-colors shadow-xs whitespace-nowrap active:scale-95"
+                      title="Thu hồi loa & hoàn thành đơn"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                      <span>Thu Loa Về</span>
+                    </button>
+                  )}
 
                   {/* Button: Thu Tiền VietQR */}
                   {onOpenVietQR && (

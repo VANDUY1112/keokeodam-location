@@ -709,6 +709,20 @@ export default function LandingPageView({
 
     const totalEstimate = (bookingFormData.durationHours * bookingFormData.pricePerHour) + 20000;
 
+    // Save rental to real SQLite database API
+    api.createRental({
+      speakerId: 'LKK-01',
+      customerName: bookingFormData.name.trim(),
+      customerPhone: phoneClean,
+      address: bookingFormData.address.trim(),
+      durationHours: bookingFormData.durationHours,
+      rentPrice: bookingFormData.durationHours * bookingFormData.pricePerHour,
+      shippingFee: 20000,
+      totalAmount: totalEstimate,
+      depositAmount: 500000,
+      note: `Đặt online lúc ${bookingFormData.startTime}: ${bookingFormData.notes || 'Khách đặt từ landing page'}`
+    }).catch(err => console.warn('Could not save booking to real API:', err.message));
+
     if (onAddBooking) {
       onAddBooking({
         customerName: bookingFormData.name.trim(),

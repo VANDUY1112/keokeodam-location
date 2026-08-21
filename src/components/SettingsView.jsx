@@ -16,10 +16,17 @@ import {
   Store,
   Sparkles
 } from 'lucide-react';
-import { HOME_LOCATION } from '../data/speakersData';
 import { formatVND } from '../utils/format';
 import { VIETNAM_BANKS, DEFAULT_BANK_CONFIG } from '../utils/vietqr';
 import { CreditCard, QrCode } from 'lucide-react';
+import { api } from '../services/api.js';
+
+const DEFAULT_HOME_LOCATION = {
+  name: 'Kho Tổng Locahome',
+  address: '10 Kha Vạn Cân, P. Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh',
+  lat: 10.8505,
+  lng: 106.7718
+};
 
 const AVATAR_PRESETS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
@@ -39,9 +46,9 @@ export default function SettingsView({
   // Store info state
   const [storeName, setStoreName] = useState(() => localStorage.getItem('kko_store_name') || 'Dịch Vụ Cho Thuê Loa Kéo KeoKeoDam');
   const [storePhone, setStorePhone] = useState(() => localStorage.getItem('kko_store_phone') || '0368 115 592');
-  const [warehouseAddress, setWarehouseAddress] = useState(() => localStorage.getItem('kko_warehouse_address') || HOME_LOCATION.address);
-  const [warehouseLat, setWarehouseLat] = useState(() => localStorage.getItem('kko_warehouse_lat') || String(HOME_LOCATION.lat || 10.8752));
-  const [warehouseLng, setWarehouseLng] = useState(() => localStorage.getItem('kko_warehouse_lng') || String(HOME_LOCATION.lng || 106.7725));
+  const [warehouseAddress, setWarehouseAddress] = useState(() => localStorage.getItem('kko_warehouse_address') || DEFAULT_HOME_LOCATION.address);
+  const [warehouseLat, setWarehouseLat] = useState(() => localStorage.getItem('kko_warehouse_lat') || String(DEFAULT_HOME_LOCATION.lat));
+  const [warehouseLng, setWarehouseLng] = useState(() => localStorage.getItem('kko_warehouse_lng') || String(DEFAULT_HOME_LOCATION.lng));
 
   // Bank Account VietQR state
   const [bankId, setBankId] = useState(() => {
@@ -92,6 +99,39 @@ export default function SettingsView({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Fetch settings from backend API on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await api.getSettings();
+        if (res?.data) {
+          const s = res.data;
+          // Apply warehouse location from backend if available
+          if (s.warehouse_location) {
+            const wh = typeof s.warehouse_location === 'string' ? JSON.parse(s.warehouse_location) : s.warehouse_location;
+            if (wh.address) setWarehouseAddress(wh.address);
+            if (wh.lat) setWarehouseLat(String(wh.lat));
+            if (wh.lng) setWarehouseLng(String(wh.lng));
+          }
+          // Apply pricing rules from backend if available
+          if (s.pricing_rules) {
+            const pr = typeof s.pricing_rules === 'string' ? JSON.parse(s.pricing_rules) : s.pricing_rules;
+            if (pr.baseShippingFee) setBaseShippingFee(String(pr.baseShippingFee));
+            if (pr.perKmFee) setFeePerKm(String(pr.perKmFee));
+          }
+          // Apply GPS alerts from backend if available
+          if (s.gps_alerts) {
+            const ga = typeof s.gps_alerts === 'string' ? JSON.parse(s.gps_alerts) : s.gps_alerts;
+            if (typeof ga.outOfGeofenceAlert === 'boolean') setAutoGPS(ga.outOfGeofenceAlert);
+          }
+        }
+      } catch (err) {
+        console.warn('Settings API offline, using localStorage:', err.message);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   // Pricing rules state
   const [baseHourlyRate, setBaseHourlyRate] = useState(() => localStorage.getItem('kko_base_hourly_rate') || '80000');
   const [baseShippingFee, setBaseShippingFee] = useState(() => localStorage.getItem('kko_base_shipping_fee') || '20000');
@@ -132,6 +172,28 @@ export default function SettingsView({
         accountName: accountName.toUpperCase(),
         template: 'compact2'
       }));
+
+      // Sync settings to backend API (fire-and-forget)
+      api.updateSettings({
+        warehouse_location: {
+          name: 'Kho Tổng Locahome',
+          address: warehouseAddress,
+          lat: parseFloat(warehouseLat) || 10.8505,
+          lng: parseFloat(warehouseLng) || 106.7718,
+          radiusKm: 15
+        },
+        pricing_rules: {
+          baseShippingFee: parseInt(baseShippingFee) || 30000,
+          perKmFee: parseInt(feePerKm) || 5000,
+          nightSurchargePercent: 20,
+          depositRequired: true
+        },
+        gps_alerts: {
+          lowBatteryThreshold: 20,
+          outOfGeofenceAlert: autoGPS,
+          overspeedThresholdKmH: 50
+        }
+      }).catch(err => console.warn('Settings sync to API failed:', err.message));
 
       if (setToast) {
         setToast({

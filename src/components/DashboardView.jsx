@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Milestone, Flame, TrendingUp, ChevronRight } from 'lucide-react';
 import { formatVND, parseVNDNumber } from '../utils/format';
 import DashboardMiniMap, { generateHotspotsAround } from './DashboardMiniMap';
+import { api } from '../services/api.js';
 
 export default function DashboardView({
   expenses = [],
@@ -12,6 +13,49 @@ export default function DashboardView({
 }) {
   const [selectedHotspotId, setSelectedHotspotId] = useState('hs-1');
   const [isLocating, setIsLocating] = useState(false);
+
+  // Backend API data state
+  const [apiSummary, setApiSummary] = useState(null);
+  const [apiSpeakers, setApiSpeakers] = useState([]);
+  const [apiRentals, setApiRentals] = useState([]);
+  const [apiExpenses, setApiExpenses] = useState([]);
+  const [isLoadingApi, setIsLoadingApi] = useState(true);
+
+  // Fetch dashboard data from backend API
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setIsLoadingApi(true);
+      try {
+        const [summaryRes, speakersRes, rentalsRes, expensesRes] = await Promise.allSettled([
+          api.getReportsSummary('30d'),
+          api.getSpeakers(),
+          api.getRentals(),
+          api.getExpenses()
+        ]);
+
+        if (summaryRes.status === 'fulfilled' && summaryRes.value?.data) {
+          setApiSummary(summaryRes.value.data);
+        }
+        if (speakersRes.status === 'fulfilled' && speakersRes.value?.data) {
+          const list = Array.isArray(speakersRes.value.data) ? speakersRes.value.data : [];
+          setApiSpeakers(list);
+        }
+        if (rentalsRes.status === 'fulfilled' && rentalsRes.value?.data) {
+          const list = Array.isArray(rentalsRes.value.data) ? rentalsRes.value.data : [];
+          setApiRentals(list);
+        }
+        if (expensesRes.status === 'fulfilled' && expensesRes.value?.data) {
+          const expData = expensesRes.value.data;
+          setApiExpenses(Array.isArray(expData.expenses) ? expData.expenses : []);
+        }
+      } catch (err) {
+        console.warn('Dashboard API fetch failed, using local data:', err.message);
+      } finally {
+        setIsLoadingApi(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
   // Initialize user coordinates from localStorage or default
   const [userCoords, setUserCoords] = useState(() => {
@@ -70,15 +114,38 @@ export default function DashboardView({
 
   const hotspots = generateHotspotsAround(userCoords.lat, userCoords.lng);
 
-  // Compute dynamic stats from actual data
-  const totalDistanceNum = trips.reduce((acc, t) => {
+  // Compute dynamic stats from API or fallback to props
+  const summaryData = apiSummary?.summary || null;
+  const totalDistanceNum = summaryData?.distanceKm || trips.reduce((acc, t) => {
     const d = parseFloat(t.distanceKm) || (t.subtitle?.match(/(\d+([\.,]\d+)?)\s*km/) ? parseFloat(t.subtitle.match(/(\d+([\.,]\d+)?)\s*km/)[1]) : 0);
     return acc + d;
   }, 0);
 
-  const totalExpenseNum = expenses.reduce((acc, e) => {
+  const totalExpenseNum = summaryData?.totalRevenue || expenses.reduce((acc, e) => {
     return acc + parseVNDNumber(e.amount);
   }, 0);
+
+  const totalRentals = summaryData?.totalRentals || (apiRentals.length > 0 ? apiRentals.length : trips.length);
+
+  // Merge API data with props for display
+  const displayTrips = apiRentals.length > 0 ? apiRentals.map(r => ({
+    id: r.id,
+    title: `${r.customerName} - ${r.customerPhone || ''}`,
+    subtitle: `${r.speakerName || 'Loa Kéo'} • ${r.durationHours}h • ${formatVND(r.totalAmount)}`,
+    cost: r.totalAmount,
+    status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
+    icon: 'speaker',
+    distanceKm: 0
+  })) : trips;
+
+  const displayExpenses = apiExpenses.length > 0 ? apiExpenses.map(e => ({
+    id: e.id,
+    title: e.title,
+    subtitle: e.subtitle || e.createdAt,
+    amount: e.amount,
+    status: e.status,
+    icon: e.icon || 'receipt'
+  })) : expenses;
 
   return (
     <div className="flex flex-col w-full gap-6 lg:gap-8">
@@ -99,7 +166,7 @@ export default function DashboardView({
 
           <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
             <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              {totalDistanceNum > 0 ? totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : '1.245'}
+              {totalDistanceNum > 0 ? totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : (isLoadingApi ? '...' : '1.245')}
             </span>
             <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">km</span>
           </div>
@@ -163,7 +230,7 @@ export default function DashboardView({
 
           <div className="flex items-baseline gap-1 z-10 my-1">
             <span className="font-display text-on-surface text-xl sm:text-2xl lg:text-[32px] font-extrabold leading-none tracking-tight truncate">
-              {totalExpenseNum > 0 ? formatVND(totalExpenseNum) : '21.500.000 ₫'}
+              {totalExpenseNum > 0 ? formatVND(totalExpenseNum) : (isLoadingApi ? '...' : '21.500.000 ₫')}
             </span>
           </div>
 
@@ -194,7 +261,7 @@ export default function DashboardView({
 
           <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
             <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              {trips.length > 0 ? trips.length : 36}
+              {totalRentals > 0 ? totalRentals : (isLoadingApi ? '...' : 36)}
             </span>
             <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">đơn</span>
           </div>
@@ -238,12 +305,12 @@ export default function DashboardView({
           </div>
 
           <div className="flex flex-col gap-3">
-            {trips.length === 0 ? (
+            {displayTrips.length === 0 ? (
               <div className="bg-surface-container-lowest p-6 rounded-2xl border border-slate-200/90 text-center text-slate-500 text-sm">
-                Chưa có chuyến nào gần đây
+                {isLoadingApi ? 'Đang tải dữ liệu...' : 'Chưa có chuyến nào gần đây'}
               </div>
             ) : (
-              trips.slice(0, 4).map((trip) => (
+              displayTrips.slice(0, 4).map((trip) => (
                 <div
                   key={trip.id}
                   onClick={() => onNavigateToTab('tracking')}
@@ -285,12 +352,12 @@ export default function DashboardView({
           </div>
 
           <div className="flex flex-col gap-3">
-            {expenses.length === 0 ? (
+            {displayExpenses.length === 0 ? (
               <div className="bg-surface-container-lowest p-6 rounded-2xl border border-slate-200/90 text-center text-slate-500 text-sm">
-                Chưa có doanh thu nào gần đây
+                {isLoadingApi ? 'Đang tải dữ liệu...' : 'Chưa có doanh thu nào gần đây'}
               </div>
             ) : (
-              expenses.slice(0, 4).map((item) => (
+              displayExpenses.slice(0, 4).map((item) => (
                 <div
                   key={item.id}
                   onClick={() => onNavigateToTab('expenses')}

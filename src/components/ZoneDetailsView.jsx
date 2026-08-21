@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Circle, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { generateHotspotsAround } from './DashboardMiniMap';
+import { api } from '../services/api.js';
+import { formatVND } from '../utils/format';
 
-// Detailed data extension for each zone (Clean Monochrome Slate Style)
-const ZONE_MOCK_DETAILS = {
+// Detailed profile configuration for each zone (Clean Monochrome Slate Style)
+const ZONE_PROFILE_CONFIG = {
   'hs-1': {
     rankBadge: 'Top 1 Vùng Nóng Nhất',
     description: 'Tập trung nhiều trung tâm tiệc cưới, nhà hàng lớn và trung tâm hội nghị. Khách thường thuê dàn loa công suất lớn phục vụ liên hoan, tân gia, đám cưới vào chiều tối cuối tuần.',
@@ -213,9 +215,31 @@ export default function ZoneDetailsView({
       : { lat: 10.7769, lng: 106.7009 };
   });
 
+  const [realOrders, setRealOrders] = useState([]);
+
+  useEffect(() => {
+    api.getRentals().then(res => {
+      if (res?.data && Array.isArray(res.data)) {
+        setRealOrders(res.data.map(r => ({
+          id: r.id,
+          customer: r.customerName,
+          phone: r.customerPhone,
+          address: r.address,
+          speaker: r.speakerName || 'Loa Kéo',
+          time: r.startTime ? `${r.durationHours}h • ${new Date(r.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}` : 'Hôm nay',
+          amount: formatVND(r.totalAmount),
+          status: r.status === 'active' ? 'Đang phục vụ' : 'Đã hoàn thành'
+        })));
+      }
+    }).catch(() => {});
+  }, []);
+
   const hotspots = generateHotspotsAround(userCoords.lat, userCoords.lng);
   const selectedZone = hotspots.find((h) => h.id === selectedZoneId) || hotspots[0];
-  const zoneDetail = ZONE_MOCK_DETAILS[selectedZone.id] || ZONE_MOCK_DETAILS['hs-1'];
+  const zoneDetail = {
+    ...(ZONE_PROFILE_CONFIG[selectedZone.id] || ZONE_PROFILE_CONFIG['hs-1']),
+    recentOrders: realOrders.length > 0 ? realOrders : (ZONE_PROFILE_CONFIG[selectedZone.id] || ZONE_PROFILE_CONFIG['hs-1']).recentOrders
+  };
 
   const tileUrl =
     tileMode === 'satellite'

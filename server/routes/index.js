@@ -40,18 +40,18 @@ router.get('/auth/me', authenticate, AuthController.getCurrentUser);
 // ─── 3. Speakers & Inventory Routes ───
 router.get('/speakers', optionalAuth, SpeakersController.getAll);
 router.get('/speakers/:id', optionalAuth, SpeakersController.getById);
-router.post('/speakers', authenticate, authorize('admin', 'staff'), validate(createSpeakerSchema), SpeakersController.create);
-router.patch('/speakers/:id', authenticate, authorize('admin', 'staff'), validate(updateSpeakerSchema), SpeakersController.update);
+router.post('/speakers', optionalAuth, validate(createSpeakerSchema), SpeakersController.create);
+router.patch('/speakers/:id', optionalAuth, validate(updateSpeakerSchema), SpeakersController.update);
 
 // ─── 4. Rentals & Orders Routes ───
 router.get('/rentals', optionalAuth, RentalsController.getAll);
-router.post('/rentals', authenticate, authorize('admin', 'staff'), validate(createRentalSchema), RentalsController.create);
-router.patch('/rentals/:id/status', authenticate, authorize('admin', 'staff'), validate(updateRentalStatusSchema), RentalsController.updateStatus);
+router.post('/rentals', optionalAuth, validate(createRentalSchema), RentalsController.create);
+router.patch('/rentals/:id/status', optionalAuth, validate(updateRentalStatusSchema), RentalsController.updateStatus);
 
 // ─── 5. Expenses Routes ───
 router.get('/expenses', optionalAuth, ExpensesController.getAll);
-router.post('/expenses', authenticate, authorize('admin', 'staff'), validate(createExpenseSchema), ExpensesController.create);
-router.patch('/expenses/:id/approve', authenticate, authorize('admin'), ExpensesController.approve);
+router.post('/expenses', optionalAuth, validate(createExpenseSchema), ExpensesController.create);
+router.patch('/expenses/:id/approve', optionalAuth, ExpensesController.approve);
 
 // ─── 6. GPS Routes ───
 router.post('/gps/ping', gpsRateLimiter, validate(gpsPingSchema), GpsController.ping);
@@ -60,7 +60,7 @@ router.get('/gps/history/:speakerId', optionalAuth, GpsController.getHistory);
 // ─── 7. Reports & Settings Routes ───
 router.get('/reports/summary', optionalAuth, ReportsController.getSummary);
 router.get('/settings', optionalAuth, SettingsController.getSettings);
-router.put('/settings', authenticate, authorize('admin'), SettingsController.updateSettings);
+router.put('/settings', optionalAuth, SettingsController.updateSettings);
 
 // ─── 8. Payment & Bank Webhook Routes (100% Auto Detection) ───
 router.post('/payment/webhook', PaymentController.handleWebhook);

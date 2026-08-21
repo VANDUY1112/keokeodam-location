@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Milestone } from 'lucide-react';
 import LiveRouteMap, { MAP_LAYERS } from './LiveRouteMap';
 import { formatVND } from '../utils/format';
+import { api } from '../services/api.js';
 
 // Haversine formula to compute distance in km between two lat/lng points
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -76,9 +77,27 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const [showLayerMenu, setShowLayerMenu] = useState(false);
   const [recenterTrigger, setRecenterTrigger] = useState(0);
 
+  // Backend speakers state
+  const [apiSpeakers, setApiSpeakers] = useState([]);
+
   const watchIdRef = useRef(null);
   const simIntervalRef = useRef(null);
   const lastPosRef = useRef(null);
+
+  // Fetch speakers from backend API on mount
+  useEffect(() => {
+    const fetchSpeakers = async () => {
+      try {
+        const res = await api.getSpeakers();
+        if (res?.data && Array.isArray(res.data)) {
+          setApiSpeakers(res.data);
+        }
+      } catch (err) {
+        console.warn('Speakers API offline, using local data:', err.message);
+      }
+    };
+    fetchSpeakers();
+  }, []);
 
   // Initialize with browser GPS location on load
   useEffect(() => {
@@ -148,6 +167,19 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     });
 
     lastPosRef.current = newCoords;
+
+    // Send GPS ping to backend (fire-and-forget)
+    if (selectedSpeaker) {
+      const speakerId = selectedSpeaker.id || (apiSpeakers.length > 0 ? apiSpeakers[0].id : 'LKK-01');
+      api.pingGps({
+        speakerId,
+        lat: newCoords.lat,
+        lng: newCoords.lng,
+        speedKmh: currentSpeed,
+        heading: 0,
+        batteryPercent: 85
+      }).catch(() => {});
+    }
   };
 
   // Start / Check-in Route
@@ -226,6 +258,23 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
 
     setSummaryData(summary);
     setShowSummaryModal(true);
+
+    // Save rental to backend API (fire-and-forget)
+    const speakerId = selectedSpeaker?.id || (apiSpeakers.length > 0 ? apiSpeakers[0].id : 'LKK-01');
+    api.createRental({
+      speakerId,
+      customerName: customerName.split(' - ')[0] || customerName,
+      customerPhone: customerName.split(' - ')[1] || '0900000000',
+      address: deliveryAddress,
+      destLat: finalPos.lat,
+      destLng: finalPos.lng,
+      durationHours: Math.max(1, Math.round(seconds / 3600)),
+      rentPrice: rentalFee,
+      shippingFee: shippingFee,
+      totalAmount: totalCollectFromCustomer,
+      depositAmount: 500000,
+      note: `GPS: ${finalDist.toFixed(2)}km, ${formatTime(seconds > 0 ? seconds : 180)}`
+    }).catch(err => console.warn('Rental save to API failed:', err.message));
 
     setActionNotice({
       type: 'info',
