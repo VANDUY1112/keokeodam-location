@@ -404,6 +404,7 @@ export default function LandingPageView({
 
   // Lightbox Zoom Modal for Scenic Photos
   const [zoomImageModal, setZoomImageModal] = useState(null);
+  const [modalZoomScale, setModalZoomScale] = useState(1);
 
   const [bookingFormTouched, setBookingFormTouched] = useState({ name: false, phone: false, address: false });
   const [bookingFormShake, setBookingFormShake] = useState(false);
@@ -1125,77 +1126,49 @@ export default function LandingPageView({
                 {/* Card 1: Bia */}
                 <div
                   onClick={() => setZoomImageModal({ id: 'bia', location: 'Bia Tươi Mát Lạnh', img: '/bia.png' })}
-                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ffd9e3] bg-gradient-to-b from-[#ffe5ee] via-[#fff0f5] to-[#ffd6e4] shadow-[0_12px_28px_rgba(134,77,97,0.12)] hover:shadow-[0_20px_45px_rgba(134,77,97,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-between p-3 sm:p-4 group cursor-pointer select-none"
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ffd9e3] bg-gradient-to-b from-[#ffe5ee] via-[#fff0f5] to-[#ffd6e4] shadow-[0_12px_28px_rgba(134,77,97,0.12)] hover:shadow-[0_20px_45px_rgba(134,77,97,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex items-center justify-center p-3 sm:p-4 group cursor-pointer select-none"
                 >
-                  <div className="flex-1 w-full flex items-center justify-center pt-2">
-                    <img
-                      src="/bia.png"
-                      alt="Bia"
-                      className="h-[92%] w-auto object-contain drop-shadow-[0_12px_20px_rgba(134,77,97,0.25)] group-hover:scale-120 group-hover:rotate-[-5deg] transition-all duration-500 ease-out"
-                    />
-                  </div>
-                  <div className="relative z-10 w-full text-center">
-                    <span className="block w-full py-1.5 px-3 bg-white/85 backdrop-blur-md border border-[#ffd9e3] rounded-2xl text-[#864d61] font-headline text-sm sm:text-base shadow-xs group-hover:bg-[#864d61] group-hover:text-white transition-colors duration-300">
-                      Bia
-                    </span>
-                  </div>
+                  <img
+                    src="/bia.png"
+                    alt="Bia"
+                    className="h-[92%] w-auto object-contain drop-shadow-[0_12px_20px_rgba(134,77,97,0.25)] group-hover:scale-120 group-hover:rotate-[-5deg] transition-all duration-500 ease-out"
+                  />
                 </div>
 
                 {/* Card 2: Mồi - Tràn viền 100% */}
                 <div
                   onClick={() => setZoomImageModal({ id: 'moi', location: 'Mồi Ngon Phú Yên', img: '/moi.png' })}
-                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#b2f2bb] shadow-[0_12px_28px_rgba(47,106,63,0.12)] hover:shadow-[0_20px_45px_rgba(47,106,63,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#b2f2bb] shadow-[0_12px_28px_rgba(47,106,63,0.12)] hover:shadow-[0_20px_45px_rgba(47,106,63,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 group cursor-pointer select-none"
                 >
                   <img
                     src="/moi.png"
                     alt="Mồi"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-
-                  <div className="relative z-10 w-full text-center">
-                    <span className="block w-full py-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/30 rounded-2xl text-white font-headline text-sm sm:text-base shadow-sm group-hover:bg-[#2f6a3f] group-hover:border-[#2f6a3f] transition-all duration-300">
-                      Mồi
-                    </span>
-                  </div>
                 </div>
 
                 {/* Card 3: Bạn Bè - Tràn viền 100% */}
                 <div
                   onClick={() => setZoomImageModal({ id: 'friend', location: 'Hội Mấy Ní Ca Hát', img: '/friend.png' })}
-                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#c9e6ff] shadow-[0_12px_28px_rgba(35,90,124,0.12)] hover:shadow-[0_20px_45px_rgba(35,90,124,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#c9e6ff] shadow-[0_12px_28px_rgba(35,90,124,0.12)] hover:shadow-[0_20px_45px_rgba(35,90,124,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 group cursor-pointer select-none"
                 >
                   <img
                     src="/friend.png"
                     alt="Bạn bè"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-
-                  <div className="relative z-10 w-full text-center">
-                    <span className="block w-full py-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/30 rounded-2xl text-white font-headline text-sm sm:text-base shadow-sm group-hover:bg-[#235a7c] group-hover:border-[#235a7c] transition-all duration-300">
-                      Mấy ní
-                    </span>
-                  </div>
                 </div>
 
                 {/* Card 4: Say - Tràn viền 100% */}
                 <div
                   onClick={() => setZoomImageModal({ id: 'say', location: 'Hát Hò Vui Say Mê', img: '/say.png' })}
-                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ebd4ff] shadow-[0_12px_28px_rgba(107,33,168,0.12)] hover:shadow-[0_20px_45px_rgba(107,33,168,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 flex flex-col justify-end p-3 sm:p-4 group cursor-pointer select-none"
+                  className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ebd4ff] shadow-[0_12px_28px_rgba(107,33,168,0.12)] hover:shadow-[0_20px_45px_rgba(107,33,168,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 group cursor-pointer select-none"
                 >
                   <img
                     src="/say.png"
                     alt="Say"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-
-                  <div className="relative z-10 w-full text-center">
-                    <span className="block w-full py-1.5 px-3 bg-black/40 backdrop-blur-md border border-white/30 rounded-2xl text-white font-headline text-sm sm:text-base shadow-sm group-hover:bg-purple-800 group-hover:border-purple-800 transition-all duration-300">
-                      Say
-                    </span>
-                  </div>
                 </div>
               </div>
 
@@ -1213,7 +1186,7 @@ export default function LandingPageView({
                 <div className="inline-flex items-center px-3.5 py-1 bg-[#ffd9e3] rounded-full text-[#864d61] text-[13px] font-bold tracking-wide mb-2">
                   <span>Ngắm một tí nhé! rồi hát tiếp</span>
                 </div>
-                <h3 className="font-headline text-2xl sm:text-3xl text-[#864d61] max-w-md leading-snug">
+                <h3 className="font-headline text-xl sm:text-4xl text-[#864d61] max-w-md leading-snug">
                   Cùng nẫu vi vu một tí rồi dô bia nha!
                 </h3>
               </div>
@@ -1262,7 +1235,7 @@ export default function LandingPageView({
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
             <div>
-              <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
+              <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
                 Cảm nhận của các nẫu
               </h2>
               <p className="text-[#514347] font-semibold text-sm sm:text-base mt-1">
@@ -1720,7 +1693,7 @@ export default function LandingPageView({
               <CuteSpeakerIcon className="w-4 h-4" />
               <span>Bảng Giá Thuê Loa Siêu Xinh</span>
             </div>
-            <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
+            <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
               Những dàn loa cho các nẫu
             </h2>
             <p className="text-[#514347] font-semibold text-sm sm:text-base mt-2">
@@ -1804,7 +1777,7 @@ export default function LandingPageView({
         {/* ═══════════════ FAQ SECTION (CÂU HỎI THƯỜNG GẶP) ═══════════════ */}
         <section id="faq" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61]">
+            <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
               Câu hỏi hằng ngày
             </h2>
 
@@ -1866,51 +1839,34 @@ export default function LandingPageView({
         {/* ═══════════════ WHY CHOOSE US (ƯU ĐIỂM) ═══════════════ */}
         <section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="bg-[#f3eaff] rounded-[2.5rem] sm:rounded-[3.5rem] p-4 sm:p-12 border-2 border-[#ffd9e3] shadow-[inset_0_4px_20px_rgba(255,255,255,0.9),0_10px_30px_rgba(134,77,97,0.06)]">
-            <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-10">
+            <div className="text-left mb-4 sm:mb-6">
               <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
-                Tại Sao Hơn 500+ Khách Hàng Chọn Locahome?
+                Dặm sẽ ship hỏa tốc?
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
-                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#fab3ca]/60 shrink-0">
-                  <CuteLightningIcon className="w-5 h-5 sm:w-7 sm:h-7" />
-                </div>
-                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">Giao Nhanh 30 Phút</h3>
-                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
-                  Đội ngũ shipper hỏa tốc luôn sẵn sàng mang loa đến tận nhà ngay sau khi bạn chốt đơn.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
-                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#b2f2bb] text-[#2f6a3f] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#96d5a0]/60 shrink-0">
-                  <CuteMicIcon className="w-5 h-5 sm:w-7 sm:h-7" />
-                </div>
-                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">Mic Chống Hú 100%</h3>
-                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
-                  Micro UHF chuẩn sân khấu bắt âm cực nhạy, hát nhẹ hơi, không lo rè hú chói tai.
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
-                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#c9e6ff] text-[#2e6385] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#9ed1f8]/60 shrink-0">
-                  <CuteSwapIcon className="w-5 h-5 sm:w-7 sm:h-7" />
-                </div>
-                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">Đổi Loa Miễn Phí</h3>
-                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
-                  Nếu không hài lòng hoặc âm thanh có vấn đề, chúng mình đổi loa mới ngay trong 15 phút!
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-sm border border-[#e9ddff] hover:scale-105 transition-transform flex flex-col">
-                <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl sm:rounded-2xl bg-[#eee4ff] text-[#864d61] flex items-center justify-center mb-2.5 sm:mb-4 border border-[#fab3ca]/60 shrink-0">
-                  <CuteQRIcon className="w-5 h-5 sm:w-7 sm:h-7" />
-                </div>
-                <h3 className="font-headline text-xs sm:text-lg text-[#201047] mb-1 sm:mb-1.5 line-clamp-1">VietQR Tiện Lợi</h3>
-                <p className="text-[10px] sm:text-sm text-slate-600 font-semibold leading-relaxed line-clamp-3 sm:line-clamp-none">
-                  Quét mã QR thanh toán tức thì qua mọi ngân hàng hoặc chọn trả tiền mặt khi nhận loa.
-                </p>
+            <div
+              onClick={() => {
+                setModalZoomScale(1.6);
+                setZoomImageModal({
+                  id: 'loca',
+                  location: 'Khu vực giao loa hỏa tốc Tuy Hòa - Phú Yên',
+                  img: '/loca.png'
+                });
+              }}
+              className="w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-md border-2 border-[#ffd9e3] bg-white cursor-pointer group relative select-none h-80 sm:h-96 md:h-[28rem]"
+              title="Nhấn để xem ảnh phóng to"
+            >
+              <img
+                src="/loca.png"
+                alt="Khu vực giao loa hỏa tốc Tuy Hòa - Phú Yên"
+                className="w-full h-full object-cover object-[67%_62%] scale-[1.45] sm:scale-[1.3] group-hover:scale-[1.5] transition-transform duration-500 ease-out origin-[67%_62%]"
+              />
+              <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs sm:text-sm font-headline px-3 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1.5 shadow-lg border border-white/25 transition-all opacity-85 group-hover:opacity-100 group-hover:scale-105">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                </svg>
+                <span>Xem ảnh lớn</span>
               </div>
             </div>
           </div>
@@ -1923,8 +1879,8 @@ export default function LandingPageView({
               <CuteMicIcon className="w-12 h-12" />
             </div>
 
-            <h2 className="font-headline text-2xl sm:text-4xl text-[#864d61] mb-2">
-              Sẵn Sàng Hát Mê Say Tối Nay?
+            <h2 className="font-headline text-xl sm:text-4xl text-[#864d61] mb-2">
+              Chuẩn bị hết rồi thì đừng quên
             </h2>
 
             <p className="text-[#514347] font-semibold text-sm sm:text-base max-w-md mb-8">
@@ -1953,7 +1909,7 @@ export default function LandingPageView({
         {/* ═══════════════ SAFETY NOTICE SECTION (ĐÃ UỐNG RƯỢU BIA THÌ KHÔNG LÁI XE) ═══════════════ */}
         <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
           <div className="bg-gradient-to-br from-[#fff5f5] via-[#fff0f3] to-[#fff8f0] rounded-[2.8rem] p-6 sm:p-10 border-2 border-[#ffd9e3] shadow-[0_12px_36px_rgba(134,77,97,0.08)] flex flex-col items-center">
-            <h3 className="font-headline text-xl sm:text-3xl text-rose-700 leading-snug mb-5 sm:mb-7 text-center">
+            <h3 className="font-headline text-xl sm:text-4xl text-rose-700 leading-snug mb-5 sm:mb-7 text-center">
               Lưu ý! Đã uống rượu bia thì không lái xe.
             </h3>
             <div
@@ -2445,7 +2401,7 @@ export default function LandingPageView({
         onClick={() => setZoomImageModal(null)}
       >
         <div
-          className={`relative max-w-3xl w-full max-h-[92vh] flex flex-col items-center justify-center transition-all duration-300 ease-out transform ${zoomImageModal
+          className={`relative max-w-5xl w-full max-h-[94vh] flex flex-col items-center justify-center transition-all duration-300 ease-out transform ${zoomImageModal
             ? 'scale-100 translate-y-0 opacity-100'
             : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
             }`}
@@ -2463,20 +2419,67 @@ export default function LandingPageView({
           {/* Main Full Uncropped Image */}
           {zoomImageModal && (
             <div className="w-full flex flex-col items-center justify-center animate-photo-pop">
-              <div className="relative rounded-3xl overflow-hidden border-2 border-white/20 shadow-[0_25px_60px_rgba(0,0,0,0.6)] bg-black/40 flex items-center justify-center max-h-[72vh] w-full">
+              <div className="relative rounded-3xl overflow-hidden border-2 border-white/20 shadow-[0_25px_60px_rgba(0,0,0,0.6)] bg-black/40 flex items-center justify-center max-h-[80vh] w-full">
                 <img
                   src={zoomImageModal.img}
                   alt={zoomImageModal.location}
-                  className="max-h-[72vh] w-auto max-w-full object-contain rounded-3xl"
+                  style={{
+                    transform: `scale(${modalZoomScale})`,
+                    transformOrigin: zoomImageModal.id === 'loca' ? '67% 62%' : 'center center',
+                    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                  className="max-h-[80vh] w-auto max-w-full object-contain rounded-3xl select-none"
                 />
+
+                {/* Floating Zoom Controls */}
+                <div className="absolute top-3.5 right-3.5 bg-black/60 backdrop-blur-md px-2 py-1 rounded-2xl border border-white/20 flex items-center gap-1.5 z-20 text-white shadow-lg">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setModalZoomScale(prev => Math.max(1, +(prev - 0.3).toFixed(1)));
+                    }}
+                    className="w-7 h-7 rounded-xl bg-white/20 hover:bg-white/40 flex items-center justify-center font-bold text-base transition-colors"
+                    title="Thu nhỏ"
+                  >
+                    -
+                  </button>
+                  <span className="text-[11px] font-mono font-bold px-1 min-w-[2.8rem] text-center">
+                    {Math.round(modalZoomScale * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setModalZoomScale(prev => Math.min(3, +(prev + 0.3).toFixed(1)));
+                    }}
+                    className="w-7 h-7 rounded-xl bg-white/20 hover:bg-white/40 flex items-center justify-center font-bold text-base transition-colors"
+                    title="Phóng to"
+                  >
+                    +
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setModalZoomScale(zoomImageModal.id === 'loca' ? 1.6 : 1);
+                    }}
+                    className="w-7 h-7 rounded-xl bg-white/20 hover:bg-white/40 flex items-center justify-center text-xs transition-colors"
+                    title="Về mặc định"
+                  >
+                    ↺
+                  </button>
+                </div>
               </div>
 
-              {/* Info bar below photo: Chỉ để tên danh lam thắng cảnh */}
-              <div className="mt-3 w-full bg-white/15 backdrop-blur-xl px-5 py-3 rounded-2xl border border-white/20 text-white shadow-lg text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <h4 className="font-headline text-base sm:text-lg text-white drop-shadow-sm">
-                  {zoomImageModal.location}
-                </h4>
-              </div>
+              {/* Info bar below photo */}
+              {zoomImageModal.location && (
+                <div className="mt-3 w-full bg-white/15 backdrop-blur-xl px-5 py-3 rounded-2xl border border-white/20 text-white shadow-lg text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <h4 className="font-headline text-base sm:text-lg text-white drop-shadow-sm">
+                    {zoomImageModal.location}
+                  </h4>
+                </div>
+              )}
             </div>
           )}
         </div>
