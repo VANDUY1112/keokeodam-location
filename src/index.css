@@ -267,3 +267,55 @@
 .animate-shake {
   animation: inputShake 0.4s ease-in-out;
 }
+
+/* ══════════ SMOOTH SUCCESS MODAL ANIMATIONS ══════════ */
+@keyframes successSpring {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-10deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(4deg);
+  }
+  80% {
+    transform: scale(0.95) rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-success-spring {
+  animation: successSpring 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes countdownBar {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.animate-countdown-bar {
+  animation: countdownBar 2.2s linear forwards;
+}
+
+@keyframes pulseGlowRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(74, 222, 128, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlowRing 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
