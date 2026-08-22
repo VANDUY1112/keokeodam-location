@@ -400,7 +400,31 @@ export default function LandingPageView({
   const [reviewFormTouched, setReviewFormTouched] = useState({ name: false, comment: false });
   const [reviewFormShake, setReviewFormShake] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [isClosingReviewModal, setIsClosingReviewModal] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewToast, setReviewToast] = useState(null);
+  const [highlightedReviewId, setHighlightedReviewId] = useState(null);
+  const reviewSuccessTimerRef = useRef(null);
+  const reviewToastTimerRef = useRef(null);
   const [submittedReviewInfo, setSubmittedReviewInfo] = useState({ name: '', rating: 5 });
+
+  const handleOpenReviewModal = () => {
+    if (reviewSuccessTimerRef.current) clearTimeout(reviewSuccessTimerRef.current);
+    setIsClosingReviewModal(false);
+    setReviewSuccess(false);
+    setShowAddReviewModal(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    if (reviewSuccessTimerRef.current) clearTimeout(reviewSuccessTimerRef.current);
+    setIsClosingReviewModal(true);
+    setTimeout(() => {
+      setShowAddReviewModal(false);
+      setIsClosingReviewModal(false);
+      setReviewSuccess(false);
+      setReviewFormTouched({ name: false, comment: false });
+    }, 280);
+  };
 
   // Lightbox Zoom Modal for Scenic Photos
   const [zoomImageModal, setZoomImageModal] = useState(null);
@@ -801,29 +825,45 @@ export default function LandingPageView({
       ownerReplyBy: null
     };
 
-    // Optimistic UI update
-    setReviewsList((prev) => [newRev, ...prev]);
-    setSubmittedReviewInfo({
-      name: newReviewForm.name.trim(),
-      rating: Number(newReviewForm.rating)
-    });
-    setReviewSuccess(true);
+    setIsSubmittingReview(true);
 
-    // Call Backend API
+    // 1. Optimistic UI update - Add new review to the top immediately
+    setReviewsList((prev) => [newRev, ...prev]);
+    setHighlightedReviewId(newRev.id);
+
+    // 2. Smoothly glide & dissolve the modal out immediately (no abrupt shrink)
+    handleCloseReviewModal();
+
+    // 3. Trigger celebratory Floating Toast Notification at top of screen
+    setReviewToast({
+      name: newRev.name,
+      rating: newRev.rating,
+      comment: newRev.comment
+    });
+
+    if (reviewToastTimerRef.current) clearTimeout(reviewToastTimerRef.current);
+    reviewToastTimerRef.current = setTimeout(() => {
+      setReviewToast(null);
+    }, 5000);
+
+    // Clear highlighted review card ring after 6.5s
+    setTimeout(() => {
+      setHighlightedReviewId((curr) => (curr === newRev.id ? null : curr));
+    }, 6500);
+
+    // 4. Smoothly scroll to reviews section so user sees their new card
+    setTimeout(() => {
+      const el = document.getElementById('reviews');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+
+    // 5. Call Backend API asynchronously in the background
     try {
       await api.createReview(newRev);
     } catch (err) {
       console.warn('Backend sync failed, saved in local state', err);
-    }
-
-    // After 1800ms, start closing modal smoothly with 300ms exit animation
-    setTimeout(() => {
-      setShowAddReviewModal(false);
-    }, 1800);
-
-    // After modal has fully finished exiting (2200ms), reset state
-    setTimeout(() => {
-      setReviewSuccess(false);
+    } finally {
+      setIsSubmittingReview(false);
       setNewReviewForm({
         name: '',
         rating: 5,
@@ -833,7 +873,7 @@ export default function LandingPageView({
         colorScheme: 'pink'
       });
       setReviewFormTouched({ name: false, comment: false });
-    }, 2200);
+    }
   };
 
   // 👑 Owner Reply Handlers
@@ -915,6 +955,18 @@ export default function LandingPageView({
 
   return (
     <div className="bg-[#fdf7ff] min-h-screen font-cute text-[#201047] selection:bg-[#ffb7ce] selection:text-[#360b1e] relative overflow-x-hidden">
+      {/* ═══════════════ FLOATING TOAST NOTIFICATION KHI ĐĂNG THÀNH CÔNG ═══════════════ */}
+      {reviewToast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] bg-white/95 backdrop-blur-xl rounded-full px-5 py-2.5 border-2 border-[#b2f2bb] shadow-[0_12px_36px_rgba(47,106,63,0.2)] flex items-center gap-2.5 animate-in fade-in slide-in-from-top-6 duration-300">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#34d399] to-[#10b981] text-white flex items-center justify-center shadow-xs shrink-0 animate-success-spring">
+            <CuteCheckIcon className="w-3.5 h-3.5" />
+          </div>
+          <span className="font-headline text-xs sm:text-sm text-[#2f6a3f] font-black whitespace-nowrap">
+            Đăng Đánh Giá Thành Công!
+          </span>
+        </div>
+      )}
+
       {/* Background Pastel Blobs */}
       <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-[#ffd9e3]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 -translate-y-1/3 translate-x-1/3 pointer-events-none z-0"></div>
       <div className="fixed top-1/3 left-0 w-[450px] h-[450px] bg-[#c9e6ff]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-65 -translate-x-1/3 pointer-events-none z-0"></div>
@@ -1050,7 +1102,7 @@ export default function LandingPageView({
               <button
                 onClick={(e) => {
                   triggerParticleBurst(e.clientX, e.clientY);
-                  setShowAddReviewModal(true);
+                  handleOpenReviewModal();
                 }}
                 className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md hover:scale-105"
                 title="Mở form viết đánh giá trải nghiệm"
@@ -1187,7 +1239,7 @@ export default function LandingPageView({
                   <span>Ngắm một tí nhé! rồi hát tiếp</span>
                 </div>
                 <h3 className="font-headline text-xl sm:text-4xl text-[#864d61] max-w-md leading-snug">
-                  Cùng nẫu vi vu một tí rồi dô bia nha!
+                  Vi vu một tí rồi dô bia
                 </h3>
               </div>
 
@@ -1382,7 +1434,7 @@ export default function LandingPageView({
               </p>
               <button
                 type="button"
-                onClick={() => setShowAddReviewModal(true)}
+                onClick={handleOpenReviewModal}
                 className="px-6 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-95 transition-all duration-300 flex items-center gap-2 cursor-pointer clay-button-pink"
               >
                 <span>Viết đánh giá ngay</span>
@@ -1650,8 +1702,15 @@ export default function LandingPageView({
                   );
                 }
 
+                const isNewlyAdded = rev.id === highlightedReviewId;
+
                 return (
-                  <article key={rev.id} className="break-inside-avoid relative">
+                  <article key={rev.id} className={`break-inside-avoid relative transition-all duration-500 ${isNewlyAdded ? 'ring-4 ring-[#10b981] ring-offset-4 rounded-[2.5rem] shadow-[0_0_40px_rgba(16,185,129,0.35)] scale-[1.02] animate-in zoom-in-95' : ''}`}>
+                    {isNewlyAdded && (
+                      <div className="absolute -top-3 right-6 z-30 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-black px-3 py-0.5 rounded-full shadow-md animate-bounce flex items-center gap-1 border border-white">
+                        <span>✨ Vừa đăng mới!</span>
+                      </div>
+                    )}
                     <div className="bg-[#f3eaff] rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
                       <div className="absolute -bottom-3 left-10 w-7 h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
                       <div className="flex items-center justify-between mb-3">
@@ -1888,13 +1947,13 @@ export default function LandingPageView({
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <button
-                onClick={handleSaveContact}
+              <a
+                href="tel:0368115592"
                 className="bg-[#864d61] text-white font-headline text-base sm:text-lg px-8 py-4 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-                title="Lưu số hotline Locahome vào danh bạ"
+                title="Mở ứng dụng điện thoại và tự soạn sẵn số 0368.115.592"
               >
                 <span>Lưu Số Ngay</span>
-              </button>
+              </a>
 
               <a
                 href="tel:0368115592"
@@ -2176,50 +2235,43 @@ export default function LandingPageView({
         </div>
       )}
 
-      {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ (HIỆU ỨNG MỞ & ĐÓNG MƯỢT MÀ) ═══════════════ */}
+      {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ (HIỆU ỨNG MỞ & ĐÓNG SIÊU MƯỢT) ═══════════════ */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ease-out ${showAddReviewModal
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAddReviewModal && !isClosingReviewModal
           ? 'opacity-100 pointer-events-auto visible bg-black/60 backdrop-blur-md'
           : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
           }`}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setShowAddReviewModal(false);
-        }}
+        onClick={handleCloseReviewModal}
       >
         <div
-          className={`bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-300 ease-out transform ${showAddReviewModal
+          className={`bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${showAddReviewModal && !isClosingReviewModal
             ? 'scale-100 translate-y-0 opacity-100'
             : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
             }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Color Accent Line */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#ffd9e3] via-[#c9e6ff] to-[#b2f2bb]"></div>
+          <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#b2f2bb]"></div>
 
-          {reviewSuccess ? (
-            <div className="py-8 text-center flex flex-col items-center justify-center animate-in zoom-in-75 fade-in duration-400 ease-out">
-              <div className="w-20 h-20 rounded-3xl bg-[#b2f2bb] text-[#2f6a3f] flex items-center justify-center mb-4 border-3 border-[#96d5a0] shadow-[0_12px_28px_rgba(47,106,63,0.2)] animate-bounce">
-                <CuteCheckIcon className="w-11 h-11" />
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border-2 border-[#fab3ca] shadow-xs shrink-0">
+                <CuteStarIcon filled={true} className="w-6 h-6 text-amber-400" />
               </div>
-              <h3 className="font-headline text-2xl text-[#864d61] mb-2 animate-in slide-in-from-bottom-2 duration-300">
-                Gửi Đánh Giá Thành Công!
-              </h3>
-              <p className="text-sm font-semibold text-[#514347] max-w-xs leading-relaxed">
-                Cảm ơn bạn <span className="font-bold text-[#201047]">"{submittedReviewInfo.name}"</span> đã chia sẻ trải nghiệm chân thực cùng Locahome.
-              </p>
-              <div className="mt-4 inline-flex items-center gap-1.5 px-4 py-1.5 bg-amber-50 rounded-full text-xs font-bold text-amber-700 border border-amber-200 shadow-xs animate-in zoom-in-90 duration-300 delay-100">
-                <CuteStarIcon filled={true} className="w-4 h-4 text-amber-400" />
-                <span>Đánh giá {submittedReviewInfo.rating} sao đã được ghi nhận</span>
+              <div>
+                <h3 className="font-headline text-xl text-[#864d61]">Viết Đánh Giá Của Bạn</h3>
+                <p className="text-xs font-semibold text-slate-500">Chia sẻ trải nghiệm thuê loa kéo</p>
               </div>
             </div>
-          ) : (
-            <>
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-12 h-12 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border-2 border-[#fab3ca] shadow-xs shrink-0">
-                  <CuteStarIcon filled={true} className="w-6 h-6 text-amber-400" />
-                </div>
-                <h3 className="font-headline text-xl text-[#864d61]">Viết Đánh Giá Của Bạn</h3>
-              </div>
+            <button
+              type="button"
+              onClick={handleCloseReviewModal}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+              title="Đóng"
+            >
+              ✕
+            </button>
+          </div>
 
               <form onSubmit={handleAddReviewSubmit} className={`flex flex-col gap-4 ${reviewFormShake ? 'animate-shake' : ''}`}>
                 {/* Field: Name */}
@@ -2371,24 +2423,23 @@ export default function LandingPageView({
                 <div className="flex gap-3 mt-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowAddReviewModal(false);
-                      setReviewFormTouched({ name: false, comment: false });
-                    }}
+                    onClick={handleCloseReviewModal}
                     className="flex-1 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-headline text-xs text-slate-700 transition-colors cursor-pointer"
                   >
                     Hủy
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs clay-button-pink flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform cursor-pointer"
+                    disabled={isSubmittingReview}
+                    className="flex-1 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs clay-button-pink flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform cursor-pointer disabled:opacity-70"
                   >
-                    <span>Gửi Đánh Giá</span>
+                    {isSubmittingReview ? (
+                      <span className="inline-block animate-spin mr-1.5">⏳</span>
+                    ) : null}
+                    <span>{isSubmittingReview ? 'Đang gửi...' : 'Gửi Đánh Giá'}</span>
                   </button>
                 </div>
               </form>
-            </>
-          )}
         </div>
       </div>
 
