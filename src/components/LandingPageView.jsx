@@ -682,6 +682,7 @@ export default function LandingPageView({
   // ══════════ REVIEWS PAGINATION CONFIG (6 reviews per page) ══════════
   const REVIEWS_PER_PAGE = 6;
   const [reviewCurrentPage, setReviewCurrentPage] = useState(1);
+  const [pageSlideDirection, setPageSlideDirection] = useState('next');
 
   useEffect(() => {
     setReviewCurrentPage(1);
@@ -694,7 +695,8 @@ export default function LandingPageView({
   );
 
   const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalReviewPages) return;
+    if (newPage < 1 || newPage > totalReviewPages || newPage === reviewCurrentPage) return;
+    setPageSlideDirection(newPage > reviewCurrentPage ? 'next' : 'prev');
     setReviewCurrentPage(newPage);
     const el = document.getElementById('reviews');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1232,14 +1234,14 @@ export default function LandingPageView({
                   />
                 </div>
 
-                {/* Card 4: Say - Tràn viền 100% */}
+                {/* Card 4: Clean - Tràn viền 100% */}
                 <div
-                  onClick={() => setZoomImageModal({ id: 'say', location: 'Hát Hò Vui Say Mê', img: '/say.png' })}
+                  onClick={() => setZoomImageModal({ id: 'clean', location: 'Dọn Dẹp Gọn Gàng', img: '/clean.png' })}
                   className="relative aspect-[3/4] max-h-72 rounded-[2rem] sm:rounded-[2.4rem] overflow-hidden border-2 border-[#ebd4ff] shadow-[0_12px_28px_rgba(107,33,168,0.12)] hover:shadow-[0_20px_45px_rgba(107,33,168,0.25)] hover:-translate-y-2 active:scale-95 transition-all duration-500 group cursor-pointer select-none"
                 >
                   <img
-                    src="/say.png"
-                    alt="Say"
+                    src="/clean.png"
+                    alt="Dọn dẹp sạch sẽ"
                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-115 transition-transform duration-700 ease-out"
                   />
                 </div>
@@ -1463,7 +1465,12 @@ export default function LandingPageView({
             </div>
           ) : (
             <>
-              <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+              <div
+                key={`${reviewCurrentPage}-${pageSlideDirection}`}
+                className={`columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 animate-in fade-in duration-350 ease-out ${
+                  pageSlideDirection === 'next' ? 'slide-in-from-right-8' : 'slide-in-from-left-8'
+                }`}
+              >
                 {paginatedReviews.map((rev) => {
                 // Reusable Owner Reply Component Block
                 const renderOwnerReplyBlock = () => {
@@ -1666,7 +1673,6 @@ export default function LandingPageView({
                   return (
                     <article key={rev.id} className="break-inside-avoid relative">
                       <div className="bg-[#c9e6ff]/50 rounded-[2.2rem] p-6 shadow-[0_8px_24px_rgba(35,90,124,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#9ed1f8]/50">
-                        <div className="absolute -bottom-3 right-10 w-7 h-7 bg-[#c9e6ff]/50 transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(35,90,124,0.04)] -z-10 border-r border-b border-[#9ed1f8]/50"></div>
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex gap-1">
                             {[...Array(rev.rating)].map((_, i) => (
@@ -1695,8 +1701,7 @@ export default function LandingPageView({
                 if (rev.colorScheme === 'green') {
                   return (
                     <article key={rev.id} className="break-inside-avoid relative">
-                      <div className="bg-[#b2f2bb]/50 rounded-[2rem] rounded-tr-none p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
-                        <div className="absolute -top-3 right-0 w-7 h-7 bg-[#b2f2bb]/50 transform rotate-45 rounded-xs -z-10 border-t border-r border-[#96d5a0]/50"></div>
+                      <div className="bg-[#b2f2bb]/50 rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(47,106,63,0.06),inset_0_2px_12px_rgba(255,255,255,0.9)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#96d5a0]/50">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex gap-1">
                             {[...Array(rev.rating)].map((_, i) => (
@@ -1734,7 +1739,6 @@ export default function LandingPageView({
                       </div>
                     )}
                     <div className="bg-[#f3eaff] rounded-[2rem] p-6 shadow-[0_8px_24px_rgba(134,77,97,0.06),inset_0_2px_12px_rgba(255,255,255,0.8)] relative z-10 transition-transform duration-300 hover:-translate-y-2 border border-[#ffd9e3]">
-                      <div className="absolute -bottom-3 left-10 w-7 h-7 bg-[#f3eaff] transform rotate-45 rounded-xs shadow-[3px_3px_6px_rgba(134,77,97,0.03)] -z-10 border-r border-b border-[#ffd9e3]"></div>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex gap-1">
                           {[...Array(rev.rating)].map((_, i) => (
@@ -1767,56 +1771,58 @@ export default function LandingPageView({
 
               {/* ═══════════════ PAGINATION CONTROLS CHO ĐÁNH GIÁ ═══════════════ */}
               {totalReviewPages > 1 && (
-                <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/85 backdrop-blur-md rounded-3xl p-4 sm:px-6 sm:py-4 border-2 border-[#ffd9e3] shadow-sm">
-                  <span className="text-xs sm:text-sm font-semibold text-slate-500 order-2 sm:order-1 text-center sm:text-left">
-                    Hiển thị <strong className="text-[#864d61]">{(reviewCurrentPage - 1) * REVIEWS_PER_PAGE + 1} - {Math.min(reviewCurrentPage * REVIEWS_PER_PAGE, filteredReviews.length)}</strong> trong <strong className="text-[#201047]">{filteredReviews.length}</strong> nhận xét
-                  </span>
+                <div className="mt-8 flex justify-center w-full">
+                  <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md rounded-full sm:rounded-3xl p-1.5 sm:px-6 sm:py-3.5 border-2 border-[#ffd9e3] shadow-[0_4px_16px_rgba(134,77,97,0.06)] sm:w-full sm:justify-between">
+                    <span className="hidden sm:inline-block text-xs sm:text-sm font-semibold text-slate-500 text-left">
+                      Hiển thị <strong className="text-[#864d61]">{(reviewCurrentPage - 1) * REVIEWS_PER_PAGE + 1} - {Math.min(reviewCurrentPage * REVIEWS_PER_PAGE, filteredReviews.length)}</strong> trong <strong className="text-[#201047]">{filteredReviews.length}</strong> nhận xét
+                    </span>
 
-                  <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2 flex-wrap justify-center">
-                    {/* Prev Button */}
-                    <button
-                      type="button"
-                      disabled={reviewCurrentPage === 1}
-                      onClick={() => handlePageChange(reviewCurrentPage - 1)}
-                      className="px-3.5 py-2 rounded-2xl border-2 border-[#fab3ca]/60 font-headline font-bold text-xs sm:text-sm text-[#864d61] bg-white hover:bg-[#ffd9e3] disabled:opacity-40 disabled:hover:bg-white disabled:cursor-not-allowed transition-all duration-200 cursor-pointer shadow-xs active:scale-95 flex items-center gap-1"
-                      title="Trang trước"
-                    >
-                      <span>←</span>
-                      <span className="hidden sm:inline">Trước</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      {/* Prev Button */}
+                      <button
+                        type="button"
+                        disabled={reviewCurrentPage === 1}
+                        onClick={() => handlePageChange(reviewCurrentPage - 1)}
+                        className="w-9 h-9 sm:w-auto sm:px-3.5 sm:py-2 rounded-full sm:rounded-2xl border-2 border-[#fab3ca]/60 font-headline font-bold text-xs sm:text-sm text-[#864d61] bg-white hover:bg-[#ffd9e3] disabled:opacity-30 disabled:hover:bg-white disabled:cursor-not-allowed transition-all duration-200 cursor-pointer shadow-2xs active:scale-95 flex items-center justify-center gap-1"
+                        title="Trang trước"
+                      >
+                        <span className="text-sm">←</span>
+                        <span className="hidden sm:inline">Trước</span>
+                      </button>
 
-                    {/* Page Numbers */}
-                    {Array.from({ length: totalReviewPages }).map((_, idx) => {
-                      const pageNum = idx + 1;
-                      const isActive = pageNum === reviewCurrentPage;
+                      {/* Page Numbers */}
+                      {Array.from({ length: totalReviewPages }).map((_, idx) => {
+                        const pageNum = idx + 1;
+                        const isActive = pageNum === reviewCurrentPage;
 
-                      return (
-                        <button
-                          key={pageNum}
-                          type="button"
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl font-headline font-extrabold text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center justify-center ${
-                            isActive
-                              ? 'bg-[#864d61] text-white shadow-md shadow-[#864d61]/30 scale-105 border-2 border-[#864d61]'
-                              : 'bg-white hover:bg-[#ffd9e3]/60 text-slate-700 hover:text-[#864d61] border-2 border-slate-200/70 hover:border-[#fab3ca]'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
+                        return (
+                          <button
+                            key={pageNum}
+                            type="button"
+                            onClick={() => handlePageChange(pageNum)}
+                            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full sm:rounded-2xl font-headline font-extrabold text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center justify-center ${
+                              isActive
+                                ? 'bg-[#864d61] text-white shadow-md shadow-[#864d61]/30 scale-105 border-2 border-[#864d61]'
+                                : 'bg-white hover:bg-[#ffd9e3]/60 text-slate-700 hover:text-[#864d61] border-2 border-slate-200/70 hover:border-[#fab3ca]'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
 
-                    {/* Next Button */}
-                    <button
-                      type="button"
-                      disabled={reviewCurrentPage === totalReviewPages}
-                      onClick={() => handlePageChange(reviewCurrentPage + 1)}
-                      className="px-3.5 py-2 rounded-2xl border-2 border-[#fab3ca]/60 font-headline font-bold text-xs sm:text-sm text-[#864d61] bg-white hover:bg-[#ffd9e3] disabled:opacity-40 disabled:hover:bg-white disabled:cursor-not-allowed transition-all duration-200 cursor-pointer shadow-xs active:scale-95 flex items-center gap-1"
-                      title="Trang sau"
-                    >
-                      <span className="hidden sm:inline">Sau</span>
-                      <span>→</span>
-                    </button>
+                      {/* Next Button */}
+                      <button
+                        type="button"
+                        disabled={reviewCurrentPage === totalReviewPages}
+                        onClick={() => handlePageChange(reviewCurrentPage + 1)}
+                        className="w-9 h-9 sm:w-auto sm:px-3.5 sm:py-2 rounded-full sm:rounded-2xl border-2 border-[#fab3ca]/60 font-headline font-bold text-xs sm:text-sm text-[#864d61] bg-white hover:bg-[#ffd9e3] disabled:opacity-30 disabled:hover:bg-white disabled:cursor-not-allowed transition-all duration-200 cursor-pointer shadow-2xs active:scale-95 flex items-center justify-center gap-1"
+                        title="Trang sau"
+                      >
+                        <span className="hidden sm:inline">Sau</span>
+                        <span className="text-sm">→</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
