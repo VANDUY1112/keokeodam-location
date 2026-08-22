@@ -679,6 +679,27 @@ export default function LandingPageView({
       return 0;
     });
 
+  // ══════════ REVIEWS PAGINATION CONFIG (6 reviews per page) ══════════
+  const REVIEWS_PER_PAGE = 6;
+  const [reviewCurrentPage, setReviewCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setReviewCurrentPage(1);
+  }, [reviewFilter]);
+
+  const totalReviewPages = Math.ceil(filteredReviews.length / REVIEWS_PER_PAGE) || 1;
+  const paginatedReviews = filteredReviews.slice(
+    (reviewCurrentPage - 1) * REVIEWS_PER_PAGE,
+    reviewCurrentPage * REVIEWS_PER_PAGE
+  );
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalReviewPages) return;
+    setReviewCurrentPage(newPage);
+    const el = document.getElementById('reviews');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handleOpenRentSpeaker = (pkg) => {
     setSelectedSpeakerForBooking(pkg.id);
     setBookingFormData(prev => ({
@@ -1441,8 +1462,9 @@ export default function LandingPageView({
               </button>
             </div>
           ) : (
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-              {filteredReviews.map((rev) => {
+            <>
+              <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                {paginatedReviews.map((rev) => {
                 // Reusable Owner Reply Component Block
                 const renderOwnerReplyBlock = () => {
                   const isExpanded = Boolean(expandedReplies[rev.id]);
@@ -1741,7 +1763,64 @@ export default function LandingPageView({
                   </article>
                 );
               })}
-            </div>
+              </div>
+
+              {/* ═══════════════ PAGINATION CONTROLS CHO ĐÁNH GIÁ ═══════════════ */}
+              {totalReviewPages > 1 && (
+                <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/85 backdrop-blur-md rounded-3xl p-4 sm:px-6 sm:py-4 border-2 border-[#ffd9e3] shadow-sm">
+                  <span className="text-xs sm:text-sm font-semibold text-slate-500 order-2 sm:order-1 text-center sm:text-left">
+                    Hiển thị <strong className="text-[#864d61]">{(reviewCurrentPage - 1) * REVIEWS_PER_PAGE + 1} - {Math.min(reviewCurrentPage * REVIEWS_PER_PAGE, filteredReviews.length)}</strong> trong <strong className="text-[#201047]">{filteredReviews.length}</strong> nhận xét
+                  </span>
+
+                  <div className="flex items-center gap-1.5 sm:gap-2 order-1 sm:order-2 flex-wrap justify-center">
+                    {/* Prev Button */}
+                    <button
+                      type="button"
+                      disabled={reviewCurrentPage === 1}
+                      onClick={() => handlePageChange(reviewCurrentPage - 1)}
+                      className="px-3.5 py-2 rounded-2xl border-2 border-[#fab3ca]/60 font-headline font-bold text-xs sm:text-sm text-[#864d61] bg-white hover:bg-[#ffd9e3] disabled:opacity-40 disabled:hover:bg-white disabled:cursor-not-allowed transition-all duration-200 cursor-pointer shadow-xs active:scale-95 flex items-center gap-1"
+                      title="Trang trước"
+                    >
+                      <span>←</span>
+                      <span className="hidden sm:inline">Trước</span>
+                    </button>
+
+                    {/* Page Numbers */}
+                    {Array.from({ length: totalReviewPages }).map((_, idx) => {
+                      const pageNum = idx + 1;
+                      const isActive = pageNum === reviewCurrentPage;
+
+                      return (
+                        <button
+                          key={pageNum}
+                          type="button"
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl font-headline font-extrabold text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center justify-center ${
+                            isActive
+                              ? 'bg-[#864d61] text-white shadow-md shadow-[#864d61]/30 scale-105 border-2 border-[#864d61]'
+                              : 'bg-white hover:bg-[#ffd9e3]/60 text-slate-700 hover:text-[#864d61] border-2 border-slate-200/70 hover:border-[#fab3ca]'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    {/* Next Button */}
+                    <button
+                      type="button"
+                      disabled={reviewCurrentPage === totalReviewPages}
+                      onClick={() => handlePageChange(reviewCurrentPage + 1)}
+                      className="px-3.5 py-2 rounded-2xl border-2 border-[#fab3ca]/60 font-headline font-bold text-xs sm:text-sm text-[#864d61] bg-white hover:bg-[#ffd9e3] disabled:opacity-40 disabled:hover:bg-white disabled:cursor-not-allowed transition-all duration-200 cursor-pointer shadow-xs active:scale-95 flex items-center gap-1"
+                      title="Trang sau"
+                    >
+                      <span className="hidden sm:inline">Sau</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
 
