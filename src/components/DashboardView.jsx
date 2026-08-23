@@ -10,6 +10,7 @@ export default function DashboardView({
   onOpenLogExpense,
   onOpenItinerary,
   onNavigateToTab,
+  onOpenLandingQRModal,
 }) {
   const [selectedHotspotId, setSelectedHotspotId] = useState('hs-1');
   const [isLocating, setIsLocating] = useState(false);
@@ -288,6 +289,54 @@ export default function DashboardView({
           isLocating={isLocating}
           onNavigateToTab={onNavigateToTab}
         />
+      </div>
+
+      {/* ══════════ FEATURED CARD: TẠO MÃ QR QUÁN & IN BẢNG ĐẶT LOA (LANDING PAGE) ══════════ */}
+      <div className="w-full bg-gradient-to-br from-[#fff0f4] via-white to-[#f0f7ff] rounded-3xl p-5 sm:p-6 lg:p-7 border-2 border-rose-100/90 shadow-[0_6px_24px_rgba(134,77,97,0.06)] flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+        {/* Glow backdrop */}
+        <div className="absolute -right-12 -bottom-12 w-48 h-48 bg-rose-200/40 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-32 h-32 bg-purple-100/50 rounded-full blur-xl pointer-events-none"></div>
+
+        {/* Left Info */}
+        <div className="flex items-center gap-4 sm:gap-5 z-10 min-w-0 flex-1">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-[#864d61] to-rose-500 text-white flex items-center justify-center shadow-lg shadow-rose-200 shrink-0 group-hover:scale-105 transition-transform">
+            <span className="material-symbols-outlined text-3xl sm:text-4xl">qr_code_2</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className="text-lg sm:text-xl lg:text-2xl font-black text-slate-900 tracking-tight">
+                Tạo Mã QR Quán & Bảng Đặt Loa
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-[#864d61] text-[11px] font-extrabold border border-rose-200">
+                Landing Page
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+              Khách hàng mở Camera điện thoại quét mã là vào ngay trang xem loa & đặt thuê hỏa tốc. Có thể tạo mã số bàn và in Standee để bàn A5/A6.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Actions */}
+        <div className="flex flex-wrap items-center gap-2.5 z-10 shrink-0 w-full md:w-auto justify-end">
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('landing')}
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs sm:text-sm border border-slate-200 shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px] text-amber-500">visibility</span>
+            <span>Xem Trang Khách</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onOpenLandingQRModal}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#864d61] to-rose-600 hover:opacity-95 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-200 flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[20px]">qr_code_scanner</span>
+            <span>Tạo Mã QR & In Standee</span>
+          </button>
+        </div>
       </div>
 
       {/* ══════════ 2-COLUMN SECTION: TRIPS & EXPENSES ══════════ */}

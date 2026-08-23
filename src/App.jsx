@@ -9,11 +9,53 @@ import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
 import VietQRModal from './components/VietQRModal';
 import LandingPageView from './components/LandingPageView';
+import LandingPageQRModal from './components/LandingPageQRModal';
+import UserLoginPageView from './components/UserLoginPageView';
+import AdminLoginPageView from './components/AdminLoginPageView';
 import { formatVND, parseVNDNumber } from './utils/format';
 import { api } from './services/api.js';
+import { supabase } from './services/supabase';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const pageParam = urlParams.get('page') || urlParams.get('tab') || window.location.hash.replace('#', '');
+      if (pageParam === 'landing' || pageParam === 'home' || pageParam === 'reviews') {
+        return 'landing';
+      }
+      if (pageParam === 'admin-login' || pageParam === 'admin') {
+        return 'admin-login';
+      }
+      if (pageParam === 'login' || pageParam === 'user-login' || pageParam === 'signin') {
+        return 'user-login';
+      }
+      if (['dashboard', 'tracking', 'expenses', 'history', 'reports', 'settings'].includes(pageParam)) {
+        return pageParam;
+      }
+      // If a stored token exists, go to dashboard, otherwise default to landing page for guests/scanned users
+      const hasToken = localStorage.getItem('locahome_token');
+      return hasToken ? 'dashboard' : 'landing';
+    } catch {
+      return 'landing';
+    }
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return Boolean(localStorage.getItem('locahome_token'));
+  });
+
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('locahome_current_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [showLandingQRModal, setShowLandingQRModal] = useState(false);
+  const [loginInitialType, setLoginInitialType] = useState('user');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogExpenseModal, setShowLogExpenseModal] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
@@ -176,6 +218,46 @@ export default function App() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Supabase Real Social Auth State Listener
+  useEffect(() => {
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || !session?.user) {
+          if (!localStorage.getItem('locahome_token')) {
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+            localStorage.removeItem('locahome_current_user');
+          }
+          return;
+        }
+
+        if (session?.user) {
+          const user = {
+            id: session.user.id,
+            email: session.user.email || session.user.phone,
+            fullName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Khách Hàng',
+            avatarUrl: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+            role: 'customer',
+            points: 120
+          };
+          setCurrentUser(user);
+          setIsAuthenticated(true);
+          localStorage.setItem('locahome_current_user', JSON.stringify(user));
+          if (event === 'SIGNED_IN') {
+            setToast({
+              title: '💖 Đăng Nhập Thành Công!',
+              desc: `Xin chào ${user.fullName}! Chúc bạn có những phút giây ca hát tuyệt vời cùng Dặm.`,
+              type: 'success'
+            });
+          }
+        }
+      });
+      return () => subscription?.unsubscribe();
+    } catch (e) {
+      console.warn('Supabase auth state listener error:', e);
+    }
+  }, []);
+
   const [newExpense, setNewExpense] = useState({
     title: '',
     project: 'Dịch vụ Kẹo Kéo Dặm',
@@ -281,8 +363,50 @@ export default function App() {
     localStorage.setItem('expensely_user_avatar', url);
   };
 
+  // Synchronize URL with active tab so scanning QR or sharing link opens exact page
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (activeTab === 'landing') {
+        url.searchParams.set('page', 'landing');
+      } else if (activeTab === 'login') {
+        url.searchParams.set('page', 'login');
+      } else {
+        url.searchParams.set('page', activeTab);
+      }
+      window.history.replaceState({}, '', url.toString());
+    } catch (e) {
+      // ignore
+    }
+  }, [activeTab]);
+
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch (e) {
+      // ignore
+    }
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      // ignore
+    }
+    api.setToken(null);
+    localStorage.removeItem('locahome_token');
+    localStorage.removeItem('locahome_current_user');
+    // Clear all Supabase session storage keys
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('sb-')) {
+        localStorage.removeItem(key);
+      }
+    });
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setShowProfileMenu(false);
+    setActiveTab('landing');
+  };
+
   const navItems = [
-    { id: 'landing', label: 'Trang Khách (Landing)', icon: 'celebration', highlight: true },
     { id: 'dashboard', label: 'Tổng Quan', icon: 'dashboard' },
     { id: 'tracking', label: 'Giao Loa & GPS', icon: 'two_wheeler' },
     { id: 'expenses', label: 'Doanh Thu & Chi Phí', icon: 'payments' },
@@ -291,11 +415,85 @@ export default function App() {
     { id: 'settings', label: 'Cài Đặt', icon: 'settings' },
   ];
 
+  // ═══════════════ VIEW 1A: TRANG ĐĂNG NHẬP KHÁCH HÀNG (USER LOGIN) ═══════════════
+  if (activeTab === 'user-login' || activeTab === 'login') {
+    return (
+      <div className="min-h-screen">
+        <UserLoginPageView
+          onLoginSuccess={(user) => {
+            setIsAuthenticated(true);
+            setCurrentUser(user);
+            setActiveTab('landing');
+          }}
+          onNavigateToLanding={() => setActiveTab('landing')}
+          setToast={setToast}
+        />
+
+        {toast && (
+          <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-200 border border-slate-700 max-w-md">
+            <span className="material-symbols-outlined text-emerald-400 text-2xl shrink-0">check_circle</span>
+            <div className="min-w-0">
+              <div className="text-sm font-bold truncate">{toast.title}</div>
+              <div className="text-xs text-slate-300 line-clamp-2">{toast.desc || toast.message}</div>
+            </div>
+            <button onClick={() => setToast(null)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white shrink-0 ml-auto">
+              <span className="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ═══════════════ VIEW 1B: TRANG ĐĂNG NHẬP QUẢN TRỊ (ADMIN & SHIPPER LOGIN) ═══════════════
+  if (activeTab === 'admin-login') {
+    return (
+      <div className="min-h-screen">
+        <AdminLoginPageView
+          onLoginSuccess={(user) => {
+            setIsAuthenticated(true);
+            setCurrentUser(user);
+            if (user.fullName) {
+              setUserName(user.fullName);
+              localStorage.setItem('expensely_user_name', user.fullName);
+            }
+            if (user.avatarUrl) {
+              setUserAvatar(user.avatarUrl);
+              localStorage.setItem('expensely_user_avatar', user.avatarUrl);
+            }
+            localStorage.setItem('locahome_current_user', JSON.stringify(user));
+            setActiveTab('dashboard');
+          }}
+          onNavigateToLanding={() => setActiveTab('landing')}
+          setToast={setToast}
+        />
+
+        {toast && (
+          <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-200 border border-slate-700 max-w-md">
+            <span className="material-symbols-outlined text-emerald-400 text-2xl shrink-0">check_circle</span>
+            <div className="min-w-0">
+              <div className="text-sm font-bold truncate">{toast.title}</div>
+              <div className="text-xs text-slate-300 line-clamp-2">{toast.desc || toast.message}</div>
+            </div>
+            <button onClick={() => setToast(null)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white shrink-0 ml-auto">
+              <span className="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ═══════════════ VIEW 2: TRANG KHÁCH HÀNG (LANDING PAGE) ═══════════════
   if (activeTab === 'landing') {
     return (
       <div className="min-h-screen bg-[#fdf7ff]">
         <LandingPageView
-          onNavigateToAdmin={() => setActiveTab('dashboard')}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onNavigateToAdmin={() => isAuthenticated ? setActiveTab('dashboard') : setActiveTab('admin-login')}
+          onNavigateToLogin={() => setActiveTab('user-login')}
+          onOpenQRModal={() => setShowLandingQRModal(true)}
           onOpenVietQR={openVietQR}
           onAddBooking={(booking) => {
             handleAddTrip({
@@ -310,11 +508,20 @@ export default function App() {
             });
             setToast({
               title: '🎉 Đã Nhận Đơn Thuê Mới!',
-              message: `${booking.customerName} vừa đặt thuê ${booking.speakerName}!`,
+              desc: `${booking.customerName} vừa đặt thuê ${booking.speakerName}!`,
               type: 'success',
             });
           }}
         />
+
+        {/* Landing Page QR Code & Standee Modal */}
+        {showLandingQRModal && (
+          <LandingPageQRModal
+            isOpen={showLandingQRModal}
+            onClose={() => setShowLandingQRModal(false)}
+            setToast={setToast}
+          />
+        )}
 
         {/* VietQR Modal */}
         {showVietQRModal && (
@@ -324,6 +531,20 @@ export default function App() {
             amount={vietQRData.amount}
             note={vietQRData.note}
           />
+        )}
+
+        {/* Toast Alert Notification */}
+        {toast && (
+          <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-200 border border-slate-700 max-w-md">
+            <span className="material-symbols-outlined text-emerald-400 text-2xl shrink-0">check_circle</span>
+            <div className="min-w-0">
+              <div className="text-sm font-bold truncate">{toast.title}</div>
+              <div className="text-xs text-slate-300 line-clamp-2">{toast.desc || toast.message}</div>
+            </div>
+            <button onClick={() => setToast(null)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white shrink-0 ml-auto">
+              <span className="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
         )}
       </div>
     );
@@ -371,17 +592,6 @@ export default function App() {
             </button>
           ))}
         </nav>
-
-        {/* Quick Customer Landing Preview in Sidebar Footer */}
-        <div className="p-4 border-t border-slate-200/60">
-          <button
-            onClick={() => setActiveTab('landing')}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#ffd9e3] hover:bg-[#ffb7ce] text-[#864d61] font-bold text-sm shadow-sm transition-all"
-          >
-            <span className="material-symbols-outlined text-[20px]">celebration</span>
-            <span>Xem Trang Khách Cute</span>
-          </button>
-        </div>
       </aside>
 
       {/* ═══════════════ MOBILE DRAWER MENU (PREMIUM SLIDE & BLUR) ═══════════════ */}
@@ -420,7 +630,7 @@ export default function App() {
             </div>
           </div>
 
-          <nav className="flex-1 flex flex-col gap-1.5 overflow-y-auto no-scrollbar">
+          <nav className="flex-1 flex flex-col gap-1.5 overflow-y-auto">
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -428,31 +638,44 @@ export default function App() {
                   setActiveTab(item.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-left transition-all ${
+                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all font-semibold text-sm ${
                   activeTab === item.id
-                    ? 'bg-slate-900 text-white font-bold shadow-md shadow-slate-900/15'
-                    : 'text-slate-700 hover:bg-slate-100 font-medium'
+                    ? 'bg-primary text-white shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
-                <span className={`material-symbols-outlined text-[22px] ${activeTab === item.id ? 'text-white' : 'text-slate-500'}`}>
+                <span className={`material-symbols-outlined text-[22px] ${
+                  activeTab === item.id ? 'text-white' : 'text-slate-500'
+                }`}>
                   {item.icon}
                 </span>
-                <span className="text-sm font-semibold">{item.label}</span>
+                <span>{item.label}</span>
               </button>
             ))}
           </nav>
 
-          {/* Quick VietQR Drawer Button */}
-          <div className="pt-3 border-t border-slate-100 mt-2">
+          {/* Quick Mobile Drawer Actions */}
+          <div className="pt-3 border-t border-slate-100 mt-auto flex flex-col gap-2">
             <button
               onClick={() => {
-                openVietQR(500000, 'KEO KEO DAM nhan 500.000');
+                setShowLandingQRModal(true);
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-md active:scale-95 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-white hover:bg-rose-50 text-[#864d61] font-bold text-xs shadow-xs transition-all border border-rose-200 cursor-pointer active:scale-95"
             >
-              <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
-              <span>Tạo Mã VietQR Thu Tiền</span>
+              <span className="material-symbols-outlined text-[18px] text-rose-600">qr_code_2</span>
+              <span>Mã QR Quán</span>
+            </button>
+
+            <button
+              onClick={() => {
+                openVietQR(280000, 'LOCAHOME THUE LOA');
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95"
+            >
+              <span className="material-symbols-outlined text-[18px]">payments</span>
+              <span>Tạo VietQR Thu Tiền</span>
             </button>
           </div>
         </div>
@@ -475,26 +698,26 @@ export default function App() {
           {/* Spacer for desktop */}
           <div className="hidden lg:block"></div>
 
-          {/* Right Header: VietQR Quick Button, Notifications & Profile Dropdown */}
-          <div className="flex items-center gap-2.5 sm:gap-4">
-            {/* Quick Landing Page Button */}
+          {/* Right Header: QR Button, VietQR, Notifications & Profile Dropdown */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Quick Landing QR Code Generator Button (Desktop/Tablet only) */}
             <button
-              onClick={() => setActiveTab('landing')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#ffd9e3] hover:bg-[#ffb7ce] text-[#864d61] font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all border border-[#fab3ca]"
-              title="Xem trang Landing Page khách hàng"
+              onClick={() => setShowLandingQRModal(true)}
+              className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-[#864d61] font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all border border-rose-200 cursor-pointer"
+              title="Mở mã QR quán / in bảng đặt bàn"
             >
-              <span className="material-symbols-outlined text-[18px]">celebration</span>
-              <span className="hidden sm:inline">Trang Khách Cute</span>
+              <span className="material-symbols-outlined text-[18px] text-rose-600">qr_code_2</span>
+              <span>Mã QR Quán</span>
             </button>
 
-            {/* Quick VietQR Button */}
+            {/* Quick VietQR Button (Desktop/Tablet only) */}
             <button
               onClick={() => openVietQR(280000, 'LOCAHOME THUE LOA')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all"
+              className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all cursor-pointer"
               title="Tạo mã VietQR thu tiền"
             >
-              <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
-              <span className="hidden sm:inline">Tạo Mã QR</span>
+              <span className="material-symbols-outlined text-[18px]">payments</span>
+              <span>Thu Tiền VietQR</span>
             </button>
 
             <button
@@ -512,90 +735,39 @@ export default function App() {
             <div className="relative" ref={profileMenuRef}>
               <div
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-2.5 sm:gap-3 cursor-pointer hover:bg-slate-100 p-1 sm:p-1.5 sm:pr-3.5 rounded-2xl transition-all group border border-slate-200 bg-white shadow-xs"
+                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-slate-100 py-1.5 px-3 sm:px-3.5 rounded-2xl transition-all group border border-slate-200 bg-white shadow-xs"
               >
-                <img
-                  alt="Profile"
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-slate-300 shadow-xs"
-                  src={userAvatar}
-                />
-                <span className="font-bold text-slate-800 text-sm sm:text-base hidden sm:inline">{userName}</span>
-                <span className={`material-symbols-outlined text-[20px] text-slate-500 transition-transform duration-200 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
+                <span className="font-bold text-slate-800 text-xs sm:text-sm md:text-base truncate max-w-[120px] sm:max-w-[180px]">
+                  {userName}
+                </span>
+                <span className={`material-symbols-outlined text-[18px] sm:text-[20px] text-slate-500 transition-transform duration-200 shrink-0 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
                   expand_more
                 </span>
               </div>
 
               {/* Profile Dropdown Menu (Open & Close transition) */}
               <div
-                className={`absolute right-0 top-full mt-2 w-76 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 flex flex-col space-y-2 transition-all duration-200 ease-out origin-top-right ${
+                className={`absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${
                   showProfileMenu
                     ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
                 }`}
               >
-                <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-3">
-                  <img
-                    alt="Profile"
-                    className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-xs"
-                    src={userAvatar}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <div className="font-bold text-sm text-slate-900 truncate">{userName}</div>
-                    <div className="text-xs text-slate-500 truncate">Quản Trị Viên Locahome</div>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-200/70 text-slate-800 text-[10px] font-bold mt-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      Đang Hoạt Động
-                    </span>
-                  </div>
+                <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-center">
+                  <div className="font-extrabold text-base text-slate-900 truncate">{userName}</div>
                 </div>
 
-                <div className="space-y-1 text-xs sm:text-sm">
+                <div className="pt-1 flex items-center justify-between gap-2">
                   <button
-                    onClick={() => { setActiveTab('settings'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
+                    onClick={handleLogout}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 border border-rose-200 cursor-pointer active:scale-95"
                   >
-                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">settings</span>
-                    <span className="font-semibold">Cài Đặt & Cấu Hình</span>
-                  </button>
-                  <button
-                    onClick={() => { setActiveTab('reports'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
-                  >
-                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">assessment</span>
-                    <span className="font-semibold">Báo Cáo & Thống Kê</span>
-                  </button>
-                  <button
-                    onClick={() => { setActiveTab('tracking'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
-                  >
-                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">two_wheeler</span>
-                    <span className="font-semibold">Giao Loa & GPS</span>
-                  </button>
-                  <button
-                    onClick={() => { setActiveTab('expenses'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-slate-800 hover:bg-slate-100 transition-colors text-left group"
-                  >
-                    <span className="material-symbols-outlined text-[20px] text-slate-500 group-hover:text-slate-900">payments</span>
-                    <span className="font-semibold">Sổ Thu Chi & Hoá Đơn</span>
-                  </button>
-                </div>
-
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <button
-                    onClick={() => {
-                      if (window.confirm('Khôi phục toàn bộ dữ liệu mẫu ban đầu?')) {
-                        localStorage.clear();
-                        window.location.reload();
-                      }
-                    }}
-                    className="text-slate-500 hover:text-slate-900 font-semibold transition-colors flex items-center gap-1"
-                  >
-                    <span className="material-symbols-outlined text-sm">restart_alt</span>
-                    Đặt Lại Dữ Liệu
+                    <span className="material-symbols-outlined text-[18px]">logout</span>
+                    <span>Đăng Xuất</span>
                   </button>
                   <button
                     onClick={() => setShowProfileMenu(false)}
-                    className="text-slate-400 hover:text-slate-700 font-bold"
+                    className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
                   >
                     Đóng
                   </button>
@@ -616,6 +788,7 @@ export default function App() {
                 onOpenLogExpense={() => setShowLogExpenseModal(true)}
                 onOpenItinerary={() => setShowItineraryModal(true)}
                 onNavigateToTab={setActiveTab}
+                onOpenLandingQRModal={() => setShowLandingQRModal(true)}
               />
             )}
 
@@ -964,6 +1137,15 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* ═══════════════ LANDING PAGE QR CODE & STANDEE MODAL ═══════════════ */}
+      {showLandingQRModal && (
+        <LandingPageQRModal
+          isOpen={showLandingQRModal}
+          onClose={() => setShowLandingQRModal(false)}
+          setToast={setToast}
+        />
+      )}
 
       {/* ═══════════════ VIETQR PAYMENT MODAL ═══════════════ */}
       <VietQRModal

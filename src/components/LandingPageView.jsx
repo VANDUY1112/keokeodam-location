@@ -362,7 +362,10 @@ export function CuteAvatarPill({ name = "User", letter = "U", color = "pink", cl
 // ══════════════════════════════════════════════════════════
 
 export default function LandingPageView({
+  currentUser,
+  onLogout,
   onNavigateToAdmin,
+  onNavigateToLogin,
   onOpenVietQR,
   onAddBooking
 }) {
@@ -400,6 +403,18 @@ export default function LandingPageView({
   const [reviewFormTouched, setReviewFormTouched] = useState({ name: false, comment: false });
   const [reviewFormShake, setReviewFormShake] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleAnimatedLogout = (e) => {
+    if (e) {
+      triggerParticleBurst(e.clientX, e.clientY);
+    }
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      if (onLogout) onLogout();
+      setIsLoggingOut(false);
+    }, 280);
+  };
   const [isClosingReviewModal, setIsClosingReviewModal] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewToast, setReviewToast] = useState(null);
@@ -1132,6 +1147,41 @@ export default function LandingPageView({
               >
                 <span>Viết Đánh Giá</span>
               </button>
+
+              {currentUser && currentUser.role === 'customer' ? (
+                <div className={`flex items-center gap-2 bg-white/95 border border-[#ffd9e3] py-1 px-2.5 sm:px-3 rounded-full shadow-xs transition-all duration-300 ${
+                  isLoggingOut ? 'scale-75 opacity-0 blur-xs -translate-y-1' : 'animate-page-enter'
+                }`}>
+                  <img
+                    src={currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
+                    alt={currentUser.fullName}
+                    className="w-7 h-7 rounded-full object-cover border border-[#ffd9e3]"
+                  />
+                  <span className="font-bold text-[#864d61] text-xs sm:text-sm max-w-[90px] sm:max-w-[140px] truncate">
+                    {currentUser.fullName}
+                  </span>
+                  <button
+                    onClick={handleAnimatedLogout}
+                    disabled={isLoggingOut}
+                    className="text-slate-400 hover:text-rose-600 transition-all p-0.5 hover:rotate-12 active:scale-90 cursor-pointer disabled:opacity-50"
+                    title="Đăng xuất tài khoản"
+                  >
+                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">logout</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    triggerParticleBurst(e.clientX, e.clientY);
+                    if (onNavigateToLogin) onNavigateToLogin();
+                    else if (onNavigateToAdmin) onNavigateToAdmin();
+                  }}
+                  className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md hover:scale-105 animate-page-enter"
+                  title="Đăng nhập thành viên"
+                >
+                  <span>Đăng Nhập</span>
+                </button>
+              )}
             </div>
           </div>
         </header>
@@ -2087,9 +2137,19 @@ export default function LandingPageView({
             Chia sẻ âm thanh hạnh phúc đến mọi bữa tiệc. Thuê loa kẹo kéo uy tín, âm thanh chất lượng tốt nhất.
           </p>
 
-          <p className="text-xs font-bold text-[#864d61]/70 mt-2 tracking-wide">
-            Được phát triển bởi Hồ Văn Duy
-          </p>
+          <div className="flex items-center gap-3 mt-2 text-xs font-bold flex-wrap justify-center">
+            <span className="text-[#864d61]/70">Được phát triển bởi Hồ Văn Duy</span>
+            <span className="text-slate-300">•</span>
+            <button
+              onClick={() => {
+                if (onNavigateToLogin) onNavigateToLogin();
+                else if (onNavigateToAdmin) onNavigateToAdmin();
+              }}
+              className="text-slate-500 hover:text-[#864d61] transition-colors cursor-pointer underline underline-offset-2"
+            >
+              Đăng nhập quản trị
+            </button>
+          </div>
         </div>
       </footer>
 

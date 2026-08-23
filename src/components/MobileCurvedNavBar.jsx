@@ -71,7 +71,7 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
               ${isCenterActive ? 'ring-2 ring-white shadow-[0_8px_22px_rgba(6,182,212,0.4)] scale-105' : ''}
             `}
             style={{ backgroundColor: isCenterActive ? ACTIVE_CENTER_BG : BG_COLOR }}
-            title="Hành Trình"
+            title="Giao Loa & GPS"
           >
             <div className="relative flex items-center justify-center">
               <Navigation size={26} className="text-white drop-shadow-sm fill-white" />
