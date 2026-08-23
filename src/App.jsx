@@ -243,13 +243,6 @@ export default function App() {
           setCurrentUser(user);
           setIsAuthenticated(true);
           localStorage.setItem('locahome_current_user', JSON.stringify(user));
-          if (event === 'SIGNED_IN') {
-            setToast({
-              title: '💖 Đăng Nhập Thành Công!',
-              desc: `Xin chào ${user.fullName}! Chúc bạn có những phút giây ca hát tuyệt vời cùng Dặm.`,
-              type: 'success'
-            });
-          }
         }
       });
       return () => subscription?.unsubscribe();

@@ -1010,71 +1010,8 @@ export default function LandingPageView({
       <div className="fixed top-1/3 left-0 w-[450px] h-[450px] bg-[#c9e6ff]/50 rounded-full mix-blend-multiply filter blur-3xl opacity-65 -translate-x-1/3 pointer-events-none z-0"></div>
       <div className="fixed bottom-0 right-1/4 w-[600px] h-[600px] bg-[#b2f2bb]/40 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/3 pointer-events-none z-0"></div>
 
-      {/* ═══════════════ PERMANENT FIXED TOP WRAPPER (MARQUEE + HEADER) ═══════════════ */}
+      {/* ═══════════════ PERMANENT FIXED TOP WRAPPER (HEADER) ═══════════════ */}
       <div className="fixed top-0 left-0 right-0 z-50 w-full shadow-[0_4px_24px_rgba(134,77,97,0.08)]">
-        {/* TOP PROMO FLASH BAR (SEAMLESS RUNNING MARQUEE) */}
-        <div className="bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#c9e6ff] text-[#360b1e] py-1.5 border-b border-[#fab3ca]/40 overflow-hidden select-none">
-          <div className="animate-marquee items-center gap-8 text-xs sm:text-sm font-bold whitespace-nowrap">
-            {/* Ticker Set 1 */}
-            <div className="flex items-center gap-8 shrink-0">
-              <span className="flex items-center gap-1.5">
-                <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
-                <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
-                <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
-                <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
-                <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
-                <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-            </div>
-
-            {/* Ticker Set 2 (Duplicate for seamless infinite scrolling) */}
-            <div className="flex items-center gap-8 shrink-0">
-              <span className="flex items-center gap-1.5">
-                <CuteHeartIcon className="w-4 h-4 text-rose-600 animate-pulse shrink-0" />
-                <strong>ƯU ĐÃI HÔM NAY:</strong> Giảm ngay 20.000₫ & Tặng 4 viên pin sạc khi thanh toán qua VietQR!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CuteLightningIcon className="w-4 h-4 text-amber-600 shrink-0" />
-                <strong>GIAO HỎA TỐC 30 PHÚT:</strong> TP. Tuy Hòa, Sông Cầu, Đông Hòa & Toàn Tỉnh Phú Yên!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CuteMicIcon className="w-4 h-4 text-[#2f6a3f] shrink-0" />
-                <strong>MIC SÂN KHẤU UHF:</strong> Chống hú rè 100%, hát nhẹ hơi cực êm!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CuteStarIcon filled={true} className="w-4 h-4 text-amber-500 shrink-0" />
-                <strong>ĐỔI LOA MIỄN PHÍ:</strong> Trong 15 phút nếu chưa hài lòng âm thanh!
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-              <span className="flex items-center gap-1.5">
-                <CutePhoneSaveIcon className="w-4 h-4 text-rose-500 shrink-0" />
-                <strong>HOTLINE 24/7:</strong> 0368.115.592 (Hồ Văn Duy)
-              </span>
-              <span className="text-[#864d61]/40">•</span>
-            </div>
-          </div>
-        </div>
-
         {/* HEADER */}
         <header className="w-full bg-[#fdf7ff]/95 backdrop-blur-xl border-b border-[#864d61]/10">
           <div className="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3">
@@ -1088,47 +1025,73 @@ export default function LandingPageView({
                 alt="Dặm"
                 className="w-12 h-12 sm:w-14 sm:h-14 object-contain shrink-0 group-hover:scale-110 group-active:scale-95 transition-all duration-300 drop-shadow-[0_4px_10px_rgba(134,77,97,0.18)]"
               />
-              <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block">Dặm</span>
+              <div className="flex flex-col">
+                <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block font-black leading-none drop-shadow-xs">
+                  Dặm
+                </span>
+                <span className="text-[10px] sm:text-xs font-semibold text-[#864d61]/70 tracking-wider">
+                  Thuê Loa Kẹo Kéo Tuy Hòa
+                </span>
+              </div>
             </div>
 
-            {/* Clean Kawaii Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1.5 bg-white/70 backdrop-blur-md p-1.5 rounded-full border border-[#864d61]/10 shadow-xs">
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
               <a
                 href="#reviews"
-                onClick={() => setActiveNav('reviews')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'reviews'
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('reviews');
+                  document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`font-headline text-xs sm:text-sm px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${activeNav === 'reviews'
+                  ? 'bg-[#864d61]/15 text-[#864d61] font-extrabold shadow-inner'
+                  : 'text-slate-600 hover:text-[#864d61] hover:bg-[#864d61]/8 font-bold'
                   }`}
               >
                 <span>Đánh Giá</span>
               </a>
+
               <a
-                href="#speakers"
-                onClick={() => setActiveNav('speakers')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'speakers'
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                href="#pricing"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('pricing');
+                  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`font-headline text-xs sm:text-sm px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${activeNav === 'pricing'
+                  ? 'bg-[#864d61]/15 text-[#864d61] font-extrabold shadow-inner'
+                  : 'text-slate-600 hover:text-[#864d61] hover:bg-[#864d61]/8 font-bold'
                   }`}
               >
                 <span>Bảng Giá Loa</span>
               </a>
+
               <a
-                href="#sound-demo"
-                onClick={() => setActiveNav('sound-demo')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'sound-demo'
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                href="#vivu"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('vivu');
+                  document.getElementById('vivu')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`font-headline text-xs sm:text-sm px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${activeNav === 'vivu'
+                  ? 'bg-[#864d61]/15 text-[#864d61] font-extrabold shadow-inner'
+                  : 'text-slate-600 hover:text-[#864d61] hover:bg-[#864d61]/8 font-bold'
                   }`}
               >
                 <span>Vi vu</span>
               </a>
+
               <a
                 href="#faq"
-                onClick={() => setActiveNav('faq')}
-                className={`px-4 py-2 rounded-full font-bold text-sm transition-all flex items-center justify-center ${activeNav === 'faq'
-                  ? 'bg-[#b2f2bb] text-[#00210b] shadow-xs'
-                  : 'text-[#514347] hover:bg-[#eee4ff] hover:text-[#201047]'
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav('faq');
+                  document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className={`font-headline text-xs sm:text-sm px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${activeNav === 'faq'
+                  ? 'bg-[#864d61]/15 text-[#864d61] font-extrabold shadow-inner'
+                  : 'text-slate-600 hover:text-[#864d61] hover:bg-[#864d61]/8 font-bold'
                   }`}
               >
                 <span>Hỏi Đáp</span>
@@ -1149,9 +1112,8 @@ export default function LandingPageView({
               </button>
 
               {currentUser && currentUser.role === 'customer' ? (
-                <div className={`flex items-center gap-2 bg-white/95 border border-[#ffd9e3] py-1 px-2.5 sm:px-3 rounded-full shadow-xs transition-all duration-300 ${
-                  isLoggingOut ? 'scale-75 opacity-0 blur-xs -translate-y-1' : 'animate-page-enter'
-                }`}>
+                <div className={`flex items-center gap-2 bg-white/95 border border-[#ffd9e3] py-1 px-2.5 sm:px-3 rounded-full shadow-xs transition-all duration-300 ${isLoggingOut ? 'scale-75 opacity-0 blur-xs -translate-y-1' : 'animate-page-enter'
+                  }`}>
                   <img
                     src={currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
                     alt={currentUser.fullName}
@@ -1179,7 +1141,7 @@ export default function LandingPageView({
                   className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md hover:scale-105 animate-page-enter"
                   title="Đăng nhập thành viên"
                 >
-                  <span>Đăng Nhập</span>
+                  <span>Đăng nhập</span>
                 </button>
               )}
             </div>
@@ -1188,7 +1150,7 @@ export default function LandingPageView({
       </div>
 
       {/* Spacer to prevent content from going behind fixed header */}
-      <div className="h-[92px] sm:h-[110px] w-full pointer-events-none"></div>
+      <div className="h-16 sm:h-20 w-full pointer-events-none"></div>
 
       {/* ═══════════════ MAIN CONTENT ═══════════════ */}
       <main className="pt-4 pb-2 relative z-10">
@@ -1850,8 +1812,8 @@ export default function LandingPageView({
                             type="button"
                             onClick={() => handlePageChange(pageNum)}
                             className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full sm:rounded-2xl font-headline font-extrabold text-xs sm:text-sm transition-all duration-200 cursor-pointer flex items-center justify-center ${isActive
-                                ? 'bg-[#864d61] text-white shadow-md shadow-[#864d61]/30 scale-105 border-2 border-[#864d61]'
-                                : 'bg-white hover:bg-[#ffd9e3]/60 text-slate-700 hover:text-[#864d61] border-2 border-slate-200/70 hover:border-[#fab3ca]'
+                              ? 'bg-[#864d61] text-white shadow-md shadow-[#864d61]/30 scale-105 border-2 border-[#864d61]'
+                              : 'bg-white hover:bg-[#ffd9e3]/60 text-slate-700 hover:text-[#864d61] border-2 border-slate-200/70 hover:border-[#fab3ca]'
                               }`}
                           >
                             {pageNum}
