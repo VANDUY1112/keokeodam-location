@@ -118,7 +118,7 @@ export default function UserLoginPageView({
           {/* Header Title */}
           <div className="text-center mb-7">
             <h1 className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight font-black">
-              Đăng Nhập
+              Đăng nhập
             </h1>
           </div>
 

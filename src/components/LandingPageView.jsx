@@ -1025,14 +1025,9 @@ export default function LandingPageView({
                 alt="Dặm"
                 className="w-12 h-12 sm:w-14 sm:h-14 object-contain shrink-0 group-hover:scale-110 group-active:scale-95 transition-all duration-300 drop-shadow-[0_4px_10px_rgba(134,77,97,0.18)]"
               />
-              <div className="flex flex-col">
-                <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block font-black leading-none drop-shadow-xs">
-                  Dặm
-                </span>
-                <span className="text-[10px] sm:text-xs font-semibold text-[#864d61]/70 tracking-wider">
-                  Thuê Loa Kẹo Kéo Tuy Hòa
-                </span>
-              </div>
+              <span className="font-headline text-2xl sm:text-3xl text-[#864d61] tracking-tight block font-black">
+                Dặm
+              </span>
             </div>
 
             {/* Desktop Navigation Links */}
@@ -2101,16 +2096,6 @@ export default function LandingPageView({
 
           <div className="flex items-center gap-3 mt-2 text-xs font-bold flex-wrap justify-center">
             <span className="text-[#864d61]/70">Được phát triển bởi Hồ Văn Duy</span>
-            <span className="text-slate-300">•</span>
-            <button
-              onClick={() => {
-                if (onNavigateToLogin) onNavigateToLogin();
-                else if (onNavigateToAdmin) onNavigateToAdmin();
-              }}
-              className="text-slate-500 hover:text-[#864d61] transition-colors cursor-pointer underline underline-offset-2"
-            >
-              Đăng nhập quản trị
-            </button>
           </div>
         </div>
       </footer>
