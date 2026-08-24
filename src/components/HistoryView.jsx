@@ -151,7 +151,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
             className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all shadow-xs active:scale-95 whitespace-nowrap shrink-0"
           >
             <span className="material-symbols-outlined text-[18px]">two_wheeler</span>
-            <span>Giao Mới</span>
+            <span>Chuyến mới</span>
           </button>
         </div>
       </div>
