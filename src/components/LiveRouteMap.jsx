@@ -3,34 +3,48 @@ import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-
 import L from 'leaflet';
 
 // Helper component for map controls (re-center & fit-bounds)
-function MapController({ position, pathCoordinates, isTracking, recenterTrigger }) {
+function MapController({ position, startPosition, endPosition, pathCoordinates = [], isTracking, recenterTrigger, readOnly }) {
   const map = useMap();
-  const hasCenteredInitial = useRef(false);
+
+  // Invalidate map size so it renders accurately inside modals
+  useEffect(() => {
+    if (!map) return;
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [map]);
 
   useEffect(() => {
-    if (!position || !map) return;
+    if (!map) return;
 
-    if (!hasCenteredInitial.current) {
-      map.setView([position.lat, position.lng], 18, { animate: true });
-      hasCenteredInitial.current = true;
-    } else if (isTracking) {
+    // Collect all actual GPS coordinates of this trip
+    const allPoints = [
+      ...(pathCoordinates || []),
+      ...(position ? [position] : []),
+      ...(startPosition ? [startPosition] : []),
+      ...(endPosition ? [endPosition] : [])
+    ].filter((p) => p && typeof p.lat === 'number' && typeof p.lng === 'number');
+
+    if (allPoints.length >= 2 && !isTracking) {
+      const bounds = L.latLngBounds(allPoints.map((p) => [p.lat, p.lng]));
+      map.fitBounds(bounds, { padding: [60, 60], maxZoom: 18, animate: true });
+    } else if (allPoints.length === 1 && !isTracking) {
+      map.setView([allPoints[0].lat, allPoints[0].lng], 18, { animate: true });
+    } else if (position && isTracking) {
       map.panTo([position.lat, position.lng], { animate: true, duration: 1 });
+    } else if (position && !isTracking) {
+      map.setView([position.lat, position.lng], 18, { animate: true });
     }
-  }, [position, isTracking, map]);
+  }, [position, startPosition, endPosition, pathCoordinates, isTracking, map, readOnly]);
 
   // Recenter on demand when user clicks "My Location" button
   useEffect(() => {
-    if (recenterTrigger && position && map) {
-      map.setView([position.lat, position.lng], 18.5, { animate: true });
+    if (recenterTrigger && (position || startPosition) && map) {
+      const target = position || startPosition;
+      map.setView([target.lat, target.lng], 18.5, { animate: true });
     }
-  }, [recenterTrigger, position, map]);
-
-  useEffect(() => {
-    if (pathCoordinates.length > 2 && !isTracking && map) {
-      const bounds = L.latLngBounds(pathCoordinates.map((p) => [p.lat, p.lng]));
-      map.fitBounds(bounds, { padding: [50, 50], animate: true });
-    }
-  }, [pathCoordinates, isTracking, map]);
+  }, [recenterTrigger, position, startPosition, map]);
 
   return null;
 }
@@ -214,9 +228,12 @@ export default function LiveRouteMap({
 
         <MapController
           position={currentPosition || startPosition}
+          startPosition={startPosition}
+          endPosition={endPosition}
           pathCoordinates={pathCoordinates}
           isTracking={isTracking}
           recenterTrigger={recenterTrigger}
+          readOnly={readOnly}
         />
       </MapContainer>
 

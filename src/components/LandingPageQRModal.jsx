@@ -10,10 +10,8 @@ export default function LandingPageQRModal({
 
   if (!isOpen) return null;
 
-  // Compute the landing page target URL
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://locahome.vn';
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
-  const targetUrl = `${origin}${pathname}?page=landing`;
+  // Target Vercel domain URL
+  const targetUrl = 'https://keokeodam-location.vercel.app/?page=landing';
 
   // Clean, sharp, high-contrast QR code
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=8&ecc=M&color=33-16-43&bgcolor=ffffff&data=${encodeURIComponent(targetUrl)}`;
@@ -43,7 +41,7 @@ export default function LandingPageQRModal({
 
       if (setToast) {
         setToast({
-          title: '⬇️ Tải thành công!',
+          title: 'Tải thành công!',
           desc: 'Hình ảnh mã QR đã được tải về máy.',
           type: 'success'
         });

@@ -40,10 +40,14 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
 
           setApiRentals(res.data.map(r => {
             const dist = calcDist(r.destLat, r.destLng, r.durationHours);
+            const hasCoords = typeof r.destLat === 'number' && typeof r.destLng === 'number';
+            const destPosition = hasCoords ? { lat: r.destLat, lng: r.destLng } : null;
+            const startPosition = hasCoords ? { lat: +(r.destLat - 0.003).toFixed(6), lng: +(r.destLng - 0.003).toFixed(6) } : null;
+
             return {
               id: r.id,
-              title: `Giao Loa: ${r.customerName} - ${r.customerPhone}`,
-              subtitle: `${r.speakerName || 'Loa Kéo'} • ${dist} km • ${r.durationHours}h • ${formatVND(r.totalAmount)}`,
+              title: r.customerName ? `Giao Loa: ${r.customerName}` : `Đơn #${r.id}`,
+              subtitle: `${r.speakerName || 'Loa Kéo'} • ${dist} km`,
               distanceKm: dist,
               duration: `${r.durationHours}h`,
               cost: r.totalAmount,
@@ -57,12 +61,18 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                   : 'bg-red-50 text-red-700 border-red-200/60',
               icon: 'speaker',
               address: r.address,
+              destination: r.address || r.customerName,
               note: r.note,
               createdAt: r.createdAt,
-              pathCoordinates: [
-                { lat: 10.8505, lng: 106.7718 },
-                { lat: r.destLat || 10.8522, lng: r.destLng || 106.7725 }
-              ]
+              startPosition: startPosition,
+              endPosition: destPosition,
+              pathCoordinates: hasCoords
+                ? [
+                    startPosition,
+                    { lat: +(r.destLat - 0.0015).toFixed(6), lng: +(r.destLng - 0.0015).toFixed(6) },
+                    destPosition
+                  ]
+                : []
             };
           }));
         }
@@ -169,7 +179,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
       {/* ══════════ 2 STATS METRIC CARDS (CLEAN SLATE) ══════════ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 lg:gap-6 w-full">
         {/* Metric 1: Total Trips */}
-        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[135px] sm:min-h-[155px]">
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
           <div className="flex items-center justify-between gap-2">
             <span className="text-slate-900 font-bold text-sm sm:text-base lg:text-lg leading-tight">
               Tổng đơn giao nhận
@@ -181,23 +191,16 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
             </div>
           </div>
 
-          <div className="flex items-baseline gap-1 my-1">
+          <div className="flex items-baseline gap-1 mt-2">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight">
               {trips.length}
             </span>
             <span className="text-slate-500 font-bold text-xs sm:text-sm lg:text-base ml-1">đơn hoàn tất</span>
           </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px]">
-              <span className="material-symbols-outlined text-[15px]">inventory_2</span>
-              Toàn bộ lịch sử
-            </span>
-          </div>
         </div>
 
         {/* Metric 2: Total GPS Distance */}
-        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[135px] sm:min-h-[155px]">
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
           <div className="flex items-center justify-between gap-2">
             <span className="text-slate-900 font-bold text-sm sm:text-base lg:text-lg leading-tight">
               Tổng quãng đường
@@ -207,18 +210,11 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
             </div>
           </div>
 
-          <div className="flex items-baseline gap-1 my-1">
+          <div className="flex items-baseline gap-1 mt-2">
             <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight">
               {totalDistance.toFixed(1)}
             </span>
             <span className="text-slate-500 font-bold text-xs sm:text-sm lg:text-base ml-1">km GPS</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px]">
-              <span className="material-symbols-outlined text-[15px]">route</span>
-              Đo đạc thực tế
-            </span>
           </div>
         </div>
       </div>
@@ -403,74 +399,68 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
         )}
       </div>
 
-      {/* ══════════ MODAL: XEM LẠI BẢN ĐỒ LỘ TRÌNH QUÁ KHỨ ══════════ */}
-      {selectedTripForMap && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-6 border border-slate-200 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[20px]">map</span>
-                </div>
-                <div>
-                  <h3 className="text-slate-900 font-bold text-base sm:text-lg">
-                    {selectedTripForMap.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 font-medium">
-                    {selectedTripForMap.subtitle} • {selectedTripForMap.status || 'Đã hoàn thành'}
-                  </p>
+      {/* ══════════ MODAL: XEM LẠI BẢN ĐỒ LỘ TRÌNH QUÁ KHỨ (PORTAL TO BODY) ══════════ */}
+      {selectedTripForMap &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-[99999] w-screen h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-xs transition-all ${
+              isClosingMapModal
+                ? 'animate-backdrop-close pointer-events-none'
+                : 'animate-in fade-in duration-200'
+            }`}
+          >
+            <div
+              className={`bg-white rounded-3xl max-w-4xl w-full p-5 sm:p-6 border border-slate-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] space-y-4 relative z-10 flex flex-col max-h-[90vh] ${
+                isClosingMapModal ? 'animate-modal-close' : 'animate-modal-pop'
+              }`}
+            >
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-[22px]">map</span>
+                  </div>
+                  <div>
+                    <h3 className="text-slate-900 font-bold text-base sm:text-lg leading-tight">
+                      {selectedTripForMap.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium mt-0.5">
+                      {selectedTripForMap.destination ? `Điểm đến: ${selectedTripForMap.destination}` : 'Lộ trình di chuyển đã lưu'}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <button
-                onClick={() => setSelectedTripForMap(null)}
-                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-
-            {/* Interactive Map of this Trip */}
-            <div className="flex-1 min-h-[350px] sm:min-h-[400px] w-full rounded-2xl overflow-hidden border border-slate-200 relative">
-              <LiveRouteMap
-                startPosition={
-                  selectedTripForMap.pathCoordinates?.[0] ||
-                  selectedTripForMap.startPosition || { lat: 10.7769, lng: 106.7009 }
-                }
-                endPosition={
-                  selectedTripForMap.pathCoordinates?.[selectedTripForMap.pathCoordinates?.length - 1] ||
-                  selectedTripForMap.endPosition || { lat: 10.782, lng: 106.708 }
-                }
-                pathCoordinates={
-                  selectedTripForMap.pathCoordinates?.length > 0
-                    ? selectedTripForMap.pathCoordinates
-                    : [
-                        { lat: 10.7769, lng: 106.7009 },
-                        { lat: 10.7785, lng: 106.7032 },
-                        { lat: 10.782, lng: 106.708 },
-                      ]
-                }
-                isTracking={false}
-                originAddress={selectedTripForMap.origin || 'Điểm xuất phát đã lưu'}
-                destinationAddress={selectedTripForMap.destination || 'Điểm kết thúc'}
-                readOnly={true}
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-1">
-              <div className="text-xs text-slate-500 font-medium">
-                Tọa độ GPS đã được lưu trong cơ sở dữ liệu cục bộ.
+              {/* Interactive Map of this Trip */}
+              <div className="flex-1 min-h-[350px] sm:min-h-[440px] w-full rounded-2xl overflow-hidden border border-slate-200 relative">
+                <LiveRouteMap
+                  startPosition={
+                    selectedTripForMap.startPosition ||
+                    selectedTripForMap.pathCoordinates?.[0]
+                  }
+                  endPosition={
+                    selectedTripForMap.endPosition ||
+                    selectedTripForMap.pathCoordinates?.[selectedTripForMap.pathCoordinates?.length - 1]
+                  }
+                  pathCoordinates={selectedTripForMap.pathCoordinates || []}
+                  isTracking={false}
+                  originAddress={selectedTripForMap.origin || 'Điểm xuất phát đã lưu'}
+                  destinationAddress={selectedTripForMap.destination || 'Điểm kết thúc'}
+                  readOnly={true}
+                />
               </div>
-              <button
-                onClick={() => setSelectedTripForMap(null)}
-                className="w-full sm:w-auto px-6 py-2 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-colors shadow-xs"
-              >
-                Đóng
-              </button>
+
+              <div className="flex items-center justify-end pt-1">
+                <button
+                  onClick={handleCloseMapModal}
+                  className="px-6 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all shadow-xs cursor-pointer active:scale-95"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
