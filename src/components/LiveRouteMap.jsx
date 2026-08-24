@@ -186,17 +186,7 @@ export default function LiveRouteMap({
           </>
         )}
 
-        {/* Start Point Marker */}
-        {startPosition && (
-          <Marker position={[startPosition.lat, startPosition.lng]} icon={createStartIcon()}>
-            <Popup className="custom-leaflet-popup">
-              <div className="p-1 text-xs">
-                <div className="font-bold text-emerald-600">Điểm Bắt Đầu</div>
-                <div className="text-slate-700 mt-0.5">{originAddress}</div>
-              </div>
-            </Popup>
-          </Marker>
-        )}
+
 
         {/* End Point Marker */}
         {endPosition && (

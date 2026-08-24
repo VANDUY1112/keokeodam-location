@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Milestone } from 'lucide-react';
 import LiveRouteMap, { MAP_LAYERS } from './LiveRouteMap';
 import { formatVND } from '../utils/format';
@@ -179,7 +180,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
         speedKmh: currentSpeed,
         heading: 0,
         batteryPercent: 85
-      }).catch(() => {});
+      }).catch(() => { });
     }
   };
 
@@ -216,7 +217,21 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     }
   };
 
-  // Stop / Check-out Route & Calculate final collection
+  const [showLocationInputModal, setShowLocationInputModal] = useState(false);
+  const [isClosingLocationModal, setIsClosingLocationModal] = useState(false);
+  const [locationNote, setLocationNote] = useState('');
+  const [pendingTripData, setPendingTripData] = useState(null);
+
+  // Close modal with exit animation then save
+  const handleCloseAndSave = (customLocation = '') => {
+    setIsClosingLocationModal(true);
+    setTimeout(() => {
+      saveCompletedTrip(customLocation);
+      setIsClosingLocationModal(false);
+    }, 200);
+  };
+
+  // Stop / Check-out Route -> Prompt for location note
   const handleStopTracking = () => {
     if (watchIdRef.current) {
       navigator.geolocation.clearWatch(watchIdRef.current);
@@ -243,28 +258,51 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     const rentalFee = selectedSpeaker?.price || 350000;
     const totalCollectFromCustomer = rentalFee + shippingFee;
 
-    // Auto save to history
+    setPendingTripData({
+      finalDist,
+      seconds,
+      finalAvgSpeed,
+      shippingFee,
+      rentalFee,
+      totalCollectFromCustomer,
+      finalPos,
+      pathCoordinates: [...pathCoordinates],
+      startPosition,
+    });
+
+    setLocationNote('');
+    setShowLocationInputModal(true);
+  };
+
+  // Save final completed trip with custom location note
+  const saveCompletedTrip = (customLocation = '') => {
+    const data = pendingTripData || {};
+    const finalDist = data.finalDist || 0.85;
+    const totalCollectFromCustomer = data.totalCollectFromCustomer || 350000;
+    const finalPos = data.finalPos || { lat: 10.7769, lng: 106.7009 };
+    const locationDisplay = customLocation ? customLocation : (deliveryAddress || 'Điểm giao khách hàng');
+
     const now = new Date();
     const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
 
     if (onAddTripRecord) {
       onAddTripRecord({
         id: Date.now(),
-        title: `Giao Loa: ${customerName}`,
+        title: customLocation ? `Vị trí: ${customLocation}` : `Giao Loa: ${customerName}`,
         subtitle: `${dateStr} • ${finalDist.toFixed(2)} km • ${selectedSpeaker?.name || 'Loa Kéo'}`,
         distanceKm: finalDist.toFixed(2),
-        duration: formatTime(seconds > 0 ? seconds : 180),
+        duration: formatTime(data.seconds > 0 ? data.seconds : 180),
         cost: totalCollectFromCustomer,
         speakerName: selectedSpeaker?.name || 'Loa Kéo',
         customerName: customerName,
         status: 'Đã bàn giao',
         statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
         icon: 'speaker',
-        pathCoordinates: [...pathCoordinates],
-        startPosition: startPosition,
+        pathCoordinates: data.pathCoordinates || [...pathCoordinates],
+        startPosition: data.startPosition || startPosition,
         endPosition: finalPos,
         origin: originAddress,
-        destination: deliveryAddress || `${finalPos.lat.toFixed(4)}°N, ${finalPos.lng.toFixed(4)}°E`,
+        destination: locationDisplay,
       });
     }
 
@@ -274,21 +312,23 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
       speakerId,
       customerName: customerName.split(' - ')[0] || customerName,
       customerPhone: customerName.split(' - ')[1] || '0900000000',
-      address: deliveryAddress,
+      address: locationDisplay,
       destLat: finalPos.lat,
       destLng: finalPos.lng,
-      durationHours: Math.max(1, Math.round(seconds / 3600)),
-      rentPrice: rentalFee,
-      shippingFee: shippingFee,
+      durationHours: Math.max(1, Math.round((data.seconds || 0) / 3600)),
+      rentPrice: data.rentalFee || 350000,
+      shippingFee: data.shippingFee || 0,
       totalAmount: totalCollectFromCustomer,
       depositAmount: 500000,
-      note: `GPS: ${finalDist.toFixed(2)}km, ${formatTime(seconds > 0 ? seconds : 180)}`
+      note: customLocation ? `Vị trí: ${customLocation}` : `GPS: ${finalDist.toFixed(2)}km`
     }).catch(err => console.warn('Rental save to API failed:', err.message));
+
+    setShowLocationInputModal(false);
 
     if (setToast) {
       setToast({
         title: 'Hoàn thành',
-        desc: 'Đã hoàn tất chuyến giao và lưu đơn vào Lịch Sử.',
+        desc: customLocation ? `Đã lưu đơn giao tại: ${customLocation}` : 'Đã hoàn tất chuyến giao và lưu đơn vào Lịch Sử.',
         type: 'success'
       });
     }
@@ -501,11 +541,10 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
                 </button>
 
                 <div
-                  className={`absolute right-0 top-full mt-1.5 w-48 sm:w-52 bg-white border border-slate-200 rounded-2xl shadow-2xl p-1.5 space-y-1 z-50 transition-all duration-200 ease-out origin-top-right ${
-                    showLayerMenu
+                  className={`absolute right-0 top-full mt-1.5 w-48 sm:w-52 bg-white border border-slate-200 rounded-2xl shadow-2xl p-1.5 space-y-1 z-50 transition-all duration-200 ease-out origin-top-right ${showLayerMenu
                       ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
-                  }`}
+                    }`}
                 >
                   {Object.values(MAP_LAYERS).map((layer) => {
                     const isSelected = layer.id === selectedLayer;
@@ -517,28 +556,25 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
                           setSelectedLayer(layer.id);
                           setTimeout(() => setShowLayerMenu(false), 120);
                         }}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-xs sm:text-sm transition-all duration-200 ease-out active:scale-95 group ${
-                          isSelected
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left text-xs sm:text-sm transition-all duration-200 ease-out active:scale-95 group ${isSelected
                             ? 'bg-slate-900 text-white font-semibold shadow-xs translate-x-0.5'
                             : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 hover:translate-x-1 font-medium'
-                        }`}
+                          }`}
                       >
                         <span className="flex items-center gap-2.5">
                           <span
-                            className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                              isSelected
+                            className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${isSelected
                                 ? 'bg-white scale-100'
                                 : 'bg-slate-300 group-hover:bg-slate-600 scale-75 group-hover:scale-100'
-                            }`}
+                              }`}
                           ></span>
                           <span>{layer.name}</span>
                         </span>
                         <span
-                          className={`material-symbols-outlined text-[16px] transition-all duration-200 ${
-                            isSelected
+                          className={`material-symbols-outlined text-[16px] transition-all duration-200 ${isSelected
                               ? 'text-white scale-100 opacity-100'
                               : 'scale-0 opacity-0 text-transparent'
-                          }`}
+                            }`}
                         >
                           check
                         </span>
@@ -551,7 +587,55 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           </div>
 
           {/* Map Container */}
-          <div className="flex-1 w-full rounded-2xl overflow-hidden border border-slate-200 min-h-[440px] relative">
+          <div className="flex-1 w-full rounded-2xl overflow-hidden border border-slate-200 min-h-[440px] relative bg-slate-100">
+            {/* ══════════ SKELETON MAP LOADER ══════════ */}
+            {!currentPosition && (
+              <div className="absolute inset-0 z-30 bg-slate-100 flex flex-col items-center justify-center p-6 select-none overflow-hidden animate-in fade-in duration-300">
+                {/* Simulated Road Grid Pattern */}
+                <div className="absolute inset-0 opacity-40 bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+
+                {/* Shimmer Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent -translate-x-full animate-shimmer" />
+
+                {/* Simulated Roads Graphic */}
+                <svg className="absolute inset-0 w-full h-full opacity-20 stroke-slate-400" fill="none">
+                  <path d="M0,120 Q300,180 600,100 T1200,220" strokeWidth="12" strokeDasharray="8 8" />
+                  <path d="M150,0 Q200,300 250,600" strokeWidth="8" />
+                  <path d="M650,0 Q550,350 700,700" strokeWidth="10" />
+                </svg>
+
+                {/* Center Radar & Shipper Bike Indicator */}
+                <div className="relative z-10 flex flex-col items-center gap-4 text-center">
+                  <div className="relative flex items-center justify-center">
+                    <div className="absolute w-28 h-28 rounded-full bg-cyan-400/20 animate-ping" />
+                    <div className="absolute w-20 h-20 rounded-full bg-slate-300/60 animate-pulse" />
+                    <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 shadow-xl flex items-center justify-center p-2.5 z-10">
+                      <img src="/motorcycle.png" alt="Locating..." className="w-full h-full object-contain animate-bounce" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5 z-10 max-w-xs">
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                      <span className="text-sm sm:text-base font-bold text-slate-800 tracking-tight">
+                        Đang dò tìm vị trí GPS của bạn...
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                      Kết nối vệ tinh định vị để hiển thị bản đồ trực tiếp
+                    </p>
+                  </div>
+
+                  {/* Shimmer placeholders */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <div className="h-2 w-16 bg-slate-300/70 rounded-full animate-pulse" />
+                    <div className="h-2 w-28 bg-slate-300/90 rounded-full animate-pulse" />
+                    <div className="h-2 w-12 bg-slate-300/70 rounded-full animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <LiveRouteMap
               currentPosition={currentPosition}
               startPosition={startPosition}
@@ -565,6 +649,71 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           </div>
         </section>
       </div>
+
+      {/* ══════════ MODAL: NHẬP VỊ TRÍ ĐIỂM GIAO (PORTAL TO BODY) ══════════ */}
+      {showLocationInputModal &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-[99999] w-screen h-screen flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-all ${
+              isClosingLocationModal
+                ? 'animate-backdrop-close pointer-events-none'
+                : 'animate-in fade-in duration-200'
+            }`}
+          >
+            <div
+              className={`bg-white rounded-3xl p-6 sm:p-7 max-w-sm sm:max-w-md w-full border border-slate-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] space-y-4 relative z-10 ${
+                isClosingLocationModal ? 'animate-modal-close' : 'animate-modal-pop'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-[22px]">pin_drop</span>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 leading-tight">
+                    Giao ở đâu?
+                  </h3>
+                </div>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleCloseAndSave(locationNote.trim());
+                }}
+                className="space-y-4 pt-1"
+              >
+                <div>
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Nhập vị trí"
+                    value={locationNote}
+                    onChange={(e) => setLocationNote(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-slate-900 shadow-inner"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleCloseAndSave('')}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors cursor-pointer active:scale-95"
+                  >
+                    Bỏ qua
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all shadow-md cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <span>Lưu</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

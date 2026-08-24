@@ -187,11 +187,10 @@ export default function DashboardMiniMap({
           {/* Tâm GPS Button */}
           <button
             onClick={() => onSelectHotspot && onSelectHotspot(null)}
-            className={`col-span-1 px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border ${
-              selectedHotspotId === null
+            className={`col-span-1 px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border ${selectedHotspotId === null
                 ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
                 : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
-            }`}
+              }`}
             title="Căn bản đồ về Tâm vị trí GPS của bạn"
           >
             <span className={`w-2 h-2 rounded-full shrink-0 ${selectedHotspotId === null ? 'bg-white' : 'bg-slate-400'}`}></span>
@@ -233,11 +232,10 @@ export default function DashboardMiniMap({
             <button
               key={hs.id}
               onClick={() => onSelectHotspot && onSelectHotspot(hs.id)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${
-                isSelected
+              className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${isSelected
                   ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
                   : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
-              }`}
+                }`}
               title="Bấm để trỏ tới điểm này trên bản đồ"
             >
               <div className="flex items-center gap-2 min-w-0">
@@ -300,15 +298,9 @@ export default function DashboardMiniMap({
           {/* User Current / Warehouse GPS Marker */}
           {userCoords && (
             <Marker position={[userCoords.lat, userCoords.lng]} icon={userCurrentLocationIcon}>
-              <Popup>
-                <div className="p-1.5 text-xs">
-                  <p className="font-bold text-slate-900 flex items-center gap-1">
-                    <span>📍</span> Vị Trí Của Bạn (Tâm GPS)
-                  </p>
-                  <p className="text-slate-600 mt-1">Điểm xuất phát chở loa</p>
-                  <p className="text-slate-400 text-[10.5px]">
-                    Tọa độ: {userCoords.lat.toFixed(4)}, {userCoords.lng.toFixed(4)}
-                  </p>
+              <Popup closeButton={false} className="custom-compact-popup">
+                <div className="py-0.5 px-2 text-center">
+                  <span className="font-bold text-slate-900 text-xs whitespace-nowrap">Vị trí của bạn</span>
                 </div>
               </Popup>
             </Marker>
@@ -336,19 +328,11 @@ export default function DashboardMiniMap({
                     },
                   }}
                 >
-                  <Popup>
-                    <div className="p-1.5 text-xs max-w-[220px]">
-                      <div className="flex items-center gap-1.5 font-bold text-slate-900 border-b border-slate-100 pb-1 mb-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: hotspot.color }}></span>
-                        <span className="truncate">{hotspot.name}</span>
-                      </div>
-                      <div className="space-y-1 text-slate-600">
-                        <p>📏 <strong>Khoảng cách:</strong> <span className="font-bold text-slate-900">~ {hotspot.distance} ({hotspot.direction})</span></p>
-                        <p>🔥 <strong>Mật độ thuê:</strong> <span className="font-bold text-slate-900">{hotspot.rentalCount} chuyến ({hotspot.tripDots?.length || 0} điểm giao)</span></p>
-                        <p>💰 <strong>Tổng thu:</strong> <span className="font-bold text-emerald-600">{hotspot.revenue}</span></p>
-                        <p>🔊 <strong>Loa chuộng:</strong> {hotspot.popularSpeaker}</p>
-                        <p className="text-[10.5px] text-slate-400 mt-1">⏰ Giờ cao điểm: {hotspot.peakHours}</p>
-                      </div>
+                  <Popup closeButton={false} className="custom-compact-popup">
+                    <div className="py-0.5 px-2 text-center">
+                      <span className="font-extrabold text-slate-900 text-xs whitespace-nowrap">
+                        {hotspot.rentalCount} chuyến
+                      </span>
                     </div>
                   </Popup>
                 </Circle>
@@ -372,9 +356,9 @@ export default function DashboardMiniMap({
                         },
                       }}
                     >
-                      <Popup>
-                        <div className="py-0.5 px-1.5 text-center min-w-[40px]">
-                          <span className="text-xs font-black text-slate-900 leading-none whitespace-nowrap">
+                      <Popup closeButton={false} className="custom-compact-popup">
+                        <div className="py-0.5 px-1.5 text-center min-w-[30px]">
+                          <span className="text-xs font-bold text-slate-900 leading-none whitespace-nowrap">
                             {dot.customerName}
                           </span>
                         </div>

@@ -65,12 +65,33 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
     fetchRentals();
   }, []);
 
-  // Merge API and local trips (API first, then local, deduplicated by id)
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // Merge API and local trips with newest always on top
   const mergedTrips = (() => {
-    if (apiRentals.length === 0) return trips;
     const apiIds = new Set(apiRentals.map(r => r.id));
     const localOnly = trips.filter(t => !apiIds.has(t.id));
-    return [...apiRentals, ...localOnly];
+    const combined = [...localOnly, ...apiRentals];
+
+    return combined.sort((a, b) => {
+      const getTimestamp = (item) => {
+        // Javascript timestamp from Date.now()
+        if (typeof item.id === 'number' && item.id > 1000000000000) return item.id;
+        if (item.createdAt) {
+          const t = new Date(item.createdAt).getTime();
+          if (!isNaN(t)) return t;
+        }
+        if (typeof item.id === 'number') return item.id * 1000000;
+        return 0;
+      };
+      return getTimestamp(b) - getTimestamp(a);
+    });
   })();
 
   const filteredTrips = mergedTrips.filter(
@@ -79,6 +100,12 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
       (t.subtitle || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (t.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (t.speakerName || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredTrips.length / ITEMS_PER_PAGE) || 1;
+  const paginatedTrips = filteredTrips.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
   // Stats calculation
@@ -101,7 +128,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
             Lịch Sử Giao & Cho Thuê Loa
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm lg:text-base mt-0.5 sm:mt-1">
-            Nhật ký các đơn thuê loa đã bàn giao, đo đạc quãng đường GPS và tổng thu từ khách hàng
+            Nhật ký các đơn thuê loa đã bàn giao và đo đạc quãng đường GPS di chuyển
           </p>
         </div>
 
@@ -129,10 +156,10 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
         </div>
       </div>
 
-      {/* ══════════ 3 STATS METRIC CARDS (CLEAN SLATE) ══════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4 lg:gap-6 w-full">
+      {/* ══════════ 2 STATS METRIC CARDS (CLEAN SLATE) ══════════ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 lg:gap-6 w-full">
         {/* Metric 1: Total Trips */}
-        <div className="col-span-2 lg:col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[135px] sm:min-h-[155px]">
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[135px] sm:min-h-[155px]">
           <div className="flex items-center justify-between gap-2">
             <span className="text-slate-900 font-bold text-sm sm:text-base lg:text-lg leading-tight">
               Tổng đơn giao nhận
@@ -184,33 +211,6 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
             </span>
           </div>
         </div>
-
-        {/* Metric 3: Total Revenue Collected */}
-        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[135px] sm:min-h-[155px]">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-slate-900 font-bold text-sm sm:text-base lg:text-lg leading-tight">
-              Tổng tiền thu nhận
-            </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
-                payments
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-baseline gap-1 my-1">
-            <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight truncate">
-              {formatVND(totalRevenue)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px]">
-              <span className="material-symbols-outlined text-[15px]">verified</span>
-              Đã thu hoàn tất
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* ══════════ TRIPS LIST ══════════ */}
@@ -219,9 +219,41 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
           <span className="text-sm font-bold text-slate-700">
             Danh sách đơn ({filteredTrips.length})
           </span>
+          {filteredTrips.length > 0 && !isLoadingApi && (
+            <span className="text-xs font-semibold text-slate-500">
+              Trang {currentPage} / {totalPages}
+            </span>
+          )}
         </div>
 
-        {filteredTrips.length === 0 ? (
+        {isLoadingApi ? (
+          /* ══════════ SKELETON LOADING CARDS ══════════ */
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3, 4, 5].map((idx) => (
+              <div
+                key={idx}
+                className="bg-white p-4 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-100/60 to-transparent -translate-x-full animate-shimmer" />
+                
+                <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-200/80 animate-pulse shrink-0" />
+                  
+                  <div className="space-y-2 min-w-0 flex-1">
+                    <div className="h-4 w-44 sm:w-64 bg-slate-200/80 rounded-md animate-pulse" />
+                    <div className="h-3 w-32 sm:w-48 bg-slate-100 rounded-md animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                  <div className="h-4 w-20 bg-slate-200/80 rounded-md animate-pulse" />
+                  <div className="h-8 w-20 bg-slate-100 rounded-xl animate-pulse hidden sm:block" />
+                  <div className="h-8 w-24 bg-slate-100 rounded-xl animate-pulse" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredTrips.length === 0 ? (
           <div className="p-12 text-center bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs">
             <div className="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center mx-auto mb-3">
               <span className="material-symbols-outlined text-3xl">speaker_group</span>
@@ -230,7 +262,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
             <p className="text-slate-500 text-xs sm:text-sm mt-1">Hãy thử tìm kiếm từ khóa khác hoặc tạo chuyến giao mới.</p>
           </div>
         ) : (
-          filteredTrips.map((trip) => {
+          paginatedTrips.map((trip) => {
             const costVal = typeof trip.cost === 'number' 
               ? trip.cost 
               : (parseFloat(String(trip.cost || 0).replace(/[^\d]/g, '')) || 0);
@@ -317,7 +349,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                   {onOpenVietQR && (
                     <button
                       onClick={() => onOpenVietQR(costVal, `KEO KEO DAM nhan ${costVal.toLocaleString('vi-VN')}`)}
-                      className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-colors shadow-xs whitespace-nowrap active:scale-95"
+                      className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-colors shadow-xs whitespace-nowrap active:scale-95 cursor-pointer"
                       title="Tạo mã VietQR thu tiền đơn này"
                     >
                       <span className="material-symbols-outlined text-[16px]">qr_code_2</span>
@@ -328,26 +360,58 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                   {/* Button: Xem Bản Đồ Lộ Trình */}
                   <button
                     onClick={() => setSelectedTripForMap(trip)}
-                    className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 transition-colors shadow-xs whitespace-nowrap"
+                    className="px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5 transition-colors shadow-xs whitespace-nowrap cursor-pointer active:scale-95"
                   >
                     <span className="material-symbols-outlined text-[16px] text-slate-700">map</span>
                     <span>Lộ trình GPS</span>
                   </button>
-
-                  {/* Delete Button */}
-                  {onDeleteTrip && (
-                    <button
-                      onClick={() => onDeleteTrip(trip.id)}
-                      title="Xóa đơn này"
-                      className="p-1.5 sm:p-2 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-xl transition-colors shrink-0"
-                    >
-                      <span className="material-symbols-outlined text-[18px] sm:text-[20px]">delete</span>
-                    </button>
-                  )}
                 </div>
               </div>
             );
           })
+        )}
+
+        {/* ══════════ PAGINATION CONTROLS ══════════ */}
+        {!isLoadingApi && filteredTrips.length > ITEMS_PER_PAGE && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 mt-1">
+            <span className="text-xs sm:text-sm font-medium text-slate-500">
+              Hiển thị <strong className="text-slate-900 font-bold">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</strong> - <strong className="text-slate-900 font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, filteredTrips.length)}</strong> trên <strong className="text-slate-900 font-bold">{filteredTrips.length}</strong> đơn
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-95"
+                title="Trang trước"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-9 h-9 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer active:scale-95 flex items-center justify-center border ${
+                    currentPage === page
+                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-95"
+                title="Trang tiếp"
+              >
+                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
