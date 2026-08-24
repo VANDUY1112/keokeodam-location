@@ -2701,7 +2701,7 @@ export default function LandingPageView({
       {/* ═══════════════ MODAL: CHỦ QUÁN TRẢ LỜI ĐÁNH GIÁ (OWNER REPLY MODAL) ═══════════════ */}
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ease-out ${showReplyModal && targetReviewForReply
-          ? 'opacity-100 pointer-events-auto visible bg-black/65 backdrop-blur-md'
+          ? 'opacity-100 pointer-events-auto visible bg-black/25 backdrop-blur-[2px]'
           : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
           }`}
         onClick={(e) => {
@@ -2709,35 +2709,26 @@ export default function LandingPageView({
         }}
       >
         <div
-          className={`bg-white rounded-[2.5rem] max-w-lg w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-300 ease-out transform ${showReplyModal && targetReviewForReply
+          className={`bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full p-6 sm:p-7 border-2 border-[#ffd9e3] shadow-[0_20px_50px_rgba(134,77,97,0.20)] relative overflow-hidden transition-all duration-300 ease-out transform ${showReplyModal && targetReviewForReply
             ? 'scale-100 translate-y-0 opacity-100'
             : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
             }`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Top Rainbow Accent Line */}
-          <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#b2f2bb]"></div>
-
-          <div className="flex items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-[#fab3ca] shadow-xs shrink-0 bg-white">
+              <div className="w-11 h-11 rounded-xl overflow-hidden border border-[#fab3ca] shadow-xs shrink-0 bg-white">
                 <img src="/anh3.png" alt="Kẹo Kéo Dặm" className="w-full h-full object-cover" />
               </div>
               <div>
                 <h3 className="font-headline text-lg sm:text-xl text-[#864d61]">
-                  {targetReviewForReply?.ownerReply ? 'Chỉnh Sửa Phản Hồi' : 'Phản Hồi Đánh Giá Của Khách'}
+                  {targetReviewForReply?.ownerReply ? 'Chỉnh sửa phản hồi' : 'Phản hồi đánh giá của khách'}
                 </h3>
                 <p className="text-xs font-semibold text-slate-500">
                   Câu trả lời sẽ được hiển thị công khai ngay dưới đánh giá
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowReplyModal(false)}
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm cursor-pointer transition-colors"
-            >
-              ✕
-            </button>
           </div>
 
           {/* Customer Review Summary Box */}
