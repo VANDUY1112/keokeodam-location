@@ -482,8 +482,18 @@ export default function LandingPageView({
         { id: 'thienvientruclam', name: 'Thiền Viện Trúc Lâm', location: 'Thiền Viện Trúc Lâm • Tuy Hòa', img: '/thienvientruclam.png', color: 'from-[#864d61]/90' }
       ],
       col2: [
-        { id: 'vungro', name: 'Vịnh Vũng Rô', location: 'Vịnh Vũng Rô Hùng Vĩ • Đông Hòa', img: '/vungro.png', color: 'from-[#2f6a3f]/90' },
-        { id: 'cauongcop', name: 'Cầu Gỗ Ông Cọp', location: 'Cầu Gỗ Ông Cọp • Tuy An', img: '/cauongcop.png', color: 'from-amber-950/90' }
+        { id: 'baitien', name: 'Bãi Tiên', location: 'Bãi Tiên Hoang Sơ • Đông Hòa', img: '/baitien.png', color: 'from-[#2f6a3f]/90' },
+        { id: 'cauongcop', name: 'Cầu Gỗ Ông Cọp', location: 'Cầu Gỗ Ông Cọp • Tuy An', img: '/cau.png', color: 'from-amber-950/90' }
+      ]
+    },
+    {
+      col1: [
+        { id: 'vucphun', name: 'Vực Phun', location: 'Vực Phun Kỳ Vĩ • Tây Hòa', img: '/vucphun.png', color: 'from-[#235a7c]/90' },
+        { id: 'vungro', name: 'Vịnh Vũng Rô', location: 'Vịnh Vũng Rô Hùng Vĩ • Đông Hòa', img: '/vungro.png', color: 'from-[#2f6a3f]/90' }
+      ],
+      col2: [
+        { id: 'baimon', name: 'Bãi Môn', location: 'Bãi Môn Cát Trắng • Đông Hòa', img: '/anh4.png', color: 'from-[#864d61]/90' },
+        { id: 'tuyhoa', name: 'Biển Tuy Hòa', location: 'Bãi Biển Tuy Hòa • Nắng Vàng', img: '/beach.png', color: 'from-[#235a7c]/90' }
       ]
     }
   ];
