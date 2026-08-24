@@ -2,8 +2,11 @@ class GpsSocketClient {
   constructor() {
     this.ws = null;
     this.listeners = new Set();
-    this.reconnectTimeout = null;
-    this.url = import.meta.env.VITE_WS_URL || 'ws://localhost:5000/ws/gps';
+    this.url = import.meta.env.VITE_WS_URL || (
+      typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+        ? 'wss://keokeodam-api.onrender.com/ws/gps'
+        : 'ws://localhost:5000/ws/gps'
+    );
   }
 
   connect() {
