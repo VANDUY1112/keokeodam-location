@@ -433,142 +433,22 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
             <span>{isSimulating ? 'Tạm dừng mô phỏng lộ trình' : 'Mô phỏng lộ trình giao loa (Chạy thử)'}</span>
           </button>
 
-          {/* Real-time Distance & Estimated Collection Box */}
-          <div className="grid grid-cols-2 gap-4 w-full">
-            <div className="bg-surface-container-lowest rounded-2xl p-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-900 font-bold text-sm lg:text-base">Tổng quãng đường</span>
-                <Milestone className="w-5 h-5 text-slate-500" />
-              </div>
-              <div className="mt-2">
+          {/* Real-time Distance Box */}
+          <div className="w-full bg-surface-container-lowest rounded-2xl p-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] flex items-center justify-between">
+            <div>
+              <span className="text-slate-500 font-bold text-xs sm:text-sm block">Tổng quãng đường</span>
+              <div className="mt-1 flex items-baseline gap-1">
                 <span className="text-2xl lg:text-3xl font-black text-slate-900">
                   {totalDistance.toFixed(2)}
                 </span>
-                <span className="text-sm font-bold text-slate-500 ml-1">km</span>
+                <span className="text-sm font-bold text-slate-500">km</span>
               </div>
             </div>
-
-            <div className="bg-surface-container-lowest rounded-2xl p-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-900 font-bold text-sm lg:text-base">Tiền típ</span>
-                <span className="material-symbols-outlined text-xl text-slate-500">volunteer_activism</span>
-              </div>
-              <div className="mt-2">
-                <span className="text-2xl lg:text-3xl font-black text-slate-900 truncate block">
-                  {formatVND(currentShippingCost)}
-                </span>
-              </div>
+            <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
+              <Milestone className="w-6 h-6 text-slate-700" />
             </div>
           </div>
 
-          {/* ══════════ DELIVERY ROUTE ITINERARY CARD (HÀNH TRÌNH) ══════════ */}
-          <div className="bg-surface-container-lowest rounded-3xl p-5 border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] space-y-4 overflow-hidden relative">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-slate-800 text-xl">route</span>
-                <span>Hành trình giao loa</span>
-              </h3>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border flex items-center gap-1.5 ${isTracking
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                : 'bg-slate-100 text-slate-700 border-slate-200'
-                }`}>
-                {isTracking && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>}
-                {isTracking ? 'Xe đang trên đường' : 'Chuẩn bị xuất phát'}
-              </span>
-            </div>
-
-            {isTracking ? (
-              /* ─── LIVE ACTIVE JOURNEY (KHI ĐANG ĐI) ─── */
-              <div className="space-y-4 pt-1">
-                <div className="relative pl-6 space-y-4 before:absolute before:left-[5px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-300">
-                  {/* Origin */}
-                  <div className="relative">
-                    <span className="absolute -left-6 top-1 w-3 h-3 rounded-full border-2 border-slate-800 bg-white ring-4 ring-white"></span>
-                    <div>
-                      <span className="text-xs text-slate-500 font-medium block">Điểm xuất phát</span>
-                      <p className="text-sm font-bold text-slate-900 mt-0.5">100 Nguyễn Huệ, P. Bến Nghé, Quận 1</p>
-                    </div>
-                  </div>
-
-                  {/* Live Progress */}
-                  <div className="relative py-1">
-                    <span className="absolute -left-6 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-slate-900 text-white flex items-center justify-center ring-4 ring-white">
-                      <span className="material-symbols-outlined text-[10px]">two_wheeler</span>
-                    </span>
-                    <div className="bg-slate-900 text-white p-3 rounded-xl flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-200">Đang di chuyển giao loa</span>
-                      <span className="text-xs font-mono font-bold text-white bg-white/15 px-2 py-0.5 rounded">
-                        {totalDistance.toFixed(2)} km
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Destination */}
-                  <div className="relative">
-                    <span className="absolute -left-6 top-1 w-3 h-3 bg-slate-900 rounded-[2px] ring-4 ring-white"></span>
-                    <div className="space-y-1">
-                      <span className="text-xs text-slate-500 font-medium block">Điểm giao đến</span>
-                      <p className="text-sm font-bold text-slate-900">{deliveryAddress}</p>
-                      <p className="text-xs text-slate-600">Khách nhận: <strong className="text-slate-800 font-semibold">{customerName}</strong></p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Collection summary */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-700">Dự tính thu từ khách:</span>
-                  <span className="text-xl font-black text-slate-900">{formatVND(currentTotalCollect)}</span>
-                </div>
-              </div>
-            ) : (
-              /* ─── PRE-START SETUP (TRƯỚC KHI BẮT ĐẦU) ─── */
-              <div className="space-y-4">
-                <div className="relative pl-6 space-y-4 before:absolute before:left-[5px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-                  {/* Origin */}
-                  <div className="relative">
-                    <span className="absolute -left-6 top-1 w-3 h-3 rounded-full border-2 border-slate-800 bg-white ring-4 ring-white"></span>
-                    <div>
-                      <span className="text-xs text-slate-500 font-medium block">Điểm xuất phát</span>
-                      <p className="text-sm font-bold text-slate-900 mt-0.5">100 Nguyễn Huệ, P. Bến Nghé, Quận 1</p>
-                    </div>
-                  </div>
-
-                  {/* Destination */}
-                  <div className="relative">
-                    <span className="absolute -left-6 top-1.5 w-3.5 h-3.5 bg-slate-900 rounded-[2px] ring-4 ring-white"></span>
-                    <div className="space-y-2.5">
-                      <span className="text-sm text-slate-500 font-semibold block">Điểm giao đến</span>
-                      <input
-                        type="text"
-                        value={deliveryAddress}
-                        onChange={(e) => setDeliveryAddress(e.target.value)}
-                        placeholder="Nhập địa chỉ giao tiệc / sự kiện..."
-                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 text-[14px]"
-                      />
-                      <div>
-                        <label className="block text-sm font-bold text-slate-800 mb-1">
-                          Người nhận &amp; SĐT
-                        </label>
-                        <input
-                          type="text"
-                          value={customerName}
-                          onChange={(e) => setCustomerName(e.target.value)}
-                          placeholder="VD: Anh Tuấn - 0908.123.456"
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 text-[14px]"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Collection summary */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-700">Dự tính thu từ khách:</span>
-                  <span className="text-xl font-black text-slate-900">{formatVND(currentTotalCollect)}</span>
-                </div>
-              </div>
-            )}
-          </div>
         </aside>
 
         {/* ══════════ RIGHT PANEL: INTERACTIVE LIVE ROUTE MAP ══════════ */}

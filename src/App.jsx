@@ -3,7 +3,6 @@ import DashboardView from './components/DashboardView';
 import TrackingView from './components/TrackingView';
 import ExpensesView from './components/ExpensesView';
 import HistoryView from './components/HistoryView';
-import ReportsView from './components/ReportsView';
 import SettingsView from './components/SettingsView';
 import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
@@ -30,7 +29,7 @@ export default function App() {
       if (pageParam === 'login' || pageParam === 'user-login' || pageParam === 'signin') {
         return 'user-login';
       }
-      if (['dashboard', 'tracking', 'expenses', 'history', 'reports', 'settings'].includes(pageParam)) {
+      if (['dashboard', 'tracking', 'expenses', 'history', 'settings'].includes(pageParam)) {
         return pageParam;
       }
       // If a stored token exists, go to dashboard, otherwise default to landing page for guests/scanned users
@@ -67,7 +66,6 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLogExpenseModal, setShowLogExpenseModal] = useState(false);
   const [showItineraryModal, setShowItineraryModal] = useState(false);
-  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef(null);
 
@@ -432,9 +430,8 @@ export default function App() {
   const navItems = [
     { id: 'dashboard', label: 'Tổng Quan', icon: 'dashboard' },
     { id: 'tracking', label: 'Giao Loa & GPS', icon: 'two_wheeler' },
-    { id: 'expenses', label: 'Doanh Thu & Chi Phí', icon: 'payments' },
+    { id: 'expenses', label: 'Quản Lý Chi Phí', icon: 'payments' },
     { id: 'history', label: 'Lịch Sử Đơn Thuê', icon: 'speaker' },
-    { id: 'reports', label: 'Báo Cáo & Thống Kê', icon: 'assessment' },
     { id: 'settings', label: 'Cài Đặt', icon: 'settings' },
   ];
 
@@ -736,17 +733,6 @@ export default function App() {
               <span>Thu Tiền VietQR</span>
             </button>
 
-            <button
-              onClick={() => setShowNotificationsModal(!showNotificationsModal)}
-              className="relative p-1.5 text-slate-700 hover:text-slate-950 transition-transform active:scale-90 group focus:outline-none"
-              title="Thông báo"
-            >
-              <span className="material-symbols-outlined text-[26px] group-hover:rotate-12 transition-transform duration-200 block">
-                notifications
-              </span>
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
-            </button>
-
             {/* Profile Dropdown Container */}
             <div className="relative" ref={profileMenuRef}>
               <div
@@ -849,17 +835,7 @@ export default function App() {
               />
             )}
 
-            {/* TAB 5: BÁO CÁO & THỐNG KÊ (REPORTS) */}
-            {activeTab === 'reports' && (
-              <ReportsView
-                speakers={speakers}
-                onSelectSpeaker={(id) => { }}
-                setActiveTab={setActiveTab}
-                setToast={setToast}
-              />
-            )}
-
-            {/* TAB 6: CÀI ĐẶT (SETTINGS) */}
+            {/* TAB 5: CÀI ĐẶT (SETTINGS) */}
             {activeTab === 'settings' && (
               <SettingsView
                 userAvatar={userAvatar}
@@ -1033,122 +1009,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* ═══════════════ POPUP: THÔNG BÁO (ANIMATED OPEN & CLOSE) ═══════════════ */}
-      <div
-        className={`fixed inset-0 z-50 overflow-hidden transition-all duration-200 ${showNotificationsModal
-            ? 'pointer-events-auto visible'
-            : 'pointer-events-none invisible'
-          }`}
-      >
-        {/* Backdrop */}
-        <div
-          className={`fixed inset-0 bg-slate-950/20 backdrop-blur-xs transition-opacity duration-200 ease-out ${showNotificationsModal ? 'opacity-100' : 'opacity-0'
-            }`}
-          onClick={() => setShowNotificationsModal(false)}
-        ></div>
-
-        {/* Animated Dropdown Card */}
-        <div
-          className={`fixed top-20 right-4 sm:right-10 z-50 w-88 sm:w-96 max-w-[92vw] bg-white rounded-3xl p-5 border border-slate-200 shadow-2xl flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${showNotificationsModal
-              ? 'opacity-100 scale-100 translate-y-0'
-              : 'opacity-0 scale-95 -translate-y-3'
-            }`}
-        >
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-base text-slate-900">Thông Báo Hệ Thống</span>
-              <span className="text-[11px] font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                {Math.max(1, trips.length)} đơn
-              </span>
-            </div>
-            <button
-              onClick={() => setShowNotificationsModal(false)}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-            >
-              <span className="material-symbols-outlined text-lg">close</span>
-            </button>
-          </div>
-
-          <div className="space-y-2.5 max-h-[380px] overflow-y-auto no-scrollbar">
-            {/* Notification 1: Recent Rental */}
-            <div
-              onClick={() => {
-                setActiveTab('history');
-                setShowNotificationsModal(false);
-              }}
-              className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
-            >
-              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="material-symbols-outlined text-[18px]">two_wheeler</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Đơn thuê loa hoạt động</span>
-                  <span className="text-[10px] text-slate-400 font-medium shrink-0">Hôm nay</span>
-                </div>
-                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                  {trips.length > 0 ? trips[0].title : 'Hệ thống Kẹo Kéo Dặm sẵn sàng tiếp nhận đơn đặt mới.'}
-                </p>
-              </div>
-            </div>
-
-            {/* Notification 2: Speaker Fleet Status */}
-            <div
-              onClick={() => {
-                setActiveTab('tracking');
-                setShowNotificationsModal(false);
-              }}
-              className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
-            >
-              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="material-symbols-outlined text-[18px]">speaker</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Kho thiết bị sẵn sàng</span>
-                  <span className="text-[10px] text-slate-400 font-medium shrink-0">Trực tiếp</span>
-                </div>
-                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                  {speakers.length > 0 ? `Đang quản lý ${speakers.length} dàn loa kéo công suất lớn tại kho tổng.` : 'Đã kết nối cơ sở dữ liệu kho loa.'}
-                </p>
-              </div>
-            </div>
-
-            {/* Notification 3: Expenses Record */}
-            <div
-              onClick={() => {
-                setActiveTab('expenses');
-                setShowNotificationsModal(false);
-              }}
-              className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-all cursor-pointer group flex items-start gap-3"
-            >
-              <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 text-xs sm:text-sm truncate">Sổ thu chi & Hóa đơn</span>
-                  <span className="text-[10px] text-slate-400 font-medium shrink-0">Cập nhật</span>
-                </div>
-                <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
-                  {expenses.length > 0 ? `Đã ghi nhận ${expenses.length} khoản chi phí vận hành.` : 'Chưa có khoản chi phát sinh.'}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
-            <span className="text-slate-400 font-medium">Đã cập nhật tất cả</span>
-            <button
-              onClick={() => setShowNotificationsModal(false)}
-              className="font-bold text-slate-900 hover:underline"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* ═══════════════ LANDING PAGE QR CODE & STANDEE MODAL ═══════════════ */}
       {showLandingQRModal && (

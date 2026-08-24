@@ -398,13 +398,6 @@ export default function ExpensesView({ expenses = [], onOpenAddExpense }) {
             <h2 className="text-[16px] font-bold text-slate-900">
               Chi Phí Gần Đây ({activeData.badge})
             </h2>
-            <button
-              onClick={onOpenAddExpense}
-              className="flex items-center gap-1 sm:gap-1.5 bg-slate-900 text-white px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 rounded-lg sm:rounded-xl hover:bg-slate-800 transition-all shadow-xs active:scale-95 text-xs sm:text-[13px] font-bold whitespace-nowrap"
-            >
-              <span className="material-symbols-outlined text-[16px] sm:text-[17px]">add</span>
-              <span>Thêm Chi Phí</span>
-            </button>
           </div>
 
           {/* Mobile Divided Row List (Clean divider without cramped card borders) */}
