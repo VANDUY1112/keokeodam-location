@@ -28,6 +28,7 @@ export default function UserLoginPageView({
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: provider,
           options: {
+            scopes: provider === 'facebook' ? 'email,public_profile' : undefined,
             redirectTo: window.location.origin + (window.location.pathname || '') + '?page=landing'
           }
         });

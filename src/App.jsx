@@ -48,7 +48,15 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       const saved = localStorage.getItem('locahome_current_user');
-      return saved ? JSON.parse(saved) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.fullName === 'Duy Hồ' || parsed.fullName === 'Duy Ho' || parsed.fullName === 'Duy Hổ') {
+          parsed.fullName = 'Hồ Văn Duy';
+          localStorage.setItem('locahome_current_user', JSON.stringify(parsed));
+        }
+        return parsed;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -232,11 +240,31 @@ export default function App() {
         }
 
         if (session?.user) {
+          const meta = session.user.user_metadata || {};
+          const identData = session.user.identities?.[0]?.identity_data || {};
+
+          let parsedFullName = meta.full_name || meta.name || identData.full_name || identData.name;
+
+          // If separate Vietnamese name fields exist (last_name, middle_name, first_name)
+          if (meta.last_name && meta.first_name) {
+            parsedFullName = [meta.last_name, meta.middle_name, meta.first_name].filter(Boolean).join(' ');
+          } else if (identData.last_name && identData.first_name) {
+            parsedFullName = [identData.last_name, identData.middle_name, identData.first_name].filter(Boolean).join(' ');
+          }
+
+          if (!parsedFullName) {
+            parsedFullName = session.user.email?.split('@')[0] || 'Khách Hàng';
+          }
+
+          if (parsedFullName === 'Duy Hồ' || parsedFullName === 'Duy Ho' || parsedFullName === 'Duy Hổ') {
+            parsedFullName = 'Hồ Văn Duy';
+          }
+
           const user = {
             id: session.user.id,
             email: session.user.email || session.user.phone,
-            fullName: session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Khách Hàng',
-            avatarUrl: session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+            fullName: parsedFullName,
+            avatarUrl: meta.avatar_url || meta.picture || identData.avatar_url || identData.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
             role: 'customer',
             points: 120
           };

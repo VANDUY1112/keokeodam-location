@@ -427,6 +427,12 @@ export default function LandingPageView({
     if (reviewSuccessTimerRef.current) clearTimeout(reviewSuccessTimerRef.current);
     setIsClosingReviewModal(false);
     setReviewSuccess(false);
+    if (currentUser?.fullName) {
+      setNewReviewForm(prev => ({
+        ...prev,
+        name: currentUser.fullName
+      }));
+    }
     setShowAddReviewModal(true);
   };
 
@@ -444,6 +450,76 @@ export default function LandingPageView({
   // Lightbox Zoom Modal for Scenic Photos
   const [zoomImageModal, setZoomImageModal] = useState(null);
   const [modalZoomScale, setModalZoomScale] = useState(1);
+
+  // Pagination for Vi vu Photo Showcase
+  const [vivuPage, setVivuPage] = useState(0);
+  const [isVivuTransitioning, setIsVivuTransitioning] = useState(false);
+
+  const vivuPages = [
+    {
+      col1: [
+        { id: 'nhan', name: 'Tháp Nhạn', location: 'Tháp Nhạn Cổ Kính • Tuy Hòa', img: '/anh8.png', color: 'from-[#864d61]/90' },
+        { id: 'honyen', name: 'Hòn Yến', location: 'Hòn Yến Biển Xanh • Tuy An', img: '/anh6.png', color: 'from-purple-950/90' }
+      ],
+      col2: [
+        { id: 'nghinhphong', name: 'Tháp Nghinh Phong', location: 'Tháp Nghinh Phong • Tuy Hòa', img: '/anh5.png', color: 'from-[#2f6a3f]/90' },
+        { id: 'muidien', name: 'Hải Đăng Mũi Điện', location: 'Hải Đăng Mũi Điện • Bãi Môn', img: '/anh7.png', color: 'from-[#235a7c]/90' }
+      ]
+    },
+    {
+      col1: [
+        { id: 'ghendadia', name: 'Ghềnh Đá Đĩa', location: 'Ghềnh Đá Đĩa • Tuy An', img: '/ghendadia.png', color: 'from-[#864d61]/90' },
+        { id: 'nhatho', name: 'Nhà Thờ Mằng Lăng', location: 'Nhà Thờ Mằng Lăng • Cổ Kính', img: '/nhatho.png', color: 'from-[#235a7c]/90' }
+      ],
+      col2: [
+        { id: 'baixep', name: 'Bãi Xép', location: 'Bãi Xép Hoa Vàng Cỏ Xanh • Tuy An', img: '/baixep.png', color: 'from-[#2f6a3f]/90' },
+        { id: 'nuidabia', name: 'Núi Đá Bia', location: 'Núi Đá Bia Hùng Vĩ • Đèo Cả', img: '/nuidabia.png', color: 'from-purple-950/90' }
+      ]
+    },
+    {
+      col1: [
+        { id: 'chuathanhluong', name: 'Chùa Thanh Lương', location: 'Chùa Thanh Lương • Tuy An', img: '/chuathanhluong.png', color: 'from-[#235a7c]/90' },
+        { id: 'thienvientruclam', name: 'Thiền Viện Trúc Lâm', location: 'Thiền Viện Trúc Lâm • Tuy Hòa', img: '/thienvientruclam.png', color: 'from-[#864d61]/90' }
+      ],
+      col2: [
+        { id: 'vungro', name: 'Vịnh Vũng Rô', location: 'Vịnh Vũng Rô Hùng Vĩ • Đông Hòa', img: '/vungro.png', color: 'from-[#2f6a3f]/90' },
+        { id: 'cauongcop', name: 'Cầu Gỗ Ông Cọp', location: 'Cầu Gỗ Ông Cọp • Tuy An', img: '/cauongcop.png', color: 'from-amber-950/90' }
+      ]
+    }
+  ];
+
+  const handleNextVivuPage = () => {
+    if (isVivuTransitioning) return;
+    setIsVivuTransitioning(true);
+    setTimeout(() => {
+      setVivuPage((prev) => (prev + 1) % vivuPages.length);
+      setTimeout(() => {
+        setIsVivuTransitioning(false);
+      }, 50);
+    }, 180);
+  };
+
+  const handlePrevVivuPage = () => {
+    if (isVivuTransitioning) return;
+    setIsVivuTransitioning(true);
+    setTimeout(() => {
+      setVivuPage((prev) => (prev - 1 + vivuPages.length) % vivuPages.length);
+      setTimeout(() => {
+        setIsVivuTransitioning(false);
+      }, 50);
+    }, 180);
+  };
+
+  const handleSelectVivuPage = (idx) => {
+    if (isVivuTransitioning || vivuPage === idx) return;
+    setIsVivuTransitioning(true);
+    setTimeout(() => {
+      setVivuPage(idx);
+      setTimeout(() => {
+        setIsVivuTransitioning(false);
+      }, 50);
+    }, 180);
+  };
 
   const [bookingFormTouched, setBookingFormTouched] = useState({ name: false, phone: false, address: false });
   const [bookingFormShake, setBookingFormShake] = useState(false);
@@ -830,7 +906,8 @@ export default function LandingPageView({
     e.preventDefault();
     setReviewFormTouched({ name: true, comment: true });
 
-    const isNameValid = Boolean(newReviewForm.name.trim());
+    const authorName = currentUser?.fullName || newReviewForm.name.trim();
+    const isNameValid = Boolean(authorName);
     const isCommentValid = Boolean(newReviewForm.comment.trim() && newReviewForm.comment.trim().length >= 5);
 
     if (!isNameValid || !isCommentValid) {
@@ -848,13 +925,13 @@ export default function LandingPageView({
 
     const newRev = {
       id: `REV-${Date.now()}`,
-      name: newReviewForm.name.trim(),
+      name: authorName,
       category: newReviewForm.category,
       time: formattedPostTime,
       rating: Number(newReviewForm.rating),
       verified: true,
-      avatar: defaultAvatarForColor,
-      avatarLetter: newReviewForm.name.trim().charAt(0).toUpperCase(),
+      avatar: currentUser?.avatarUrl || defaultAvatarForColor,
+      avatarLetter: authorName.charAt(0).toUpperCase(),
       avatarColor: chosenColor,
       comment: newReviewForm.comment.trim(),
       colorScheme: chosenColor,
@@ -1103,7 +1180,7 @@ export default function LandingPageView({
                 className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md hover:scale-105"
                 title="Mở form viết đánh giá trải nghiệm"
               >
-                <span>Viết Đánh Giá</span>
+                <span>Viết đánh giá</span>
               </button>
 
               {currentUser && currentUser.role === 'customer' ? (
@@ -1114,7 +1191,7 @@ export default function LandingPageView({
                     alt={currentUser.fullName}
                     className="w-7 h-7 rounded-full object-cover border border-[#ffd9e3]"
                   />
-                  <span className="font-bold text-[#864d61] text-xs sm:text-sm max-w-[90px] sm:max-w-[140px] truncate">
+                  <span className="font-bold text-[#864d61] text-xs sm:text-sm max-w-[160px] sm:max-w-[240px] truncate">
                     {currentUser.fullName}
                   </span>
                   <button
@@ -1189,7 +1266,7 @@ export default function LandingPageView({
                   }}
                   className="bg-[#864d61] text-white font-headline text-base px-8 py-3.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md"
                 >
-                  <span>Thuê Loa Ngay</span>
+                  <span>Thuê loa ngay</span>
                 </button>
 
                 <button
@@ -1258,54 +1335,125 @@ export default function LandingPageView({
           </div>
         </section>
 
-        {/* ═══════════════ INTERACTIVE SOUND DEMO & EQUALIZER ═══════════════ */}
-        <section id="sound-demo" className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white/90 rounded-[3rem] p-6 sm:p-10 border-2 border-[#ffd9e3] shadow-[0_12px_36px_rgba(134,77,97,0.08)]">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* ═══════════════ INTERACTIVE SOUND DEMO & SCENIC SPOTS (PAGINATED) ═══════════════ */}
+        <section id="vivu" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+          <div className="bg-white/95 rounded-[2.5rem] sm:rounded-[3rem] p-5 sm:p-8 lg:p-10 border-2 border-[#ffd9e3] shadow-[0_16px_40px_rgba(134,77,97,0.08)]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
 
-              {/* Left text */}
-              <div className="text-center md:text-left">
-                <div className="inline-flex items-center px-3.5 py-1 bg-[#ffd9e3] rounded-full text-[#864d61] text-[13px] font-bold tracking-wide mb-2">
-                  <span>Ngắm một tí nhé! rồi hát tiếp</span>
+              {/* Box 1: Seamless Header on Mobile / 1st Column Card on Desktop */}
+              <div className="flex flex-col justify-between p-0 lg:p-8 rounded-none lg:rounded-[2.2rem] bg-transparent lg:bg-gradient-to-br lg:from-[#fff0f4] lg:via-[#fdf7ff] lg:to-[#f0f4ff] border-0 lg:border-2 lg:border-[#ffd9e3]/80 shadow-none lg:shadow-xs md:col-span-2 lg:col-span-1">
+                <div className="text-left">
+                  <div className="inline-flex items-center gap-1.5 px-3.5 py-1 sm:px-4 sm:py-1.5 bg-[#ffd9e3] lg:bg-white/90 shadow-xs rounded-full text-[#864d61] text-xs sm:text-sm font-bold tracking-wide mb-2.5 sm:mb-4 border border-[#ffd9e3]">
+                    <span>🌸 Ngắm một tí nhé! rồi hát tiếp</span>
+                  </div>
+                  <h3 className="font-headline text-2xl sm:text-3xl lg:text-[2.2rem] text-[#864d61] leading-tight font-black mb-2 sm:mb-3.5">
+                    Vi vu một tí rồi dô bia
+                  </h3>
+                  <p className="text-slate-600 font-semibold text-xs sm:text-sm leading-relaxed">
+                    Khám phá những danh lam thắng cảnh tuyệt đẹp của xứ sở "Hoa vàng trên cỏ xanh" Tuy Hòa - Phú Yên cùng âm nhạc rộn ràng!
+                  </p>
                 </div>
-                <h3 className="font-headline text-xl sm:text-4xl text-[#864d61] max-w-md leading-snug">
-                  Vi vu một tí rồi dô bia
-                </h3>
+
+                {/* Pagination Controls */}
+                <div className="pt-3 lg:pt-6 mt-3 lg:mt-6 border-t-0 lg:border-t border-[#ffd9e3]/60 flex items-center justify-between">
+                  {/* Dots Indicator */}
+                  <div className="flex items-center gap-1.5">
+                    {vivuPages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSelectVivuPage(idx)}
+                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                          vivuPage === idx
+                            ? 'w-6 bg-[#864d61]'
+                            : 'w-2 bg-[#864d61]/25 hover:bg-[#864d61]/50'
+                        }`}
+                        title={`Trang ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Unified Sleek Pill Prev / Next Controls */}
+                  <div className="inline-flex items-center bg-white/90 backdrop-blur-xs p-1 rounded-full border border-[#ffd9e3] shadow-xs gap-1">
+                    <button
+                      type="button"
+                      onClick={handlePrevVivuPage}
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[#864d61] hover:bg-[#ffd9e3]/50 active:scale-90 transition-all cursor-pointer select-none"
+                      title="Trang trước"
+                    >
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    <span className="text-xs font-bold text-[#864d61] px-1.5 select-none tracking-wider font-headline">
+                      {vivuPage + 1} <span className="text-[#864d61]/35 font-normal">/</span> {vivuPages.length}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={handleNextVivuPage}
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[#864d61] hover:bg-[#ffd9e3]/50 active:scale-90 transition-all cursor-pointer select-none"
+                      title="Trang sau"
+                    >
+                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              {/* Right Demo Buttons: 1 ảnh 1 dòng trên Mobile, 2 cột trên Tablet/Desktop */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 w-full md:w-[480px]">
-                {[
-                  { id: 'nhan', name: 'Tháp Nhạn', location: 'Tháp Nhạn Cổ Kính • Tuy Hòa', img: '/anh8.png', color: 'from-[#864d61]/90', ring: 'ring-[#864d61]' },
-                  { id: 'nghinhphong', name: 'Tháp Nghinh Phong', location: 'Tháp Nghinh Phong • Tuy Hòa', img: '/anh5.png', color: 'from-[#2f6a3f]/90', ring: 'ring-[#2f6a3f]' },
-                  { id: 'honyen', name: 'Hòn Yến', location: 'Hòn Yến Biển Xanh • Tuy An', img: '/anh6.png', color: 'from-purple-950/90', ring: 'ring-purple-700' },
-                  { id: 'muidien', name: 'Hải Đăng Mũi Điện', location: 'Hải Đăng Mũi Điện • Bãi Môn', img: '/anh7.png', color: 'from-[#235a7c]/90', ring: 'ring-[#235a7c]' }
-                ].map((item) => {
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => setZoomImageModal(item)}
-                      className="relative aspect-[16/10] sm:aspect-[4/3] rounded-3xl overflow-hidden border-2 border-[#ffd9e3] hover:border-[#864d61]/60 transition-all duration-300 active:scale-90 hover:scale-[1.03] cursor-pointer group shadow-sm hover:shadow-2xl select-none"
-                    >
-                      <img
-                        src={item.img}
-                        alt={item.location}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-112 group-active:scale-95 transition-transform duration-500 ease-out"
-                      />
-                      <div className={`absolute inset-0 bg-gradient-to-t ${item.color} via-black/20 to-transparent opacity-85 group-hover:opacity-95 transition-opacity`}></div>
-
-                      {/* Click effect ripple highlight */}
-                      <div className="absolute inset-0 bg-white/0 group-active:bg-white/25 transition-colors pointer-events-none"></div>
-
-                      {/* Bottom Info: Chỉ hiển thị tên danh lam thắng cảnh */}
-                      <div className="absolute bottom-2.5 left-3 right-3 text-left">
-                        <span className="font-headline text-sm sm:text-base text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] block truncate group-hover:translate-x-1 transition-transform">
-                          {item.location}
-                        </span>
-                      </div>
+              {/* Box 2 (Middle Column): Scenic Spots Col 1 */}
+              <div className={`flex flex-col gap-3.5 sm:gap-5 justify-between transition-all duration-300 ease-out transform ${
+                isVivuTransitioning ? 'opacity-0 scale-95 translate-y-1' : 'opacity-100 scale-100 translate-y-0'
+              }`}>
+                {vivuPages[vivuPage].col1.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setZoomImageModal(item)}
+                    className="relative flex-1 min-h-[160px] sm:min-h-[180px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-[#ffd9e3] hover:border-[#864d61]/70 transition-all duration-500 active:scale-95 hover:scale-[1.02] cursor-pointer group shadow-sm hover:shadow-2xl select-none"
+                  >
+                    <img
+                      src={item.img}
+                      alt={item.location}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-112 transition-transform duration-700 ease-out"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${item.color} via-black/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity`}></div>
+                    <div className="absolute inset-0 bg-white/0 group-active:bg-white/20 transition-colors pointer-events-none"></div>
+                    <div className="absolute bottom-2.5 sm:bottom-3 left-3 sm:left-3.5 right-3 sm:right-3.5 text-left">
+                      <span className="font-headline text-sm sm:text-base text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] block truncate group-hover:translate-x-1 transition-transform">
+                        {item.location}
+                      </span>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
+              </div>
+
+              {/* Box 3 (Right Column): Scenic Spots Col 2 */}
+              <div className={`flex flex-col gap-3.5 sm:gap-5 justify-between transition-all duration-300 ease-out transform ${
+                isVivuTransitioning ? 'opacity-0 scale-95 translate-y-1' : 'opacity-100 scale-100 translate-y-0'
+              }`}>
+                {vivuPages[vivuPage].col2.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setZoomImageModal(item)}
+                    className="relative flex-1 min-h-[160px] sm:min-h-[180px] rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-[#ffd9e3] hover:border-[#864d61]/70 transition-all duration-500 active:scale-95 hover:scale-[1.02] cursor-pointer group shadow-sm hover:shadow-2xl select-none"
+                  >
+                    <img
+                      src={item.img}
+                      alt={item.location}
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-112 transition-transform duration-700 ease-out"
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${item.color} via-black/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity`}></div>
+                    <div className="absolute inset-0 bg-white/0 group-active:bg-white/20 transition-colors pointer-events-none"></div>
+                    <div className="absolute bottom-2.5 sm:bottom-3 left-3 sm:left-3.5 right-3 sm:right-3.5 text-left">
+                      <span className="font-headline text-sm sm:text-base text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] block truncate group-hover:translate-x-1 transition-transform">
+                        {item.location}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
 
             </div>
@@ -1985,41 +2133,7 @@ export default function LandingPageView({
           </div>
         </section>
 
-        {/* ═══════════════ WHY CHOOSE US (ƯU ĐIỂM) ═══════════════ */}
-        <section id="features" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-[#f3eaff] rounded-[2.5rem] sm:rounded-[3.5rem] p-4 sm:p-12 border-2 border-[#ffd9e3] shadow-[inset_0_4px_20px_rgba(255,255,255,0.9),0_10px_30px_rgba(134,77,97,0.06)]">
-            <div className="text-left mb-4 sm:mb-6">
-              <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
-                Dặm sẽ ship hỏa tốc?
-              </h2>
-            </div>
 
-            <div
-              onClick={() => {
-                setModalZoomScale(1.6);
-                setZoomImageModal({
-                  id: 'loca',
-                  location: 'Khu vực giao loa hỏa tốc Tuy Hòa - Phú Yên',
-                  img: '/loca.png'
-                });
-              }}
-              className="w-full overflow-hidden rounded-2xl sm:rounded-3xl shadow-md border-2 border-[#ffd9e3] bg-white cursor-pointer group relative select-none h-80 sm:h-96 md:h-[28rem]"
-              title="Nhấn để xem ảnh phóng to"
-            >
-              <img
-                src="/loca.png"
-                alt="Khu vực giao loa hỏa tốc Tuy Hòa - Phú Yên"
-                className="w-full h-full object-cover object-[67%_62%] scale-[1.45] sm:scale-[1.3] group-hover:scale-[1.5] transition-transform duration-500 ease-out origin-[67%_62%]"
-              />
-              <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-xs sm:text-sm font-headline px-3 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1.5 shadow-lg border border-white/25 transition-all opacity-85 group-hover:opacity-100 group-hover:scale-105">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-                </svg>
-                <span>Xem ảnh lớn</span>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* ═══════════════ BOTTOM CTA BANNER ═══════════════ */}
         <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 text-center">
@@ -2042,7 +2156,7 @@ export default function LandingPageView({
                 className="bg-[#864d61] text-white font-headline text-base sm:text-lg px-8 py-4 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
                 title="Mở ứng dụng điện thoại và tự soạn sẵn số 0368.115.592"
               >
-                <span>Lưu Số Ngay</span>
+                <span>Lưu số ngay</span>
               </a>
 
               <a
@@ -2328,39 +2442,26 @@ export default function LandingPageView({
       {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ (HIỆU ỨNG MỞ & ĐÓNG SIÊU MƯỢT) ═══════════════ */}
       <div
         className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAddReviewModal && !isClosingReviewModal
-          ? 'opacity-100 pointer-events-auto visible bg-black/60 backdrop-blur-md'
+          ? 'opacity-100 pointer-events-auto visible bg-black/25 backdrop-blur-[2px]'
           : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
           }`}
         onClick={handleCloseReviewModal}
       >
         <div
-          className={`bg-white rounded-[2.8rem] max-w-md w-full p-6 sm:p-8 border-3 border-[#ffd9e3] shadow-[0_25px_60px_rgba(134,77,97,0.25)] relative overflow-hidden transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${showAddReviewModal && !isClosingReviewModal
+          className={`bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-6 sm:p-7 border-2 border-[#ffd9e3] shadow-[0_20px_50px_rgba(134,77,97,0.20)] relative overflow-hidden transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${showAddReviewModal && !isClosingReviewModal
             ? 'scale-100 translate-y-0 opacity-100'
             : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
             }`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Top Color Accent Line */}
-          <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-[#ffd9e3] via-[#ffb7ce] to-[#b2f2bb]"></div>
-
-          <div className="flex items-center justify-between gap-3 mb-5">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border-2 border-[#fab3ca] shadow-xs shrink-0">
-                <CuteStarIcon filled={true} className="w-6 h-6 text-amber-400" />
-              </div>
-              <div>
-                <h3 className="font-headline text-xl text-[#864d61]">Viết Đánh Giá Của Bạn</h3>
-                <p className="text-xs font-semibold text-slate-500">Chia sẻ trải nghiệm thuê loa kéo</p>
-              </div>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-11 h-11 rounded-xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border border-[#fab3ca] shadow-xs shrink-0">
+              <CuteStarIcon filled={true} className="w-5 h-5 text-amber-400" />
             </div>
-            <button
-              type="button"
-              onClick={handleCloseReviewModal}
-              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
-              title="Đóng"
-            >
-              ✕
-            </button>
+            <div>
+              <h3 className="font-headline text-xl text-[#864d61]">Viết đánh giá của bạn</h3>
+              <p className="text-xs font-semibold text-slate-500">Chia sẻ trải nghiệm thuê loa kéo</p>
+            </div>
           </div>
 
           <form onSubmit={handleAddReviewSubmit} className={`flex flex-col gap-4 ${reviewFormShake ? 'animate-shake' : ''}`}>
@@ -2370,29 +2471,35 @@ export default function LandingPageView({
                 <label className="block text-[13px] font-headline text-[#201047]">
                   Tên của bạn<span className="text-rose-500">*</span>
                 </label>
-                {reviewFormTouched.name && newReviewForm.name.trim() && (
+                {!currentUser?.fullName && reviewFormTouched.name && newReviewForm.name.trim() ? (
                   <span className="text-[13px] font-bold text-emerald-600">
                     Hợp lệ
                   </span>
-                )}
+                ) : null}
               </div>
               <input
                 type="text"
                 placeholder="Nhập tên của bạn..."
-                value={newReviewForm.name}
+                value={currentUser?.fullName || newReviewForm.name}
+                disabled={Boolean(currentUser?.fullName)}
+                readOnly={Boolean(currentUser?.fullName)}
                 onBlur={() => setReviewFormTouched(prev => ({ ...prev, name: true }))}
                 onChange={(e) => {
-                  setNewReviewForm({ ...newReviewForm, name: e.target.value });
-                  if (!reviewFormTouched.name) setReviewFormTouched(prev => ({ ...prev, name: true }));
+                  if (!currentUser?.fullName) {
+                    setNewReviewForm({ ...newReviewForm, name: e.target.value });
+                    if (!reviewFormTouched.name) setReviewFormTouched(prev => ({ ...prev, name: true }));
+                  }
                 }}
-                className={`w-full px-4 py-3 rounded-2xl font-bold text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${reviewFormTouched.name && !newReviewForm.name.trim()
-                  ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
-                  : reviewFormTouched.name && newReviewForm.name.trim()
-                    ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-                    : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white'
+                className={`w-full px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-inner focus:outline-none ${currentUser?.fullName
+                  ? 'bg-slate-100/90 border border-slate-200 text-slate-700 cursor-not-allowed select-none'
+                  : reviewFormTouched.name && !newReviewForm.name.trim()
+                    ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200 text-slate-900'
+                    : reviewFormTouched.name && newReviewForm.name.trim()
+                      ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100 text-slate-900'
+                      : 'bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-[#864d61] focus:bg-white text-slate-900'
                   }`}
               />
-              {reviewFormTouched.name && !newReviewForm.name.trim() && (
+              {!currentUser?.fullName && reviewFormTouched.name && !newReviewForm.name.trim() && (
                 <p className="text-[13px] font-bold text-rose-600 mt-1 animate-in fade-in slide-in-from-top-1">
                   Vui lòng nhập tên của bạn
                 </p>
@@ -2404,7 +2511,7 @@ export default function LandingPageView({
               <label className="block text-[13px] font-headline text-[#201047] mb-1.5">
                 Số sao đánh giá
               </label>
-              <div className="flex items-center gap-3 bg-[#fdf7ff] p-2.5 rounded-2xl border border-[#ffd9e3]">
+              <div className="flex items-center gap-3 bg-[#fdf7ff] p-2.5 rounded-xl border border-[#ffd9e3]">
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -2418,13 +2525,13 @@ export default function LandingPageView({
                     >
                       <CuteStarIcon
                         filled={star <= newReviewForm.rating}
-                        className={`w-7 h-7 transition-colors ${star <= newReviewForm.rating ? 'text-amber-400 drop-shadow-xs' : 'text-slate-200 hover:text-amber-200'
+                        className={`w-6 h-6 transition-colors ${star <= newReviewForm.rating ? 'text-amber-400 drop-shadow-xs' : 'text-slate-200 hover:text-amber-200'
                           }`}
                       />
                     </button>
                   ))}
                 </div>
-                <span className="text-xs font-extrabold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0 ml-auto">
+                <span className="text-xs font-extrabold text-amber-700 bg-amber-100/80 px-2.5 py-1 rounded-lg border border-amber-200 shrink-0 ml-auto">
                   {newReviewForm.rating === 5 ? 'Quá đã! 5⭐' :
                     newReviewForm.rating === 4 ? 'Hài lòng 4⭐' :
                       newReviewForm.rating === 3 ? 'Bình thường 3⭐' :
@@ -2443,19 +2550,19 @@ export default function LandingPageView({
                   {
                     id: 'pink',
                     name: 'Hồng',
-                    activeClass: 'bg-[#864d61] text-white border-[#864d61] shadow-md shadow-[#864d61]/30 ring-2 ring-[#864d61]/20 scale-[1.03]',
+                    activeClass: 'bg-[#864d61] text-white border-[#864d61] shadow-md shadow-[#864d61]/30 ring-2 ring-[#864d61]/20 scale-[1.02]',
                     inactiveClass: 'bg-[#ffd9e3]/40 border-[#fab3ca]/60 text-[#864d61] hover:bg-[#ffd9e3]/80 hover:border-[#fab3ca]'
                   },
                   {
                     id: 'blue',
                     name: 'Xanh Dương',
-                    activeClass: 'bg-[#235a7c] text-white border-[#235a7c] shadow-md shadow-[#235a7c]/30 ring-2 ring-[#235a7c]/20 scale-[1.03]',
+                    activeClass: 'bg-[#235a7c] text-white border-[#235a7c] shadow-md shadow-[#235a7c]/30 ring-2 ring-[#235a7c]/20 scale-[1.02]',
                     inactiveClass: 'bg-[#c9e6ff]/40 border-[#9ed1f8]/60 text-[#235a7c] hover:bg-[#c9e6ff]/80 hover:border-[#9ed1f8]'
                   },
                   {
                     id: 'green',
                     name: 'Xanh Lá',
-                    activeClass: 'bg-[#2f6a3f] text-white border-[#2f6a3f] shadow-md shadow-[#2f6a3f]/30 ring-2 ring-[#2f6a3f]/20 scale-[1.03]',
+                    activeClass: 'bg-[#2f6a3f] text-white border-[#2f6a3f] shadow-md shadow-[#2f6a3f]/30 ring-2 ring-[#2f6a3f]/20 scale-[1.02]',
                     inactiveClass: 'bg-[#b2f2bb]/40 border-[#96d5a0]/60 text-[#2f6a3f] hover:bg-[#b2f2bb]/80 hover:border-[#96d5a0]'
                   }
                 ].map((theme) => {
@@ -2465,7 +2572,7 @@ export default function LandingPageView({
                       key={theme.id}
                       type="button"
                       onClick={() => setNewReviewForm({ ...newReviewForm, colorScheme: theme.id })}
-                      className={`flex items-center justify-center gap-1 py-2.5 px-2 rounded-2xl border-2 font-headline font-bold text-xs sm:text-[13px] transition-all duration-200 cursor-pointer ${isSelected ? theme.activeClass : theme.inactiveClass
+                      className={`flex items-center justify-center gap-1 py-2 px-2 rounded-xl border-2 font-headline font-bold text-xs sm:text-[13px] transition-all duration-200 cursor-pointer ${isSelected ? theme.activeClass : theme.inactiveClass
                         }`}
                     >
                       {isSelected && <span className="text-xs font-black">✓</span>}
@@ -2496,7 +2603,7 @@ export default function LandingPageView({
                   setNewReviewForm({ ...newReviewForm, comment: e.target.value });
                   if (!reviewFormTouched.comment) setReviewFormTouched(prev => ({ ...prev, comment: true }));
                 }}
-                className={`w-full px-4 py-3 rounded-2xl font-medium text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${reviewFormTouched.comment && (!newReviewForm.comment.trim() || newReviewForm.comment.trim().length < 5)
+                className={`w-full px-4 py-2.5 rounded-xl font-medium text-sm text-slate-900 transition-all shadow-inner focus:outline-none ${reviewFormTouched.comment && (!newReviewForm.comment.trim() || newReviewForm.comment.trim().length < 5)
                   ? 'bg-rose-50/70 border-2 border-rose-400 focus:ring-2 focus:ring-rose-200'
                   : reviewFormTouched.comment && newReviewForm.comment.trim().length >= 5
                     ? 'bg-emerald-50/20 border-2 border-emerald-400 focus:ring-2 focus:ring-emerald-100'
@@ -2510,18 +2617,18 @@ export default function LandingPageView({
               )}
             </div>
 
-            <div className="flex gap-3 mt-2">
+            <div className="flex gap-3 mt-1">
               <button
                 type="button"
                 onClick={handleCloseReviewModal}
-                className="flex-1 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-headline text-xs text-slate-700 transition-colors cursor-pointer"
+                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 font-headline text-xs font-bold text-slate-700 transition-colors cursor-pointer"
               >
                 Hủy
               </button>
               <button
                 type="submit"
                 disabled={isSubmittingReview}
-                className="flex-1 py-3.5 rounded-2xl bg-[#864d61] text-white font-headline text-xs clay-button-pink flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform cursor-pointer disabled:opacity-70"
+                className="flex-1 py-3 rounded-xl bg-[#864d61] text-white font-headline text-xs font-bold clay-button-pink flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-transform cursor-pointer disabled:opacity-70"
               >
                 {isSubmittingReview ? (
                   <span className="inline-block animate-spin mr-1.5">⏳</span>
@@ -2559,64 +2666,19 @@ export default function LandingPageView({
 
           {/* Main Full Uncropped Image */}
           {zoomImageModal && (
-            <div className="w-full flex flex-col items-center justify-center animate-photo-pop">
-              <div className="relative rounded-3xl overflow-hidden border-2 border-white/20 shadow-[0_25px_60px_rgba(0,0,0,0.6)] bg-black/40 flex items-center justify-center max-h-[80vh] w-full">
+            <div className="w-fit max-w-full flex flex-col items-center justify-center animate-photo-pop">
+              <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-white/40 shadow-[0_25px_60px_rgba(0,0,0,0.8)] flex items-center justify-center max-h-[80vh]">
                 <img
                   src={zoomImageModal.img}
                   alt={zoomImageModal.location}
-                  style={{
-                    transform: `scale(${modalZoomScale})`,
-                    transformOrigin: zoomImageModal.id === 'loca' ? '67% 62%' : 'center center',
-                    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-                  }}
-                  className="max-h-[80vh] w-auto max-w-full object-contain rounded-3xl select-none"
+                  className="max-h-[80vh] w-auto max-w-full object-contain block select-none rounded-2xl sm:rounded-3xl"
                 />
-
-                {/* Floating Zoom Controls */}
-                <div className="absolute top-3.5 right-3.5 bg-black/60 backdrop-blur-md px-2 py-1 rounded-2xl border border-white/20 flex items-center gap-1.5 z-20 text-white shadow-lg">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setModalZoomScale(prev => Math.max(1, +(prev - 0.3).toFixed(1)));
-                    }}
-                    className="w-7 h-7 rounded-xl bg-white/20 hover:bg-white/40 flex items-center justify-center font-bold text-base transition-colors"
-                    title="Thu nhỏ"
-                  >
-                    -
-                  </button>
-                  <span className="text-[11px] font-mono font-bold px-1 min-w-[2.8rem] text-center">
-                    {Math.round(modalZoomScale * 100)}%
-                  </span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setModalZoomScale(prev => Math.min(3, +(prev + 0.3).toFixed(1)));
-                    }}
-                    className="w-7 h-7 rounded-xl bg-white/20 hover:bg-white/40 flex items-center justify-center font-bold text-base transition-colors"
-                    title="Phóng to"
-                  >
-                    +
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setModalZoomScale(zoomImageModal.id === 'loca' ? 1.6 : 1);
-                    }}
-                    className="w-7 h-7 rounded-xl bg-white/20 hover:bg-white/40 flex items-center justify-center text-xs transition-colors"
-                    title="Về mặc định"
-                  >
-                    ↺
-                  </button>
-                </div>
               </div>
 
               {/* Info bar below photo */}
               {zoomImageModal.location && (
-                <div className="mt-3 w-full bg-white/15 backdrop-blur-xl px-5 py-3 rounded-2xl border border-white/20 text-white shadow-lg text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <h4 className="font-headline text-base sm:text-lg text-white drop-shadow-sm">
+                <div className="mt-3 w-full bg-black/60 backdrop-blur-xl px-5 py-2.5 rounded-2xl border border-white/20 text-white shadow-lg text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <h4 className="font-headline text-sm sm:text-base text-white drop-shadow-sm">
                     {zoomImageModal.location}
                   </h4>
                 </div>
