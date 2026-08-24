@@ -68,8 +68,11 @@ export function initDatabase() {
       customer_name TEXT NOT NULL,
       customer_phone TEXT NOT NULL,
       address TEXT NOT NULL,
+      start_lat REAL,
+      start_lng REAL,
       dest_lat REAL,
       dest_lng REAL,
+      path_coordinates TEXT,
       start_time DATETIME NOT NULL,
       end_time DATETIME,
       duration_hours REAL NOT NULL DEFAULT 4,
@@ -108,15 +111,16 @@ export function initDatabase() {
       amount INTEGER NOT NULL,
       category TEXT NOT NULL, -- 'Nhiên liệu & Xăng xe', 'Bảo trì thiết bị', 'Ăn uống & Tiếp khách', 'Phụ kiện', 'Khác'
       subtitle TEXT,
-      icon TEXT DEFAULT 'receipt',
-      status TEXT NOT NULL DEFAULT 'Đã duyệt', -- 'Đã duyệt', 'Chờ duyệt', 'Từ chối'
-      approved_by TEXT,
-      receipt_url TEXT,
+      date TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'Đã thanh toán',
+      speaker_id TEXT,
+      note TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (approved_by) REFERENCES users(id)
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (speaker_id) REFERENCES speakers(id) ON DELETE SET NULL
     );
 
-    -- 7. SYSTEM SETTINGS TABLE
+    -- 7. SETTINGS & APP CONFIG TABLE
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
@@ -146,4 +150,17 @@ export function initDatabase() {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Auto-migrate new columns for existing SQLite database
+  try { db.exec('ALTER TABLE rentals ADD COLUMN start_lat REAL;'); } catch (e) {}
+  try { db.exec('ALTER TABLE rentals ADD COLUMN start_lng REAL;'); } catch (e) {}
+  try { db.exec('ALTER TABLE rentals ADD COLUMN path_coordinates TEXT;'); } catch (e) {}
+
+  // Clean out initial mock seed rows so only real user data remains
+  try {
+    db.exec(`
+      DELETE FROM rentals WHERE id IN ('ORD-2026-001', 'ORD-2026-002', 'ORD-2026-003');
+      DELETE FROM expenses WHERE id IN ('EXP-01', 'EXP-02', 'EXP-03', 'EXP-04');
+    `);
+  } catch (e) {}
 }

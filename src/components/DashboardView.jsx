@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Milestone, Flame, TrendingUp, ChevronRight } from 'lucide-react';
 import { formatVND, parseVNDNumber } from '../utils/format';
-import DashboardMiniMap, { generateHotspotsAround } from './DashboardMiniMap';
+import DashboardMiniMap from './DashboardMiniMap';
 import { api } from '../services/api.js';
 
 export default function DashboardView({
@@ -12,7 +12,6 @@ export default function DashboardView({
   onNavigateToTab,
   onOpenLandingQRModal,
 }) {
-  const [selectedHotspotId, setSelectedHotspotId] = useState('hs-1');
   const [isLocating, setIsLocating] = useState(false);
 
   // Backend API data state
@@ -113,31 +112,70 @@ export default function DashboardView({
     }
   }, []);
 
-  const hotspots = generateHotspotsAround(userCoords.lat, userCoords.lng);
+  // Calculate real Haversine distance from actual GPS coordinates
+  const calculateGpsDistance = (coords) => {
+    if (!Array.isArray(coords) || coords.length < 2) return 0;
+    let totalKm = 0;
+    for (let i = 0; i < coords.length - 1; i++) {
+      const p1 = coords[i];
+      const p2 = coords[i + 1];
+      if (p1 && p2 && typeof p1.lat === 'number' && typeof p2.lat === 'number') {
+        const R = 6371;
+        const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+        const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((p1.lat * Math.PI) / 180) *
+            Math.cos((p2.lat * Math.PI) / 180) *
+            Math.sin(dLng / 2) *
+            Math.sin(dLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c;
+        if (d > 0.005) {
+          totalKm += d;
+        }
+      }
+    }
+    return parseFloat(totalKm.toFixed(2));
+  };
 
-  // Compute dynamic stats from API or fallback to props
-  const summaryData = apiSummary?.summary || null;
-  const totalDistanceNum = summaryData?.distanceKm || trips.reduce((acc, t) => {
-    const d = parseFloat(t.distanceKm) || (t.subtitle?.match(/(\d+([\.,]\d+)?)\s*km/) ? parseFloat(t.subtitle.match(/(\d+([\.,]\d+)?)\s*km/)[1]) : 0);
+  // Merge API data with props for display
+  const displayTrips = apiRentals.length > 0 ? apiRentals.map(r => {
+    let pathCoords = [];
+    if (Array.isArray(r.pathCoordinates)) pathCoords = r.pathCoordinates;
+    else if (typeof r.pathCoordinates === 'string') {
+      try { pathCoords = JSON.parse(r.pathCoordinates); } catch (e) { }
+    }
+    // Strict calculation from actual GPS path coordinates
+    const calculatedDist = calculateGpsDistance(pathCoords);
+    const realDist = pathCoords.length > 1 ? calculatedDist : (typeof r.distanceKm === 'number' && r.distanceKm < 2.4 ? r.distanceKm : 0);
+
+    return {
+      id: r.id,
+      title: `${r.customerName} - ${r.customerPhone || ''}`,
+      customerName: r.customerName,
+      subtitle: `${r.speakerName || 'Loa Kéo'} • ${r.durationHours || 4}h • ${formatVND(r.totalAmount || 0)}`,
+      cost: r.totalAmount,
+      status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
+      icon: 'speaker',
+      destLat: r.destLat || r.lat,
+      destLng: r.destLng || r.lng,
+      address: r.address,
+      speakerName: r.speakerName,
+      distanceKm: realDist,
+      pathCoordinates: pathCoords
+    };
+  }) : trips;
+
+  // Compute dynamic real distance from actual trips
+  const totalDistanceNum = displayTrips.reduce((acc, t) => {
+    const d = typeof t.distanceKm === 'number' && t.distanceKm > 0 
+      ? t.distanceKm 
+      : calculateGpsDistance(t.pathCoordinates);
     return acc + d;
   }, 0);
 
-  const totalExpenseNum = summaryData?.totalRevenue || expenses.reduce((acc, e) => {
-    return acc + parseVNDNumber(e.amount);
-  }, 0);
-
-  const totalRentals = summaryData?.totalRentals || (apiRentals.length > 0 ? apiRentals.length : trips.length);
-
-  // Merge API data with props for display
-  const displayTrips = apiRentals.length > 0 ? apiRentals.map(r => ({
-    id: r.id,
-    title: `${r.customerName} - ${r.customerPhone || ''}`,
-    subtitle: `${r.speakerName || 'Loa Kéo'} • ${r.durationHours}h • ${formatVND(r.totalAmount)}`,
-    cost: r.totalAmount,
-    status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
-    icon: 'speaker',
-    distanceKm: 0
-  })) : trips;
+  const totalRentals = displayTrips.length;
 
   const displayExpenses = apiExpenses.length > 0 ? apiExpenses.map(e => ({
     id: e.id,
@@ -153,7 +191,7 @@ export default function DashboardView({
       {/* ══════════ 3 TOP STAT CARDS ══════════ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 w-full">
         {/* Metric 1: Total Distance */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[120px] lg:min-h-[140px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
           <div className="flex items-center justify-between gap-2 z-10">
@@ -167,23 +205,14 @@ export default function DashboardView({
 
           <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
             <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              {totalDistanceNum > 0 ? totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 }) : (isLoadingApi ? '...' : '1.245')}
+              {isLoadingApi ? '...' : totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}
             </span>
             <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">km</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
-              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
-                trending_up
-              </span>
-              +12% tháng trước
-            </span>
           </div>
         </div>
 
         {/* Metric 2: Avg Speed */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[120px] lg:min-h-[140px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
           <div className="flex items-center justify-between gap-2 z-10">
@@ -199,25 +228,14 @@ export default function DashboardView({
 
           <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
             <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              68.4
+              {isLoadingApi ? '...' : (totalDistanceNum > 0 && totalRentals > 0 ? (totalDistanceNum / totalRentals).toFixed(1) : '0')}
             </span>
             <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">km/h</span>
           </div>
-
-          <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
-              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
-                horizontal_rule
-              </span>
-              Vận tốc ổn định
-            </span>
-          </div>
         </div>
 
-
-
-        {/* Metric 4: Total Speaker Rentals */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
+        {/* Metric 3: Total Speaker Rentals */}
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[120px] lg:min-h-[140px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
           <div className="flex items-center justify-between gap-2 z-10">
@@ -233,29 +251,18 @@ export default function DashboardView({
 
           <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
             <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              {totalRentals > 0 ? totalRentals : (isLoadingApi ? '...' : 36)}
+              {isLoadingApi ? '...' : totalRentals}
             </span>
             <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">đơn</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
-              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
-                trending_up
-              </span>
-              +8 đơn tuần này
-            </span>
           </div>
         </div>
       </div>
 
-      {/* ══════════ FULL-WIDTH HERO MAP: BẢN ĐỒ MẬT ĐỘ THUÊ LOA QUANH BẠN ══════════ */}
+      {/* ══════════ FULL-WIDTH HERO MAP: BẢN ĐỒ GIAO LOA THỰC TẾ ══════════ */}
       <div className="w-full">
         <DashboardMiniMap
           userCoords={userCoords}
-          hotspots={hotspots}
-          selectedHotspotId={selectedHotspotId}
-          onSelectHotspot={(id) => setSelectedHotspotId(id)}
+          rentals={displayTrips}
           onRequestGPS={handleRequestGPS}
           isLocating={isLocating}
           onNavigateToTab={onNavigateToTab}

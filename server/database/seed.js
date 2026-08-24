@@ -127,68 +127,13 @@ export async function seedDatabase() {
     );
   }
 
-  // 3. Seed Active Rentals & Orders
+  // 3. Seed Active Rentals & Orders (Empty - only real user orders)
   const insertRental = db.prepare(`
     INSERT INTO rentals (id, speaker_id, customer_name, customer_phone, address, dest_lat, dest_lng, start_time, duration_hours, rent_price, shipping_fee, total_amount, deposit_amount, deposit_status, status, note)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  const rentalsData = [
-    {
-      id: 'ORD-2026-001',
-      speaker_id: 'LKK-01',
-      customer_name: 'Anh Hoàng (Tiệc Sinh Nhật)',
-      customer_phone: '0903123456',
-      address: '145 Kha Vạn Cân, P. Linh Trung, TP. Thủ Đức',
-      dest_lat: 10.8522,
-      dest_lng: 106.7725,
-      start_time: new Date(Date.now() - 3600000 * 3).toISOString(),
-      duration_hours: 4,
-      rent_price: 240000,
-      shipping_fee: 40000,
-      total_amount: 280000,
-      deposit_amount: 500000,
-      deposit_status: 'Đã giữ cọc',
-      status: 'active',
-      note: 'Giao kèm 2 mic sạc đầy pin và 1 dây nối jack 3.5mm'
-    },
-    {
-      id: 'ORD-2026-002',
-      speaker_id: 'LKK-02',
-      customer_name: 'Quán Nhậu 79 (Khai Trương)',
-      customer_phone: '0918776655',
-      address: '78 Võ Văn Ngân, P. Bình Thọ, TP. Thủ Đức',
-      dest_lat: 10.8499,
-      dest_lng: 106.7711,
-      start_time: new Date(Date.now() - 3600000 * 5).toISOString(),
-      duration_hours: 6,
-      rent_price: 540000,
-      shipping_fee: 50000,
-      total_amount: 590000,
-      deposit_amount: 1000000,
-      deposit_status: 'Đã giữ cọc',
-      status: 'active',
-      note: 'Thuê ca dài 6 tiếng đến 22h đêm'
-    },
-    {
-      id: 'ORD-2026-003',
-      speaker_id: 'LKK-04',
-      customer_name: 'Chị Mai (Gia Đình Hát Karaoke)',
-      customer_phone: '0938441122',
-      address: '24 Đường số 6, P. Linh Chiểu, TP. Thủ Đức',
-      dest_lat: 10.8465,
-      dest_lng: 106.7689,
-      start_time: new Date(Date.now() - 3600000 * 2).toISOString(),
-      duration_hours: 3,
-      rent_price: 150000,
-      shipping_fee: 30000,
-      total_amount: 180000,
-      deposit_amount: 400000,
-      deposit_status: 'Đã giữ cọc',
-      status: 'active',
-      note: 'Yêu cầu mic hút âm tốt'
-    }
-  ];
+  const rentalsData = [];
 
   for (const r of rentalsData) {
     insertRental.run(
@@ -198,50 +143,13 @@ export async function seedDatabase() {
     );
   }
 
-  // 4. Seed Expenses
+  // 4. Seed Expenses (Empty - only real expenses)
   const insertExpense = db.prepare(`
     INSERT INTO expenses (id, title, amount, category, subtitle, icon, status)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
-  const expensesData = [
-    {
-      id: 'EXP-01',
-      title: 'Bảo dưỡng định kỳ 2 micro UHF & thay pin sạc',
-      amount: 550000,
-      category: 'Bảo trì thiết bị',
-      subtitle: '17:30 • Hôm nay',
-      icon: 'mic',
-      status: 'Đã duyệt'
-    },
-    {
-      id: 'EXP-02',
-      title: 'Ăn trưa tiếp đối tác thuê loa sự kiện',
-      amount: 350000,
-      category: 'Ăn uống & Tiếp khách',
-      subtitle: '11:45 • Hôm nay',
-      icon: 'restaurant',
-      status: 'Đã duyệt'
-    },
-    {
-      id: 'EXP-03',
-      title: 'Đổ xăng xe máy giao loa 3 đơn Quận 1 & Thủ Đức',
-      amount: 120000,
-      category: 'Nhiên liệu & Xăng xe',
-      subtitle: '08:15 • Hôm nay',
-      icon: 'local_gas_station',
-      status: 'Đã duyệt'
-    },
-    {
-      id: 'EXP-04',
-      title: 'Mua dây cáp tín hiệu âm thanh Canon & Jack 6.5mm',
-      amount: 680000,
-      category: 'Phụ kiện',
-      subtitle: 'Hôm qua',
-      icon: 'cable',
-      status: 'Chờ duyệt'
-    }
-  ];
+  const expensesData = [];
 
   for (const e of expensesData) {
     insertExpense.run(e.id, e.title, e.amount, e.category, e.subtitle, e.icon, e.status);

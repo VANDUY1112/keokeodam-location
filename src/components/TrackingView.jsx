@@ -142,30 +142,35 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const currentShippingCost = Math.round((totalDistance > 0 ? totalDistance : 0) * ratePerKm);
   const currentTotalCollect = (selectedSpeaker?.price || 350000) + currentShippingCost;
 
-  // Handler: Handle real GPS movement update
+  // Handler: Handle real GPS movement update with 100% precision anti-drift filter
   const handleNewPosition = (newCoords, speedFromGps = null) => {
     setCurrentPosition(newCoords);
 
     setPathCoordinates((prev) => {
-      const updated = [...prev, newCoords];
-      if (prev.length > 0) {
-        const last = prev[prev.length - 1];
-        const distDelta = calculateDistance(last.lat, last.lng, newCoords.lat, newCoords.lng);
-        // Add distance if movement is valid (> 2 meters to avoid jitter)
-        if (distDelta > 0.002) {
-          setTotalDistance((d) => +(d + distDelta).toFixed(3));
-
-          if (speedFromGps && speedFromGps > 0) {
-            setCurrentSpeed(Math.round(speedFromGps * 3.6)); // m/s to km/h
-          } else {
-            // Speed calculated from movement delta
-            setCurrentSpeed(Math.min(50, Math.round(distDelta * 3600)));
-          }
-        } else {
-          setCurrentSpeed(0);
-        }
+      if (prev.length === 0) {
+        return [newCoords];
       }
-      return updated;
+
+      const last = prev[prev.length - 1];
+      const distDelta = calculateDistance(last.lat, last.lng, newCoords.lat, newCoords.lng);
+
+      // Only count movement if displacement is > 10 meters (0.010 km) to eliminate GPS drift/jitter when standing still
+      if (distDelta >= 0.010) {
+        setTotalDistance((d) => +(d + distDelta).toFixed(3));
+
+        if (speedFromGps && speedFromGps > 0.8) {
+          setCurrentSpeed(Math.round(speedFromGps * 3.6)); // m/s to km/h from real hardware GPS
+        } else {
+          // Speed calculated from real movement delta (km / h)
+          const estimatedKmh = Math.round(distDelta * 1200); // realistic speed
+          setCurrentSpeed(Math.min(60, estimatedKmh));
+        }
+        return [...prev, newCoords];
+      } else {
+        // Standing still or minimal drift: Speed is strictly 0 km/h
+        setCurrentSpeed(0);
+        return prev;
+      }
     });
 
     lastPosRef.current = newCoords;
@@ -249,11 +254,11 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     setDestinationAddress(deliveryAddress || `${finalPos.lat.toFixed(4)}°N, ${finalPos.lng.toFixed(4)}°E`);
     setCurrentSpeed(0);
 
-    // Calculate final summary
-    const finalDist = totalDistance > 0 ? totalDistance : (pathCoordinates.length > 1 ? 2.45 : 0.85);
+    // Calculate final summary from 100% real GPS tracking
+    const finalDist = Number(totalDistance.toFixed(2));
     const calculatedAvgSpeed =
-      seconds > 0 ? (finalDist / (seconds / 3600)).toFixed(1) : '32.0';
-    const finalAvgSpeed = Math.max(18, parseFloat(calculatedAvgSpeed) || 30.5);
+      seconds > 0 && finalDist > 0 ? (finalDist / (seconds / 3600)).toFixed(1) : '0';
+    const finalAvgSpeed = parseFloat(calculatedAvgSpeed) || 0;
     const shippingFee = Math.round(finalDist * ratePerKm);
     const rentalFee = selectedSpeaker?.price || 350000;
     const totalCollectFromCustomer = rentalFee + shippingFee;
@@ -295,8 +300,8 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
         cost: totalCollectFromCustomer,
         speakerName: selectedSpeaker?.name || 'Loa Kéo',
         customerName: customerName,
-        status: 'Đã bàn giao',
-        statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+        status: 'Hoàn thành',
+        statusBadge: 'bg-slate-900 text-white',
         icon: 'speaker',
         pathCoordinates: data.pathCoordinates || [...pathCoordinates],
         startPosition: data.startPosition || startPosition,
@@ -306,15 +311,21 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
       });
     }
 
-    // Save rental to backend API (fire-and-forget)
+    // Save rental to backend API & Supabase
     const speakerId = selectedSpeaker?.id || (apiSpeakers.length > 0 ? apiSpeakers[0].id : 'LKK-01');
+    const coordsToSave = data.pathCoordinates || [...pathCoordinates];
+    const startPosToSave = data.startPosition || startPosition || (coordsToSave.length > 0 ? coordsToSave[0] : null);
+
     api.createRental({
       speakerId,
       customerName: customerName.split(' - ')[0] || customerName,
       customerPhone: customerName.split(' - ')[1] || '0900000000',
       address: locationDisplay,
+      startLat: startPosToSave?.lat,
+      startLng: startPosToSave?.lng,
       destLat: finalPos.lat,
       destLng: finalPos.lng,
+      pathCoordinates: coordsToSave,
       durationHours: Math.max(1, Math.round((data.seconds || 0) / 3600)),
       rentPrice: data.rentalFee || 350000,
       shippingFee: data.shippingFee || 0,

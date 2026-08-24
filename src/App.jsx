@@ -127,42 +127,37 @@ export default function App() {
         }
 
         if (rentRes.status === 'fulfilled' && Array.isArray(rentRes.value?.data)) {
-          const calcDist = (lat, lng, hours = 4) => {
-            if (!lat || !lng) return parseFloat((hours * 1.8).toFixed(1));
-            const wLat = 10.8505, wLng = 106.7718;
-            const dLat = (lat - wLat) * 111;
-            const dLng = (lng - wLng) * 111 * Math.cos((wLat * Math.PI) / 180);
-            const dist = Math.sqrt(dLat * dLat + dLng * dLng) * 1.35;
-            return dist > 0.5 ? parseFloat(dist.toFixed(1)) : parseFloat((hours * 1.8).toFixed(1));
-          };
-
           const apiTrips = rentRes.value.data.map(r => {
-            const dist = calcDist(r.destLat, r.destLng, r.durationHours);
+            const hasDest = typeof r.destLat === 'number' && typeof r.destLng === 'number';
+            const hasStart = typeof r.startLat === 'number' && typeof r.startLng === 'number';
+            const destPosition = hasDest ? { lat: r.destLat, lng: r.destLng } : null;
+            const startPosition = hasStart ? { lat: r.startLat, lng: r.startLng } : null;
+
+            let pathCoordinates = [];
+            if (Array.isArray(r.pathCoordinates) && r.pathCoordinates.length > 0) {
+              pathCoordinates = r.pathCoordinates;
+            } else if (typeof r.pathCoordinates === 'string') {
+              try { pathCoordinates = JSON.parse(r.pathCoordinates); } catch (e) { }
+            }
+
+            const dist = typeof r.distanceKm === 'number' ? r.distanceKm : (pathCoordinates.length > 1 ? parseFloat((pathCoordinates.length * 0.05).toFixed(1)) : 0);
+
             return {
               id: r.id,
-              title: `Giao Loa: ${r.customerName} - ${r.customerPhone}`,
-              subtitle: `${r.speakerName || 'Loa Kéo'} • ${dist} km • ${r.durationHours}h • ${formatVND(r.totalAmount)}`,
+              title: r.customerName ? `Giao Loa: ${r.customerName}` : `Đơn #${r.id}`,
               distanceKm: dist,
-              duration: `${r.durationHours}h`,
+              duration: `${r.durationHours || 4}h`,
               cost: r.totalAmount,
               speakerName: r.speakerName || 'Loa Kéo',
               customerName: r.customerName,
-              status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Đã bàn giao' : 'Đã huỷ',
-              statusBadge: r.status === 'active'
-                ? 'bg-amber-50 text-amber-700 border-amber-200/60'
-                : r.status === 'completed'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
-                  : 'bg-red-50 text-red-700 border-red-200/60',
+              status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
               icon: 'speaker',
-              pathCoordinates: [
-                { lat: 10.8505, lng: 106.7718 },
-                { lat: r.destLat || 10.8522, lng: r.destLng || 106.7725 }
-              ]
+              startPosition: startPosition,
+              endPosition: destPosition,
+              pathCoordinates: pathCoordinates
             };
           });
-          if (apiTrips.length > 0) {
-            setTrips(apiTrips);
-          }
+          setTrips(apiTrips);
         }
 
         if (spkRes.status === 'fulfilled' && Array.isArray(spkRes.value?.data) && spkRes.value.data.length > 0) {
@@ -363,9 +358,9 @@ export default function App() {
 
   const [userName, setUserName] = useState(() => {
     const saved = localStorage.getItem('expensely_user_name');
-    if (!saved || saved === 'Alex Johnson') {
-      localStorage.setItem('expensely_user_name', 'Trần Anh Tuấn');
-      return 'Trần Anh Tuấn';
+    if (!saved || saved === 'Alex Johnson' || saved === 'Trần Anh Tuấn') {
+      localStorage.setItem('expensely_user_name', 'Hồ Văn Duy');
+      return 'Hồ Văn Duy';
     }
     return saved;
   });
@@ -423,6 +418,13 @@ export default function App() {
     setIsAuthenticated(false);
     setCurrentUser(null);
     setShowProfileMenu(false);
+
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('page', 'landing');
+      window.history.pushState({}, '', url.toString());
+    } catch (e) { }
+
     setActiveTab('landing');
   };
 

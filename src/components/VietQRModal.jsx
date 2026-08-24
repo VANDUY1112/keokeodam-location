@@ -44,10 +44,17 @@ export default function VietQRModal({
   onConfirmPayment = null,
   setToast = null
 }) {
-  const [bankConfig] = useState(() => {
+  const [bankConfig, setBankConfig] = useState(() => {
     try {
       const saved = localStorage.getItem('locahome_bank_config');
-      return saved ? JSON.parse(saved) : DEFAULT_BANK_CONFIG;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.accountNo === '0903123456' || parsed.accountName === 'TRAN ANH TUAN' || parsed.bankId === 'MB') {
+          return DEFAULT_BANK_CONFIG;
+        }
+        return parsed;
+      }
+      return DEFAULT_BANK_CONFIG;
     } catch {
       return DEFAULT_BANK_CONFIG;
     }
@@ -68,9 +75,26 @@ export default function VietQRModal({
   amountRef.current = amount;
   noteRef.current = note;
 
-  // Reset state when modal opens
+  // Reset state and re-read fresh bank config when modal opens
   useEffect(() => {
     if (isOpen) {
+      try {
+        const saved = localStorage.getItem('locahome_bank_config');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.accountNo === '0903123456' || parsed.accountName === 'TRAN ANH TUAN' || parsed.bankId === 'MB') {
+            setBankConfig(DEFAULT_BANK_CONFIG);
+            localStorage.setItem('locahome_bank_config', JSON.stringify(DEFAULT_BANK_CONFIG));
+          } else {
+            setBankConfig(parsed);
+          }
+        } else {
+          setBankConfig(DEFAULT_BANK_CONFIG);
+        }
+      } catch {
+        setBankConfig(DEFAULT_BANK_CONFIG);
+      }
+
       const startAmt = initialAmount || 500000;
       setAmount(startAmt);
       setNote(initialNote || formatNoteForAmount(startAmt));

@@ -183,8 +183,11 @@ class ApiService {
             customerName: r.customer_name,
             customerPhone: r.customer_phone,
             address: r.address,
+            startLat: r.start_lat,
+            startLng: r.start_lng,
             destLat: r.dest_lat,
             destLng: r.dest_lng,
+            pathCoordinates: r.path_coordinates ? (typeof r.path_coordinates === 'string' ? JSON.parse(r.path_coordinates) : r.path_coordinates) : [],
             startTime: r.start_time,
             endTime: r.end_time,
             durationHours: r.duration_hours,
@@ -217,11 +220,14 @@ class ApiService {
         customer_name: data.customerName,
         customer_phone: data.customerPhone,
         address: data.address,
-        dest_lat: data.destLat,
-        dest_lng: data.destLng,
+        start_lat: data.startLat || (data.startPosition ? data.startPosition.lat : null),
+        start_lng: data.startLng || (data.startPosition ? data.startPosition.lng : null),
+        dest_lat: data.destLat || (data.endPosition ? data.endPosition.lat : null),
+        dest_lng: data.destLng || (data.endPosition ? data.endPosition.lng : null),
+        path_coordinates: data.pathCoordinates || null,
         duration_hours: data.durationHours || 4,
         rent_price: data.rentPrice,
-        shipping_fee: data.shippingFee || 0,
+        shippingFee: data.shippingFee || 0,
         total_amount: data.totalAmount,
         deposit_amount: data.depositAmount || 500000,
         deposit_status: data.depositStatus || 'Đã giữ cọc',
@@ -374,12 +380,12 @@ class ApiService {
         data: {
           range,
           summary: {
-            totalRentals: totalRentals || 3,
-            totalRevenue: totalRevenue || 1050000,
-            shippingIncome: shippingIncome || 120000,
-            avgDurationHours: 4.0,
-            avgPerRental: totalRentals > 0 ? Math.round(totalRevenue / totalRentals) : 350000,
-            distanceKm: Number((totalRentals * 5.6 + 2.4).toFixed(1))
+            totalRentals: totalRentals || 0,
+            totalRevenue: totalRevenue || 0,
+            shippingIncome: shippingIncome || 0,
+            avgDurationHours: totalRentals > 0 ? 4.0 : 0,
+            avgPerRental: totalRentals > 0 ? Math.round(totalRevenue / totalRentals) : 0,
+            distanceKm: 0
           }
         }
       };

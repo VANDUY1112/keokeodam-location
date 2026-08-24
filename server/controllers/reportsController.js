@@ -50,28 +50,20 @@ export class ReportsController {
       data: {
         range,
         summary: {
-          totalRentals: stats.total_rentals || 38,
-          totalRevenue: stats.total_revenue || 11950000,
-          shippingIncome: stats.total_shipping_income || 920000,
-          avgDurationHours: Number(stats.avg_duration.toFixed(1)),
-          avgPerRental: Math.round(stats.avg_per_rental) || 314500,
-          distanceKm: Number((stats.total_rentals * 5.6 + 2.4).toFixed(1))
+          totalRentals: stats.total_rentals || 0,
+          totalRevenue: stats.total_revenue || 0,
+          shippingIncome: stats.total_shipping_income || 0,
+          avgDurationHours: stats.total_rentals > 0 ? Number(stats.avg_duration.toFixed(1)) : 0,
+          avgPerRental: stats.total_rentals > 0 ? Math.round(stats.avg_per_rental) : 0,
+          distanceKm: 0
         },
         categoryShare: categoryShare.map((c) => ({
           name: c.speaker_name,
-          count: c.count || 1,
-          revenue: c.revenue || 1000000,
-          percent: stats.total_revenue > 0 ? Math.round((c.revenue / stats.total_revenue) * 100) : 25
+          count: c.count || 0,
+          revenue: c.revenue || 0,
+          percent: stats.total_revenue > 0 ? Math.round((c.revenue / stats.total_revenue) * 100) : 0
         })),
-        chartData: chartData.length > 0 ? chartData : [
-          { label: 'T2', name: 'Thứ 2', revenue: 850000, orders: 3, height: '30%' },
-          { label: 'T3', name: 'Thứ 3', revenue: 1150000, orders: 4, height: '40%' },
-          { label: 'T4', name: 'Thứ 4', revenue: 980000, orders: 3, height: '35%' },
-          { label: 'T5', name: 'Thứ 5', revenue: 1420000, orders: 5, height: '50%' },
-          { label: 'T6', name: 'Thứ 6', revenue: 2100000, orders: 7, height: '74%' },
-          { label: 'T7', name: 'Thứ 7', revenue: 2850000, orders: 9, height: '100%', peak: true },
-          { label: 'CN', name: 'Chủ Nhật', revenue: 2600000, orders: 7, height: '91%', peak: true },
-        ]
+        chartData: chartData
       }
     });
   }

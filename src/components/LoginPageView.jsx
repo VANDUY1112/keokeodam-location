@@ -93,7 +93,7 @@ export default function LoginPageView({
           const userData = res.data?.user || {
             email: email.trim(),
             role: email.includes('shipper') ? 'driver' : 'admin',
-            fullName: email.includes('shipper') ? 'Nguyễn Văn Hùng' : 'Trần Anh Tuấn',
+            fullName: email.includes('shipper') ? 'Nguyễn Văn Hùng' : 'Hồ Văn Duy',
             avatarUrl: email.includes('shipper')
               ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'
               : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'

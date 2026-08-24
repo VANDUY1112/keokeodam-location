@@ -13,9 +13,9 @@ export const VIETNAM_BANKS = [
 ];
 
 export const DEFAULT_BANK_CONFIG = {
-  bankId: 'MB',
-  accountNo: '0903123456',
-  accountName: 'TRAN ANH TUAN',
+  bankId: 'BIDV',
+  accountNo: '5901170138',
+  accountName: 'HO VAN DUY',
   template: 'compact2' // 'compact2', 'qr_only', 'print'
 };
 
@@ -23,11 +23,11 @@ export const DEFAULT_BANK_CONFIG = {
  * Tạo URL mã VietQR động theo chuẩn Napas 247
  */
 export function generateVietQRUrl({
-  bankId = 'MB',
-  accountNo = '0903123456',
-  accountName = 'TRAN ANH TUAN',
+  bankId = 'BIDV',
+  accountNo = '5901170138',
+  accountName = 'HO VAN DUY',
   amount = 0,
-  addInfo = 'LOCAHOME THANH TOAN',
+  addInfo = 'KEO KEO DAM THANH TOAN',
   template = 'compact2'
 }) {
   const cleanAccountNo = accountNo.trim().replace(/\s+/g, '');

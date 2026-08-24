@@ -99,39 +99,6 @@ export default function SettingsView({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch settings from backend API on mount
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await api.getSettings();
-        if (res?.data) {
-          const s = res.data;
-          // Apply warehouse location from backend if available
-          if (s.warehouse_location) {
-            const wh = typeof s.warehouse_location === 'string' ? JSON.parse(s.warehouse_location) : s.warehouse_location;
-            if (wh.address) setWarehouseAddress(wh.address);
-            if (wh.lat) setWarehouseLat(String(wh.lat));
-            if (wh.lng) setWarehouseLng(String(wh.lng));
-          }
-          // Apply pricing rules from backend if available
-          if (s.pricing_rules) {
-            const pr = typeof s.pricing_rules === 'string' ? JSON.parse(s.pricing_rules) : s.pricing_rules;
-            if (pr.baseShippingFee) setBaseShippingFee(String(pr.baseShippingFee));
-            if (pr.perKmFee) setFeePerKm(String(pr.perKmFee));
-          }
-          // Apply GPS alerts from backend if available
-          if (s.gps_alerts) {
-            const ga = typeof s.gps_alerts === 'string' ? JSON.parse(s.gps_alerts) : s.gps_alerts;
-            if (typeof ga.outOfGeofenceAlert === 'boolean') setAutoGPS(ga.outOfGeofenceAlert);
-          }
-        }
-      } catch (err) {
-        console.warn('Settings API offline, using localStorage:', err.message);
-      }
-    };
-    fetchSettings();
-  }, []);
-
   // Pricing rules state
   const [baseHourlyRate, setBaseHourlyRate] = useState(() => localStorage.getItem('kko_base_hourly_rate') || '80000');
   const [baseShippingFee, setBaseShippingFee] = useState(() => localStorage.getItem('kko_base_shipping_fee') || '20000');
@@ -144,6 +111,59 @@ export default function SettingsView({
   const [lowBatteryAlert, setLowBatteryAlert] = useState(() => localStorage.getItem('kko_low_battery_alert') !== 'false');
   const [autoLateFee, setAutoLateFee] = useState(() => localStorage.getItem('kko_auto_late_fee') !== 'false');
   const [gpsInterval, setGpsInterval] = useState(() => localStorage.getItem('kko_gps_interval') || '1');
+
+  // Fetch settings from backend API & Supabase on mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await api.getSettings();
+        if (res?.data) {
+          const s = res.data;
+          // Apply Bank VietQR config
+          if (s.bank_config) {
+            const bc = typeof s.bank_config === 'string' ? JSON.parse(s.bank_config) : s.bank_config;
+            if (bc.bankId) setBankId(bc.bankId);
+            if (bc.accountNo) setAccountNo(bc.accountNo);
+            if (bc.accountName) setAccountName(bc.accountName);
+          }
+          // Apply Store Profile
+          if (s.store_profile) {
+            const sp = typeof s.store_profile === 'string' ? JSON.parse(s.store_profile) : s.store_profile;
+            if (sp.userName) setUserName(sp.userName);
+            if (sp.storeName) setStoreName(sp.storeName);
+            if (sp.storePhone) setStorePhone(sp.storePhone);
+          }
+          // Apply warehouse location
+          if (s.warehouse_location) {
+            const wh = typeof s.warehouse_location === 'string' ? JSON.parse(s.warehouse_location) : s.warehouse_location;
+            if (wh.address) setWarehouseAddress(wh.address);
+            if (wh.lat) setWarehouseLat(String(wh.lat));
+            if (wh.lng) setWarehouseLng(String(wh.lng));
+          }
+          // Apply pricing rules
+          if (s.pricing_rules) {
+            const pr = typeof s.pricing_rules === 'string' ? JSON.parse(s.pricing_rules) : s.pricing_rules;
+            if (pr.baseHourlyRate) setBaseHourlyRate(String(pr.baseHourlyRate));
+            if (pr.baseShippingFee) setBaseShippingFee(String(pr.baseShippingFee));
+            if (pr.perKmFee) setFeePerKm(String(pr.perKmFee));
+            if (pr.minDeposit) setMinDeposit(String(pr.minDeposit));
+          }
+          // Apply GPS alerts
+          if (s.gps_alerts) {
+            const ga = typeof s.gps_alerts === 'string' ? JSON.parse(s.gps_alerts) : s.gps_alerts;
+            if (typeof ga.autoGPS === 'boolean') setAutoGPS(ga.autoGPS);
+            if (typeof ga.overtimeAlert === 'boolean') setOvertimeAlert(ga.overtimeAlert);
+            if (typeof ga.lowBatteryAlert === 'boolean') setLowBatteryAlert(ga.lowBatteryAlert);
+            if (typeof ga.autoLateFee === 'boolean') setAutoLateFee(ga.autoLateFee);
+            if (ga.gpsInterval) setGpsInterval(String(ga.gpsInterval));
+          }
+        }
+      } catch (err) {
+        console.warn('Settings API offline, using localStorage:', err.message);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   // Save all settings handler
   const handleSaveSettings = (e) => {
@@ -165,40 +185,50 @@ export default function SettingsView({
       localStorage.setItem('kko_auto_late_fee', String(autoLateFee));
       localStorage.setItem('kko_gps_interval', gpsInterval);
 
-      // Save Bank VietQR config
-      localStorage.setItem('locahome_bank_config', JSON.stringify({
+      // Save Bank VietQR config to local storage
+      const bankConfigObj = {
         bankId,
         accountNo,
         accountName: accountName.toUpperCase(),
         template: 'compact2'
-      }));
+      };
+      localStorage.setItem('locahome_bank_config', JSON.stringify(bankConfigObj));
 
-      // Sync settings to backend API (fire-and-forget)
+      // Sync ALL settings to Supabase and backend API
       api.updateSettings({
+        bank_config: bankConfigObj,
+        store_profile: {
+          userName,
+          storeName,
+          storePhone
+        },
         warehouse_location: {
-          name: 'Kho Tổng Locahome',
+          name: storeName || 'Kho Tổng Locahome',
           address: warehouseAddress,
           lat: parseFloat(warehouseLat) || 10.8505,
           lng: parseFloat(warehouseLng) || 106.7718,
           radiusKm: 15
         },
         pricing_rules: {
-          baseShippingFee: parseInt(baseShippingFee) || 30000,
+          baseHourlyRate: parseInt(baseHourlyRate) || 80000,
+          baseShippingFee: parseInt(baseShippingFee) || 20000,
           perKmFee: parseInt(feePerKm) || 5000,
-          nightSurchargePercent: 20,
+          minDeposit: parseInt(minDeposit) || 200000,
           depositRequired: true
         },
         gps_alerts: {
-          lowBatteryThreshold: 20,
-          outOfGeofenceAlert: autoGPS,
-          overspeedThresholdKmH: 50
+          autoGPS,
+          overtimeAlert,
+          lowBatteryAlert,
+          autoLateFee,
+          gpsInterval
         }
-      }).catch(err => console.warn('Settings sync to API failed:', err.message));
+      }).catch(err => console.warn('Settings sync to API / Supabase failed:', err.message));
 
       if (setToast) {
         setToast({
           title: 'Đã Lưu Cấu Hình Thành Công',
-          desc: 'Cài đặt tài khoản VietQR, kho hàng và bảng giá đã được áp dụng.',
+          desc: 'Cài đặt tài khoản VietQR, kho hàng và bảng giá đã được đồng bộ lên hệ thống.',
           type: 'success'
         });
       }

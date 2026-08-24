@@ -1,117 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Circle, CircleMarker, Marker, Popup, Polyline, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import { formatVND } from '../utils/format';
 
-// Generate dynamic hotspots around a central GPS point with individual trip dots inside each zone
-export function generateHotspotsAround(centerLat, centerLng) {
-  const list = [
-    {
-      id: 'hs-1',
-      name: 'Khu Nhà Hàng - Tiệc Cưới Lân Cận',
-      shortName: 'Nhà Hàng Tiệc Cưới',
-      direction: 'Phía Bắc',
-      distance: '650m',
-      lat: centerLat + 0.0055,
-      lng: centerLng + 0.0035,
-      rentalCount: 18,
-      revenue: '8.200.000 ₫',
-      popularSpeaker: 'Loa Đôi Bass 50 Khủng (1500W)',
-      peakHours: '18:00 - 22:30 (Cuối tuần)',
-      color: '#ef4444', // Red
-      radius: 360,
-      badgeText: '18 chuyến',
-    },
-    {
-      id: 'hs-2',
-      name: 'Khu Dân Cư - Phố Ẩm Thực',
-      shortName: 'Phố Ẩm Thực',
-      direction: 'Phía Đông',
-      distance: '1.1 km',
-      lat: centerLat - 0.0042,
-      lng: centerLng + 0.0085,
-      rentalCount: 12,
-      revenue: '5.400.000 ₫',
-      popularSpeaker: 'Loa Kéo Bass 40 (800W)',
-      peakHours: '17:30 - 21:30',
-      color: '#f59e0b', // Amber
-      radius: 300,
-      badgeText: '12 chuyến',
-    },
-    {
-      id: 'hs-3',
-      name: 'Khu Quán Ăn Sân Vườn',
-      shortName: 'Quán Sân Vườn',
-      direction: 'Phía Tây',
-      distance: '800m',
-      lat: centerLat + 0.0038,
-      lng: centerLng - 0.0065,
-      rentalCount: 9,
-      revenue: '4.100.000 ₫',
-      popularSpeaker: 'Loa Kéo Bass 40',
-      peakHours: '19:00 - 23:00',
-      color: '#3b82f6', // Blue
-      radius: 260,
-      badgeText: '9 chuyến',
-    },
-    {
-      id: 'hs-4',
-      name: 'Khu Biệt Thự / Tiệc Gia Đình',
-      shortName: 'Khu Biệt Thự',
-      direction: 'Phía Nam',
-      distance: '1.5 km',
-      lat: centerLat - 0.0080,
-      lng: centerLng - 0.0040,
-      rentalCount: 7,
-      revenue: '3.200.000 ₫',
-      popularSpeaker: 'Loa Đôi Bass 50',
-      peakHours: '16:00 - 20:00',
-      color: '#10b981', // Emerald
-      radius: 240,
-      badgeText: '7 chuyến',
-    },
-  ];
-
-  const CUSTOMER_NAMES = [
-    'Tuấn', 'Minh Trí', 'Anh Hoàng', 'Chị Lan', 'Hương Cau',
-    'Anh Thành', 'Bảo', 'Đức Huy', 'Quốc Bảo', 'Chị Mai',
-    'Anh Hùng', 'Văn Duy', 'Phúc', 'Ngọc', 'Tấn Phát',
-    'Chị Phương', 'Khánh', 'Anh Long', 'Lộc Vừng', 'Thanh Hải'
-  ];
-
-  return list.map((hs, hsIdx) => {
-    // Generate individual trip dots scattered naturally within the zone's circular area
-    const tripDots = [];
-    const radiusDeg = (hs.radius * 0.72) / 111000;
-    for (let i = 0; i < hs.rentalCount; i++) {
-      const angle = i * 2.39996 + (hs.id.charCodeAt(3) || 1);
-      const r = Math.sqrt((i + 0.55) / hs.rentalCount) * radiusDeg;
-      const dotLat = hs.lat + r * Math.cos(angle);
-      const dotLng = hs.lng + (r * Math.sin(angle)) / Math.cos((hs.lat * Math.PI) / 180);
-      const customerName = CUSTOMER_NAMES[(i + hsIdx * 4) % CUSTOMER_NAMES.length];
-      tripDots.push({
-        id: `${hs.id}-dot-${i + 1}`,
-        tripNumber: i + 1,
-        customerName: customerName,
-        lat: dotLat,
-        lng: dotLng,
-        speaker: i % 2 === 0 ? hs.popularSpeaker : 'Loa Kéo Bass 40 (800W)',
-        cost: i % 2 === 0 ? '600.000 ₫' : '450.000 ₫',
-      });
-    }
-    return {
-      ...hs,
-      tripDots,
-    };
-  });
-}
-
-const userCurrentLocationIcon = L.divIcon({
+// Warehouse / Store central icon
+const warehouseIcon = L.divIcon({
   className: 'custom-map-pin',
   html: `
     <div class="relative flex items-center justify-center">
-      <div class="absolute w-12 h-12 rounded-full bg-cyan-400/25 animate-ping"></div>
-      <div class="w-10 h-10 rounded-full bg-white/95 backdrop-blur-xs border-2 border-slate-900 shadow-[0_4px_14px_rgba(0,0,0,0.35)] flex items-center justify-center p-1">
-        <img src="/motorcycle.png" alt="Shipper" class="w-full h-full object-contain drop-shadow-xs" />
+      <div class="absolute w-12 h-12 rounded-full bg-slate-900/20 animate-ping"></div>
+      <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-white shadow-[0_4px_14px_rgba(0,0,0,0.35)] flex items-center justify-center text-white">
+        <span class="material-symbols-outlined text-[20px]">storefront</span>
       </div>
     </div>
   `,
@@ -119,90 +18,110 @@ const userCurrentLocationIcon = L.divIcon({
   iconAnchor: [20, 20],
 });
 
-// Helper to create custom Hotspot Icon (showing "X chuyến")
-function createHotspotIcon(hotspot, isSelected) {
+// Helper to create real Customer Rental marker pin
+function createCustomerMarkerIcon(rental, isSelected) {
+  const isRenting = rental.status === 'active' || rental.status === 'Đang thuê';
+  const bgColor = isRenting ? '#f59e0b' : '#10b981'; // Amber for active, Emerald for completed
+
   return L.divIcon({
     className: 'custom-map-pin',
     html: `
-      <div class="relative flex items-center justify-center group cursor-pointer ${isSelected ? 'scale-110' : ''}">
-        <div class="absolute w-8 h-8 rounded-full ${isSelected ? 'animate-ping opacity-90' : 'opacity-40'}" style="background-color: ${hotspot.color}"></div>
-        <div class="px-2.5 py-1 rounded-full text-white font-black text-xs shadow-xl flex items-center gap-1 border-2 ${isSelected ? 'border-white ring-2 ring-slate-900' : 'border-white'} whitespace-nowrap" style="background-color: ${hotspot.color}">
-          <span class="material-symbols-outlined text-[13px]">local_fire_department</span>
-          <span>${hotspot.badgeText}</span>
+      <div class="relative flex items-center justify-center group cursor-pointer transition-transform ${isSelected ? 'scale-110' : 'hover:scale-105'}">
+        <div class="absolute w-7 h-7 rounded-full ${isSelected ? 'animate-ping opacity-80' : 'opacity-30'}" style="background-color: ${bgColor}"></div>
+        <div class="px-2.5 py-1 rounded-full text-white font-bold text-xs shadow-lg flex items-center gap-1 border-2 border-white" style="background-color: ${bgColor}">
+          <span class="material-symbols-outlined text-[13px]">${isRenting ? 'speaker' : 'check_circle'}</span>
+          <span class="max-w-[110px] truncate">${rental.customerName || rental.title || 'Đơn thuê'}</span>
         </div>
       </div>
     `,
-    iconSize: [85, 32],
-    iconAnchor: [42, 16],
+    iconSize: [110, 30],
+    iconAnchor: [55, 15],
   });
 }
 
-function MapBoundsController({ userCoords, hotspots, selectedHotspot }) {
+function MapBoundsController({ userCoords, rentals, selectedRental }) {
   const map = useMap();
   useEffect(() => {
     if (!map) return;
-    if (selectedHotspot) {
-      map.flyTo([selectedHotspot.lat, selectedHotspot.lng], 15.5, { duration: 0.8 });
+    if (selectedRental && selectedRental.destLat && selectedRental.destLng) {
+      map.flyTo([selectedRental.destLat, selectedRental.destLng], 16, { duration: 0.8 });
+    } else if (rentals && rentals.length > 0) {
+      const validPoints = rentals
+        .filter(r => (r.destLat && r.destLng) || (r.lat && r.lng) || (r.endPosition?.lat && r.endPosition?.lng))
+        .map(r => [r.destLat || r.lat || r.endPosition.lat, r.destLng || r.lng || r.endPosition.lng]);
+
+      if (userCoords) validPoints.push([userCoords.lat, userCoords.lng]);
+
+      if (validPoints.length > 0) {
+        const bounds = L.latLngBounds(validPoints);
+        map.fitBounds(bounds, { padding: [50, 50], animate: true, maxZoom: 16 });
+      }
     } else if (userCoords) {
-      const allPoints = [
-        [userCoords.lat, userCoords.lng],
-        ...hotspots.map((p) => [p.lat, p.lng]),
-      ];
-      const bounds = L.latLngBounds(allPoints);
-      map.fitBounds(bounds, { padding: [50, 50], animate: false });
+      map.setView([userCoords.lat, userCoords.lng], 15);
     }
-  }, [map, userCoords, hotspots, selectedHotspot]);
+  }, [map, userCoords, rentals, selectedRental]);
   return null;
 }
 
 export default function DashboardMiniMap({
   userCoords,
-  hotspots = [],
-  selectedHotspotId,
-  onSelectHotspot,
+  rentals = [],
   onRequestGPS,
   isLocating,
   onNavigateToTab,
 }) {
   const [tileMode, setTileMode] = useState('street'); // 'street' | 'satellite'
-  const selectedHotspot = hotspots.find((h) => h.id === selectedHotspotId);
+  const [selectedRentalId, setSelectedRentalId] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all' | 'active' | 'completed'
 
   const tileUrl =
     tileMode === 'satellite'
       ? 'https://mt1.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}'
       : 'https://mt1.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}';
 
-  const defaultCenter = userCoords ? [userCoords.lat, userCoords.lng] : [10.780, 106.698];
+  const defaultCenter = userCoords ? [userCoords.lat, userCoords.lng] : [10.7769, 106.7009];
+
+  // Filter rentals with valid coordinates
+  const validRentals = rentals.filter(r => {
+    const lat = r.destLat || r.lat || r.endPosition?.lat;
+    const lng = r.destLng || r.lng || r.endPosition?.lng;
+    return typeof lat === 'number' && typeof lng === 'number';
+  }).map(r => ({
+    ...r,
+    destLat: r.destLat || r.lat || r.endPosition?.lat,
+    destLng: r.destLng || r.lng || r.endPosition?.lng,
+  }));
+
+  const filteredRentals = validRentals.filter(r => {
+    if (filterStatus === 'all') return true;
+    if (filterStatus === 'active') return r.status === 'active' || r.status === 'Đang thuê';
+    if (filterStatus === 'completed') return r.status === 'completed' || r.status === 'Hoàn thành' || r.status === 'Đã bàn giao';
+    return true;
+  });
+
+  const selectedRental = filteredRentals.find(r => r.id === selectedRentalId) || null;
 
   return (
     <div className="w-full flex flex-col gap-3.5 bg-surface-container-lowest rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
-      {/* ══════════ 1. HEADER & FULL-LINE CONTROLS (NO WRAPPER BACKGROUND) ══════════ */}
+      {/* ══════════ 1. HEADER & CONTROLS ══════════ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h2 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
-          Phân Bố Khách Thuê Loa Trọng Điểm
-        </h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
+            Bản Đồ Điểm Giao Loa Thực Tế
+          </h2>
+          <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold border border-slate-200">
+            {validRentals.length} điểm
+          </span>
+        </div>
 
-        {/* Full-line Controls without wrapper background */}
-        <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-          {/* Tâm GPS Button */}
-          <button
-            onClick={() => onSelectHotspot && onSelectHotspot(null)}
-            className={`col-span-1 px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border ${selectedHotspotId === null
-                ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
-                : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
-              }`}
-            title="Căn bản đồ về Tâm vị trí GPS của bạn"
-          >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${selectedHotspotId === null ? 'bg-white' : 'bg-slate-400'}`}></span>
-            <span className="truncate">Tâm</span>
-          </button>
-
+        {/* Map View Controls */}
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
           {/* Lấy GPS Button */}
           <button
             onClick={onRequestGPS}
             disabled={isLocating}
-            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-800 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
-            title="Lấy lại GPS vị trí bạn đang đứng"
+            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-800 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+            title="Cập nhật vị trí GPS thiết bị của bạn"
           >
             <span className={`material-symbols-outlined text-[16px] text-slate-700 ${isLocating ? 'animate-spin' : ''}`}>
               {isLocating ? 'sync' : 'my_location'}
@@ -213,7 +132,7 @@ export default function DashboardMiniMap({
           {/* Vệ tinh / Đường phố */}
           <button
             onClick={() => setTileMode(tileMode === 'street' ? 'satellite' : 'street')}
-            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
             title="Chuyển chế độ xem bản đồ"
           >
             <span className="material-symbols-outlined text-[16px] text-slate-700">
@@ -224,38 +143,39 @@ export default function DashboardMiniMap({
         </div>
       </div>
 
-      {/* ══════════ 2. 4-HOTSPOT BUTTONS (FULL LINE, NO WRAPPER BACKGROUND) ══════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-2 w-full">
-        {hotspots.map((hs) => {
-          const isSelected = selectedHotspotId === hs.id;
-          return (
-            <button
-              key={hs.id}
-              onClick={() => onSelectHotspot && onSelectHotspot(hs.id)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${isSelected
-                  ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
-                  : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
-                }`}
-              title="Bấm để trỏ tới điểm này trên bản đồ"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: hs.color }}
-                ></span>
-                <span className="font-bold truncate">
-                  {hs.rentalCount} chuyến
-                </span>
-              </div>
-              <span className={`text-[11px] font-normal shrink-0 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                ~ {hs.distance}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      {/* ══════════ 2. REAL ORDERS PILL TABS (IF ANY REAL RENTALS) ══════════ */}
+      {validRentals.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            onClick={() => { setFilterStatus('all'); setSelectedRentalId(null); }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border ${filterStatus === 'all' && !selectedRentalId
+                ? 'bg-slate-900 text-white border-slate-900'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+              }`}
+          >
+            Tất cả ({validRentals.length})
+          </button>
 
-      {/* ══════════ 3. MAP CANVAS WITH INDIVIDUAL TRIP DOTS IN EACH ZONE ══════════ */}
+          {validRentals.map((r) => {
+            const isSelected = selectedRentalId === r.id;
+            return (
+              <button
+                key={r.id}
+                onClick={() => setSelectedRentalId(r.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 whitespace-nowrap border shadow-xs ${isSelected
+                    ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-medium'
+                  }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${r.status === 'active' || r.status === 'Đang thuê' ? 'bg-amber-400' : 'bg-emerald-400'}`}></span>
+                <span className="truncate">{r.customerName || r.title || `Đơn #${r.id}`}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ══════════ 3. MAP CANVAS WITH REAL DELIVERY PINS ══════════ */}
       <div className="w-full h-[400px] sm:h-[460px] lg:h-[490px] relative rounded-2xl overflow-hidden shadow-inner border border-slate-200/90">
         <MapContainer
           center={defaultCenter}
@@ -268,8 +188,8 @@ export default function DashboardMiniMap({
         >
           <MapBoundsController
             userCoords={userCoords}
-            hotspots={hotspots}
-            selectedHotspot={selectedHotspot}
+            rentals={filteredRentals}
+            selectedRental={selectedRental}
           />
 
           <TileLayer
@@ -279,98 +199,56 @@ export default function DashboardMiniMap({
             subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
           />
 
-          {/* Connecting line from user to selected hotspot */}
-          {userCoords && selectedHotspot && (
+          {/* User / Warehouse GPS Marker */}
+          {userCoords && (
+            <Marker position={[userCoords.lat, userCoords.lng]} icon={warehouseIcon} />
+          )}
+
+          {/* Lines connecting warehouse to real rental destinations */}
+          {userCoords && filteredRentals.map((r) => (
             <Polyline
+              key={`line-${r.id}`}
               positions={[
                 [userCoords.lat, userCoords.lng],
-                [selectedHotspot.lat, selectedHotspot.lng],
+                [r.destLat, r.destLng],
               ]}
               pathOptions={{
-                color: selectedHotspot.color,
-                weight: 3.5,
-                opacity: 0.85,
-                dashArray: '6, 6',
+                color: r.id === selectedRentalId ? '#2563eb' : (r.status === 'active' || r.status === 'Đang thuê' ? '#f59e0b' : '#10b981'),
+                weight: r.id === selectedRentalId ? 3.5 : 2,
+                opacity: r.id === selectedRentalId ? 0.9 : 0.45,
+                dashArray: '5, 5',
               }}
             />
-          )}
+          ))}
 
-          {/* User Current / Warehouse GPS Marker */}
-          {userCoords && (
-            <Marker position={[userCoords.lat, userCoords.lng]} icon={userCurrentLocationIcon}>
-              <Popup closeButton={false} className="custom-compact-popup">
-                <div className="py-0.5 px-2 text-center">
-                  <span className="font-bold text-slate-900 text-xs whitespace-nowrap">Vị trí của bạn</span>
-                </div>
-              </Popup>
-            </Marker>
-          )}
-
-          {/* Hotspot Circles & Markers around user */}
-          {hotspots.map((hotspot) => {
-            const isSelected = selectedHotspotId === hotspot.id;
+          {/* Real Rental Markers */}
+          {filteredRentals.map((r) => {
+            const isSelected = selectedRentalId === r.id;
             return (
-              <React.Fragment key={hotspot.id}>
-                {/* Zone Circle Boundary */}
-                <Circle
-                  center={[hotspot.lat, hotspot.lng]}
-                  radius={hotspot.radius}
-                  pathOptions={{
-                    color: hotspot.color,
-                    fillColor: hotspot.color,
-                    fillOpacity: isSelected ? 0.30 : 0.15,
-                    weight: isSelected ? 3 : 1.5,
-                    dashArray: '4, 4',
-                  }}
-                  eventHandlers={{
-                    click: () => {
-                      if (onSelectHotspot) onSelectHotspot(hotspot.id);
-                    },
-                  }}
-                >
-                  <Popup closeButton={false} className="custom-compact-popup">
-                    <div className="py-0.5 px-2 text-center">
-                      <span className="font-extrabold text-slate-900 text-xs whitespace-nowrap">
-                        {hotspot.rentalCount} chuyến
+              <Marker
+                key={r.id}
+                position={[r.destLat, r.destLng]}
+                icon={createCustomerMarkerIcon(r, isSelected)}
+                eventHandlers={{
+                  click: () => setSelectedRentalId(r.id),
+                }}
+              >
+                <Popup>
+                  <div className="p-2 min-w-[200px]">
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1.5 mb-1.5">
+                      <span className="font-bold text-sm text-slate-900">{r.customerName || r.title}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${r.status === 'active' || r.status === 'Đang thuê' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                        {r.status || 'Hoàn thành'}
                       </span>
                     </div>
-                  </Popup>
-                </Circle>
-
-                {/* Individual Trip Dots inside this zone (Mỗi chấm = 1 chuyến đã thuê) */}
-                {hotspot.tripDots &&
-                  hotspot.tripDots.map((dot) => (
-                    <CircleMarker
-                      key={dot.id}
-                      center={[dot.lat, dot.lng]}
-                      radius={isSelected ? 6 : 5}
-                      pathOptions={{
-                        color: '#ffffff',
-                        weight: 2,
-                        fillColor: hotspot.color,
-                        fillOpacity: isSelected ? 1 : 0.9,
-                      }}
-                      eventHandlers={{
-                        click: () => {
-                          if (onSelectHotspot) onSelectHotspot(hotspot.id);
-                        },
-                      }}
-                    >
-                      <Popup closeButton={false} className="custom-compact-popup">
-                        <div className="py-0.5 px-1.5 text-center min-w-[30px]">
-                          <span className="text-xs font-bold text-slate-900 leading-none whitespace-nowrap">
-                            {dot.customerName}
-                          </span>
-                        </div>
-                      </Popup>
-                      <Tooltip direction="top" offset={[0, -6]} opacity={0.95}>
-                        <div className="text-[11px] font-bold text-slate-900 whitespace-nowrap">
-                          {dot.customerName}
-                        </div>
-                      </Tooltip>
-                    </CircleMarker>
-                  ))}
-              </React.Fragment>
+                    <div className="text-xs text-slate-600 space-y-1">
+                      {r.speakerName && <div>🔊 <b>Loa:</b> {r.speakerName}</div>}
+                      {r.address && <div>📍 <b>Đ/c:</b> {r.address}</div>}
+                      {r.cost && <div>💰 <b>Thu:</b> {formatVND(r.cost)}</div>}
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
             );
           })}
         </MapContainer>

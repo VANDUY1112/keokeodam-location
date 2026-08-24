@@ -34,8 +34,11 @@ export class RentalsController {
         customerName: r.customer_name,
         customerPhone: r.customer_phone,
         address: r.address,
+        startLat: r.start_lat,
+        startLng: r.start_lng,
         destLat: r.dest_lat,
         destLng: r.dest_lng,
+        pathCoordinates: r.path_coordinates ? (typeof r.path_coordinates === 'string' ? JSON.parse(r.path_coordinates) : r.path_coordinates) : [],
         startTime: r.start_time,
         endTime: r.end_time,
         durationHours: r.duration_hours,
@@ -55,19 +58,22 @@ export class RentalsController {
   static create(req, res) {
     const data = req.body;
     const rentalId = `ORD-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
+    const pathCoordsStr = data.pathCoordinates ? (typeof data.pathCoordinates === 'string' ? data.pathCoordinates : JSON.stringify(data.pathCoordinates)) : null;
 
     // Use transaction to create rental and update speaker status atomically
     const createRentalTx = db.transaction(() => {
       // 1. Insert Rental
       db.prepare(`
         INSERT INTO rentals (
-          id, speaker_id, customer_name, customer_phone, address, dest_lat, dest_lng,
+          id, speaker_id, customer_name, customer_phone, address, start_lat, start_lng, dest_lat, dest_lng, path_coordinates,
           start_time, duration_hours, rent_price, shipping_fee, total_amount,
           deposit_amount, deposit_status, status, note
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
         rentalId, data.speakerId, data.customerName, data.customerPhone, data.address,
-        data.destLat || null, data.destLng || null, new Date().toISOString(),
+        data.startLat || null, data.startLng || null,
+        data.destLat || null, data.destLng || null, pathCoordsStr,
+        new Date().toISOString(),
         data.durationHours, data.rentPrice, data.shippingFee || 0, data.totalAmount,
         data.depositAmount || 500000, data.depositStatus || 'Đã giữ cọc', 'active', data.note || null
       );

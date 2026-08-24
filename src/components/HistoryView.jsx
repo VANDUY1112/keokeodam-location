@@ -29,20 +29,49 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
       try {
         const res = await api.getRentals();
         if (res?.data && Array.isArray(res.data)) {
-          const calcDist = (lat, lng, hours = 4) => {
-            if (!lat || !lng) return parseFloat((hours * 1.8).toFixed(1));
-            const wLat = 10.8505, wLng = 106.7718;
-            const dLat = (lat - wLat) * 111;
-            const dLng = (lng - wLng) * 111 * Math.cos((wLat * Math.PI) / 180);
-            const dist = Math.sqrt(dLat * dLat + dLng * dLng) * 1.35;
-            return dist > 0.5 ? parseFloat(dist.toFixed(1)) : parseFloat((hours * 1.8).toFixed(1));
+          // Calculate real Haversine distance between GPS path coordinates
+          const calculateGpsDistance = (coords) => {
+            if (!Array.isArray(coords) || coords.length < 2) return 0;
+            let totalKm = 0;
+            for (let i = 0; i < coords.length - 1; i++) {
+              const p1 = coords[i];
+              const p2 = coords[i + 1];
+              if (p1 && p2 && typeof p1.lat === 'number' && typeof p2.lat === 'number') {
+                const R = 6371;
+                const dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
+                const dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+                const a =
+                  Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos((p1.lat * Math.PI) / 180) *
+                    Math.cos((p2.lat * Math.PI) / 180) *
+                    Math.sin(dLng / 2) *
+                    Math.sin(dLng / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const d = R * c;
+                if (d > 0.005) {
+                  totalKm += d;
+                }
+              }
+            }
+            return parseFloat(totalKm.toFixed(2));
           };
 
           setApiRentals(res.data.map(r => {
-            const dist = calcDist(r.destLat, r.destLng, r.durationHours);
-            const hasCoords = typeof r.destLat === 'number' && typeof r.destLng === 'number';
-            const destPosition = hasCoords ? { lat: r.destLat, lng: r.destLng } : null;
-            const startPosition = hasCoords ? { lat: +(r.destLat - 0.003).toFixed(6), lng: +(r.destLng - 0.003).toFixed(6) } : null;
+            const hasDest = typeof r.destLat === 'number' && typeof r.destLng === 'number';
+            const hasStart = typeof r.startLat === 'number' && typeof r.startLng === 'number';
+            const destPosition = hasDest ? { lat: r.destLat, lng: r.destLng } : null;
+            const startPosition = hasStart ? { lat: r.startLat, lng: r.startLng } : null;
+
+            let pathCoordinates = [];
+            if (Array.isArray(r.pathCoordinates) && r.pathCoordinates.length > 0) {
+              pathCoordinates = r.pathCoordinates;
+            } else if (typeof r.pathCoordinates === 'string') {
+              try { pathCoordinates = JSON.parse(r.pathCoordinates); } catch (e) { }
+            }
+
+            const dist = typeof r.distanceKm === 'number' && r.distanceKm > 0 
+              ? r.distanceKm 
+              : calculateGpsDistance(pathCoordinates);
 
             return {
               id: r.id,
@@ -53,11 +82,11 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               cost: r.totalAmount,
               speakerName: r.speakerName || 'Loa Kéo',
               customerName: r.customerName,
-              status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Đã bàn giao' : 'Đã huỷ',
+              status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
               statusBadge: r.status === 'active'
                 ? 'bg-amber-50 text-amber-700 border-amber-200/60'
                 : r.status === 'completed'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60'
+                  ? 'bg-slate-900 text-white border-slate-900'
                   : 'bg-red-50 text-red-700 border-red-200/60',
               icon: 'speaker',
               address: r.address,
@@ -66,13 +95,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               createdAt: r.createdAt,
               startPosition: startPosition,
               endPosition: destPosition,
-              pathCoordinates: hasCoords
-                ? [
-                    startPosition,
-                    { lat: +(r.destLat - 0.0015).toFixed(6), lng: +(r.destLng - 0.0015).toFixed(6) },
-                    destPosition
-                  ]
-                : []
+              pathCoordinates: pathCoordinates
             };
           }));
         }
@@ -316,7 +339,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                       onClick={async () => {
                         try {
                           await api.updateRentalStatus(trip.id, 'completed');
-                          setApiRentals(prev => prev.map(r => r.id === trip.id ? { ...r, status: 'Đã bàn giao' } : r));
+                          setApiRentals(prev => prev.map(r => r.id === trip.id ? { ...r, status: 'Hoàn thành' } : r));
                         } catch (err) {
                           console.warn('Complete rental error:', err.message);
                         }
