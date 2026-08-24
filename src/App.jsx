@@ -592,21 +592,19 @@ export default function App() {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               aria-current={activeTab === item.id ? 'page' : undefined}
-              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-200 group text-left ${
-                activeTab === item.id
+              className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-200 group text-left ${activeTab === item.id
                   ? 'bg-primary text-white shadow-md font-bold'
-                  : item.highlight 
+                  : item.highlight
                     ? 'bg-[#ffb7ce]/30 text-[#864d61] hover:bg-[#ffb7ce]/50 font-bold border border-[#ffd9e3]'
                     : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-semibold'
-              }`}
+                }`}
             >
-              <span className={`material-symbols-outlined text-[24px] transition-transform ${
-                activeTab === item.id 
-                  ? 'text-white' 
-                  : item.highlight 
-                    ? 'text-[#864d61]' 
+              <span className={`material-symbols-outlined text-[24px] transition-transform ${activeTab === item.id
+                  ? 'text-white'
+                  : item.highlight
+                    ? 'text-[#864d61]'
                     : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-900'
-              }`}>
+                }`}>
                 {item.icon}
               </span>
               <span className="text-[15px] lg:text-base">{item.label}</span>
@@ -617,23 +615,20 @@ export default function App() {
 
       {/* ═══════════════ MOBILE DRAWER MENU (PREMIUM SLIDE & BLUR) ═══════════════ */}
       <div
-        className={`fixed inset-0 z-[100] lg:hidden transition-all duration-300 ${
-          mobileMenuOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
-        }`}
+        className={`fixed inset-0 z-[100] lg:hidden transition-all duration-300 ${mobileMenuOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
+          }`}
       >
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ease-out ${
-            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 ease-out ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+            }`}
           onClick={() => setMobileMenuOpen(false)}
         ></div>
 
         {/* Drawer Panel */}
         <div
-          className={`relative w-80 max-w-[85vw] bg-white h-full flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.3)] p-5 z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${
-            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className={`relative w-80 max-w-[85vw] bg-white h-full flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.3)] p-5 z-10 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+            }`}
         >
           <div
             onClick={() => {
@@ -659,15 +654,13 @@ export default function App() {
                   setActiveTab(item.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all font-semibold text-sm ${
-                  activeTab === item.id
+                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl transition-all font-semibold text-sm ${activeTab === item.id
                     ? 'bg-primary text-white shadow-xs font-bold'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                  }`}
               >
-                <span className={`material-symbols-outlined text-[22px] ${
-                  activeTab === item.id ? 'text-white' : 'text-slate-500'
-                }`}>
+                <span className={`material-symbols-outlined text-[22px] ${activeTab === item.id ? 'text-white' : 'text-slate-500'
+                  }`}>
                   {item.icon}
                 </span>
                 <span>{item.label}</span>
@@ -768,11 +761,10 @@ export default function App() {
 
               {/* Profile Dropdown Menu (Open & Close transition) */}
               <div
-                className={`absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${
-                  showProfileMenu
+                className={`absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${showProfileMenu
                     ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
-                }`}
+                  }`}
               >
                 <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-center">
                   <div className="font-extrabold text-base text-slate-900 truncate">{userName}</div>
@@ -859,7 +851,7 @@ export default function App() {
             {activeTab === 'reports' && (
               <ReportsView
                 speakers={speakers}
-                onSelectSpeaker={(id) => {}}
+                onSelectSpeaker={(id) => { }}
                 setActiveTab={setActiveTab}
                 setToast={setToast}
               />
@@ -1042,27 +1034,24 @@ export default function App() {
 
       {/* ═══════════════ POPUP: THÔNG BÁO (ANIMATED OPEN & CLOSE) ═══════════════ */}
       <div
-        className={`fixed inset-0 z-50 overflow-hidden transition-all duration-200 ${
-          showNotificationsModal
+        className={`fixed inset-0 z-50 overflow-hidden transition-all duration-200 ${showNotificationsModal
             ? 'pointer-events-auto visible'
             : 'pointer-events-none invisible'
-        }`}
+          }`}
       >
         {/* Backdrop */}
         <div
-          className={`fixed inset-0 bg-slate-950/20 backdrop-blur-xs transition-opacity duration-200 ease-out ${
-            showNotificationsModal ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`fixed inset-0 bg-slate-950/20 backdrop-blur-xs transition-opacity duration-200 ease-out ${showNotificationsModal ? 'opacity-100' : 'opacity-0'
+            }`}
           onClick={() => setShowNotificationsModal(false)}
         ></div>
 
         {/* Animated Dropdown Card */}
         <div
-          className={`fixed top-20 right-4 sm:right-10 z-50 w-88 sm:w-96 max-w-[92vw] bg-white rounded-3xl p-5 border border-slate-200 shadow-2xl flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${
-            showNotificationsModal
+          className={`fixed top-20 right-4 sm:right-10 z-50 w-88 sm:w-96 max-w-[92vw] bg-white rounded-3xl p-5 border border-slate-200 shadow-2xl flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${showNotificationsModal
               ? 'opacity-100 scale-100 translate-y-0'
               : 'opacity-0 scale-95 -translate-y-3'
-          }`}
+            }`}
         >
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-2">

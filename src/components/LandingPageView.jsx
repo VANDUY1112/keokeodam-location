@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api.js';
+import LandingPageQRModal from './LandingPageQRModal';
 
 // ══════════════════════════════════════════════════════════
 // 💖 KAWAII VECTOR ICONS (CUTE, 3D GLOSSY & POLISHED SVGS)
@@ -167,21 +168,15 @@ export function CuteCheckIcon({ className = "w-4 h-4" }) {
 export function CuteQRIcon({ className = "w-6 h-6" }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-      <rect x="4" y="4" width="10" height="10" rx="3" fill="url(#qr-grad)" stroke="#235a7c" strokeWidth="1.5" />
-      <rect x="7" y="7" width="4" height="4" rx="1" fill="#235a7c" />
-      <rect x="18" y="4" width="10" height="10" rx="3" fill="url(#qr-grad)" stroke="#235a7c" strokeWidth="1.5" />
-      <rect x="21" y="7" width="4" height="4" rx="1" fill="#235a7c" />
-      <rect x="4" y="18" width="10" height="10" rx="3" fill="url(#qr-grad)" stroke="#235a7c" strokeWidth="1.5" />
-      <rect x="7" y="21" width="4" height="4" rx="1" fill="#235a7c" />
-      <rect x="18" y="18" width="4" height="4" rx="1" fill="#235a7c" />
-      <rect x="24" y="18" width="4" height="4" rx="1" fill="#235a7c" />
-      <rect x="18" y="24" width="10" height="4" rx="1" fill="#235a7c" />
-      <defs>
-        <linearGradient id="qr-grad" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#e0f2fe" />
-          <stop offset="1" stopColor="#bae6fd" />
-        </linearGradient>
-      </defs>
+      <rect x="4" y="4" width="10" height="10" rx="3" fill="#ffd9e3" stroke="#864d61" strokeWidth="1.5" />
+      <rect x="7" y="7" width="4" height="4" rx="1" fill="#864d61" />
+      <rect x="18" y="4" width="10" height="10" rx="3" fill="#ffd9e3" stroke="#864d61" strokeWidth="1.5" />
+      <rect x="21" y="7" width="4" height="4" rx="1" fill="#864d61" />
+      <rect x="4" y="18" width="10" height="10" rx="3" fill="#ffd9e3" stroke="#864d61" strokeWidth="1.5" />
+      <rect x="7" y="21" width="4" height="4" rx="1" fill="#864d61" />
+      <rect x="18" y="18" width="4" height="4" rx="1" fill="#864d61" />
+      <rect x="24" y="18" width="4" height="4" rx="1" fill="#864d61" />
+      <rect x="18" y="24" width="10" height="4" rx="1" fill="#864d61" />
     </svg>
   );
 }
@@ -366,6 +361,7 @@ export default function LandingPageView({
   onLogout,
   onNavigateToAdmin,
   onNavigateToLogin,
+  onOpenQRModal,
   onOpenVietQR,
   onAddBooking
 }) {
@@ -373,6 +369,7 @@ export default function LandingPageView({
   const [reviewFilter, setReviewFilter] = useState('all');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showAddReviewModal, setShowAddReviewModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [selectedSpeakerForBooking, setSelectedSpeakerForBooking] = useState('puffy-bass-pro');
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
@@ -1084,7 +1081,9 @@ export default function LandingPageView({
       {reviewToast && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] bg-white/95 backdrop-blur-xl rounded-full px-5 py-2.5 border-2 border-[#b2f2bb] shadow-[0_12px_36px_rgba(47,106,63,0.2)] flex items-center gap-2.5 animate-in fade-in slide-in-from-top-6 duration-300">
           <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#34d399] to-[#10b981] text-white flex items-center justify-center shadow-xs shrink-0 animate-success-spring">
-            <CuteCheckIcon className="w-3.5 h-3.5" />
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
           <span className="font-headline text-xs sm:text-sm text-[#2f6a3f] font-black whitespace-nowrap">
             Đăng Đánh Giá Thành Công!
@@ -1268,13 +1267,13 @@ export default function LandingPageView({
               </p>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-6">
                 <button
                   onClick={() => {
                     const el = document.getElementById('speakers');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="bg-[#864d61] text-white font-headline text-base px-8 py-3.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md"
+                  className="bg-[#864d61] text-white font-headline text-sm sm:text-base px-7 py-3 sm:px-8 sm:py-3.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md hover:scale-105"
                 >
                   <span>Thuê loa ngay</span>
                 </button>
@@ -1284,7 +1283,7 @@ export default function LandingPageView({
                     const el = document.getElementById('sound-demo');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  className="bg-[#b2f2bb] text-[#00210b] font-headline text-base px-7 py-3.5 rounded-full clay-button-green flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md"
+                  className="bg-[#b2f2bb] text-[#00210b] font-headline text-sm sm:text-base px-6 py-3 sm:px-7 sm:py-3.5 rounded-full clay-button-green flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md hover:scale-105"
                 >
                   <span>Vi vu</span>
                 </button>
@@ -1373,11 +1372,10 @@ export default function LandingPageView({
                         key={idx}
                         type="button"
                         onClick={() => handleSelectVivuPage(idx)}
-                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                          vivuPage === idx
+                        className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${vivuPage === idx
                             ? 'w-6 bg-[#864d61]'
                             : 'w-2 bg-[#864d61]/25 hover:bg-[#864d61]/50'
-                        }`}
+                          }`}
                         title={`Trang ${idx + 1}`}
                       />
                     ))}
@@ -1415,9 +1413,8 @@ export default function LandingPageView({
               </div>
 
               {/* Box 2 (Middle Column): Scenic Spots Col 1 */}
-              <div className={`flex flex-col gap-3.5 sm:gap-5 justify-between transition-all duration-300 ease-out transform ${
-                isVivuTransitioning ? 'opacity-0 scale-95 translate-y-1' : 'opacity-100 scale-100 translate-y-0'
-              }`}>
+              <div className={`flex flex-col gap-3.5 sm:gap-5 justify-between transition-all duration-300 ease-out transform ${isVivuTransitioning ? 'opacity-0 scale-95 translate-y-1' : 'opacity-100 scale-100 translate-y-0'
+                }`}>
                 {vivuPages[vivuPage].col1.map((item) => (
                   <div
                     key={item.id}
@@ -1441,9 +1438,8 @@ export default function LandingPageView({
               </div>
 
               {/* Box 3 (Right Column): Scenic Spots Col 2 */}
-              <div className={`flex flex-col gap-3.5 sm:gap-5 justify-between transition-all duration-300 ease-out transform ${
-                isVivuTransitioning ? 'opacity-0 scale-95 translate-y-1' : 'opacity-100 scale-100 translate-y-0'
-              }`}>
+              <div className={`flex flex-col gap-3.5 sm:gap-5 justify-between transition-all duration-300 ease-out transform ${isVivuTransitioning ? 'opacity-0 scale-95 translate-y-1' : 'opacity-100 scale-100 translate-y-0'
+                }`}>
                 {vivuPages[vivuPage].col2.map((item) => (
                   <div
                     key={item.id}
@@ -2250,7 +2246,9 @@ export default function LandingPageView({
             {bookingSuccess ? (
               <div className="py-8 text-center flex flex-col items-center gap-3">
                 <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center animate-bounce border-2 border-emerald-300">
-                  <CuteCheckIcon className="w-8 h-8" />
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17L4 12" />
+                  </svg>
                 </div>
                 <h4 className="font-headline text-2xl text-emerald-800">Đặt Loa Thành Công!</h4>
                 <p className="text-sm font-semibold text-slate-600 max-w-xs">
@@ -2833,7 +2831,16 @@ export default function LandingPageView({
           </form>
         </div>
       </div>
+
+      {/* ═══════════════ MODAL: LANDING PAGE QR CODE & STANDEE ═══════════════ */}
+      {showQRModal && (
+        <LandingPageQRModal
+          isOpen={showQRModal}
+          onClose={() => setShowQRModal(false)}
+        />
+      )}
     </div>
   );
 }
+
 
