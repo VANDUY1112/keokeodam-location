@@ -50,7 +50,7 @@ const SPEAKER_PACKAGES = [
   },
 ];
 
-export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddExpenseRecord, onOpenVietQR }) {
+export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddExpenseRecord, onOpenVietQR, setToast }) {
   const [isTracking, setIsTracking] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(null);
   const [startPosition, setStartPosition] = useState(null);
@@ -66,7 +66,6 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const [seconds, setSeconds] = useState(0);
   const [totalDistance, setTotalDistance] = useState(0); // in km
   const [currentSpeed, setCurrentSpeed] = useState(0); // in km/h
-  const [actionNotice, setActionNotice] = useState(null);
   const [isSimulating, setIsSimulating] = useState(false);
 
   const [originAddress, setOriginAddress] = useState('Đang lấy vị trí GPS...');
@@ -130,13 +129,13 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     return () => clearInterval(timer);
   }, [isTracking]);
 
-  // Real-time Average Speed (km/h)
+  // Real-time Average Speed (km/h) - accurately 0.0 when standing still
   const currentAvgSpeed =
-    seconds > 3 && totalDistance > 0
+    isTracking && seconds > 2 && totalDistance > 0.01
       ? ((totalDistance / (seconds / 3600))).toFixed(1)
-      : isTracking
-        ? (currentSpeed > 0 ? (currentSpeed * 0.9).toFixed(1) : '28.5')
-        : '0';
+      : isTracking && currentSpeed > 0
+        ? Number(currentSpeed).toFixed(1)
+        : '0.0';
 
   // Real-time Shipping fee (VNĐ)
   const currentShippingCost = Math.round((totalDistance > 0 ? totalDistance : 0) * ratePerKm);
@@ -158,9 +157,11 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           if (speedFromGps && speedFromGps > 0) {
             setCurrentSpeed(Math.round(speedFromGps * 3.6)); // m/s to km/h
           } else {
-            // Realistic city delivery motorcycle speed: 25 - 45 km/h
-            setCurrentSpeed(Math.floor(28 + Math.random() * 16));
+            // Speed calculated from movement delta
+            setCurrentSpeed(Math.min(50, Math.round(distDelta * 3600)));
           }
+        } else {
+          setCurrentSpeed(0);
         }
       }
       return updated;
@@ -194,11 +195,13 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     setIsTracking(true);
     setDestinationAddress(`Đang di chuyển giao loa đến: ${deliveryAddress}`);
 
-    setActionNotice({
-      type: 'success',
-      text: `Bắt đầu chuyến giao loa cho ${customerName}! GPS đang vẽ đường trực tiếp theo xe.`,
-    });
-    setTimeout(() => setActionNotice(null), 4500);
+    if (setToast) {
+      setToast({
+        title: 'Đang bắt đầu',
+        desc: `Bắt đầu ghi nhận lộ trình GPS giao loa cho ${customerName.split(' - ')[0] || customerName}.`,
+        type: 'info'
+      });
+    }
 
     // Start real GPS watch if available
     if (navigator.geolocation) {
@@ -240,24 +243,30 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     const rentalFee = selectedSpeaker?.price || 350000;
     const totalCollectFromCustomer = rentalFee + shippingFee;
 
-    const summary = {
-      distance: finalDist.toFixed(2),
-      duration: formatTime(seconds > 0 ? seconds : 180),
-      seconds,
-      avgSpeed: finalAvgSpeed,
-      origin: originAddress,
-      destination: deliveryAddress || `${finalPos.lat.toFixed(4)}°N, ${finalPos.lng.toFixed(4)}°E`,
-      customerName,
-      speakerName: selectedSpeaker?.name || 'Loa Kéo Bass 40',
-      rentalFee,
-      shippingFee,
-      ratePerKm,
-      totalCollect: totalCollectFromCustomer,
-      pointsCount: Math.max(pathCoordinates.length, 12),
-    };
+    // Auto save to history
+    const now = new Date();
+    const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
 
-    setSummaryData(summary);
-    setShowSummaryModal(true);
+    if (onAddTripRecord) {
+      onAddTripRecord({
+        id: Date.now(),
+        title: `Giao Loa: ${customerName}`,
+        subtitle: `${dateStr} • ${finalDist.toFixed(2)} km • ${selectedSpeaker?.name || 'Loa Kéo'}`,
+        distanceKm: finalDist.toFixed(2),
+        duration: formatTime(seconds > 0 ? seconds : 180),
+        cost: totalCollectFromCustomer,
+        speakerName: selectedSpeaker?.name || 'Loa Kéo',
+        customerName: customerName,
+        status: 'Đã bàn giao',
+        statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+        icon: 'speaker',
+        pathCoordinates: [...pathCoordinates],
+        startPosition: startPosition,
+        endPosition: finalPos,
+        origin: originAddress,
+        destination: deliveryAddress || `${finalPos.lat.toFixed(4)}°N, ${finalPos.lng.toFixed(4)}°E`,
+      });
+    }
 
     // Save rental to backend API (fire-and-forget)
     const speakerId = selectedSpeaker?.id || (apiSpeakers.length > 0 ? apiSpeakers[0].id : 'LKK-01');
@@ -276,11 +285,13 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
       note: `GPS: ${finalDist.toFixed(2)}km, ${formatTime(seconds > 0 ? seconds : 180)}`
     }).catch(err => console.warn('Rental save to API failed:', err.message));
 
-    setActionNotice({
-      type: 'info',
-      text: `Đã đến nơi giao loa! Tổng tiền thu từ khách: ${formatVND(totalCollectFromCustomer)}`,
-    });
-    setTimeout(() => setActionNotice(null), 5000);
+    if (setToast) {
+      setToast({
+        title: 'Hoàn thành',
+        desc: 'Đã hoàn tất chuyến giao và lưu đơn vào Lịch Sử.',
+        type: 'success'
+      });
+    }
   };
 
   // Toggle Live Movement Simulation (For easy testing on PC)
@@ -322,15 +333,6 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
 
   return (
     <div className="flex flex-col w-full h-full relative gap-6">
-      {/* Toast Notice */}
-      {actionNotice && (
-        <div className="absolute top-2 right-2 z-40 bg-slate-900/95 backdrop-blur-md text-white text-sm lg:text-base px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 border border-slate-700">
-          <span className="material-symbols-outlined text-xl text-emerald-400">
-            {actionNotice.type === 'success' ? 'check_circle' : 'info'}
-          </span>
-          <span className="font-medium">{actionNotice.text}</span>
-        </div>
-      )}
 
       {/* Main 2-Column Layout */}
       <div className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8">
@@ -563,156 +565,6 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
           </div>
         </section>
       </div>
-
-      {/* ══════════ MODAL: HÓA ĐƠN & BIÊN BẢN BÀN GIAO THU TIỀN CHO THUÊ LOA ══════════ */}
-      {showSummaryModal && summaryData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-surface-container-lowest rounded-3xl p-6 lg:p-8 max-w-lg w-full border border-slate-200 shadow-2xl space-y-6 animate-in zoom-in-95">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200/80 flex items-center justify-center shadow-xs">
-                  <span className="material-symbols-outlined text-3xl">task_alt</span>
-                </div>
-                <div>
-                  <h3 className="text-xl lg:text-2xl font-black text-on-surface">Phiếu Bàn Giao Loa Kẹo Kéo</h3>
-                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Hành trình giao loa hoàn tất thành công</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowSummaryModal(false)}
-                className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
-              >
-                <span className="material-symbols-outlined text-2xl">close</span>
-              </button>
-            </div>
-
-            {/* BIG HIGHLIGHT: TOTAL COLLECTED FROM CUSTOMER */}
-            <div className="bg-gradient-to-br from-emerald-500/10 via-emerald-50 to-blue-50/40 p-5 rounded-3xl border border-emerald-200/80 text-center shadow-xs">
-              <span className="text-xs lg:text-sm uppercase tracking-wider font-bold text-emerald-800">
-                TỔNG TIỀN THU TỪ NGƯỜI THUÊ
-              </span>
-              <div className="text-3xl lg:text-4xl font-black text-emerald-800 mt-1">
-                {formatVND(summaryData.totalCollect)}
-              </div>
-              <span className="inline-block mt-2 px-3 py-1 bg-emerald-100/80 text-emerald-800 text-xs font-bold rounded-full">
-                Bao gồm tiền thuê loa + Tiền típ
-              </span>
-            </div>
-
-            {/* Financial Breakdown Table */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/70 space-y-2.5 text-sm">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                <span className="text-slate-600 font-medium">1. Gói thuê: <strong className="text-slate-900">{summaryData.speakerName}</strong></span>
-                <span className="font-bold text-slate-900">{formatVND(summaryData.rentalFee)}</span>
-              </div>
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-                <span className="text-slate-600 font-medium">2. Tiền típ ({summaryData.distance} km):</span>
-                <span className="font-bold text-slate-900">{formatVND(summaryData.shippingFee)}</span>
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-slate-800 font-bold">Khách thuê:</span>
-                <span className="font-bold text-slate-900">{summaryData.customerName}</span>
-              </div>
-            </div>
-
-            {/* GPS Metrics Grid */}
-            <div className="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/70 text-center">
-              <div>
-                <span className="text-xs text-slate-800 font-bold block mb-1">Quãng đường</span>
-                <span className="text-xl font-black text-slate-900 mt-0.5 block">{summaryData.distance} km</span>
-              </div>
-              <div>
-                <span className="text-xs text-slate-800 font-bold block mb-1">Thời gian đi</span>
-                <span className="text-xl font-black text-slate-900 mt-0.5 block">{summaryData.duration}</span>
-              </div>
-              <div>
-                <span className="text-xs text-slate-800 font-bold block mb-1">Tốc độ TB</span>
-                <span className="text-xl font-black text-primary mt-0.5 block">{summaryData.avgSpeed} km/h</span>
-              </div>
-            </div>
-
-            {/* Destination Address */}
-            <div className="text-xs text-slate-600 bg-white p-3 rounded-xl border border-slate-200 flex items-start gap-2">
-              <span className="material-symbols-outlined text-primary text-base shrink-0 mt-0.5">place</span>
-              <div>
-                <strong className="text-slate-800">Điểm giao nhận: </strong>
-                <span>{summaryData.destination}</span>
-              </div>
-            </div>
-
-            {/* Quick VietQR Button */}
-            {onOpenVietQR && (
-              <button
-                type="button"
-                onClick={() => {
-                  onOpenVietQR(
-                    summaryData.totalCollect || 350000,
-                    `LOCAHOME ${summaryData.customerName.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 20)}`
-                  );
-                }}
-                className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[20px]">qr_code_2</span>
-                <span>Tạo Mã VietQR Thu Tiền ({formatVND(summaryData.totalCollect)})</span>
-              </button>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-1">
-              <button
-                type="button"
-                onClick={() => setShowSummaryModal(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-on-surface font-bold text-sm sm:text-base transition-colors"
-              >
-                Đóng
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const now = new Date();
-                  const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
-
-                  if (onAddTripRecord) {
-                    onAddTripRecord({
-                      id: Date.now(),
-                      title: `Giao Loa: ${summaryData.customerName}`,
-                      subtitle: `${dateStr} • ${summaryData.distance} km • ${summaryData.speakerName}`,
-                      distanceKm: summaryData.distance,
-                      duration: summaryData.duration,
-                      cost: summaryData.totalCollect,
-                      speakerName: summaryData.speakerName,
-                      customerName: summaryData.customerName,
-                      status: 'Đã bàn giao',
-                      statusBadge: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
-                      icon: 'speaker',
-                      pathCoordinates: [...pathCoordinates],
-                      startPosition: startPosition,
-                      endPosition: endPosition,
-                      origin: summaryData.origin,
-                      destination: summaryData.destination,
-                    });
-                  }
-
-                  if (onAddExpenseRecord) {
-                    onAddExpenseRecord({
-                      title: `Thu tiền thuê loa - ${summaryData.customerName}`,
-                      amount: formatVND(summaryData.totalCollect),
-                      category: 'Doanh thu',
-                      subtitle: `${dateStr} • Gói ${summaryData.speakerName}`,
-                    });
-                  }
-                  setShowSummaryModal(false);
-                }}
-                className="flex-1 py-3 rounded-xl bg-primary hover:bg-slate-800 text-white font-bold text-sm sm:text-base transition-colors shadow-md flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-xl">save</span>
-                <span>Lưu Đơn Hàng</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

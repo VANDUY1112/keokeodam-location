@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Navigation,
   BarChart3,
-  Receipt,
+  Sparkles,
   History,
   Settings,
 } from 'lucide-react';
@@ -71,7 +71,7 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
               ${isCenterActive ? 'ring-2 ring-white shadow-[0_8px_22px_rgba(6,182,212,0.4)] scale-105' : ''}
             `}
             style={{ backgroundColor: isCenterActive ? ACTIVE_CENTER_BG : BG_COLOR }}
-            title="Giao Loa & GPS"
+            title="Thực Hiện"
           >
             <div className="relative flex items-center justify-center">
               <Navigation size={26} className="text-white drop-shadow-sm fill-white" />
@@ -107,29 +107,29 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
             </span>
           </button>
 
-          {/* Nút 2: Chi Phí */}
+          {/* Nút 2: Trang Khách (Landing Page) */}
           <button
-            onClick={() => onSelectTab('expenses')}
+            onClick={() => onSelectTab('landing')}
             onTouchStart={() => {}}
             style={{ WebkitTapHighlightColor: 'transparent' }}
             className="flex flex-col items-center justify-center py-1 cursor-pointer group active:scale-90 transition-all duration-200"
-            title="Chi Phí"
+            title="Trang Khách"
           >
-            <div className={`relative transition-transform duration-200 ${activeTab === 'expenses' ? '-translate-y-1 scale-105' : ''}`}>
-              <Receipt
+            <div className={`relative transition-transform duration-200 ${activeTab === 'landing' ? '-translate-y-1 scale-105' : ''}`}>
+              <Sparkles
                 size={23}
                 className={`transition-all duration-200 ${
-                  activeTab === 'expenses'
+                  activeTab === 'landing'
                     ? 'text-white stroke-[2.8] drop-shadow-sm'
                     : 'text-slate-400 group-hover:text-white stroke-[1.8]'
                 }`}
               />
-              {activeTab === 'expenses' && (
+              {activeTab === 'landing' && (
                 <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
               )}
             </div>
-            <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'expenses' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
-              Chi Phí
+            <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'landing' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
+              Trang Khách
             </span>
           </button>
 

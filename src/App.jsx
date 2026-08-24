@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import DashboardView from './components/DashboardView';
 import TrackingView from './components/TrackingView';
-import ExpensesView from './components/ExpensesView';
 import HistoryView from './components/HistoryView';
 import SettingsView from './components/SettingsView';
 import CustomDropdown from './components/CustomDropdown';
@@ -29,7 +28,7 @@ export default function App() {
       if (pageParam === 'login' || pageParam === 'user-login' || pageParam === 'signin') {
         return 'user-login';
       }
-      if (['dashboard', 'tracking', 'expenses', 'history', 'settings'].includes(pageParam)) {
+      if (['dashboard', 'tracking', 'history', 'settings'].includes(pageParam)) {
         return pageParam;
       }
       // If a stored token exists, go to dashboard, otherwise default to landing page for guests/scanned users
@@ -429,9 +428,8 @@ export default function App() {
 
   const navItems = [
     { id: 'dashboard', label: 'Tổng Quan', icon: 'dashboard' },
-    { id: 'tracking', label: 'Giao Loa & GPS', icon: 'two_wheeler' },
-    { id: 'expenses', label: 'Quản Lý Chi Phí', icon: 'payments' },
-    { id: 'history', label: 'Lịch Sử Đơn Thuê', icon: 'speaker' },
+    { id: 'tracking', label: 'Thực Hiện', icon: 'two_wheeler' },
+    { id: 'history', label: 'Lịch Sử', icon: 'speaker' },
     { id: 'settings', label: 'Cài Đặt', icon: 'settings' },
   ];
 
@@ -799,6 +797,7 @@ export default function App() {
                 onOpenLogExpense={() => setShowLogExpenseModal(true)}
                 onOpenVietQR={openVietQR}
                 onAddTripRecord={handleAddTrip}
+                setToast={setToast}
                 onAddExpenseRecord={(rec) => {
                   setExpenses((prev) => [
                     {
@@ -817,13 +816,7 @@ export default function App() {
               />
             )}
 
-            {/* TAB 3: QUẢN LÝ CHI PHÍ (EXPENSES) */}
-            {activeTab === 'expenses' && (
-              <ExpensesView
-                expenses={expenses}
-                onOpenAddExpense={() => setShowLogExpenseModal(true)}
-              />
-            )}
+
 
             {/* TAB 4: LỊCH SỬ CHUYẾN ĐI (HISTORY) */}
             {activeTab === 'history' && (
@@ -859,87 +852,7 @@ export default function App() {
         <MobileCurvedNavBar activeTab={activeTab} onSelectTab={setActiveTab} />
       </div>
 
-      {/* ═══════════════ MODAL: GHI NHẬN CHI PHÍ ═══════════════ */}
-      {showLogExpenseModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-surface-container-lowest rounded-3xl max-w-lg w-full p-6 lg:p-8 border border-slate-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[26px]">receipt_long</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-extrabold text-on-surface">Ghi Nhận Chi Phí Mới</h3>
-                  <p className="text-xs lg:text-sm text-slate-500 font-medium">Dịch vụ Kẹo Kéo Dặm</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowLogExpenseModal(false)}
-                className="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition-colors"
-              >
-                <span className="material-symbols-outlined text-2xl">close</span>
-              </button>
-            </div>
 
-            <form onSubmit={handleAddExpense} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-slate-700 mb-1.5 uppercase tracking-wider text-xs lg:text-sm font-bold">
-                  Nội Dung / Mô Tả Chi Phí
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ví dụ: Ăn tối tiếp khách, Đổ xăng xe..."
-                  value={newExpense.title}
-                  onChange={(e) => setNewExpense({ ...newExpense, title: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 font-medium text-base"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-700 mb-1.5 uppercase tracking-wider text-xs lg:text-sm font-bold">
-                  Số Tiền (VNĐ)
-                </label>
-                <input
-                  type="number"
-                  step="1000"
-                  required
-                  placeholder="Ví dụ: 250.000 hoặc 1.500.000"
-                  value={newExpense.amount}
-                  onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 font-bold text-base"
-                />
-              </div>
-
-              {/* Custom Modern Dropdown */}
-              <div>
-                <CustomDropdown
-                  label="Danh Mục Chi Phí"
-                  options={categoryOptions}
-                  value={newExpense.category}
-                  onChange={(cat) => setNewExpense({ ...newExpense, category: cat })}
-                />
-              </div>
-
-              <div className="flex gap-3 mt-4 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowLogExpenseModal(false)}
-                  className="flex-1 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-on-surface font-bold transition-colors text-base"
-                >
-                  Hủy Bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3.5 rounded-xl bg-primary hover:bg-slate-800 text-on-primary font-bold transition-colors shadow-md text-base"
-                >
-                  Lưu Chi Phí
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* ═══════════════ MODAL: XEM LỊCH TRÌNH GIAO NHẬN LOA ═══════════════ */}
       {showItineraryModal && (

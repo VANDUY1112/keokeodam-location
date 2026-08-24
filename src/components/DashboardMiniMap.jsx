@@ -105,19 +105,18 @@ export function generateHotspotsAround(centerLat, centerLng) {
   });
 }
 
-// User current GPS pin
 const userCurrentLocationIcon = L.divIcon({
   className: 'custom-map-pin',
   html: `
     <div class="relative flex items-center justify-center">
-      <div class="absolute w-10 h-10 rounded-full bg-slate-900/20 animate-ping"></div>
-      <div class="w-9 h-9 rounded-full bg-slate-900 border-2 border-white shadow-2xl flex items-center justify-center text-white font-bold">
-        <span class="material-symbols-outlined text-[18px] text-white">my_location</span>
+      <div class="absolute w-12 h-12 rounded-full bg-cyan-400/25 animate-ping"></div>
+      <div class="w-10 h-10 rounded-full bg-white/95 backdrop-blur-xs border-2 border-slate-900 shadow-[0_4px_14px_rgba(0,0,0,0.35)] flex items-center justify-center p-1">
+        <img src="/motorcycle.png" alt="Shipper" class="w-full h-full object-contain drop-shadow-xs" />
       </div>
     </div>
   `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
 });
 
 // Helper to create custom Hotspot Icon (showing "X chuyến")

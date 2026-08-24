@@ -150,8 +150,8 @@ export default function DashboardView({
 
   return (
     <div className="flex flex-col w-full gap-6 lg:gap-8">
-      {/* ══════════ 4 TOP STAT CARDS ══════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 w-full">
+      {/* ══════════ 3 TOP STAT CARDS ══════════ */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 w-full">
         {/* Metric 1: Total Distance */}
         <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
@@ -214,36 +214,7 @@ export default function DashboardView({
           </div>
         </div>
 
-        {/* Metric 3: Monthly Revenue / Expenses (VNĐ) */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
-          <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between gap-2 z-10">
-            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
-              Doanh thu tháng
-            </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
-                payments
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-baseline gap-1 z-10 my-1">
-            <span className="font-display text-on-surface text-xl sm:text-2xl lg:text-[32px] font-extrabold leading-none tracking-tight truncate">
-              {totalExpenseNum > 0 ? formatVND(totalExpenseNum) : (isLoadingApi ? '...' : '21.500.000 ₫')}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200/80 font-bold text-xs sm:text-[13px] lg:text-[14px]">
-              <span className="material-symbols-outlined text-[16px] sm:text-[18px]">
-                trending_up
-              </span>
-              +15% tháng trước
-            </span>
-          </div>
-        </div>
 
         {/* Metric 4: Total Speaker Rentals */}
         <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[150px] lg:min-h-[175px]">
