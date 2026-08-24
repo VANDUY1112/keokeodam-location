@@ -86,10 +86,14 @@ export default function UserLoginPageView({
     try {
       const res = await apiService.login(loginIdentifier.trim(), loginPassword);
       if (res && (res.success || res.data?.token)) {
+        const isHotadam = loginIdentifier.trim().toLowerCase() === 'hotadam';
+        const isDiep = loginIdentifier.trim().toLowerCase() === 'nguyenaidiep';
+        const isAdmin = isHotadam || isDiep || loginIdentifier.includes('admin');
+
         const user = res.data?.user || {
-          role: 'customer',
-          fullName: loginIdentifier.trim(),
-          avatarUrl: '/pink.png',
+          role: isAdmin ? 'admin' : 'customer',
+          fullName: isDiep ? 'Nguyễn Ái Diệp' : (isHotadam ? 'Hồ Văn Duy' : loginIdentifier.trim()),
+          avatarUrl: isDiep ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' : '/pink.png',
           points: 120
         };
 

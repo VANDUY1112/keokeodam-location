@@ -443,7 +443,22 @@ export default function App() {
           onLoginSuccess={(user) => {
             setIsAuthenticated(true);
             setCurrentUser(user);
-            setActiveTab('landing');
+            localStorage.setItem('locahome_current_user', JSON.stringify(user));
+            if (user.fullName) {
+              setUserName(user.fullName);
+              localStorage.setItem('expensely_user_name', user.fullName);
+            }
+            if (user.avatarUrl) {
+              setUserAvatar(user.avatarUrl);
+              localStorage.setItem('expensely_user_avatar', user.avatarUrl);
+            }
+
+            // If role is admin or driver/staff, redirect straight into Dashboard!
+            if (user.role === 'admin' || user.role === 'driver' || user.role === 'staff' || ['hotadam', 'nguyenaidiep'].includes(user.fullName?.toLowerCase()) || ['hotadam', 'nguyenaidiep'].includes(user.email?.toLowerCase())) {
+              setActiveTab('dashboard');
+            } else {
+              setActiveTab('landing');
+            }
           }}
           onNavigateToLanding={() => setActiveTab('landing')}
           setToast={setToast}
