@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Milestone } from 'lucide-react';
 import LiveRouteMap from './LiveRouteMap';
 import { formatVND } from '../utils/format';
@@ -6,7 +7,16 @@ import { api } from '../services/api.js';
 
 export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTracking, onOpenVietQR }) {
   const [selectedTripForMap, setSelectedTripForMap] = useState(null);
+  const [isClosingMapModal, setIsClosingMapModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handleCloseMapModal = () => {
+    setIsClosingMapModal(true);
+    setTimeout(() => {
+      setSelectedTripForMap(null);
+      setIsClosingMapModal(false);
+    }, 200);
+  };
 
   // Backend API rentals state
   const [apiRentals, setApiRentals] = useState([]);
@@ -239,14 +249,12 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                 <div className="flex items-start sm:items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-slate-200/80 animate-pulse shrink-0" />
                   
-                  <div className="space-y-2 min-w-0 flex-1">
+                  <div className="min-w-0 flex-1">
                     <div className="h-4 w-44 sm:w-64 bg-slate-200/80 rounded-md animate-pulse" />
-                    <div className="h-3 w-32 sm:w-48 bg-slate-100 rounded-md animate-pulse" />
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                  <div className="h-4 w-20 bg-slate-200/80 rounded-md animate-pulse" />
                   <div className="h-8 w-20 bg-slate-100 rounded-xl animate-pulse hidden sm:block" />
                   <div className="h-8 w-24 bg-slate-100 rounded-xl animate-pulse" />
                 </div>
@@ -289,31 +297,11 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                         {trip.status || 'Hoàn thành'}
                       </span>
                     </div>
-
-                    <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1 flex-wrap">
-                      <span>{trip.subtitle}</span>
-                      {trip.duration && (
-                        <>
-                          <span>•</span>
-                          <span className="inline-flex items-center gap-1 text-slate-600">
-                            <span className="material-symbols-outlined text-[13px]">timer</span>
-                            {trip.duration}
-                          </span>
-                        </>
-                      )}
-                    </div>
                   </div>
                 </div>
 
-                {/* Right actions / financial amount */}
+                {/* Right actions */}
                 <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                  {/* Financial amount */}
-                  <div className="flex flex-col sm:items-end">
-                    <span className="text-xs text-slate-400 font-semibold sm:hidden">Tiền thu:</span>
-                    <span className="text-sm sm:text-base font-black text-slate-900 whitespace-nowrap">
-                      {formatVND(costVal)}
-                    </span>
-                  </div>
 
                   {/* Status badge (Desktop) */}
                   <span className={`hidden sm:inline-block text-xs font-bold px-2.5 py-1 rounded-lg border whitespace-nowrap ${
