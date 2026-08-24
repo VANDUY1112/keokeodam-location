@@ -50,10 +50,10 @@ export default function App() {
       const saved = localStorage.getItem('locahome_current_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.fullName === 'Duy Hồ' || parsed.fullName === 'Duy Ho' || parsed.fullName === 'Duy Hổ') {
+        if (parsed.fullName && (/Duy/i.test(parsed.fullName) && /(Hồ|Hổ|Ho)/i.test(parsed.fullName))) {
           parsed.fullName = 'Hồ Văn Duy';
-          localStorage.setItem('locahome_current_user', JSON.stringify(parsed));
         }
+        localStorage.setItem('locahome_current_user', JSON.stringify(parsed));
         return parsed;
       }
       return null;
@@ -256,15 +256,17 @@ export default function App() {
             parsedFullName = session.user.email?.split('@')[0] || 'Khách Hàng';
           }
 
-          if (parsedFullName === 'Duy Hồ' || parsedFullName === 'Duy Ho' || parsedFullName === 'Duy Hổ') {
+          if (parsedFullName && (/Duy/i.test(parsedFullName) && /(Hồ|Hổ|Ho)/i.test(parsedFullName))) {
             parsedFullName = 'Hồ Văn Duy';
           }
+
+          const rawAvatar = meta.avatar_url || meta.picture || identData.avatar_url || identData.picture || meta.photos?.[0]?.value || '';
 
           const user = {
             id: session.user.id,
             email: session.user.email || session.user.phone,
             fullName: parsedFullName,
-            avatarUrl: meta.avatar_url || meta.picture || identData.avatar_url || identData.picture || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+            avatarUrl: rawAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
             role: 'customer',
             points: 120
           };

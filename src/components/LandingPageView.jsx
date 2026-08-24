@@ -421,19 +421,33 @@ export default function LandingPageView({
   const [submittedReviewInfo, setSubmittedReviewInfo] = useState({ name: '', rating: 5 });
 
   const handleOpenReviewModal = () => {
+    if (!currentUser) {
+      if (onNavigateToLogin) {
+        onNavigateToLogin();
+      } else if (onNavigateToAdmin) {
+        onNavigateToAdmin();
+      }
+      return;
+    }
     if (reviewSuccessTimerRef.current) clearTimeout(reviewSuccessTimerRef.current);
     setIsClosingReviewModal(false);
     setReviewSuccess(false);
-    if (currentUser?.fullName) {
+    const resolvedName = (/Duy/i.test(currentUser?.fullName || '') && /(Hồ|Hổ|Ho)/i.test(currentUser?.fullName || ''))
+      ? 'Hồ Văn Duy'
+      : (currentUser?.fullName || '');
+    if (resolvedName) {
       setNewReviewForm(prev => ({
         ...prev,
-        name: currentUser.fullName
+        name: resolvedName
       }));
     }
     setShowAddReviewModal(true);
   };
 
-  const handleCloseReviewModal = () => {
+  const handleCloseReviewModal = (e) => {
+    if (e && e.clientX && e.clientY) {
+      triggerParticleBurst(e.clientX, e.clientY);
+    }
     if (reviewSuccessTimerRef.current) clearTimeout(reviewSuccessTimerRef.current);
     setIsClosingReviewModal(true);
     setTimeout(() => {
@@ -441,7 +455,7 @@ export default function LandingPageView({
       setIsClosingReviewModal(false);
       setReviewSuccess(false);
       setReviewFormTouched({ name: false, comment: false });
-    }, 280);
+    }, 240);
   };
 
   // Lightbox Zoom Modal for Scenic Photos
@@ -1192,39 +1206,49 @@ export default function LandingPageView({
                 <span>Viết đánh giá</span>
               </button>
 
-              {currentUser && currentUser.role === 'customer' ? (
-                <div className={`flex items-center gap-2 bg-white/95 border border-[#ffd9e3] py-1 px-2.5 sm:px-3 rounded-full shadow-xs transition-all duration-300 ${isLoggingOut ? 'scale-75 opacity-0 blur-xs -translate-y-1' : 'animate-page-enter'
-                  }`}>
-                  <img
-                    src={currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
-                    alt={currentUser.fullName}
-                    className="w-7 h-7 rounded-full object-cover border border-[#ffd9e3]"
-                  />
-                  <span className="font-bold text-[#864d61] text-xs sm:text-sm max-w-[160px] sm:max-w-[240px] truncate">
-                    {currentUser.fullName}
-                  </span>
-                  <button
-                    onClick={handleAnimatedLogout}
-                    disabled={isLoggingOut}
-                    className="text-slate-400 hover:text-rose-600 transition-all p-0.5 hover:rotate-12 active:scale-90 cursor-pointer disabled:opacity-50"
-                    title="Đăng xuất tài khoản"
-                  >
-                    <span className="material-symbols-outlined text-[16px] sm:text-[18px]">logout</span>
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={(e) => {
-                    triggerParticleBurst(e.clientX, e.clientY);
-                    if (onNavigateToLogin) onNavigateToLogin();
-                    else if (onNavigateToAdmin) onNavigateToAdmin();
-                  }}
-                  className="bg-[#864d61] text-white font-headline text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform whitespace-nowrap shrink-0 shadow-md hover:scale-105 animate-page-enter"
-                  title="Đăng nhập thành viên"
-                >
-                  <span>Đăng nhập</span>
-                </button>
-              )}
+              {currentUser && currentUser.role === 'customer' && (() => {
+                const displayName = (() => {
+                  const raw = currentUser.fullName || '';
+                  if (/Duy/i.test(raw) && /(Hồ|Hổ|Ho)/i.test(raw)) {
+                    return 'Hồ Văn Duy';
+                  }
+                  return raw || 'Khách Hàng';
+                })();
+
+                return (
+                  <div className={`flex items-center gap-2 bg-white/95 border border-[#ffd9e3] py-1 px-2.5 sm:px-3 rounded-full shadow-xs transition-all duration-300 ${isLoggingOut ? 'scale-75 opacity-0 blur-xs -translate-y-1' : 'animate-page-enter'}`}>
+                    <div className="w-7 h-7 rounded-full overflow-hidden border border-[#ffd9e3] shrink-0 bg-gradient-to-tr from-[#fab3ca] to-[#864d61] flex items-center justify-center text-white text-[11px] font-black shadow-2xs relative">
+                      {currentUser.avatarUrl && (
+                        <img
+                          src={currentUser.avatarUrl}
+                          alt={displayName}
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
+                          className="w-full h-full object-cover z-10 relative"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <span className="select-none uppercase leading-none z-0 absolute">
+                        {displayName.charAt(0)}
+                      </span>
+                    </div>
+
+                    <span className="font-bold text-[#864d61] text-xs sm:text-sm max-w-[160px] sm:max-w-[240px] truncate">
+                      {displayName}
+                    </span>
+                    <button
+                      onClick={handleAnimatedLogout}
+                      disabled={isLoggingOut}
+                      className="text-slate-400 hover:text-rose-600 transition-all p-0.5 hover:rotate-12 active:scale-90 cursor-pointer disabled:opacity-50"
+                      title="Đăng xuất tài khoản"
+                    >
+                      <span className="material-symbols-outlined text-[16px] sm:text-[18px]">logout</span>
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </header>
@@ -1373,8 +1397,8 @@ export default function LandingPageView({
                         type="button"
                         onClick={() => handleSelectVivuPage(idx)}
                         className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${vivuPage === idx
-                            ? 'w-6 bg-[#864d61]'
-                            : 'w-2 bg-[#864d61]/25 hover:bg-[#864d61]/50'
+                          ? 'w-6 bg-[#864d61]'
+                          : 'w-2 bg-[#864d61]/25 hover:bg-[#864d61]/50'
                           }`}
                         title={`Trang ${idx + 1}`}
                       />
@@ -2448,29 +2472,54 @@ export default function LandingPageView({
       )}
 
       {/* ═══════════════ MODAL: VIẾT ĐÁNH GIÁ (HIỆU ỨNG MỞ & ĐÓNG SIÊU MƯỢT) ═══════════════ */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${showAddReviewModal && !isClosingReviewModal
-          ? 'opacity-100 pointer-events-auto visible bg-black/25 backdrop-blur-[2px]'
-          : 'opacity-0 pointer-events-none invisible bg-black/0 backdrop-blur-none'
-          }`}
-        onClick={handleCloseReviewModal}
-      >
+      {showAddReviewModal && (
         <div
-          className={`bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-6 sm:p-7 border-2 border-[#ffd9e3] shadow-[0_20px_50px_rgba(134,77,97,0.20)] relative overflow-hidden transition-all duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] transform ${showAddReviewModal && !isClosingReviewModal
-            ? 'scale-100 translate-y-0 opacity-100'
-            : 'scale-90 translate-y-8 opacity-0 pointer-events-none'
-            }`}
-          onClick={(e) => e.stopPropagation()}
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/25 backdrop-blur-[2px] transition-all duration-200 ${
+            isClosingReviewModal ? 'opacity-0 backdrop-blur-none pointer-events-none' : 'opacity-100'
+          }`}
+          style={{
+            animation: !isClosingReviewModal ? 'reviewModalBackdropIn 0.22s ease-out forwards' : 'reviewModalBackdropOut 0.22s ease-out forwards'
+          }}
+          onClick={handleCloseReviewModal}
         >
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-11 h-11 rounded-xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border border-[#fab3ca] shadow-xs shrink-0">
-              <CuteStarIcon filled={true} className="w-5 h-5 text-amber-400" />
+          <style>{`
+            @keyframes reviewModalIn {
+              0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+              60% { transform: scale(1.02) translateY(-2px); opacity: 1; }
+              100% { transform: scale(1) translateY(0); opacity: 1; }
+            }
+            @keyframes reviewModalOut {
+              0% { transform: scale(1) translateY(0); opacity: 1; }
+              100% { transform: scale(0.88) translateY(24px); opacity: 0; }
+            }
+            @keyframes reviewModalBackdropIn {
+              0% { opacity: 0; }
+              100% { opacity: 1; }
+            }
+            @keyframes reviewModalBackdropOut {
+              0% { opacity: 1; }
+              100% { opacity: 0; }
+            }
+          `}</style>
+
+          <div
+            className={`bg-white rounded-2xl sm:rounded-3xl max-w-md w-full p-6 sm:p-7 border-2 border-[#ffd9e3] shadow-[0_20px_50px_rgba(134,77,97,0.20)] relative overflow-hidden`}
+            style={{
+              animation: !isClosingReviewModal
+                ? 'reviewModalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                : 'reviewModalOut 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-xl bg-[#ffd9e3] text-[#864d61] flex items-center justify-center border border-[#fab3ca] shadow-xs shrink-0">
+                <CuteStarIcon filled={true} className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="font-headline text-xl text-[#864d61]">Viết đánh giá của bạn</h3>
+                <p className="text-xs font-semibold text-slate-500">Chia sẻ trải nghiệm thuê loa kéo</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-headline text-xl text-[#864d61]">Viết đánh giá của bạn</h3>
-              <p className="text-xs font-semibold text-slate-500">Chia sẻ trải nghiệm thuê loa kéo</p>
-            </div>
-          </div>
 
           <form onSubmit={handleAddReviewSubmit} className={`flex flex-col gap-4 ${reviewFormShake ? 'animate-shake' : ''}`}>
             {/* Field: Name */}
@@ -2488,7 +2537,7 @@ export default function LandingPageView({
               <input
                 type="text"
                 placeholder="Nhập tên của bạn..."
-                value={currentUser?.fullName || newReviewForm.name}
+                value={((/Duy/i.test(currentUser?.fullName || '') && /(Hồ|Hổ|Ho)/i.test(currentUser?.fullName || '')) ? 'Hồ Văn Duy' : (currentUser?.fullName || newReviewForm.name))}
                 disabled={Boolean(currentUser?.fullName)}
                 readOnly={Boolean(currentUser?.fullName)}
                 onBlur={() => setReviewFormTouched(prev => ({ ...prev, name: true }))}
@@ -2647,6 +2696,7 @@ export default function LandingPageView({
           </form>
         </div>
       </div>
+      )}
 
       {/* ═══════════════ MODAL: LIGHTBOX XEM FULL ẢNH VI VU PHÚ YÊN (HIỆU ỨNG MỞ & ĐÓNG) ═══════════════ */}
       <div
