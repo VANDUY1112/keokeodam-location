@@ -569,7 +569,18 @@ export default function LandingPageView({
         const res = await api.getReviews();
         if (res && res.data) {
           const list = Array.isArray(res.data) ? res.data : (res.data.reviews || []);
-          setReviewsList(list);
+          if (list.length > 0) {
+            setReviewsList((prev) => {
+              const revMap = new Map();
+              list.forEach(r => revMap.set(String(r.id), r));
+              prev.forEach(r => revMap.set(String(r.id), r));
+              const merged = Array.from(revMap.values());
+              try {
+                localStorage.setItem('locahome_customer_reviews', JSON.stringify(merged));
+              } catch (e) { }
+              return merged;
+            });
+          }
         }
       } catch (err) {
         console.warn('Backend reviews offline or unavailable:', err.message);
@@ -748,8 +759,23 @@ export default function LandingPageView({
     }
   ];
 
-  // Reviews Data - Real Data from Backend
-  const [reviewsList, setReviewsList] = useState([]);
+  // Reviews Data - Real Data from Backend & LocalStorage Dual Layer
+  const [reviewsList, setReviewsList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('locahome_customer_reviews');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    if (reviewsList.length > 0) {
+      try {
+        localStorage.setItem('locahome_customer_reviews', JSON.stringify(reviewsList));
+      } catch (e) { }
+    }
+  }, [reviewsList]);
 
   // FAQ Questions Data
   const faqs = [

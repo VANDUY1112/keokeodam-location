@@ -121,9 +121,15 @@ export default function App() {
             hoverColor: 'group-hover:bg-primary/10 group-hover:text-primary',
             category: e.category
           }));
-          if (apiExp.length > 0) {
-            setExpenses(apiExp);
-          }
+
+          setExpenses((prev) => {
+            const expMap = new Map();
+            // Load backend expenses
+            apiExp.forEach(e => expMap.set(String(e.id), e));
+            // Layer previous / local expenses on top
+            prev.forEach(e => expMap.set(String(e.id), e));
+            return Array.from(expMap.values());
+          });
         }
 
         if (rentRes.status === 'fulfilled' && Array.isArray(rentRes.value?.data)) {
@@ -157,7 +163,15 @@ export default function App() {
               pathCoordinates: pathCoordinates
             };
           });
-          setTrips(apiTrips);
+
+          setTrips((prev) => {
+            const tripMap = new Map();
+            // Load backend trips
+            apiTrips.forEach(t => tripMap.set(String(t.id), t));
+            // Layer user's local trips on top
+            prev.forEach(t => tripMap.set(String(t.id), t));
+            return Array.from(tripMap.values());
+          });
         }
 
         if (spkRes.status === 'fulfilled' && Array.isArray(spkRes.value?.data) && spkRes.value.data.length > 0) {
@@ -331,8 +345,32 @@ export default function App() {
     setShowLogExpenseModal(false);
   };
 
-  const handleAddTrip = (newTrip) => {
+  const handleAddTrip = async (newTrip) => {
     setTrips((prev) => [newTrip, ...prev]);
+
+    try {
+      const existing = JSON.parse(localStorage.getItem('expensely_trips') || '[]');
+      localStorage.setItem('expensely_trips', JSON.stringify([newTrip, ...existing]));
+    } catch (e) { }
+
+    try {
+      await api.createRental({
+        speakerId: newTrip.speakerId || 'LKK-01',
+        customerName: newTrip.customerName || newTrip.title,
+        customerPhone: newTrip.customerPhone || '0900000000',
+        address: newTrip.address || newTrip.destination || 'Tuy Hòa, Phú Yên',
+        startLat: newTrip.startPosition?.lat,
+        startLng: newTrip.startPosition?.lng,
+        destLat: newTrip.endPosition?.lat,
+        destLng: newTrip.endPosition?.lng,
+        pathCoordinates: newTrip.pathCoordinates || [],
+        durationHours: 4,
+        totalAmount: typeof newTrip.cost === 'number' ? newTrip.cost : (parseVNDNumber(newTrip.cost) || 350000),
+        status: 'active'
+      });
+    } catch (err) {
+      console.warn('Could not save trip to backend API:', err.message);
+    }
   };
 
   const handleDeleteTrip = async (tripId) => {
