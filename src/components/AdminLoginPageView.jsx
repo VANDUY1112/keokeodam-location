@@ -8,8 +8,8 @@ export default function AdminLoginPageView({
   setToast = null
 }) {
   const [adminRole, setAdminRole] = useState('admin'); // 'admin' | 'shipper'
-  const [email, setEmail] = useState('admin@locahome.vn');
-  const [password, setPassword] = useState('admin123456');
+  const [email, setEmail] = useState('hotadam');
+  const [password, setPassword] = useState('Denyeubama1');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,11 +20,11 @@ export default function AdminLoginPageView({
     setAdminRole(role);
     setErrorMessage('');
     if (role === 'admin') {
-      setEmail('admin@locahome.vn');
-      setPassword('admin123456');
+      setEmail('hotadam');
+      setPassword('Denyeubama1');
     } else {
       setEmail('shipper1@locahome.vn');
-      setPassword('admin123456');
+      setPassword('Denyeubama1');
     }
   };
 
@@ -49,13 +49,18 @@ export default function AdminLoginPageView({
       const res = await api.login(email.trim(), password);
 
       if (res && (res.success || res.data?.token)) {
+        const isDiep = email.trim().toLowerCase().includes('nguyenaidiep');
+        const isShipper = email.trim().toLowerCase().includes('shipper');
+
         const userData = res.data?.user || {
           email: email.trim(),
-          role: email.includes('shipper') ? 'driver' : 'admin',
-          fullName: email.includes('shipper') ? 'Nguyễn Văn Hùng' : 'Hồ Văn Duy',
-          avatarUrl: email.includes('shipper')
-            ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'
-            : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+          role: isShipper ? 'driver' : 'admin',
+          fullName: isDiep ? 'Nguyễn Ái Diệp' : (isShipper ? 'Nguyễn Văn Hùng' : 'Hồ Văn Duy'),
+          avatarUrl: isDiep 
+            ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+            : (isShipper 
+              ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'
+              : '/pink.png')
         };
 
         if (rememberMe) {

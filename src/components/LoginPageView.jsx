@@ -17,8 +17,8 @@ export default function LoginPageView({
 
   // Admin / Shipper state
   const [adminRole, setAdminRole] = useState('admin'); // 'admin' | 'shipper'
-  const [adminEmail, setAdminEmail] = useState('admin@locahome.vn');
-  const [adminPassword, setAdminPassword] = useState('admin123456');
+  const [adminEmail, setAdminEmail] = useState('hotadam');
+  const [adminPassword, setAdminPassword] = useState('Denyeubama1');
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -29,11 +29,11 @@ export default function LoginPageView({
     setAdminRole(role);
     setErrorMessage('');
     if (role === 'admin') {
-      setAdminEmail('admin@locahome.vn');
-      setAdminPassword('admin123456');
+      setAdminEmail('hotadam');
+      setAdminPassword('Denyeubama1');
     } else {
       setAdminEmail('shipper1@locahome.vn');
-      setAdminPassword('admin123456');
+      setAdminPassword('Denyeubama1');
     }
   };
 
@@ -90,13 +90,18 @@ export default function LoginPageView({
         const res = await api.login(email.trim(), password);
 
         if (res && (res.success || res.data?.token)) {
+          const isDiep = email.trim().toLowerCase().includes('nguyenaidiep');
+          const isShipper = email.trim().toLowerCase().includes('shipper');
+
           const userData = res.data?.user || {
             email: email.trim(),
-            role: email.includes('shipper') ? 'driver' : 'admin',
-            fullName: email.includes('shipper') ? 'Nguyễn Văn Hùng' : 'Hồ Văn Duy',
-            avatarUrl: email.includes('shipper')
-              ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'
-              : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+            role: isShipper ? 'driver' : 'admin',
+            fullName: isDiep ? 'Nguyễn Ái Diệp' : (isShipper ? 'Nguyễn Văn Hùng' : 'Hồ Văn Duy'),
+            avatarUrl: isDiep
+              ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
+              : (isShipper
+                ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'
+                : '/pink.png')
           };
 
           if (rememberMe) {

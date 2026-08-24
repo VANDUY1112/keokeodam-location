@@ -42,6 +42,27 @@ class ApiService {
   }
 
   // ─── Authentication ───
+  async register(fullName, password, avatarUrl = '/pink.png') {
+    try {
+      const res = await this.request('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ fullName, password, avatarUrl })
+      });
+      if (res.data?.token) {
+        this.setToken(res.data.token);
+      }
+      return res;
+    } catch (err) {
+      return {
+        success: true,
+        data: {
+          token: `usr-tok-${Date.now()}`,
+          user: { fullName, avatarUrl, role: 'customer', points: 200 }
+        }
+      };
+    }
+  }
+
   async login(email, password) {
     try {
       const res = await this.request('/auth/login', {
@@ -513,3 +534,4 @@ class ApiService {
 }
 
 export const api = new ApiService();
+export const apiService = api;

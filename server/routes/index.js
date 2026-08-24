@@ -32,6 +32,7 @@ router.get('/health', (req, res) => {
 });
 
 // ─── 2. Auth Routes ───
+router.post('/auth/register', authRateLimiter, AuthController.register);
 router.post('/auth/login', authRateLimiter, validate(loginSchema), AuthController.login);
 router.post('/auth/logout', AuthController.logout);
 router.post('/auth/refresh', AuthController.refreshToken);

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ─── Authentication Schemas ───
 export const loginSchema = z.object({
-  email: z.string().email('Email không đúng định dạng').max(100),
+  email: z.string().min(3, 'Tài khoản phải từ 3 ký tự').max(100),
   password: z.string().min(6, 'Mật khẩu phải từ 6 ký tự').max(100)
 });
 

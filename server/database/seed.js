@@ -10,19 +10,28 @@ export async function seedDatabase() {
 
   console.log('🌱 Seeding initial database records for Locahome...');
 
-  const passwordHash = await bcrypt.hash('admin123456', 12);
+  const defaultAdminHash = await bcrypt.hash('Denyeubama1', 12);
 
   // 1. Seed Default Admin & Staff
   const insertUser = db.prepare(`
-    INSERT INTO users (id, email, password_hash, full_name, role, avatar_url)
+    INSERT OR REPLACE INTO users (id, email, password_hash, full_name, role, avatar_url)
     VALUES (?, ?, ?, ?, ?, ?)
   `);
 
   insertUser.run(
-    'usr-admin-1',
-    'admin@locahome.vn',
-    passwordHash,
-    'Trần Anh Tuấn',
+    'usr-admin-hotadam',
+    'hotadam',
+    defaultAdminHash,
+    'Hồ Văn Duy',
+    'admin',
+    '/pink.png'
+  );
+
+  insertUser.run(
+    'usr-admin-nguyenaidiep',
+    'nguyenaidiep',
+    defaultAdminHash,
+    'Nguyễn Ái Diệp',
     'admin',
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
   );
@@ -30,7 +39,7 @@ export async function seedDatabase() {
   insertUser.run(
     'usr-staff-1',
     'shipper1@locahome.vn',
-    passwordHash,
+    defaultAdminHash,
     'Nguyễn Văn Hùng',
     'driver',
     'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'

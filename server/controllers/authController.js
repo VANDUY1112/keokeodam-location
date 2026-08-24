@@ -4,15 +4,73 @@ import { db } from '../database/db.js';
 import { config } from '../config/index.js';
 
 export class AuthController {
+  // POST /api/v1/auth/register
+  static async register(req, res) {
+    const { fullName, password, avatarUrl } = req.body;
+    if (!fullName || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Vui lòng cung cấp đầy đủ thông tin Họ tên và Mật khẩu'
+      });
+    }
+
+    const userId = `usr-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    const email = req.body.email || `${fullName.toLowerCase().replace(/[^a-z0-9]/g, '')}${Date.now().toString().slice(-4)}@dam.vn`;
+    const passwordHash = await bcrypt.hash(password, 10);
+    const finalAvatar = avatarUrl || '/pink.png';
+
+    try {
+      db.prepare(`
+        INSERT INTO users (id, email, password_hash, full_name, role, avatar_url, is_active, created_at, updated_at)
+        VALUES (?, ?, ?, ?, 'customer', ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).run(userId, email, passwordHash, fullName, finalAvatar);
+
+      const accessToken = jwt.sign(
+        { userId, role: 'customer' },
+        config.jwtSecret,
+        { expiresIn: config.jwtExpiresIn }
+      );
+
+      return res.status(201).json({
+        success: true,
+        message: 'Đăng ký tài khoản thành công',
+        data: {
+          token: accessToken,
+          user: {
+            id: userId,
+            email,
+            fullName,
+            role: 'customer',
+            avatarUrl: finalAvatar,
+            points: 200
+          }
+        }
+      });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        error: err.message || 'Lỗi khi tạo tài khoản'
+      });
+    }
+  }
+
   // POST /api/v1/auth/login
   static async login(req, res) {
     const { email, password } = req.body;
+    const identifier = (email || '').trim().toLowerCase();
 
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    const user = db.prepare(`
+      SELECT * FROM users 
+      WHERE LOWER(email) = ? 
+         OR LOWER(id) = ? 
+         OR LOWER(email) LIKE ?
+         OR LOWER(full_name) = ?
+    `).get(identifier, identifier, `${identifier}@%`, identifier);
+
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: 'Email hoặc mật khẩu không chính xác'
+        error: 'Tài khoản hoặc mật khẩu không chính xác'
       });
     }
 
@@ -27,7 +85,7 @@ export class AuthController {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        error: 'Email hoặc mật khẩu không chính xác'
+        error: 'Tài khoản hoặc mật khẩu không chính xác'
       });
     }
 
