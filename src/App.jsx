@@ -453,8 +453,8 @@ export default function App() {
               localStorage.setItem('expensely_user_avatar', user.avatarUrl);
             }
 
-            // If role is admin or driver/staff, redirect straight into Dashboard!
-            if (user.role === 'admin' || user.role === 'driver' || user.role === 'staff' || ['hotadam', 'nguyenaidiep'].includes(user.fullName?.toLowerCase()) || ['hotadam', 'nguyenaidiep'].includes(user.email?.toLowerCase())) {
+            // If role is admin, redirect straight into Dashboard; otherwise go to customer Landing page!
+            if (user.role === 'admin' || ['hotadam', 'nguyenaidiep'].includes(user.fullName?.toLowerCase()) || ['hotadam', 'nguyenaidiep'].includes(user.email?.toLowerCase())) {
               setActiveTab('dashboard');
             } else {
               setActiveTab('landing');

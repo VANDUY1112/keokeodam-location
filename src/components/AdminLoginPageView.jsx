@@ -7,7 +7,6 @@ export default function AdminLoginPageView({
   onNavigateToLanding,
   setToast = null
 }) {
-  const [adminRole, setAdminRole] = useState('admin'); // 'admin' | 'shipper'
   const [email, setEmail] = useState('hotadam');
   const [password, setPassword] = useState('Denyeubama1');
   const [showPassword, setShowPassword] = useState(false);
@@ -16,14 +15,13 @@ export default function AdminLoginPageView({
   const [errorMessage, setErrorMessage] = useState('');
   const [isExiting, setIsExiting] = useState(false);
 
-  const handleSelectAdminRole = (role) => {
-    setAdminRole(role);
+  const handleSelectAdminUser = (account) => {
     setErrorMessage('');
-    if (role === 'admin') {
+    if (account === 'hotadam') {
       setEmail('hotadam');
       setPassword('Denyeubama1');
     } else {
-      setEmail('shipper1@locahome.vn');
+      setEmail('nguyenaidiep');
       setPassword('Denyeubama1');
     }
   };
@@ -40,7 +38,7 @@ export default function AdminLoginPageView({
     setErrorMessage('');
 
     if (!email.trim() || !password) {
-      setErrorMessage('Vui lòng nhập đầy đủ Email và Mật khẩu.');
+      setErrorMessage('Vui lòng nhập đầy đủ Tài khoản và Mật khẩu.');
       return;
     }
 
@@ -50,17 +48,14 @@ export default function AdminLoginPageView({
 
       if (res && (res.success || res.data?.token)) {
         const isDiep = email.trim().toLowerCase().includes('nguyenaidiep');
-        const isShipper = email.trim().toLowerCase().includes('shipper');
 
         const userData = res.data?.user || {
           email: email.trim(),
-          role: isShipper ? 'driver' : 'admin',
-          fullName: isDiep ? 'Nguyễn Ái Diệp' : (isShipper ? 'Nguyễn Văn Hùng' : 'Hồ Văn Duy'),
+          role: 'admin',
+          fullName: isDiep ? 'Nguyễn Ái Diệp' : 'Hồ Văn Duy',
           avatarUrl: isDiep 
             ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-            : (isShipper 
-              ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'
-              : '/pink.png')
+            : '/pink.png'
         };
 
         if (rememberMe) {
@@ -72,7 +67,7 @@ export default function AdminLoginPageView({
         if (setToast) {
           setToast({
             title: '🎉 Đăng Nhập Thành Công',
-            desc: `Xin chào ${userData.fullName || 'Quản trị viên'}!`,
+            desc: `Xin chào Quản trị viên ${userData.fullName}!`,
             type: 'success'
           });
         }
@@ -131,36 +126,39 @@ export default function AdminLoginPageView({
         }`}>
           
           {/* Header Title */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Đăng nhập quản trị</h1>
+          <div className="mb-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center mx-auto mb-3 shadow-md">
+              <ShieldCheck className="w-8 h-8 text-rose-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Quản Trị Viên</h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-              Hệ thống quản lý dịch vụ Kẹo Kéo Dặm
+              Đăng nhập hệ thống điều phối Kẹo Kéo Dặm
             </p>
           </div>
 
-          {/* Clean Segmented Role Switcher */}
-          <div className="mb-6 bg-slate-100/90 p-1 rounded-xl flex items-center gap-1">
+          {/* Quick Admin Selector */}
+          <div className="mb-5 bg-slate-100/90 p-1 rounded-xl flex items-center gap-1">
             <button
               type="button"
-              onClick={() => handleSelectAdminRole('admin')}
+              onClick={() => handleSelectAdminUser('hotadam')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                adminRole === 'admin'
+                email === 'hotadam'
                   ? 'bg-white text-slate-900 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>👑 Quản trị viên</span>
+              <span>👑 Hồ Văn Duy</span>
             </button>
             <button
               type="button"
-              onClick={() => handleSelectAdminRole('shipper')}
+              onClick={() => handleSelectAdminUser('nguyenaidiep')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                adminRole === 'shipper'
+                email === 'nguyenaidiep'
                   ? 'bg-white text-slate-900 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>🛵 Kỹ thuật / Shipper</span>
+              <span>👑 Nguyễn Ái Diệp</span>
             </button>
           </div>
 

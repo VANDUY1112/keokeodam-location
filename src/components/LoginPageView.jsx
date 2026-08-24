@@ -15,8 +15,7 @@ export default function LoginPageView({
   const [userEmail, setUserEmail] = useState('khachhang.dam@gmail.com');
   const [userPassword, setUserPassword] = useState('123456');
 
-  // Admin / Shipper state
-  const [adminRole, setAdminRole] = useState('admin'); // 'admin' | 'shipper'
+  // Admin state
   const [adminEmail, setAdminEmail] = useState('hotadam');
   const [adminPassword, setAdminPassword] = useState('Denyeubama1');
 
@@ -25,14 +24,13 @@ export default function LoginPageView({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleSelectAdminRole = (role) => {
-    setAdminRole(role);
+  const handleSelectAdminAccount = (account) => {
     setErrorMessage('');
-    if (role === 'admin') {
+    if (account === 'hotadam') {
       setAdminEmail('hotadam');
       setAdminPassword('Denyeubama1');
     } else {
-      setAdminEmail('shipper1@locahome.vn');
+      setAdminEmail('nguyenaidiep');
       setAdminPassword('Denyeubama1');
     }
   };
@@ -86,22 +84,19 @@ export default function LoginPageView({
           onLoginSuccess(customerUser);
         }
       } else {
-        // Admin / Shipper login via backend API
+        // Admin login via backend API
         const res = await api.login(email.trim(), password);
 
         if (res && (res.success || res.data?.token)) {
           const isDiep = email.trim().toLowerCase().includes('nguyenaidiep');
-          const isShipper = email.trim().toLowerCase().includes('shipper');
 
           const userData = res.data?.user || {
             email: email.trim(),
-            role: isShipper ? 'driver' : 'admin',
-            fullName: isDiep ? 'Nguyễn Ái Diệp' : (isShipper ? 'Nguyễn Văn Hùng' : 'Hồ Văn Duy'),
+            role: 'admin',
+            fullName: isDiep ? 'Nguyễn Ái Diệp' : 'Hồ Văn Duy',
             avatarUrl: isDiep
               ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'
-              : (isShipper
-                ? 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80'
-                : '/pink.png')
+              : '/pink.png'
           };
 
           if (rememberMe) {
@@ -410,29 +405,29 @@ export default function LoginPageView({
             </p>
           </div>
 
-          {/* Clean Segmented Role Switcher */}
+          {/* Quick Admin Selector */}
           <div className="mb-6 bg-slate-100/90 p-1 rounded-xl flex items-center gap-1">
             <button
               type="button"
-              onClick={() => handleSelectAdminRole('admin')}
+              onClick={() => handleSelectAdminAccount('hotadam')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                adminRole === 'admin'
+                adminEmail === 'hotadam'
                   ? 'bg-white text-slate-900 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>👑 Quản trị viên</span>
+              <span>👑 Hồ Văn Duy</span>
             </button>
             <button
               type="button"
-              onClick={() => handleSelectAdminRole('shipper')}
+              onClick={() => handleSelectAdminAccount('nguyenaidiep')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                adminRole === 'shipper'
+                adminEmail === 'nguyenaidiep'
                   ? 'bg-white text-slate-900 shadow-xs font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>🛵 Kỹ thuật / Shipper</span>
+              <span>👑 Nguyễn Ái Diệp</span>
             </button>
           </div>
 
