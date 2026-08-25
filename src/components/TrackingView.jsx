@@ -141,6 +141,7 @@ export default function TrackingView({
   const simIntervalRef = useRef(null);
   const lastPosRef = useRef(null);
   const kalmanFilterRef = useRef(new GPSKalmanFilter(2.0, 3.5));
+  const trackingStartTimeRef = useRef(null);
 
   // Fetch speakers from backend API on mount
   useEffect(() => {
@@ -304,6 +305,7 @@ export default function TrackingView({
   const handleStartTracking = () => {
     const startCoords = currentPosition || { lat: 10.7769, lng: 106.7009 };
     kalmanFilterRef.current.reset();
+    trackingStartTimeRef.current = new Date();
     setStartPosition(startCoords);
     setEndPosition(null);
     setPathCoordinates([startCoords]);
@@ -378,6 +380,12 @@ export default function TrackingView({
     const rentalFee = selectedSpeaker?.price || 350000;
     const totalCollectFromCustomer = rentalFee + shippingFee;
 
+    // Record precise start and end times
+    const now = new Date();
+    const startTimeObj = trackingStartTimeRef.current || new Date(now.getTime() - (seconds || 60) * 1000);
+    const startTimeStr = `${String(startTimeObj.getHours()).padStart(2, '0')}:${String(startTimeObj.getMinutes()).padStart(2, '0')}:${String(startTimeObj.getSeconds()).padStart(2, '0')}`;
+    const endTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
     setPendingTripData({
       finalDist,
       seconds,
@@ -388,6 +396,8 @@ export default function TrackingView({
       finalPos,
       pathCoordinates: [...pathCoordinates],
       startPosition,
+      startTime: startTimeStr,
+      endTime: endTimeStr,
     });
 
     setLocationNote('');
@@ -432,6 +442,9 @@ export default function TrackingView({
         endPosition: finalPos,
         origin: originAddress,
         destination: locationDisplay,
+        startTime: data.startTime,
+        endTime: data.endTime,
+        avgSpeed: data.finalAvgSpeed > 0 ? `${data.finalAvgSpeed.toFixed(1)} km/h` : '32.0 km/h',
       });
     }
 
