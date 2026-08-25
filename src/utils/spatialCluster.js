@@ -91,10 +91,10 @@ export function clusterDeliveryPoints(trips = [], maxRadiusKm = 0.65, userCoords
     const radiusMeters = Math.max(180, Math.round(maxDistFromCenter * 1000) + 70);
 
     // Calculate distance from user warehouse to this cluster center
-    let distFromWarehouse = '~ 800m';
+    let distFromWarehouse = '800m';
     if (userCoords && typeof userCoords.lat === 'number') {
       const d = calculateDistanceKm(userCoords.lat, userCoords.lng, centerLat, centerLng);
-      distFromWarehouse = d >= 1 ? `~ ${d.toFixed(1)} km` : `~ ${Math.round(d * 1000)}m`;
+      distFromWarehouse = d >= 1 ? `${d.toFixed(1)} km` : `${Math.max(1, Math.round(d * 1000))}m`;
     }
 
     const clusterIdx = clusters.length;
