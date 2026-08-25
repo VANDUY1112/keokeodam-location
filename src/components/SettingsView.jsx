@@ -333,10 +333,6 @@ export default function SettingsView({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 text-[11px] font-bold shrink-0">
-                  <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                  <span>Chuẩn VietQR</span>
-                </div>
               </div>
             </div>
 
