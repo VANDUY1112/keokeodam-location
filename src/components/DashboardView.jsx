@@ -335,7 +335,9 @@ export default function DashboardView({
                     <span className="material-symbols-outlined text-[20px] sm:text-[24px] lg:text-[28px]">{trip.icon || 'speaker'}</span>
                   </div>
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-sm sm:text-base lg:text-[17px] font-bold text-on-surface truncate leading-snug">{trip.title}</span>
+                    <span className="text-sm sm:text-base lg:text-[17px] font-bold text-on-surface truncate leading-snug">
+                      {(trip.customerName || trip.title || '').replace(/^(Giao Loa|Vị trí):\s*/i, '') || `Đơn #${trip.id}`}
+                    </span>
                     <span className="text-xs sm:text-[13px] lg:text-[14px] text-slate-500 font-medium mt-0.5 truncate">{trip.subtitle}</span>
                   </div>
                 </div>

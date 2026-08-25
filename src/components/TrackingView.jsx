@@ -420,10 +420,10 @@ export default function TrackingView({
 
     if (onAddTripRecord) {
       const tripTitle = customLocation
-        ? `Vị trí: ${customLocation}`
+        ? customLocation
         : customerName
-          ? `Giao Loa: ${customerName}`
-          : 'Chuyến giao loa';
+          ? customerName
+          : 'Khách thuê';
 
       onAddTripRecord({
         id: Date.now(),
@@ -640,39 +640,42 @@ export default function TrackingView({
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* ══════════ LEFT PANEL: CONTROL COCKPIT ══════════ */}
         <aside className="w-full lg:w-[380px] shrink-0 flex flex-col gap-5">
-          {/* Status & Live Timer Card */}
-          <div className="bg-surface-container-lowest rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)] flex flex-col gap-4 relative overflow-hidden group">
-            <div className="absolute -right-16 -top-16 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700"></div>
-
-            <div className="flex items-center justify-between z-10">
-              <h2 className="text-xl lg:text-2xl font-black text-on-surface tracking-tight">Giao loa trực tuyến</h2>
-            </div>
-
-            {/* Timer & Speed HUD */}
-            <div className="grid grid-cols-2 gap-3 pt-2 z-10">
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70 flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-900 font-bold text-sm lg:text-base">Thời gian đi</span>
-                  <span className="material-symbols-outlined text-xl text-slate-500">schedule</span>
-                </div>
-                <div className="mt-1.5">
-                  <span className="text-2xl lg:text-3xl font-black text-slate-900 tabular-nums">
-                    {formatTime(seconds)}
-                  </span>
+          {/* Status & Live Timer - 2 Separate Metric Boxes */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
+            {/* Box 1: Thời gian đi */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
+              <div className="flex items-start justify-between gap-1.5">
+                <span className="text-slate-900 font-bold text-[15px] leading-snug">
+                  Thời gian đi
+                </span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+                  <span className="material-symbols-outlined text-[18px] sm:text-[22px]">schedule</span>
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70 flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-900 font-bold text-sm lg:text-base">Tốc độ hiện tại</span>
-                  <span className="material-symbols-outlined text-xl text-slate-500">speed</span>
+              <div className="flex items-baseline gap-1 mt-2">
+                <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight tabular-nums">
+                  {formatTime(seconds)}
+                </span>
+              </div>
+            </div>
+
+            {/* Box 2: Tốc độ hiện tại */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
+              <div className="flex items-start justify-between gap-1.5">
+                <span className="text-slate-900 font-bold text-[15px] leading-snug">
+                  Tốc độ hiện tại
+                </span>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+                  <span className="material-symbols-outlined text-[18px] sm:text-[22px]">speed</span>
                 </div>
-                <div className="mt-1.5 flex items-baseline gap-1">
-                  <span className="text-2xl lg:text-3xl font-black text-slate-900 tabular-nums">
-                    {isSimulating ? simTelemetry.speed : currentAvgSpeed}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-500">km/h</span>
-                </div>
+              </div>
+
+              <div className="flex items-baseline gap-1 mt-2">
+                <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight tabular-nums">
+                  {isSimulating ? simTelemetry.speed : currentAvgSpeed}
+                </span>
+                <span className="text-slate-500 font-bold text-[13px] ml-0.5">km/h</span>
               </div>
             </div>
           </div>
@@ -750,16 +753,20 @@ export default function TrackingView({
           )}
 
           {/* Real-time Distance Box */}
-          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70 flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-900 font-bold text-sm lg:text-base">Tổng quãng đường</span>
-              <span className="material-symbols-outlined text-xl text-slate-500">route</span>
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
+            <div className="flex items-start justify-between gap-1.5">
+              <span className="text-slate-900 font-bold text-[15px] leading-snug">
+                Tổng quãng đường
+              </span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
+                <span className="material-symbols-outlined text-[18px] sm:text-[22px]">route</span>
+              </div>
             </div>
-            <div className="mt-1.5 flex items-baseline gap-1">
-              <span className="text-2xl lg:text-3xl font-black text-slate-900 tabular-nums">
+            <div className="flex items-baseline gap-1 mt-2">
+              <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight tabular-nums">
                 {totalDistance.toFixed(2)}
               </span>
-              <span className="text-xs font-semibold text-slate-500">km</span>
+              <span className="text-slate-500 font-bold text-[13px] ml-0.5">km</span>
             </div>
           </div>
 
@@ -773,9 +780,6 @@ export default function TrackingView({
                 <span className="material-symbols-outlined text-slate-800">public</span>
                 <span>Bản đồ lộ trình</span>
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-                Vệt đường màu xanh vẽ trực tiếp theo xe di chuyển theo thời gian thực
-              </p>
             </div>
 
             {/* Map Controls placed directly next to GPS Badge */}

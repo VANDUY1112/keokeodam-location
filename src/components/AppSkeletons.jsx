@@ -107,23 +107,23 @@ export function HistorySkeleton() {
         </div>
       </div>
 
-      {/* Trip Cards List Skeleton */}
-      <div className="space-y-3">
-        {[1, 2, 3, 4, 5].map((i) => (
+      {/* Trip Cards List Skeleton (UNIFIED CONNECTED MATRIX) */}
+      <div className="bg-slate-200/80 rounded-2xl sm:rounded-3xl border border-slate-200/90 p-[1px] gap-[1px] grid grid-cols-2 overflow-hidden shadow-xs">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
           <div
             key={i}
-            className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-between gap-4"
+            className="bg-white p-3.5 sm:p-5 flex flex-col justify-between gap-2.5 sm:gap-3.5 relative overflow-hidden"
           >
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <div className="w-11 h-11 rounded-2xl skeleton-shimmer shrink-0" />
-              <div className="space-y-2 flex-1 min-w-0">
-                <div className="h-4 w-36 sm:w-56 rounded-lg skeleton-shimmer" />
-                <div className="h-3 w-48 sm:w-80 rounded-md skeleton-shimmer" />
-              </div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md skeleton-shimmer shrink-0" />
+              <div className="h-5 w-14 sm:w-20 rounded-md skeleton-shimmer shrink-0" />
             </div>
-            <div className="space-y-1.5 text-right shrink-0">
-              <div className="h-5 w-20 rounded-lg skeleton-shimmer ml-auto" />
-              <div className="h-3.5 w-16 rounded-md skeleton-shimmer ml-auto" />
+            <div className="space-y-1.5 my-0.5">
+              <div className="h-3.5 w-3/4 rounded-lg skeleton-shimmer" />
+              <div className="h-2.5 w-full rounded-md skeleton-shimmer" />
+            </div>
+            <div className="pt-2 border-t border-slate-100">
+              <div className="h-7 rounded-lg skeleton-shimmer" />
             </div>
           </div>
         ))}

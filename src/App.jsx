@@ -248,7 +248,7 @@ export default function App() {
 
             return {
               id: r.id,
-              title: r.customerName ? `Giao Loa: ${r.customerName}` : `Đơn #${r.id}`,
+              title: r.customerName || (r.address ? r.address : `Đơn #${r.id}`),
               distanceKm: dist,
               duration: `${r.durationHours || 4}h`,
               cost: r.totalAmount,

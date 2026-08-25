@@ -269,7 +269,7 @@ export default function ReportsView({
                 formatter={(v) => v.toFixed(1)} 
               />
             </span>
-            <span className="text-slate-500 font-bold text-xs sm:text-sm">km GPS</span>
+            <span className="text-slate-500 font-bold text-xs sm:text-sm">km</span>
           </div>
 
           <div className="flex items-center gap-1.5">
