@@ -7,10 +7,26 @@
  * Generate a random destination point 1-2km away from origin
  * Uses random bearing + random distance in [1000m, 2000m]
  */
+/**
+ * Generate a random destination point 1km - 2km away from origin
+ * Uses random bearing with organic variation
+ */
 export function generateRandomDestination(origin) {
   const R = 6371000; // Earth radius in meters
-  const distMeters = 1000 + Math.random() * 1000; // 1km - 2km
-  const bearing = Math.random() * 2 * Math.PI; // random direction
+  const distMeters = 1000 + Math.random() * 1200; // 1.0km - 2.2km
+  
+  // Truly random direction (0 to 360 deg)
+  let bearing = Math.random() * 2 * Math.PI;
+
+  // If in coastal Tuy Hoa / Central VN (east is ocean), bias directions away from deep ocean (east quadrant)
+  if (origin.lng > 109.31 && origin.lat > 12.5 && origin.lat < 14.0) {
+    // Favor North, West, South, Inland (angles 1.2 rad to 5.2 rad)
+    const inlandAngles = [
+      Math.PI * 0.5 + Math.random() * Math.PI * 0.8, // West-South
+      Math.PI * 1.2 + Math.random() * Math.PI * 0.6  // West-North
+    ];
+    bearing = inlandAngles[Math.floor(Math.random() * inlandAngles.length)];
+  }
 
   const lat1 = (origin.lat * Math.PI) / 180;
   const lng1 = (origin.lng * Math.PI) / 180;

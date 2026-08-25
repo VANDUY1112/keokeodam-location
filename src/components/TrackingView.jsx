@@ -98,6 +98,7 @@ export default function TrackingView({
   };
 
   // 🚀 Smart Route Simulator State
+  const [simStatus, setSimStatus] = useState('idle'); // 'idle' | 'running' | 'completed'
   const [simMultiplier, setSimMultiplier] = useState(2); // 1x, 2x, 4x, 8x
   const [isSimPaused, setIsSimPaused] = useState(false);
   const [isRouteLoading, setIsRouteLoading] = useState(false);
@@ -478,19 +479,26 @@ export default function TrackingView({
     }
 
     setIsRouteLoading(true);
+    setSimStatus('running');
 
-    // Get current GPS position
-    let origin;
-    try {
-      const pos = await new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
-      );
-      origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-    } catch {
-      // Fallback to Tuy Hoa center if GPS fails
-      origin = { lat: 13.0882, lng: 109.3105 };
+    // Get current GPS position (use currentPosition if already acquired)
+    let origin = currentPosition && typeof currentPosition.lat === 'number'
+      ? { lat: currentPosition.lat, lng: currentPosition.lng }
+      : null;
+
+    if (!origin) {
+      try {
+        const pos = await new Promise((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
+        );
+        origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      } catch {
+        // Fallback to Tuy Hoa center if GPS fails
+        origin = { lat: 13.0882, lng: 109.3105 };
+      }
     }
 
+    // Always generate a random new destination 1km - 2km away from origin
     const destination = generateRandomDestination(origin);
 
     // Fetch Real Road Geometry from OSRM
@@ -498,6 +506,7 @@ export default function TrackingView({
     setIsRouteLoading(false);
 
     if (!routeData?.coordinates || routeData.coordinates.length < 2) {
+      setSimStatus('idle');
       if (setToast) {
         setToast({ title: 'Lỗi lộ trình', type: 'error' });
       }
@@ -539,6 +548,7 @@ export default function TrackingView({
       onComplete: () => {
         setIsSimulating(false);
         setIsSimPaused(false);
+        setSimStatus('completed');
         if (setToast) {
           setToast({
             title: '🎉 Đã đến điểm giao!',
@@ -551,6 +561,36 @@ export default function TrackingView({
 
     simulatorRef.current = sim;
     sim.start();
+  };
+
+  const handleStopSimulation = () => {
+    if (simulatorRef.current) {
+      simulatorRef.current.stop();
+      simulatorRef.current = null;
+    }
+    setIsSimulating(false);
+    setIsSimPaused(false);
+    setSimStatus('idle');
+    setIsTracking(false);
+    setCurrentSpeed(0);
+    if (setToast) {
+      setToast({
+        title: 'Đã ngừng',
+        desc: 'Đã dừng chuyến mô phỏng.',
+        type: 'info'
+      });
+    }
+  };
+
+  const handleSimulationButtonClick = () => {
+    if (simStatus === 'completed') {
+      // Reset back to idle so user can run a new simulation anytime
+      setSimStatus('idle');
+      setIsTracking(false);
+      setIsSimulating(false);
+      return;
+    }
+    handleStartSmartSimulation();
   };
 
   const handlePauseResumeSimulation = () => {
@@ -580,33 +620,19 @@ export default function TrackingView({
   };
 
   return (
-    <div className="flex flex-col w-full h-full relative gap-6">
+    <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 animate-fade-in pb-12">
 
-      {/* Main 2-Column Layout */}
-      <div className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8">
-        {/* ══════════ LEFT PANEL: RENTAL CONTROLS & LIVE STATS ══════════ */}
-        <aside className="w-full lg:w-[420px] shrink-0 flex flex-col gap-5 z-10 relative">
 
+      {/* ══════════ MAIN 2-COLUMN LAYOUT ══════════ */}
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* ══════════ LEFT PANEL: CONTROL COCKPIT ══════════ */}
+        <aside className="w-full lg:w-[380px] shrink-0 flex flex-col gap-5">
           {/* Status & Live Timer Card */}
           <div className="bg-surface-container-lowest rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)] flex flex-col gap-4 relative overflow-hidden group">
             <div className="absolute -right-16 -top-16 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700"></div>
 
             <div className="flex items-center justify-between z-10">
               <h2 className="text-xl lg:text-2xl font-black text-on-surface tracking-tight">Giao loa trực tuyến</h2>
-              <div
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-colors ${isTracking
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold'
-                  : 'bg-slate-100 text-slate-700 border-slate-200 font-semibold'
-                  }`}
-              >
-                <span
-                  className={`w-2.5 h-2.5 rounded-full ${isTracking ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-                    }`}
-                ></span>
-                <span className="text-xs sm:text-sm font-semibold">
-                  {isTracking ? (isSimulating ? `Mô phỏng ${simMultiplier}x` : 'Đang di chuyển') : 'Sẵn sàng'}
-                </span>
-              </div>
             </div>
 
             {/* Timer & Speed HUD */}
@@ -669,18 +695,44 @@ export default function TrackingView({
             </button>
           </div>
 
-          {/* ══════════ 🚀 SIMULATION ══════════ */}
-          {!isSimulating && (
+          {/* ══════════ 🚀 SIMULATION BUTTON WITH DYNAMIC ROTATING / FINISHED STATES ══════════ */}
+          {simStatus === 'running' || isRouteLoading || isSimulating ? (
+            <div className="flex items-center gap-3 w-full">
+              <button
+                type="button"
+                disabled
+                className="flex-1 py-3.5 px-4 rounded-2xl bg-slate-900 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md"
+              >
+                <span className="material-symbols-outlined text-[18px] animate-spin">
+                  progress_activity
+                </span>
+                <span>Đang mô phỏng</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleStopSimulation}
+                className="py-3.5 px-5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm flex items-center justify-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer shrink-0"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  stop_circle
+                </span>
+                <span>Ngừng</span>
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
               disabled={isRouteLoading}
-              onClick={handleStartSmartSimulation}
-              className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 disabled:opacity-50"
+              onClick={handleSimulationButtonClick}
+              className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-75"
             >
               <span className="material-symbols-outlined text-[18px]">
-                {isRouteLoading ? 'progress_activity' : 'two_wheeler'}
+                {simStatus === 'completed' ? 'check_circle' : 'two_wheeler'}
               </span>
-              <span>{isRouteLoading ? 'Đang vẽ tuyến đường...' : 'Chạy mô phỏng lộ trình'}</span>
+              <span>
+                {simStatus === 'completed' ? 'Kết thúc' : 'Chạy mô phỏng lộ trình'}
+              </span>
             </button>
           )}
 
@@ -877,8 +929,8 @@ export default function TrackingView({
         createPortal(
           <div
             className={`fixed inset-0 z-[99999] w-screen h-screen flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-all ${isClosingLocationModal
-                ? 'animate-backdrop-close pointer-events-none'
-                : 'animate-in fade-in duration-200'
+              ? 'animate-backdrop-close pointer-events-none'
+              : 'animate-in fade-in duration-200'
               }`}
           >
             <div
@@ -947,8 +999,8 @@ export default function TrackingView({
               type="button"
               onClick={handleCloseFullscreenMap}
               className={`absolute top-4 right-4 z-[99999] w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 border border-white/20 hover:border-white/40 ${isMapClosing
-                  ? 'scale-75 opacity-0'
-                  : 'scale-100 opacity-100 animate-in zoom-in-75 slide-in-from-top-2 duration-300'
+                ? 'scale-75 opacity-0'
+                : 'scale-100 opacity-100 animate-in zoom-in-75 slide-in-from-top-2 duration-300'
                 }`}
               title="Đóng toàn màn hình (Esc)"
             >
@@ -958,8 +1010,8 @@ export default function TrackingView({
             {/* Edge-to-Edge Fullscreen Live Route Map */}
             <div
               className={`w-full h-full relative bg-slate-900 overflow-hidden transition-all duration-300 ease-out transform ${isMapClosing
-                  ? 'scale-90 opacity-0 rounded-[40px]'
-                  : 'scale-100 opacity-100 rounded-none animate-in zoom-in-95 duration-300'
+                ? 'scale-90 opacity-0 rounded-[40px]'
+                : 'scale-100 opacity-100 rounded-none animate-in zoom-in-95 duration-300'
                 }`}
             >
               <LiveRouteMap
