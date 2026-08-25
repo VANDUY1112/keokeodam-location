@@ -201,7 +201,7 @@ export default function SettingsView({
 
       if (setToast) {
         setToast({
-          title: 'Đã Lưu Cấu Hình Thành Công',
+          title: 'Đã lưu',
           desc: 'Cài đặt tài khoản VietQR, kho hàng và bảng giá đã được đồng bộ lên hệ thống.',
           type: 'success'
         });

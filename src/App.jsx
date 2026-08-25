@@ -598,19 +598,6 @@ export default function App() {
           onNavigateToLanding={() => setActiveTab('landing')}
           setToast={setToast}
         />
-
-        {toast && (
-          <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-200 border border-slate-700 max-w-md">
-            <span className="material-symbols-outlined text-emerald-400 text-2xl shrink-0">check_circle</span>
-            <div className="min-w-0">
-              <div className="text-sm font-bold truncate">{toast.title}</div>
-              <div className="text-xs text-slate-300 line-clamp-2">{toast.desc || toast.message}</div>
-            </div>
-            <button onClick={() => setToast(null)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white shrink-0 ml-auto">
-              <span className="material-symbols-outlined text-base">close</span>
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -637,19 +624,6 @@ export default function App() {
           onNavigateToLanding={() => setActiveTab('landing')}
           setToast={setToast}
         />
-
-        {toast && (
-          <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-200 border border-slate-700 max-w-md">
-            <span className="material-symbols-outlined text-emerald-400 text-2xl shrink-0">check_circle</span>
-            <div className="min-w-0">
-              <div className="text-sm font-bold truncate">{toast.title}</div>
-              <div className="text-xs text-slate-300 line-clamp-2">{toast.desc || toast.message}</div>
-            </div>
-            <button onClick={() => setToast(null)} className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white shrink-0 ml-auto">
-              <span className="material-symbols-outlined text-base">close</span>
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -1180,23 +1154,14 @@ export default function App() {
         </div>
       )}
 
-      {/* ═══════════════ TOAST NOTIFICATION ═══════════════ */}
+      {/* ═══════════════ TOAST ═══════════════ */}
       {toast && (
         <div
           onClick={() => setToast(null)}
-          className="fixed bottom-6 right-6 z-[99999] cursor-pointer select-none bg-slate-900/95 text-white backdrop-blur-md px-4 py-2 rounded-full border border-slate-700/80 shadow-[0_10px_30px_rgba(0,0,0,0.25)] flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-3 duration-200 active:scale-95 hover:bg-slate-800 transition-all max-w-sm"
+          className="fixed top-4 right-4 z-[9999999] cursor-pointer select-none bg-emerald-600 text-white pl-3 pr-3 py-2 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-3 fade-in duration-200 active:scale-95 transition-all"
         >
-          <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-[15px]">check</span>
-          </span>
-          <span className="text-xs sm:text-sm font-bold text-white tracking-tight truncate">
-            {toast.title || 'Hoàn thành'}
-          </span>
-          {toast.desc && (
-            <span className="text-xs text-slate-300 font-normal truncate max-w-[200px]">
-              {toast.desc}
-            </span>
-          )}
+          <span className="material-symbols-outlined text-[16px]">check_circle</span>
+          <span className="text-[13px] font-semibold">{toast.title || 'Đã lưu'}</span>
         </div>
       )}
     </div>
