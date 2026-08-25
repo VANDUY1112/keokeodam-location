@@ -17,6 +17,7 @@ function MapClickHandler({ onSelectPosition, isTracking }) {
 // Helper component for map controls (re-center & fit-bounds)
 function MapController({ position, startPosition, endPosition, pathCoordinates = [], isTracking, recenterTrigger, readOnly }) {
   const map = useMap();
+  const lastPanRef = useRef(0);
 
   // Invalidate map size so it renders accurately inside modals
   useEffect(() => {
@@ -30,7 +31,17 @@ function MapController({ position, startPosition, endPosition, pathCoordinates =
   useEffect(() => {
     if (!map) return;
 
-    // Collect all actual GPS coordinates of this trip
+    if (isTracking && position && typeof position.lat === 'number' && typeof position.lng === 'number') {
+      const now = performance.now();
+      // Throttle camera pan to every 150ms for buttery-smooth follow
+      if (now - lastPanRef.current > 150) {
+        lastPanRef.current = now;
+        map.panTo([position.lat, position.lng], { animate: true, duration: 0.25 });
+      }
+      return;
+    }
+
+    // Collect all actual GPS coordinates of this trip for static bounds
     const allPoints = [
       ...(pathCoordinates || []),
       ...(position ? [position] : []),
@@ -43,8 +54,6 @@ function MapController({ position, startPosition, endPosition, pathCoordinates =
       map.fitBounds(bounds, { padding: [60, 60], maxZoom: 18, animate: true });
     } else if (allPoints.length === 1 && !isTracking) {
       map.setView([allPoints[0].lat, allPoints[0].lng], 18, { animate: true });
-    } else if (position && isTracking) {
-      map.panTo([position.lat, position.lng], { animate: true, duration: 1 });
     } else if (position && !isTracking) {
       map.setView([position.lat, position.lng], 18, { animate: true });
     }
@@ -105,12 +114,10 @@ function calculateBearing(startLat, startLng, endLat, endLng) {
   return (brng + 360) % 360;
 }
 
-// Custom Smooth Marker that smoothly slides between GPS updates & rotates towards bearing
+// Custom Smooth Marker that tracks live/simulated GPS coordinates & vehicle heading
 function SmoothMovingMarker({ position, isTracking, destinationAddress }) {
-  const [currentPos, setCurrentPos] = useState(position);
   const [heading, setHeading] = useState(0);
   const prevPosRef = useRef(position);
-  const animFrameRef = useRef(null);
 
   // 🧭 SENSOR FUSION: Hardware Gyroscope & Compass Orientation
   useEffect(() => {
@@ -136,58 +143,26 @@ function SmoothMovingMarker({ position, isTracking, destinationAddress }) {
     };
   }, [isTracking]);
 
-  // Smooth lerp animation & heading calculation between GPS updates
+  // Calculate bearing angle from coordinate movement vector
   useEffect(() => {
     if (!position || typeof position.lat !== 'number' || typeof position.lng !== 'number') return;
 
-    const prev = prevPosRef.current || position;
-    const isBigJump = Math.abs(position.lat - prev.lat) > 0.05 || Math.abs(position.lng - prev.lng) > 0.05;
-
-    // Calculate heading angle from movement vector if not already using hardware compass
-    const newHeading = calculateBearing(prev.lat, prev.lng, position.lat, position.lng);
-    if (newHeading !== 0) {
-      setHeading(Math.round(newHeading));
-    }
-
-    if (isBigJump || !isTracking) {
-      setCurrentPos(position);
-      prevPosRef.current = position;
-      return;
-    }
-
-    const startTime = performance.now();
-    const duration = 850; // Smooth 850ms slide between GPS updates
-    const startLat = prev.lat;
-    const startLng = prev.lng;
-    const targetLat = position.lat;
-    const targetLng = position.lng;
-
-    const animate = (currentTime) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(1, elapsed / duration);
-      // Ease out cubic
-      const ease = 1 - Math.pow(1 - progress, 3);
-
-      const lat = startLat + (targetLat - startLat) * ease;
-      const lng = startLng + (targetLng - startLng) * ease;
-
-      setCurrentPos({ lat, lng });
-
-      if (progress < 1) {
-        animFrameRef.current = requestAnimationFrame(animate);
-      } else {
+    const prev = prevPosRef.current;
+    if (prev && (prev.lat !== position.lat || prev.lng !== position.lng)) {
+      const dist = Math.hypot(position.lat - prev.lat, position.lng - prev.lng);
+      if (dist > 0.00002) {
+        const newHeading = calculateBearing(prev.lat, prev.lng, position.lat, position.lng);
+        if (newHeading !== 0) {
+          setHeading(Math.round(newHeading));
+        }
         prevPosRef.current = position;
       }
-    };
+    } else {
+      prevPosRef.current = position;
+    }
+  }, [position?.lat, position?.lng]);
 
-    animFrameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    };
-  }, [position?.lat, position?.lng, isTracking]);
-
-  if (!currentPos || typeof currentPos.lat !== 'number' || typeof currentPos.lng !== 'number') return null;
+  if (!position || typeof position.lat !== 'number' || typeof position.lng !== 'number') return null;
 
   const dynamicIcon = L.divIcon({
     className: 'custom-moving-shipper',
@@ -198,13 +173,13 @@ function SmoothMovingMarker({ position, isTracking, destinationAddress }) {
           <div class="absolute inset-0 rounded-full bg-cyan-400/20 animate-ping pointer-events-none" style="animation-duration: 2.2s;"></div>
           <div class="absolute w-8 h-8 rounded-full bg-emerald-400/25 animate-pulse pointer-events-none"></div>
           <!-- Direction Headlight Beam -->
-          <div class="absolute top-1/2 left-1/2 w-0 h-0 pointer-events-none transition-transform duration-300 ease-out" style="transform: translate(-50%, -50%) rotate(${heading}deg);">
+          <div class="absolute top-1/2 left-1/2 w-0 h-0 pointer-events-none transition-transform duration-200 ease-out" style="transform: translate(-50%, -50%) rotate(${heading}deg);">
             <div class="w-10 h-14 -mt-14 -ml-5 bg-gradient-to-t from-cyan-400/35 via-cyan-300/10 to-transparent clip-triangle blur-[1px]"></div>
           </div>
         ` : ''}
         
         <!-- Shipper Vehicle Avatar Circle with Smooth Heading Rotation -->
-        <div class="relative z-10 w-10 h-10 rounded-full bg-white border-2 border-slate-900 shadow-md flex items-center justify-center p-1.5 transition-transform duration-300 ease-out"
+        <div class="relative z-10 w-10 h-10 rounded-full bg-white border-2 border-slate-900 shadow-md flex items-center justify-center p-1.5 transition-transform duration-200 ease-out"
              style="transform: rotate(${heading > 0 ? heading : 0}deg);">
           <img src="/motorcycle.png" alt="Shipper" class="w-full h-full object-contain drop-shadow-xs pointer-events-none" />
         </div>
@@ -215,7 +190,7 @@ function SmoothMovingMarker({ position, isTracking, destinationAddress }) {
   });
 
   return (
-    <Marker position={[currentPos.lat, currentPos.lng]} icon={dynamicIcon}>
+    <Marker position={[position.lat, position.lng]} icon={dynamicIcon}>
       <Popup className="custom-leaflet-popup">
         <div className="p-1 text-xs">
           <div className="font-bold text-slate-900 flex items-center gap-1.5">
@@ -223,7 +198,7 @@ function SmoothMovingMarker({ position, isTracking, destinationAddress }) {
             <span>Vị trí shipper trực tiếp</span>
           </div>
           <div className="text-slate-600 mt-0.5 text-[11px]">
-            Tọa độ: {currentPos.lat.toFixed(5)}, {currentPos.lng.toFixed(5)}
+            Tọa độ: {position.lat.toFixed(5)}, {position.lng.toFixed(5)}
           </div>
           {destinationAddress && (
             <div className="text-slate-500 text-[10px] mt-1 line-clamp-1">

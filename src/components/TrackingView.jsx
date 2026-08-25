@@ -521,13 +521,13 @@ export default function TrackingView({
     // 2. Initialize Kinematic 60FPS Simulator
     const sim = new KinematicRouteSimulator({
       path: routeData.coordinates,
-      speedMultiplier: simMultiplier,
-      baseSpeedKmh: 35,
+      speedMultiplier: 1,
+      baseSpeedKmh: 40,
       onPositionUpdate: (telemetry) => {
         setCurrentPosition(telemetry.coords);
         setPathCoordinates((prev) => {
           const last = prev[prev.length - 1];
-          if (!last || calculateDistance(last.lat, last.lng, telemetry.coords.lat, telemetry.coords.lng) > 0.004) {
+          if (!last || calculateDistance(last.lat, last.lng, telemetry.coords.lat, telemetry.coords.lng) > 0.002) {
             return [...prev, telemetry.coords];
           }
           return prev;

@@ -243,9 +243,9 @@ export class KinematicRouteSimulator {
     const p2 = this.path[this.currentIndex + 1];
     const segmentLength = this.segments[this.currentIndex] || 1;
 
-    // Kinematic speed calculation with natural variance & multiplier
-    const targetSpeedKmh = Math.max(15, this.baseSpeedKmh * this.speedMultiplier + (Math.sin(timestamp / 600) * 4));
-    this.currentSpeedKmh = targetSpeedKmh;
+    // Kinematic speed calculation ~40 km/h
+    const targetSpeedKmh = Math.max(30, this.baseSpeedKmh * this.speedMultiplier + (Math.sin(timestamp / 1000) * 2));
+    this.currentSpeedKmh = Math.round(targetSpeedKmh);
     const metersPerSec = (targetSpeedKmh * 1000) / 3600;
     const distanceStep = metersPerSec * deltaSec;
 
