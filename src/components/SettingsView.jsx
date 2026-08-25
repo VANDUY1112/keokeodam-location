@@ -28,12 +28,7 @@ const DEFAULT_HOME_LOCATION = {
   lng: 106.7718
 };
 
-const AVATAR_PRESETS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-];
+
 
 export default function SettingsView({ 
   userAvatar, 
@@ -327,82 +322,6 @@ export default function SettingsView({
       </div>
 
       <form onSubmit={handleSaveSettings} className="space-y-5 sm:space-y-6">
-        {/* ══════════ SECTION 1: THÔNG TIN TÀI KHOẢN & HỒ SƠ ══════════ */}
-        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] space-y-5">
-          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-            <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center">
-              <User className="w-4 h-4" />
-            </div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900">
-              Hồ Sơ & Ảnh Đại Diện
-            </h2>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
-            <div className="relative group shrink-0">
-              <img
-                src={userAvatar}
-                alt="Avatar"
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl object-cover border-2 border-slate-200 shadow-sm"
-              />
-            </div>
-
-            <div className="flex-1 w-full space-y-3 text-center sm:text-left">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                Chọn avatar có sẵn
-              </span>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-                {AVATAR_PRESETS.map((preset, idx) => (
-                  <img
-                    key={idx}
-                    src={preset}
-                    alt={`Preset ${idx + 1}`}
-                    onClick={() => {
-                      setUserAvatar(preset);
-                      localStorage.setItem('expensely_user_avatar', preset);
-                    }}
-                    className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover cursor-pointer transition-all hover:scale-105 ${
-                      userAvatar === preset
-                        ? 'ring-3 ring-slate-900 shadow-sm'
-                        : 'border border-slate-200 opacity-70 hover:opacity-100'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">
-                    Tên Người Quản Trị
-                  </label>
-                  <input
-                    type="text"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
-                    placeholder="Nguyễn Văn Duy"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 mb-1">
-                    Dán Link Avatar Khác
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://..."
-                    onBlur={(e) => {
-                      if (e.target.value.trim()) {
-                        setUserAvatar(e.target.value.trim());
-                        localStorage.setItem('expensely_user_avatar', e.target.value.trim());
-                      }
-                    }}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
 
 
