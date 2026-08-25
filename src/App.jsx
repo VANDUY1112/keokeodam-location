@@ -114,6 +114,7 @@ export default function App() {
 
   const [speakers, setSpeakers] = useState([]);
   const [toast, setToast] = useState(null);
+  const [toastClosing, setToastClosing] = useState(false);
   const [showVietQRModal, setShowVietQRModal] = useState(false);
   const [vietQRData, setVietQRData] = useState({ amount: 280000, note: 'LOCAHOME THUE LOA' });
   const [sessionRevokedData, setSessionRevokedData] = useState(null);
@@ -287,9 +288,18 @@ export default function App() {
     setShowVietQRModal(true);
   };
 
+  const dismissToast = () => {
+    setToastClosing(true);
+    setTimeout(() => {
+      setToast(null);
+      setToastClosing(false);
+    }, 250);
+  };
+
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => setToast(null), 4000);
+      setToastClosing(false);
+      const timer = setTimeout(dismissToast, 3000);
       return () => clearTimeout(timer);
     }
   }, [toast]);
@@ -1157,8 +1167,12 @@ export default function App() {
       {/* ═══════════════ TOAST ═══════════════ */}
       {toast && (
         <div
-          onClick={() => setToast(null)}
-          className="fixed top-4 right-4 z-[9999999] cursor-pointer select-none bg-emerald-600 text-white pl-3 pr-3 py-2 rounded-xl shadow-lg flex items-center gap-2 animate-in slide-in-from-top-3 fade-in duration-200 active:scale-95 transition-all"
+          onClick={dismissToast}
+          className={`fixed top-4 right-4 z-[9999999] cursor-pointer select-none bg-emerald-600 text-white pl-3 pr-3.5 py-2 rounded-xl shadow-lg flex items-center gap-2 transition-all duration-250 ${
+            toastClosing
+              ? 'opacity-0 -translate-y-2 scale-95'
+              : 'opacity-100 translate-y-0 scale-100 animate-in slide-in-from-top-3 fade-in duration-200'
+          }`}
         >
           <span className="material-symbols-outlined text-[16px]">check_circle</span>
           <span className="text-[13px] font-semibold">{toast.title || 'Đã lưu'}</span>

@@ -3,45 +3,33 @@
  * Powered by OSRM Real Road Routing & Kinematic Physics Interpolator
  */
 
-// Preset popular speaker delivery routes in Tuy Hoa / Phu Yen
-export const PRESET_ROUTES = [
-  {
-    id: 'route_beach',
-    name: 'Kho ➔ Bãi Biển Tuy Hòa',
-    desc: 'Tuyến đường giao loa ven biển Độc Lập - Quảng Trường 1/4',
-    start: { lat: 13.0882, lng: 109.3105, name: 'Kho Loa Kẹo Kéo Trung Tâm' },
-    end: { lat: 13.0955, lng: 109.3248, name: 'Quảng Trường 1/4 & Bãi Biển Tuy Hòa' },
-    customer: 'Anh Tuấn - Tiệc BBQ Bãi Biển',
-    speaker: 'Loa Kéo Đôi Bass 50 Khủng (1500W)'
-  },
-  {
-    id: 'route_nghinhphong',
-    name: 'Kho ➔ Tháp Nghinh Phong',
-    desc: 'Tuyến đại lộ Hùng Vương ➔ Quảng trường Nghinh Phong',
-    start: { lat: 13.0882, lng: 109.3105, name: 'Kho Loa Kẹo Kéo Trung Tâm' },
-    end: { lat: 13.1118, lng: 109.3185, name: 'Quảng Trường Tháp Nghinh Phong' },
-    customer: 'Chị Mai - Sự kiện Check-in',
-    speaker: 'Combo Loa Kéo + Đèn Laser Sân Khấu'
-  },
-  {
-    id: 'route_boke',
-    name: 'Kho ➔ Bờ Kè Bạch Đằng',
-    desc: 'Tuyến đường ẩm thực hải sản & tiệc bờ kè sông Đà Rằng',
-    start: { lat: 13.0882, lng: 109.3105, name: 'Kho Loa Kẹo Kéo Trung Tâm' },
-    end: { lat: 13.0789, lng: 109.3032, name: 'Khu Ẩm Thực Bờ Kè Bạch Đằng' },
-    customer: 'Quán Hải Sản Năm Ánh',
-    speaker: 'Loa Kéo Bass 40 (Công suất 800W)'
-  },
-  {
-    id: 'route_thapnhan',
-    name: 'Kho ➔ Núi Nhạn & Sông Chùa',
-    desc: 'Tuyến đường Trần Hưng Đạo ➔ Di tích Tháp Nhạn',
-    start: { lat: 13.0882, lng: 109.3105, name: 'Kho Loa Kẹo Kéo Trung Tâm' },
-    end: { lat: 13.0825, lng: 109.2995, name: 'Khu Du Lịch Núi Nhạn' },
-    customer: 'Gia đình Chú Sáu - Tiệc Mừng Thọ',
-    speaker: 'Loa Kéo Xách Tay Mini (400W)'
-  }
-];
+/**
+ * Generate a random destination point 1-2km away from origin
+ * Uses random bearing + random distance in [1000m, 2000m]
+ */
+export function generateRandomDestination(origin) {
+  const R = 6371000; // Earth radius in meters
+  const distMeters = 1000 + Math.random() * 1000; // 1km - 2km
+  const bearing = Math.random() * 2 * Math.PI; // random direction
+
+  const lat1 = (origin.lat * Math.PI) / 180;
+  const lng1 = (origin.lng * Math.PI) / 180;
+  const angDist = distMeters / R;
+
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(angDist) +
+    Math.cos(lat1) * Math.sin(angDist) * Math.cos(bearing)
+  );
+  const lng2 = lng1 + Math.atan2(
+    Math.sin(bearing) * Math.sin(angDist) * Math.cos(lat1),
+    Math.cos(angDist) - Math.sin(lat1) * Math.sin(lat2)
+  );
+
+  return {
+    lat: (lat2 * 180) / Math.PI,
+    lng: (lng2 * 180) / Math.PI
+  };
+}
 
 /**
  * Calculate Haversine distance in meters

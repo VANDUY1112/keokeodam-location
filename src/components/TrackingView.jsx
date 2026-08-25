@@ -5,7 +5,7 @@ import LiveRouteMap, { MAP_LAYERS } from './LiveRouteMap';
 import { formatVND } from '../utils/format';
 import { api } from '../services/api.js';
 import { GPSKalmanFilter, snapToNearestRoad } from '../utils/geoKalman';
-import { PRESET_ROUTES, fetchOSRMRoute, KinematicRouteSimulator } from '../utils/routeSimulatorEngine';
+import { generateRandomDestination, fetchOSRMRoute, KinematicRouteSimulator } from '../utils/routeSimulatorEngine';
 
 // Haversine formula to compute distance in km between two lat/lng points
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -97,9 +97,7 @@ export default function TrackingView({
     }, 280);
   };
 
-  // 🚀 New Smart Route Simulator State
-  const [selectedPresetRoute, setSelectedPresetRoute] = useState(PRESET_ROUTES[0]);
-  const [showPresetRouteMenu, setShowPresetRouteMenu] = useState(false);
+  // 🚀 Smart Route Simulator State
   const [simMultiplier, setSimMultiplier] = useState(2); // 1x, 2x, 4x, 8x
   const [isSimPaused, setIsSimPaused] = useState(false);
   const [isRouteLoading, setIsRouteLoading] = useState(false);
@@ -473,31 +471,35 @@ export default function TrackingView({
   };
 
   // 🚀 Start Real-Road High-FPS Kinematic Simulation
-  const handleStartSmartSimulation = async (routePreset = selectedPresetRoute) => {
+  const handleStartSmartSimulation = async () => {
     if (simulatorRef.current) {
       simulatorRef.current.stop();
       simulatorRef.current = null;
     }
 
     setIsRouteLoading(true);
-    setSelectedPresetRoute(routePreset);
-    setShowPresetRouteMenu(false);
 
-    // Set Customer & Order details from preset
-    if (routePreset.customer) setCustomerName(routePreset.customer);
-    if (routePreset.end?.name) setDeliveryAddress(routePreset.end.name);
+    // Get current GPS position
+    let origin;
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 })
+      );
+      origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    } catch {
+      // Fallback to Tuy Hoa center if GPS fails
+      origin = { lat: 13.0882, lng: 109.3105 };
+    }
 
-    // 1. Fetch Real Road Geometry from OSRM
-    const routeData = await fetchOSRMRoute(routePreset.start, routePreset.end);
+    const destination = generateRandomDestination(origin);
+
+    // Fetch Real Road Geometry from OSRM
+    const routeData = await fetchOSRMRoute(origin, destination);
     setIsRouteLoading(false);
 
     if (!routeData?.coordinates || routeData.coordinates.length < 2) {
       if (setToast) {
-        setToast({
-          title: 'Lỗi lộ trình',
-          desc: 'Không thể kết nối máy chủ định tuyến đường, vui lòng thử lại.',
-          type: 'error'
-        });
+        setToast({ title: 'Lỗi lộ trình', type: 'error' });
       }
       return;
     }
@@ -507,14 +509,14 @@ export default function TrackingView({
     setCurrentPosition(routeData.coordinates[0]);
     setStartPosition(routeData.coordinates[0]);
     setEndPosition(routeData.coordinates[routeData.coordinates.length - 1]);
-    setOriginAddress(routePreset.start.name || 'Kho Tuy Hòa');
-    setDestinationAddress(routePreset.end.name || 'Điểm giao khách');
+    setOriginAddress('Vị trí hiện tại');
+    setDestinationAddress('Điểm giao');
     setTotalDistance(0);
     setSeconds(0);
     setIsTracking(true);
     setIsSimulating(true);
     setIsSimPaused(false);
-    setSimStepInstruction('Bắt đầu lộ trình giao loa theo định tuyến đường phố thực tế OSRM');
+    setSimStepInstruction('Đang mô phỏng lộ trình từ vị trí hiện tại');
 
     // 2. Initialize Kinematic 60FPS Simulator
     const sim = new KinematicRouteSimulator({
@@ -540,7 +542,7 @@ export default function TrackingView({
         if (setToast) {
           setToast({
             title: '🎉 Đã đến điểm giao!',
-            desc: `Đã hoàn thành toàn bộ lộ trình ${routePreset.name} an toàn.`,
+            desc: 'Đã hoàn thành mô phỏng lộ trình.',
             type: 'success'
           });
         }
@@ -640,8 +642,8 @@ export default function TrackingView({
           <div className="flex gap-4 w-full">
             <button
               onClick={handleStartTracking}
-              disabled={isTracking}
-              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative overflow-hidden border ${isTracking
+              disabled={isTracking || isSimulating}
+              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 shadow-md group relative overflow-hidden border ${isTracking || isSimulating
                 ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
                 : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
                 }`}
@@ -654,8 +656,8 @@ export default function TrackingView({
 
             <button
               onClick={handleStopTracking}
-              disabled={!isTracking}
-              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group border ${!isTracking
+              disabled={!isTracking || isSimulating}
+              className={`flex-1 rounded-2xl p-4 lg:p-5 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 group border ${!isTracking || isSimulating
                 ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60'
                 : 'bg-rose-600 text-white border-rose-700 shadow-lg hover:bg-rose-700'
                 }`}
@@ -668,11 +670,11 @@ export default function TrackingView({
           </div>
 
           {/* ══════════ 🚀 SIMULATION ══════════ */}
-          {!isSimulating ? (
+          {!isSimulating && (
             <button
               type="button"
               disabled={isRouteLoading}
-              onClick={() => handleStartSmartSimulation(selectedPresetRoute)}
+              onClick={handleStartSmartSimulation}
               className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[18px]">
@@ -680,70 +682,19 @@ export default function TrackingView({
               </span>
               <span>{isRouteLoading ? 'Đang vẽ tuyến đường...' : 'Chạy mô phỏng lộ trình'}</span>
             </button>
-          ) : (
-            <div className="w-full bg-surface-container-lowest rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
-              {/* Progress bar */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px] font-bold text-slate-600">
-                  <span>{(simTelemetry.progressRatio * 100).toFixed(0)}%</span>
-                  <span>Còn {(simTelemetry.remainingMeters / 1000).toFixed(2)} km</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden border border-slate-200/80">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-150"
-                    style={{ width: `${Math.max(2, simTelemetry.progressRatio * 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Pause/Resume & Speed */}
-              <div className="flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={handlePauseResumeSimulation}
-                  className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs ${isSimPaused
-                      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                      : 'bg-amber-500 text-white hover:bg-amber-600'
-                    }`}
-                >
-                  <span className="material-symbols-outlined text-[16px]">
-                    {isSimPaused ? 'play_arrow' : 'pause'}
-                  </span>
-                  <span>{isSimPaused ? 'Tiếp tục' : 'Tạm dừng'}</span>
-                </button>
-
-                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                  {[1, 2, 4, 8].map((mult) => (
-                    <button
-                      key={mult}
-                      type="button"
-                      onClick={() => handleChangeSimSpeed(mult)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${simMultiplier === mult
-                          ? 'bg-slate-900 text-white shadow-2xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                    >
-                      {mult}x
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
           )}
 
           {/* Real-time Distance Box */}
-          <div className="w-full bg-surface-container-lowest rounded-2xl p-4 border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] flex items-center justify-between">
-            <div>
-              <span className="text-slate-500 font-bold text-xs sm:text-sm block">Tổng quãng đường</span>
-              <div className="mt-1 flex items-baseline gap-1">
-                <span className="text-2xl lg:text-3xl font-black text-slate-900">
-                  {totalDistance.toFixed(2)}
-                </span>
-                <span className="text-sm font-bold text-slate-500">km</span>
-              </div>
+          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/70 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-900 font-bold text-sm lg:text-base">Tổng quãng đường</span>
+              <span className="material-symbols-outlined text-xl text-slate-500">route</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
-              <Milestone className="w-6 h-6 text-slate-700" />
+            <div className="mt-1.5 flex items-baseline gap-1">
+              <span className="text-2xl lg:text-3xl font-black text-slate-900 tabular-nums">
+                {totalDistance.toFixed(2)}
+              </span>
+              <span className="text-xs font-semibold text-slate-500">km</span>
             </div>
           </div>
 
@@ -767,7 +718,7 @@ export default function TrackingView({
               {/* GPS Live Badge */}
               <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-700 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200 shrink-0">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                <span>GPS Trực Tiếp</span>
+                <span>Hoạt động</span>
               </div>
 
               {/* Nút Căn Giữa Vị Trí (My Location) */}
