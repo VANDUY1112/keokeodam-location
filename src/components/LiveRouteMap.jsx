@@ -239,10 +239,10 @@ export const MAP_LAYERS = {
   googleHybrid: {
     id: 'googleHybrid',
     name: 'Vệ Tinh',
-    url: 'https://mt1.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}',
+    url: 'https://mt{s}.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}&scale=2',
     maxZoom: 22,
     maxNativeZoom: 20,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    subdomains: ['0', '1', '2', '3'],
   },
   darkMuted: {
     id: 'darkMuted',
@@ -255,10 +255,10 @@ export const MAP_LAYERS = {
   googleStreets: {
     id: 'googleStreets',
     name: 'Đường Phố',
-    url: 'https://mt1.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}',
+    url: 'https://mt{s}.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}&scale=2',
     maxZoom: 22,
     maxNativeZoom: 20,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    subdomains: ['0', '1', '2', '3'],
   },
 };
 

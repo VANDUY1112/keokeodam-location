@@ -184,13 +184,9 @@ export default function DashboardView({
 
   const totalRentals = displayTrips.length;
 
-  // 🎯 DYNAMIC SPATIAL CLUSTERING: Groups nearby completed delivery endpoints into circular hotspot zones
+  // 🎯 DYNAMIC REAL SPATIAL CLUSTERING: Only real delivery endpoints are grouped into circular zones
   const hotspots = useMemo(() => {
-    const realClusters = clusterDeliveryPoints(displayTrips, 0.65, userCoords);
-    if (realClusters && realClusters.length > 0) {
-      return realClusters;
-    }
-    return generateHotspotsAround(userCoords.lat, userCoords.lng);
+    return clusterDeliveryPoints(displayTrips, 0.65, userCoords);
   }, [displayTrips, userCoords.lat, userCoords.lng]);
 
   const displayExpenses = apiExpenses.length > 0 ? apiExpenses.map(e => ({

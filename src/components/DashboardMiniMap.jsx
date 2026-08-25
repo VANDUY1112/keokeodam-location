@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MapContainer, TileLayer, Circle, CircleMarker, Marker, Popup, Polyline, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -170,12 +171,34 @@ export default function DashboardMiniMap({
   onNavigateToTab,
 }) {
   const [tileMode, setTileMode] = useState('street'); // 'street' | 'satellite'
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const selectedHotspot = hotspots.find((h) => h.id === selectedHotspotId);
 
+  const handleCloseFullscreen = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsExpanded(false);
+      setIsClosing(false);
+    }, 280);
+  };
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isExpanded && !isClosing) {
+        handleCloseFullscreen();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isExpanded, isClosing]);
+
+  // 🚀 ULTRA-HD RETINA GOOGLE TILES (scale=2 prevents blur/pixelation on phones & retina screens)
   const tileUrl =
     tileMode === 'satellite'
-      ? 'https://mt1.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}'
-      : 'https://mt1.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}';
+      ? 'https://mt{s}.google.com/vt/lyrs=y&hl=vi&gl=VN&x={x}&y={y}&z={z}&scale=2'
+      : 'https://mt{s}.google.com/vt/lyrs=m&hl=vi&gl=VN&x={x}&y={y}&z={z}&scale=2';
 
   const defaultCenter = userCoords ? [userCoords.lat, userCoords.lng] : [10.780, 106.698];
 
@@ -188,11 +211,11 @@ export default function DashboardMiniMap({
         </h2>
 
         {/* Full-line Controls without wrapper background */}
-        <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+        <div className="grid grid-cols-4 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
           {/* Tâm GPS Button */}
           <button
             onClick={() => onSelectHotspot && onSelectHotspot(null)}
-            className={`col-span-1 px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border ${selectedHotspotId === null
+            className={`col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border cursor-pointer ${selectedHotspotId === null
               ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
               : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
               }`}
@@ -206,7 +229,7 @@ export default function DashboardMiniMap({
           <button
             onClick={onRequestGPS}
             disabled={isLocating}
-            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-800 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+            className="col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl text-slate-800 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
             title="Lấy lại GPS vị trí bạn đang đứng"
           >
             <span className={`material-symbols-outlined text-[16px] text-slate-700 ${isLocating ? 'animate-spin' : ''}`}>
@@ -218,7 +241,7 @@ export default function DashboardMiniMap({
           {/* Vệ tinh / Đường phố */}
           <button
             onClick={() => setTileMode(tileMode === 'street' ? 'satellite' : 'street')}
-            className="col-span-1 px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+            className="col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
             title="Chuyển chế độ xem bản đồ"
           >
             <span className="material-symbols-outlined text-[16px] text-slate-700">
@@ -226,39 +249,53 @@ export default function DashboardMiniMap({
             </span>
             <span className="truncate">{tileMode === 'street' ? 'Vệ tinh' : 'Đường'}</span>
           </button>
+
+          {/* Mở rộng Toàn màn hình */}
+          <button
+            onClick={() => setIsExpanded(true)}
+            className="col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+            title="Mở rộng xem toàn màn hình"
+          >
+            <span className="material-symbols-outlined text-[16px] text-slate-700">
+              fullscreen
+            </span>
+            <span className="truncate">Mở rộng</span>
+          </button>
         </div>
       </div>
 
-      {/* ══════════ 2. 4-HOTSPOT BUTTONS (FULL LINE, NO WRAPPER BACKGROUND) ══════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-2 w-full">
-        {hotspots.map((hs) => {
-          const isSelected = selectedHotspotId === hs.id;
-          return (
-            <button
-              key={hs.id}
-              onClick={() => onSelectHotspot && onSelectHotspot(hs.id)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${isSelected
-                ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
-                : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
-                }`}
-              title="Bấm để trỏ tới điểm này trên bản đồ"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className="w-2.5 h-2.5 rounded-full shrink-0"
-                  style={{ backgroundColor: hs.color }}
-                ></span>
-                <span className="font-bold truncate">
-                  {hs.rentalCount} chuyến
+      {/* ══════════ 2. REAL CLUSTER BUTTONS (RENDER ONLY WHEN REAL TRIPS EXIST) ══════════ */}
+      {hotspots && hotspots.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 items-center gap-2 w-full">
+          {hotspots.map((hs) => {
+            const isSelected = selectedHotspotId === hs.id;
+            return (
+              <button
+                key={hs.id}
+                onClick={() => onSelectHotspot && onSelectHotspot(hs.id)}
+                className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${isSelected
+                  ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
+                  : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
+                  }`}
+                title="Bấm để trỏ tới điểm này trên bản đồ"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: hs.color }}
+                  ></span>
+                  <span className="font-bold truncate">
+                    {hs.rentalCount} chuyến
+                  </span>
+                </div>
+                <span className={`text-[11px] font-normal shrink-0 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
+                  ~ {hs.distance}
                 </span>
-              </div>
-              <span className={`text-[11px] font-normal shrink-0 ${isSelected ? 'text-slate-300' : 'text-slate-500'}`}>
-                ~ {hs.distance}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* ══════════ 3. MAP CANVAS WITH INDIVIDUAL TRIP DOTS IN EACH ZONE ══════════ */}
       <div className="w-full h-[400px] sm:h-[460px] lg:h-[490px] relative rounded-2xl overflow-hidden shadow-inner border border-slate-200/90">
@@ -281,7 +318,7 @@ export default function DashboardMiniMap({
             url={tileUrl}
             maxZoom={22}
             maxNativeZoom={20}
-            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+            subdomains={['0', '1', '2', '3']}
           />
 
           {/* Connecting line from user to selected hotspot */}
@@ -380,6 +417,135 @@ export default function DashboardMiniMap({
           })}
         </MapContainer>
       </div>
+
+      {/* ══════════ 4. FULLSCREEN MAP MODAL (PORTAL TO BODY WITH SMOOTH ANIMATION) ══════════ */}
+      {isExpanded &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-[999999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center transition-all duration-300 ${
+              isClosing ? 'opacity-0' : 'opacity-100 animate-in fade-in'
+            }`}
+          >
+            {/* Floating Close Button in Top Right with Slide & Scale Animation */}
+            <button
+              onClick={handleCloseFullscreen}
+              className={`absolute top-4 right-4 z-[99999] w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 border border-white/20 hover:border-white/40 ${
+                isClosing
+                  ? 'scale-75 opacity-0'
+                  : 'scale-100 opacity-100 animate-in zoom-in-75 slide-in-from-top-2 duration-300'
+              }`}
+              title="Đóng toàn màn hình (Esc)"
+            >
+              <span className="material-symbols-outlined text-[24px]">close</span>
+            </button>
+
+            {/* Fullscreen Edge-to-Edge Map Canvas with Smooth Scale/Zoom Transition */}
+            <div
+              className={`w-full h-full relative bg-slate-900 overflow-hidden transition-all duration-300 ease-out transform ${
+                isClosing
+                  ? 'scale-90 opacity-0 rounded-[40px]'
+                  : 'scale-100 opacity-100 rounded-none animate-in zoom-in-95 duration-300'
+              }`}
+            >
+              <MapContainer
+                center={defaultCenter}
+                zoom={15}
+                zoomControl={false}
+                scrollWheelZoom={true}
+                attributionControl={false}
+                className="w-full h-full z-0"
+                style={{ width: '100vw', height: '100vh' }}
+              >
+                  <MapBoundsController
+                    userCoords={userCoords}
+                    hotspots={hotspots}
+                    selectedHotspot={selectedHotspot}
+                  />
+
+                  <TileLayer
+                    url={tileUrl}
+                    maxZoom={22}
+                    maxNativeZoom={20}
+                    subdomains={['0', '1', '2', '3']}
+                  />
+
+                  {/* Connecting line */}
+                  {userCoords && selectedHotspot && (
+                    <Polyline
+                      positions={[
+                        [userCoords.lat, userCoords.lng],
+                        [selectedHotspot.lat, selectedHotspot.lng],
+                      ]}
+                      pathOptions={{
+                        color: selectedHotspot.color,
+                        weight: 4,
+                        opacity: 0.9,
+                        dashArray: '6, 6',
+                      }}
+                    />
+                  )}
+
+                  {/* User Current Marker */}
+                  {userCoords && (
+                    <Marker position={[userCoords.lat, userCoords.lng]} icon={userCurrentLocationIcon}>
+                      <Popup closeButton={false}>
+                        <div className="py-0.5 px-2 text-center">
+                          <span className="font-bold text-slate-900 text-xs">Vị trí của bạn</span>
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )}
+
+                  {/* Hotspots */}
+                  {hotspots.map((hotspot) => {
+                    const isSelected = selectedHotspotId === hotspot.id;
+                    return (
+                      <React.Fragment key={hotspot.id}>
+                        <Circle
+                          center={[hotspot.lat, hotspot.lng]}
+                          radius={hotspot.radius}
+                          pathOptions={{
+                            color: hotspot.color,
+                            fillColor: hotspot.color,
+                            fillOpacity: isSelected ? 0.35 : 0.2,
+                            weight: isSelected ? 3 : 2,
+                            dashArray: '4, 4',
+                          }}
+                        />
+                        {hotspot.tripDots?.map((dot) => (
+                          <CircleMarker
+                            key={dot.id}
+                            center={[dot.lat, dot.lng]}
+                            radius={6}
+                            pathOptions={{
+                              color: '#ffffff',
+                              weight: 2,
+                              fillColor: hotspot.color,
+                              fillOpacity: 1,
+                            }}
+                          >
+                            <Popup closeButton={false}>
+                              <div className="py-0.5 px-1.5 text-center">
+                                <span className="text-xs font-bold text-slate-900">
+                                  {dot.customerName}
+                                </span>
+                              </div>
+                            </Popup>
+                            <Tooltip direction="top" offset={[0, -6]} permanent opacity={0.9}>
+                              <div className="text-[11px] font-bold text-slate-900">
+                                {dot.customerName}
+                              </div>
+                            </Tooltip>
+                          </CircleMarker>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })}
+                </MapContainer>
+              </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

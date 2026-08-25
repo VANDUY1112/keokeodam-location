@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Milestone } from 'lucide-react';
 import LiveRouteMap from './LiveRouteMap';
+import Pagination from './Pagination';
 import { formatVND, parseLocalDate } from '../utils/format';
 import { api } from '../services/api.js';
 
@@ -380,47 +381,16 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
           })
         )}
 
-        {/* ══════════ PAGINATION CONTROLS ══════════ */}
+        {/* ══════════ MODERN PAGINATION CONTROLS ══════════ */}
         {!isLoadingApi && filteredTrips.length > ITEMS_PER_PAGE && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 mt-1">
-            <span className="text-xs sm:text-sm font-medium text-slate-500">
-              Hiển thị <strong className="text-slate-900 font-bold">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</strong> - <strong className="text-slate-900 font-bold">{Math.min(currentPage * ITEMS_PER_PAGE, filteredTrips.length)}</strong> trên <strong className="text-slate-900 font-bold">{filteredTrips.length}</strong> đơn
-            </span>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-95"
-                title="Trang trước"
-              >
-                <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-              </button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`w-9 h-9 rounded-xl font-bold text-xs transition-all shadow-xs cursor-pointer active:scale-95 flex items-center justify-center border ${
-                    currentPage === page
-                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
-
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs cursor-pointer active:scale-95"
-                title="Trang tiếp"
-              >
-                <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredTrips.length}
+            pageSize={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+            itemName="đơn"
+          />
         )}
       </div>
 
