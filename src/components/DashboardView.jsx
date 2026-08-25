@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Milestone, Flame, TrendingUp, ChevronRight } from 'lucide-react';
-import { formatVND, parseVNDNumber } from '../utils/format';
+import { formatVND, parseVNDNumber, parseLocalDate } from '../utils/format';
 import DashboardMiniMap, { generateHotspotsAround } from './DashboardMiniMap';
 import { api } from '../services/api.js';
 import { clusterDeliveryPoints } from '../utils/spatialCluster';
@@ -152,7 +152,7 @@ export default function DashboardView({
     const calculatedDist = calculateGpsDistance(pathCoords);
     const realDist = pathCoords.length > 1 ? calculatedDist : (typeof r.distanceKm === 'number' && r.distanceKm > 0 ? r.distanceKm : 0.85);
 
-    const now = r.createdAt ? new Date(r.createdAt) : new Date();
+    const now = parseLocalDate(r.createdAt || r.startTime);
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
     const distText = `${realDist.toFixed(2)} km`;
@@ -290,12 +290,12 @@ export default function DashboardView({
       {/* ══════════ SECTION: RECENT TRIPS ══════════ */}
       <div className="w-full flex flex-col gap-4">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-on-surface">Chuyến Gần Đây</h3>
+          <h3 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-on-surface">Chuyến gần đây</h3>
           <button
             onClick={() => onNavigateToTab('history')}
             className="text-primary font-bold text-xs sm:text-sm lg:text-base hover:underline transition-all"
           >
-            Xem Tất Cả
+            Xem tất cả
           </button>
         </div>
 
@@ -308,7 +308,7 @@ export default function DashboardView({
             displayTrips.slice(0, 4).map((trip) => (
               <div
                 key={trip.id}
-                onClick={() => onNavigateToTab('tracking')}
+                onClick={() => onNavigateToTab('history')}
                 className="bg-surface-container-lowest p-3.5 sm:p-4 lg:p-5 rounded-2xl flex items-center justify-between hover:bg-slate-50 transition-all cursor-pointer group border border-slate-200/90 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:shadow-[0_4px_16px_rgba(11,28,48,0.06)] gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">

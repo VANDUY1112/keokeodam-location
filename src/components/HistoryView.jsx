@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Milestone } from 'lucide-react';
 import LiveRouteMap from './LiveRouteMap';
-import { formatVND } from '../utils/format';
+import { formatVND, parseLocalDate } from '../utils/format';
 import { api } from '../services/api.js';
 
 export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTracking, onOpenVietQR }) {
@@ -73,7 +73,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               ? r.distanceKm 
               : calculateGpsDistance(pathCoordinates);
 
-            const createdAtDate = r.createdAt ? new Date(r.createdAt) : new Date();
+            const createdAtDate = parseLocalDate(r.createdAt || r.startTime);
             const timeStr = `${String(createdAtDate.getHours()).padStart(2, '0')}:${String(createdAtDate.getMinutes()).padStart(2, '0')}`;
             const dateStr = `${createdAtDate.getDate()} Th${createdAtDate.getMonth() + 1}`;
             const distText = dist > 0 ? `${dist.toFixed(2)} km` : '0.85 km';
@@ -170,7 +170,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Lịch Sử Giao & Cho Thuê Loa
+            Lịch sử chuyến
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm lg:text-base mt-0.5 sm:mt-1">
             Nhật ký các đơn thuê loa đã bàn giao và đo đạc quãng đường GPS di chuyển

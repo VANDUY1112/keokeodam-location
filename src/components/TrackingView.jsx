@@ -470,7 +470,7 @@ export default function TrackingView({
             <div className="absolute -right-16 -top-16 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-700"></div>
 
             <div className="flex items-center justify-between z-10">
-              <h2 className="text-xl lg:text-2xl font-black text-on-surface tracking-tight">Giao Loa Trực Tuyến</h2>
+              <h2 className="text-xl lg:text-2xl font-black text-on-surface tracking-tight">Giao loa trực tuyến</h2>
               <div
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-colors ${isTracking
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 font-bold'

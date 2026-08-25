@@ -184,7 +184,7 @@ export default function DashboardMiniMap({
       {/* ══════════ 1. HEADER & FULL-LINE CONTROLS (NO WRAPPER BACKGROUND) ══════════ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h2 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
-          Phân Bố Khách Thuê Loa Trọng Điểm
+          Phân bố khu vực
         </h2>
 
         {/* Full-line Controls without wrapper background */}
@@ -193,8 +193,8 @@ export default function DashboardMiniMap({
           <button
             onClick={() => onSelectHotspot && onSelectHotspot(null)}
             className={`col-span-1 px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border ${selectedHotspotId === null
-                ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
-                : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
+              ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
+              : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
               }`}
             title="Căn bản đồ về Tâm vị trí GPS của bạn"
           >
@@ -238,8 +238,8 @@ export default function DashboardMiniMap({
               key={hs.id}
               onClick={() => onSelectHotspot && onSelectHotspot(hs.id)}
               className={`px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between gap-1.5 border shadow-xs ${isSelected
-                  ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
-                  : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
+                ? 'bg-slate-900 text-white border-slate-900 font-extrabold shadow-sm'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-semibold'
                 }`}
               title="Bấm để trỏ tới điểm này trên bản đồ"
             >

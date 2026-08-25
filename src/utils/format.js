@@ -40,6 +40,20 @@ export const parseVNDNumber = (val) => {
     const raw = parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
     return Math.round(raw * 25000);
   }
-  const clean = str.replace(/[^0-9]/g, '');
-  return parseInt(clean, 10) || 0;
+  const cleanDigits = str.replace(/[^0-9]/g, '');
+  return cleanDigits ? parseInt(cleanDigits, 10) : 0;
+};
+
+export const parseLocalDate = (dateStr) => {
+  if (!dateStr) return new Date();
+  if (dateStr instanceof Date) return dateStr;
+  let str = String(dateStr).trim();
+  // SQLite CURRENT_TIMESTAMP returns UTC "YYYY-MM-DD HH:mm:ss"
+  if (!str.includes('Z') && !str.includes('+') && str.includes(' ')) {
+    str = str.replace(' ', 'T') + 'Z';
+  } else if (!str.includes('Z') && !str.includes('+') && str.includes('T')) {
+    str = str + 'Z';
+  }
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? new Date() : d;
 };
