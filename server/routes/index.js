@@ -37,6 +37,7 @@ router.post('/auth/login', authRateLimiter, validate(loginSchema), AuthControlle
 router.post('/auth/logout', AuthController.logout);
 router.post('/auth/refresh', AuthController.refreshToken);
 router.get('/auth/me', authenticate, AuthController.getCurrentUser);
+router.get('/auth/session-check', authenticate, AuthController.sessionCheck);
 
 // ─── 3. Speakers & Inventory Routes ───
 router.get('/speakers', optionalAuth, SpeakersController.getAll);

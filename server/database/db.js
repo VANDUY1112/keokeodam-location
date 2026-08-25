@@ -27,6 +27,8 @@ export function initDatabase() {
       full_name TEXT NOT NULL,
       role TEXT NOT NULL DEFAULT 'staff', -- 'admin', 'staff', 'driver'
       avatar_url TEXT,
+      active_session_id TEXT,
+      last_login_device TEXT,
       is_active INTEGER NOT NULL DEFAULT 1,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -155,6 +157,8 @@ export function initDatabase() {
   try { db.exec('ALTER TABLE rentals ADD COLUMN start_lat REAL;'); } catch (e) {}
   try { db.exec('ALTER TABLE rentals ADD COLUMN start_lng REAL;'); } catch (e) {}
   try { db.exec('ALTER TABLE rentals ADD COLUMN path_coordinates TEXT;'); } catch (e) {}
+  try { db.exec('ALTER TABLE users ADD COLUMN active_session_id TEXT;'); } catch (e) {}
+  try { db.exec('ALTER TABLE users ADD COLUMN last_login_device TEXT;'); } catch (e) {}
 
   // Clean out initial mock seed rows so only real user data remains
   try {

@@ -19,12 +19,22 @@ export function authenticate(req, res, next) {
     }
 
     const decoded = jwt.verify(token, config.jwtSecret);
-    const user = db.prepare('SELECT id, email, full_name, role, avatar_url, is_active FROM users WHERE id = ?').get(decoded.userId);
+    const user = db.prepare('SELECT id, email, full_name, role, avatar_url, is_active, active_session_id, last_login_device FROM users WHERE id = ?').get(decoded.userId);
 
     if (!user || !user.is_active) {
       return res.status(401).json({
         success: false,
         error: 'Tài khoản không tồn tại hoặc đã bị khóa'
+      });
+    }
+
+    // 🛡️ Single Active Session Check: If session ID in token does not match active_session_id in DB, reject request!
+    if (decoded.sessionId && user.active_session_id && decoded.sessionId !== user.active_session_id) {
+      return res.status(401).json({
+        success: false,
+        code: 'SESSION_REVOKED',
+        error: 'Tài khoản của bạn vừa đăng nhập ở một thiết bị khác. Phiên làm việc trên thiết bị này đã kết thúc.',
+        lastDevice: user.last_login_device || 'Thiết bị khác'
       });
     }
 

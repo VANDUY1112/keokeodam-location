@@ -89,15 +89,30 @@ export class AuthController {
       });
     }
 
-    // Generate JWT Access & Refresh Tokens
+    // 🛡️ Single Active Session: Generate unique session ID for this login instance
+    const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+    const userAgent = req.headers['user-agent'] || 'Thiết bị lạ';
+    const deviceName = userAgent.includes('Mobile')
+      ? 'Điện thoại di động'
+      : userAgent.includes('Windows')
+        ? 'Máy tính Windows'
+        : userAgent.includes('Mac')
+          ? 'Máy tính Mac'
+          : 'Trình duyệt Web';
+
+    // Invalidate previous sessions by saving new active_session_id in DB
+    db.prepare('UPDATE users SET active_session_id = ?, last_login_device = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+      .run(sessionId, deviceName, user.id);
+
+    // Generate JWT Access & Refresh Tokens with embedded sessionId
     const accessToken = jwt.sign(
-      { userId: user.id, role: user.role },
+      { userId: user.id, role: user.role, sessionId },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn }
     );
 
     const refreshToken = jwt.sign(
-      { userId: user.id },
+      { userId: user.id, sessionId },
       config.jwtRefreshSecret,
       { expiresIn: config.jwtRefreshExpiresIn }
     );
@@ -129,14 +144,38 @@ export class AuthController {
       message: 'Đăng nhập thành công',
       data: {
         token: accessToken,
+        sessionId,
         user: {
           id: user.id,
           email: user.email,
           fullName: user.full_name,
           role: user.role,
-          avatarUrl: user.avatar_url
+          avatarUrl: user.avatar_url,
+          lastDevice: deviceName
         }
       }
+    });
+  }
+
+  // GET /api/v1/auth/session-check
+  static sessionCheck(req, res) {
+    const user = req.user;
+    const clientSessionId = req.headers['x-session-id'] || req.query.sessionId;
+    const currentDbUser = db.prepare('SELECT active_session_id, last_login_device FROM users WHERE id = ?').get(user.id);
+
+    if (currentDbUser?.active_session_id && clientSessionId && currentDbUser.active_session_id !== clientSessionId) {
+      return res.status(401).json({
+        success: false,
+        code: 'SESSION_REVOKED',
+        error: 'Tài khoản của bạn vừa đăng nhập ở một thiết bị khác. Phiên làm việc trên thiết bị này đã kết thúc.',
+        lastDevice: currentDbUser?.last_login_device || 'Thiết bị khác'
+      });
+    }
+
+    return res.json({
+      success: true,
+      active: true,
+      sessionId: currentDbUser?.active_session_id || clientSessionId
     });
   }
 

@@ -9,14 +9,22 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || (
 class ApiService {
   constructor() {
     this.token = localStorage.getItem('locahome_token') || null;
+    this.sessionId = localStorage.getItem('locahome_session_id') || null;
   }
 
-  setToken(token) {
+  setToken(token, sessionId = null) {
     this.token = token;
     if (token) {
       localStorage.setItem('locahome_token', token);
     } else {
       localStorage.removeItem('locahome_token');
+    }
+    if (sessionId) {
+      this.sessionId = sessionId;
+      localStorage.setItem('locahome_session_id', sessionId);
+    } else if (!token) {
+      this.sessionId = null;
+      localStorage.removeItem('locahome_session_id');
     }
   }
 
@@ -25,6 +33,7 @@ class ApiService {
     const headers = {
       'Content-Type': 'application/json',
       ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
+      ...(this.sessionId ? { 'x-session-id': this.sessionId } : {}),
       ...options.headers
     };
 
@@ -37,6 +46,11 @@ class ApiService {
 
       const json = await response.json();
       if (!response.ok) {
+        if (json.code === 'SESSION_REVOKED') {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('kko_session_revoked', { detail: json }));
+          }
+        }
         throw new Error(json.error || `HTTP error ${response.status}`);
       }
       return json;
@@ -53,7 +67,7 @@ class ApiService {
         body: JSON.stringify({ fullName, password, avatarUrl })
       });
       if (res.data?.token) {
-        this.setToken(res.data.token);
+        this.setToken(res.data.token, res.data.sessionId);
       }
       return res;
     } catch (err) {
@@ -74,11 +88,19 @@ class ApiService {
         body: JSON.stringify({ email, password })
       });
       if (res.data?.token) {
-        this.setToken(res.data.token);
+        this.setToken(res.data.token, res.data.sessionId);
       }
       return res;
     } catch (err) {
       return { success: true, data: { token: 'mock-token', user: { email, role: 'admin' } } };
+    }
+  }
+
+  async checkSession() {
+    try {
+      return await this.request('/auth/session-check');
+    } catch (e) {
+      return { success: false, error: e.message };
     }
   }
 

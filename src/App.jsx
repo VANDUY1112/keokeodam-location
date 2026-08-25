@@ -116,6 +116,39 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [showVietQRModal, setShowVietQRModal] = useState(false);
   const [vietQRData, setVietQRData] = useState({ amount: 280000, note: 'LOCAHOME THUE LOA' });
+  const [sessionRevokedData, setSessionRevokedData] = useState(null);
+
+  // 🛡️ Single Active Session Heartbeat & Event Listener
+  useEffect(() => {
+    const handleSessionRevoked = (e) => {
+      const detail = e.detail || {};
+      setSessionRevokedData({
+        lastDevice: detail.lastDevice || 'Thiết bị khác',
+        message: detail.error || 'Tài khoản của bạn vừa đăng nhập ở một thiết bị khác.'
+      });
+      // Clear local auth token
+      api.setToken(null);
+      setIsAuthenticated(false);
+    };
+
+    window.addEventListener('kko_session_revoked', handleSessionRevoked);
+
+    // Heartbeat check every 8 seconds if authenticated
+    let interval = null;
+    if (isAuthenticated) {
+      interval = setInterval(async () => {
+        const res = await api.checkSession();
+        if (res?.code === 'SESSION_REVOKED') {
+          handleSessionRevoked({ detail: res });
+        }
+      }, 8000);
+    }
+
+    return () => {
+      window.removeEventListener('kko_session_revoked', handleSessionRevoked);
+      if (interval) clearInterval(interval);
+    };
+  }, [isAuthenticated]);
 
   // Initial Real Data Loading from Backend SQLite API
   useEffect(() => {
@@ -1053,6 +1086,48 @@ export default function App() {
         onNavigateToTracking={() => setActiveTab('tracking')}
         onOpenVietQR={openVietQR}
       />
+
+      {/* ═══════════════ SINGLE ACTIVE SESSION REVOKED SECURITY MODAL ═══════════════ */}
+      {sessionRevokedData && (
+        <div className="fixed inset-0 z-[999999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-5 border border-amber-200/60 shadow-inner">
+              <span className="material-symbols-outlined text-[36px]">devices</span>
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-2">
+              Đăng nhập ở thiết bị khác
+            </h3>
+
+            <p className="text-sm text-slate-600 leading-relaxed mb-6">
+              Tài khoản của bạn vừa được đăng nhập trên <strong className="text-slate-900 font-bold">{sessionRevokedData.lastDevice || 'một thiết bị khác'}</strong>. Phiên làm việc trên thiết bị này đã kết thúc để đảm bảo an toàn.
+            </p>
+
+            <div className="w-full flex flex-col gap-2.5">
+              <button
+                onClick={() => {
+                  setSessionRevokedData(null);
+                  setActiveTab('user-login');
+                }}
+                className="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base shadow-lg shadow-slate-900/20 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[20px]">login</span>
+                <span>Đăng Nhập Lại</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setSessionRevokedData(null);
+                  setActiveTab('landing');
+                }}
+                className="w-full py-2.5 px-4 rounded-xl text-slate-500 hover:text-slate-800 text-xs font-semibold hover:bg-slate-50 transition-all cursor-pointer"
+              >
+                Về trang chủ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ═══════════════ TOAST NOTIFICATION ═══════════════ */}
       {toast && (
