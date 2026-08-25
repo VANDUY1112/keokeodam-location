@@ -65,6 +65,7 @@ router.put('/settings', optionalAuth, SettingsController.updateSettings);
 
 // ─── 8. Payment & Bank Webhook Routes (100% Auto Detection) ───
 router.post('/payment/webhook', PaymentController.handleWebhook);
+router.get('/payment/check', PaymentController.checkRecentPayment);
 router.post('/payment/simulate-success', PaymentController.simulateSuccess);
 
 // ─── 9. Customer Reviews & Owner Replies Routes ───

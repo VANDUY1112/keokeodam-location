@@ -6,6 +6,7 @@ import SettingsView from './components/SettingsView';
 import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
 import VietQRModal from './components/VietQRModal';
+import DynamicIsland from './components/DynamicIsland';
 import LandingPageView from './components/LandingPageView';
 import LandingPageQRModal from './components/LandingPageQRModal';
 import UserLoginPageView from './components/UserLoginPageView';
@@ -15,6 +16,15 @@ import { api } from './services/api.js';
 import { supabase } from './services/supabase';
 
 export default function App() {
+  // Global Active Tracking State for Dynamic Island
+  const [activeTracking, setActiveTracking] = useState({
+    isTracking: false,
+    seconds: 0,
+    distanceKm: 0,
+    speedKmh: 0,
+    customerName: '',
+    speakerName: 'Loa Kéo'
+  });
   const [activeTab, setActiveTab] = useState(() => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -88,7 +98,15 @@ export default function App() {
   const [trips, setTrips] = useState(() => {
     try {
       const saved = localStorage.getItem('expensely_trips');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      const filtered = Array.isArray(parsed)
+        ? parsed.filter(t => !t?.title?.includes('Anh Tuấn') && !t?.customerName?.includes('Anh Tuấn'))
+        : [];
+      if (filtered.length !== (Array.isArray(parsed) ? parsed.length : 0)) {
+        localStorage.setItem('expensely_trips', JSON.stringify(filtered));
+      }
+      return filtered;
     } catch {
       return [];
     }
@@ -859,6 +877,7 @@ export default function App() {
                 onOpenVietQR={openVietQR}
                 onAddTripRecord={handleAddTrip}
                 setToast={setToast}
+                onTrackingStateChange={setActiveTracking}
                 onAddExpenseRecord={(rec) => {
                   setExpenses((prev) => [
                     {
@@ -1020,6 +1039,19 @@ export default function App() {
           };
           setExpenses([incomeRecord, ...expenses]);
         }}
+      />
+
+      {/* ═══════════════ FLOATING DYNAMIC ISLAND TRACKING PILL ═══════════════ */}
+      <DynamicIsland
+        isTracking={activeTracking.isTracking}
+        seconds={activeTracking.seconds}
+        distanceKm={activeTracking.distanceKm}
+        speedKmh={activeTracking.speedKmh}
+        activeTab={activeTab}
+        customerName={activeTracking.customerName}
+        speakerName={activeTracking.speakerName}
+        onNavigateToTracking={() => setActiveTab('tracking')}
+        onOpenVietQR={openVietQR}
       />
 
       {/* ═══════════════ TOAST NOTIFICATION ═══════════════ */}

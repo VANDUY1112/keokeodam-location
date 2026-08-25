@@ -426,3 +426,13 @@
 .animate-backdrop-close {
   animation: backdropFadeOut 0.22s ease-out forwards;
 }
+
+/* ══════════ SMOOTH MOVING SHIPPER MARKER ══════════ */
+.clip-triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.custom-moving-shipper {
+  background: transparent !important;
+  border: none !important;
+}

@@ -1,6 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Marker, Popup, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
+
+// Click listener to fine-tune exact position on map
+function MapClickHandler({ onSelectPosition, isTracking }) {
+  useMapEvents({
+    click(e) {
+      if (!isTracking && onSelectPosition) {
+        onSelectPosition({ lat: e.latlng.lat, lng: e.latlng.lng });
+      }
+    }
+  });
+  return null;
+}
 
 // Helper component for map controls (re-center & fit-bounds)
 function MapController({ position, startPosition, endPosition, pathCoordinates = [], isTracking, recenterTrigger, readOnly }) {
@@ -55,23 +67,8 @@ const createStartIcon = () =>
     className: 'custom-map-pin',
     html: `
       <div class="relative flex items-center justify-center">
-        <div class="absolute w-8 h-8 rounded-full bg-emerald-400/40 animate-ping"></div>
-        <div class="w-7 h-7 rounded-full bg-emerald-500 border-2 border-white shadow-xl flex items-center justify-center text-white font-bold">
-          <span class="material-symbols-outlined text-[16px]">trip_origin</span>
-        </div>
-      </div>
-    `,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-  });
-
-const createEndIcon = () =>
-  L.divIcon({
-    className: 'custom-map-pin',
-    html: `
-      <div class="relative flex items-center justify-center">
-        <div class="w-8 h-8 rounded-full bg-rose-500 border-2 border-white shadow-xl flex items-center justify-center text-white">
-          <span class="material-symbols-outlined text-[18px]">sports_score</span>
+        <div class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white shadow-lg flex items-center justify-center text-white font-bold">
+          <span class="material-symbols-outlined text-[18px]">trip_origin</span>
         </div>
       </div>
     `,
@@ -79,20 +76,163 @@ const createEndIcon = () =>
     iconAnchor: [16, 16],
   });
 
-const createCurrentIcon = () =>
+const createEndIcon = () =>
   L.divIcon({
     className: 'custom-map-pin',
     html: `
       <div class="relative flex items-center justify-center">
-        <div class="absolute w-12 h-12 rounded-full bg-cyan-400/25 animate-ping"></div>
-        <div class="w-10 h-10 rounded-full bg-white/95 backdrop-blur-xs border-2 border-slate-900 shadow-[0_4px_14px_rgba(0,0,0,0.35)] flex items-center justify-center p-1">
-          <img src="/motorcycle.png" alt="Shipper" class="w-full h-full object-contain drop-shadow-xs" />
+        <div class="w-8 h-8 rounded-full bg-rose-500 border-2 border-white shadow-lg flex items-center justify-center text-white font-bold">
+          <span class="material-symbols-outlined text-[18px]">flag</span>
         </div>
       </div>
     `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
   });
+
+// Calculate bearing (in degrees 0-360) between 2 points
+function calculateBearing(startLat, startLng, endLat, endLng) {
+  if (!startLat || !startLng || !endLat || !endLng) return 0;
+  if (startLat === endLat && startLng === endLng) return 0;
+  const dLng = ((endLng - startLng) * Math.PI) / 180;
+  const lat1 = (startLat * Math.PI) / 180;
+  const lat2 = (endLat * Math.PI) / 180;
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  let brng = (Math.atan2(y, x) * 180) / Math.PI;
+  return (brng + 360) % 360;
+}
+
+// Custom Smooth Marker that smoothly slides between GPS updates & rotates towards bearing
+function SmoothMovingMarker({ position, isTracking, destinationAddress }) {
+  const [currentPos, setCurrentPos] = useState(position);
+  const [heading, setHeading] = useState(0);
+  const prevPosRef = useRef(position);
+  const animFrameRef = useRef(null);
+
+  // 🧭 SENSOR FUSION: Hardware Gyroscope & Compass Orientation
+  useEffect(() => {
+    const handleOrientation = (e) => {
+      if (!isTracking) return;
+      const compassHeading = e.webkitCompassHeading !== undefined
+        ? e.webkitCompassHeading
+        : e.alpha !== null
+          ? (360 - e.alpha) % 360
+          : null;
+      if (compassHeading !== null) {
+        setHeading(Math.round(compassHeading));
+      }
+    };
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', handleOrientation, true);
+    }
+    return () => {
+      if (window.DeviceOrientationEvent) {
+        window.removeEventListener('deviceorientation', handleOrientation, true);
+      }
+    };
+  }, [isTracking]);
+
+  // Smooth lerp animation & heading calculation between GPS updates
+  useEffect(() => {
+    if (!position || typeof position.lat !== 'number' || typeof position.lng !== 'number') return;
+
+    const prev = prevPosRef.current || position;
+    const isBigJump = Math.abs(position.lat - prev.lat) > 0.05 || Math.abs(position.lng - prev.lng) > 0.05;
+
+    // Calculate heading angle from movement vector if not already using hardware compass
+    const newHeading = calculateBearing(prev.lat, prev.lng, position.lat, position.lng);
+    if (newHeading !== 0) {
+      setHeading(Math.round(newHeading));
+    }
+
+    if (isBigJump || !isTracking) {
+      setCurrentPos(position);
+      prevPosRef.current = position;
+      return;
+    }
+
+    const startTime = performance.now();
+    const duration = 850; // Smooth 850ms slide between GPS updates
+    const startLat = prev.lat;
+    const startLng = prev.lng;
+    const targetLat = position.lat;
+    const targetLng = position.lng;
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      // Ease out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      const lat = startLat + (targetLat - startLat) * ease;
+      const lng = startLng + (targetLng - startLng) * ease;
+
+      setCurrentPos({ lat, lng });
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        prevPosRef.current = position;
+      }
+    };
+
+    animFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+  }, [position?.lat, position?.lng, isTracking]);
+
+  if (!currentPos || typeof currentPos.lat !== 'number' || typeof currentPos.lng !== 'number') return null;
+
+  const dynamicIcon = L.divIcon({
+    className: 'custom-moving-shipper',
+    html: `
+      <div class="relative flex items-center justify-center select-none" style="width: 48px; height: 48px;">
+        <!-- Radar Pulse Waves when tracking -->
+        ${isTracking ? `
+          <div class="absolute inset-0 rounded-full bg-cyan-400/20 animate-ping pointer-events-none" style="animation-duration: 2.2s;"></div>
+          <div class="absolute w-8 h-8 rounded-full bg-emerald-400/25 animate-pulse pointer-events-none"></div>
+          <!-- Direction Headlight Beam -->
+          <div class="absolute top-1/2 left-1/2 w-0 h-0 pointer-events-none transition-transform duration-300 ease-out" style="transform: translate(-50%, -50%) rotate(${heading}deg);">
+            <div class="w-10 h-14 -mt-14 -ml-5 bg-gradient-to-t from-cyan-400/35 via-cyan-300/10 to-transparent clip-triangle blur-[1px]"></div>
+          </div>
+        ` : ''}
+        
+        <!-- Shipper Vehicle Avatar Circle with Smooth Heading Rotation -->
+        <div class="relative z-10 w-10 h-10 rounded-full bg-white border-2 border-slate-900 shadow-md flex items-center justify-center p-1.5 transition-transform duration-300 ease-out"
+             style="transform: rotate(${heading > 0 ? heading : 0}deg);">
+          <img src="/motorcycle.png" alt="Shipper" class="w-full h-full object-contain drop-shadow-xs pointer-events-none" />
+        </div>
+      </div>
+    `,
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+  });
+
+  return (
+    <Marker position={[currentPos.lat, currentPos.lng]} icon={dynamicIcon}>
+      <Popup className="custom-leaflet-popup">
+        <div className="p-1 text-xs">
+          <div className="font-bold text-slate-900 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span>Vị trí shipper trực tiếp</span>
+          </div>
+          <div className="text-slate-600 mt-0.5 text-[11px]">
+            Tọa độ: {currentPos.lat.toFixed(5)}, {currentPos.lng.toFixed(5)}
+          </div>
+          {destinationAddress && (
+            <div className="text-slate-500 text-[10px] mt-1 line-clamp-1">
+              Đến: {destinationAddress}
+            </div>
+          )}
+        </div>
+      </Popup>
+    </Marker>
+  );
+}
 
 // Map Tile Options (Large, high-contrast Vietnamese text labels)
 export const MAP_LAYERS = {
@@ -134,6 +274,8 @@ export default function LiveRouteMap({
   selectedLayer: propSelectedLayer,
   recenterTrigger: propRecenterTrigger,
   showInternalControls = false,
+  gpsAccuracy = null,
+  onSelectPosition = null,
 }) {
   const [internalSelectedLayer, setInternalSelectedLayer] = useState('googleHybrid');
   const [showLayerMenu, setShowLayerMenu] = useState(false);
@@ -200,10 +342,20 @@ export default function LiveRouteMap({
           </>
         )}
 
+        {/* Start Point Marker: Render only when moved away from current point or completed */}
+        {startPosition && (!isTracking || (currentPosition && (Math.abs(startPosition.lat - currentPosition.lat) > 0.0002 || Math.abs(startPosition.lng - currentPosition.lng) > 0.0002))) && (
+          <Marker position={[startPosition.lat, startPosition.lng]} icon={createStartIcon()}>
+            <Popup className="custom-leaflet-popup">
+              <div className="p-1 text-xs">
+                <div className="font-bold text-emerald-600">Điểm Xuất Phát</div>
+                <div className="text-slate-700 mt-0.5">{originAddress}</div>
+              </div>
+            </Popup>
+          </Marker>
+        )}
 
-
-        {/* End Point Marker */}
-        {endPosition && (
+        {/* End Point Marker: Render ONLY for finished trips (when not tracking) */}
+        {!isTracking && endPosition && (
           <Marker position={[endPosition.lat, endPosition.lng]} icon={createEndIcon()}>
             <Popup className="custom-leaflet-popup">
               <div className="p-1 text-xs">
@@ -214,17 +366,17 @@ export default function LiveRouteMap({
           </Marker>
         )}
 
-        {/* Current Live Moving Marker */}
-        {currentPosition && isTracking && (
-          <Marker position={[currentPosition.lat, currentPosition.lng]} icon={createCurrentIcon()}>
-            <Popup className="custom-leaflet-popup">
-              <div className="p-1 text-xs">
-                <div className="font-bold text-cyan-700">Vị trí hiện tại</div>
-                <div className="text-slate-600 mt-0.5">Tín hiệu GPS trực tiếp</div>
-              </div>
-            </Popup>
-          </Marker>
+        {/* Current Live Moving Marker: Render during tracking or when idle without finished end flag */}
+        {(isTracking || !endPosition) && currentPosition && (
+          <SmoothMovingMarker
+            position={currentPosition}
+            isTracking={isTracking}
+            destinationAddress={destinationAddress}
+          />
         )}
+
+        {/* Map Click Listener to fine-tune exact position */}
+        <MapClickHandler onSelectPosition={onSelectPosition} isTracking={isTracking} />
 
         <MapController
           position={currentPosition || startPosition}

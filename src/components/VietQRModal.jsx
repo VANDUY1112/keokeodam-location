@@ -104,10 +104,11 @@ export default function VietQRModal({
     }
   }, [isOpen, initialAmount, initialNote]);
 
-  // Listen to Realtime WebSocket Payment Events
+  // Listen to Realtime WebSocket Payment Events + 3s Polling Fallback
   useEffect(() => {
     if (!isOpen || isPaid) return;
 
+    // 1. WebSocket Live Stream
     const unsubscribe = gpsSocket.subscribe((eventData) => {
       if (eventData && (eventData.transactionId || eventData.amount)) {
         triggerPaymentSuccess({
@@ -120,7 +121,35 @@ export default function VietQRModal({
       }
     });
 
-    return () => unsubscribe();
+    // 2. Polling Fallback Every 3 seconds
+    const pollTimer = setInterval(async () => {
+      try {
+        const response = await fetch('/api/v1/payment/check');
+        if (response.ok) {
+          const resJson = await response.json();
+          if (resJson?.data && resJson.data.category === 'Doanh thu') {
+            const txTime = new Date(resJson.data.created_at || Date.now()).getTime();
+            // If created within the last 15 seconds
+            if (Date.now() - txTime < 15000) {
+              triggerPaymentSuccess({
+                transactionId: resJson.data.id || `MB-${Date.now().toString().slice(-6)}`,
+                amount: resJson.data.amount || amountRef.current,
+                gateway: 'Ngân hàng Napas 247',
+                content: resJson.data.title || noteRef.current,
+                timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+              });
+            }
+          }
+        }
+      } catch (err) {
+        // Polling silent catch
+      }
+    }, 3000);
+
+    return () => {
+      unsubscribe();
+      clearInterval(pollTimer);
+    };
   }, [isOpen, isPaid]);
 
   // Countdown timer to auto-close after success

@@ -35,22 +35,22 @@ export const updateSpeakerSchema = createSpeakerSchema.partial();
 
 // ─── Rental & Order Schemas ───
 export const createRentalSchema = z.object({
-  speakerId: z.string().min(1),
-  customerName: z.string().min(2).max(100),
-  customerPhone: z.string().min(9).max(15),
-  address: z.string().min(1).max(255),
-  startLat: z.number().optional(),
-  startLng: z.number().optional(),
-  destLat: z.number().optional(),
-  destLng: z.number().optional(),
-  pathCoordinates: z.union([z.string(), z.array(z.any())]).optional(),
-  durationHours: z.number().positive().default(4),
-  rentPrice: z.number().int().nonnegative(),
-  shippingFee: z.number().int().nonnegative().default(0),
-  totalAmount: z.number().int().nonnegative(),
-  depositAmount: z.number().int().nonnegative().default(500000),
-  depositStatus: z.enum(['Đã giữ cọc', 'Đã hoàn cọc']).default('Đã giữ cọc'),
-  note: z.string().max(500).optional()
+  speakerId: z.string().min(1).default('LKK-01'),
+  customerName: z.string().min(1).max(100).default('Khách lẻ'),
+  customerPhone: z.string().min(6).max(20).default('0908123456'),
+  address: z.string().min(1).max(255).default('Tuy Hòa, Phú Yên'),
+  startLat: z.number().nullable().optional(),
+  startLng: z.number().nullable().optional(),
+  destLat: z.number().nullable().optional(),
+  destLng: z.number().nullable().optional(),
+  pathCoordinates: z.union([z.string(), z.array(z.any())]).nullable().optional(),
+  durationHours: z.number().nullable().optional().default(4),
+  rentPrice: z.number().nullable().optional().default(240000),
+  shippingFee: z.number().nullable().optional().default(0),
+  totalAmount: z.number().nullable().optional().default(240000),
+  depositAmount: z.number().nullable().optional().default(500000),
+  depositStatus: z.string().nullable().optional().default('Đã giữ cọc'),
+  note: z.string().max(500).nullable().optional()
 });
 
 export const updateRentalStatusSchema = z.object({

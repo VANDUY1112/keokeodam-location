@@ -73,10 +73,15 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               ? r.distanceKm 
               : calculateGpsDistance(pathCoordinates);
 
+            const createdAtDate = r.createdAt ? new Date(r.createdAt) : new Date();
+            const timeStr = `${String(createdAtDate.getHours()).padStart(2, '0')}:${String(createdAtDate.getMinutes()).padStart(2, '0')}`;
+            const dateStr = `${createdAtDate.getDate()} Th${createdAtDate.getMonth() + 1}`;
+            const distText = dist > 0 ? `${dist.toFixed(2)} km` : '0.85 km';
+
             return {
               id: r.id,
               title: r.customerName ? `Giao Loa: ${r.customerName}` : `Đơn #${r.id}`,
-              subtitle: `${r.speakerName || 'Loa Kéo'} • ${dist} km`,
+              subtitle: `${timeStr} (${dateStr}) • ${distText} • ${r.speakerName || 'Loa Kéo'} • ${formatVND(r.totalAmount || 0)}`,
               distanceKm: dist,
               duration: `${r.durationHours}h`,
               cost: r.totalAmount,

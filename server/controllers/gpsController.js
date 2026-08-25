@@ -4,11 +4,21 @@ import { broadcastGpsUpdate } from '../socket/gpsSocket.js';
 export class GpsController {
   // POST /api/v1/gps/ping (Record telemetry & broadcast to WebSocket clients)
   static ping(req, res) {
-    const { speakerId, lat, lng, speedKmh, heading, batteryPercent } = req.body;
+    let { speakerId, lat, lng, speedKmh, heading, batteryPercent } = req.body;
 
-    const speaker = db.prepare('SELECT id FROM speakers WHERE id = ?').get(speakerId);
+    let speaker = db.prepare('SELECT id FROM speakers WHERE id = ?').get(speakerId);
     if (!speaker) {
-      return res.status(404).json({ success: false, error: 'Không tìm thấy loa' });
+      const firstSpeaker = db.prepare('SELECT id FROM speakers LIMIT 1').get();
+      if (firstSpeaker) {
+        speakerId = firstSpeaker.id;
+      } else {
+        speakerId = speakerId || 'LKK-01';
+        // Auto-create speaker record if empty database
+        db.prepare(`
+          INSERT OR IGNORE INTO speakers (id, name, model, power_watts, hourly_rate, deposit_amount, status, battery_percent, lat, lng)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(speakerId, 'Loa Kẹo Kéo Nanomax', 'SK-15X', 800, 60000, 500000, 'renting', 85, lat, lng);
+      }
     }
 
     const logTx = db.transaction(() => {

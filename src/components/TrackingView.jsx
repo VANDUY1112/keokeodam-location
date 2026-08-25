@@ -4,6 +4,7 @@ import { Milestone } from 'lucide-react';
 import LiveRouteMap, { MAP_LAYERS } from './LiveRouteMap';
 import { formatVND } from '../utils/format';
 import { api } from '../services/api.js';
+import { GPSKalmanFilter, snapToNearestRoad } from '../utils/geoKalman';
 
 // Haversine formula to compute distance in km between two lat/lng points
 function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -22,28 +23,28 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 const SPEAKER_PACKAGES = [
   {
-    id: 'spk-40',
+    id: 'LKK-01',
     name: 'Loa Kéo Bass 40 (Công suất 800W)',
     price: 350000,
     icon: 'speaker',
     desc: 'Tiệc gia đình, sinh nhật, thôi nôi (20 - 40 người)',
   },
   {
-    id: 'spk-50',
+    id: 'LKK-02',
     name: 'Loa Kéo Đôi Bass 50 Khủng (1500W)',
     price: 500000,
     icon: 'volume_up',
     desc: 'Tiệc cưới, sự kiện ngoài trời, âm thanh uy lực (50 - 100 người)',
   },
   {
-    id: 'spk-mini',
+    id: 'LKK-03',
     name: 'Loa Kéo Xách Tay Mini (400W)',
     price: 250000,
     icon: 'speaker_phone',
     desc: 'Gọn nhẹ, phòng khách, dã ngoại, hát acoustic',
   },
   {
-    id: 'spk-combo',
+    id: 'LKK-04',
     name: 'Combo Loa Kéo + Đèn Laser Sân Khấu',
     price: 600000,
     icon: 'surround_sound',
@@ -51,7 +52,14 @@ const SPEAKER_PACKAGES = [
   },
 ];
 
-export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddExpenseRecord, onOpenVietQR, setToast }) {
+export default function TrackingView({
+  onOpenLogExpense,
+  onAddTripRecord,
+  onAddExpenseRecord,
+  onOpenVietQR,
+  setToast,
+  onTrackingStateChange
+}) {
   const [isTracking, setIsTracking] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(null);
   const [startPosition, setStartPosition] = useState(null);
@@ -59,8 +67,8 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const [pathCoordinates, setPathCoordinates] = useState([]);
 
   // Rental Order Configuration State
-  const [customerName, setCustomerName] = useState('Anh Tuấn - 0908.123.456');
-  const [deliveryAddress, setDeliveryAddress] = useState('128 Đường Điện Biên Phủ, P.15, Bình Thạnh');
+  const [customerName, setCustomerName] = useState('');
+  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [selectedSpeaker, setSelectedSpeaker] = useState(SPEAKER_PACKAGES[0]);
   const [ratePerKm, setRatePerKm] = useState(15000); // 15,000đ/km ship cước
 
@@ -68,6 +76,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const [totalDistance, setTotalDistance] = useState(0); // in km
   const [currentSpeed, setCurrentSpeed] = useState(0); // in km/h
   const [isSimulating, setIsSimulating] = useState(false);
+  const [gpsAccuracy, setGpsAccuracy] = useState(null); // in meters
 
   const [originAddress, setOriginAddress] = useState('Đang lấy vị trí GPS...');
   const [destinationAddress, setDestinationAddress] = useState('Chưa bắt đầu');
@@ -83,6 +92,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const watchIdRef = useRef(null);
   const simIntervalRef = useRef(null);
   const lastPosRef = useRef(null);
+  const kalmanFilterRef = useRef(new GPSKalmanFilter(2.0, 3.5));
 
   // Fetch speakers from backend API on mount
   useEffect(() => {
@@ -99,25 +109,50 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     fetchSpeakers();
   }, []);
 
-  // Initialize with browser GPS location on load
+  // Initialize with browser GPS location on load (100% High Accuracy Satellite Query)
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          setCurrentPosition(coords);
-          setOriginAddress(`${coords.lat.toFixed(4)}°N, ${coords.lng.toFixed(4)}°E`);
+          const rawCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          const smoothedCoords = kalmanFilterRef.current.filter(rawCoords.lat, rawCoords.lng, pos.coords.accuracy || 3);
+          setCurrentPosition(smoothedCoords);
+          setGpsAccuracy(Math.round(pos.coords.accuracy || 3));
+          setOriginAddress(`${smoothedCoords.lat.toFixed(5)}°N, ${smoothedCoords.lng.toFixed(5)}°E`);
         },
         () => {
-          // Fallback location if permission denied or desktop (Ho Chi Minh City center)
-          const fallback = { lat: 10.7769, lng: 106.7009 };
+          // Fallback saved or default center
+          const savedLat = localStorage.getItem('kko_warehouse_lat');
+          const savedLng = localStorage.getItem('kko_warehouse_lng');
+          const fallback = savedLat && savedLng
+            ? { lat: parseFloat(savedLat), lng: parseFloat(savedLng) }
+            : { lat: 10.7769, lng: 106.7009 };
           setCurrentPosition(fallback);
-          setOriginAddress('Kho Loa Kẹo Kéo Trung Tâm (100 Nguyễn Huệ, Q.1, TP.HCM)');
+          setOriginAddress('Vị trí mặc định (Nhấp bản đồ để chỉnh)');
         },
-        { enableHighAccuracy: true, timeout: 5000 }
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
       );
     }
   }, []);
+
+  // Manual fine-tune point selection by clicking on the map
+  const handleManualPositionSelect = (newCoords) => {
+    if (!isTracking) {
+      kalmanFilterRef.current.reset();
+      setCurrentPosition(newCoords);
+      setStartPosition(newCoords);
+      localStorage.setItem('kko_warehouse_lat', String(newCoords.lat));
+      localStorage.setItem('kko_warehouse_lng', String(newCoords.lng));
+      setOriginAddress(`${newCoords.lat.toFixed(5)}°N, ${newCoords.lng.toFixed(5)}°E`);
+      if (setToast) {
+        setToast({
+          title: 'Đã Chọn Vị Trí Chuẩn',
+          desc: `Tọa độ: ${newCoords.lat.toFixed(5)}, ${newCoords.lng.toFixed(5)} (Chính xác từng mét).`,
+          type: 'success'
+        });
+      }
+    }
+  };
 
   // Timer effect while tracking
   useEffect(() => {
@@ -129,6 +164,20 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     }
     return () => clearInterval(timer);
   }, [isTracking]);
+
+  // Sync tracking state to Dynamic Island in parent App
+  useEffect(() => {
+    if (onTrackingStateChange) {
+      onTrackingStateChange({
+        isTracking,
+        seconds,
+        distanceKm: totalDistance,
+        speedKmh: currentSpeed,
+        customerName,
+        speakerName: selectedSpeaker?.name || 'Loa Kéo'
+      });
+    }
+  }, [isTracking, seconds, totalDistance, currentSpeed, customerName, selectedSpeaker, onTrackingStateChange]);
 
   // Real-time Average Speed (km/h) - accurately 0.0 when standing still
   const currentAvgSpeed =
@@ -142,28 +191,42 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   const currentShippingCost = Math.round((totalDistance > 0 ? totalDistance : 0) * ratePerKm);
   const currentTotalCollect = (selectedSpeaker?.price || 350000) + currentShippingCost;
 
-  // Handler: Handle real GPS movement update with 100% precision anti-drift filter
-  const handleNewPosition = (newCoords, speedFromGps = null) => {
+  // Handler: Handle real GPS movement update with 2D Kalman Filter & Anti-drift
+  const handleNewPosition = (rawCoords, speedFromGps = null, accuracy = 5) => {
+    // 🧠 Apply 2D Kalman Filter to eliminate noise & reflection
+    const newCoords = kalmanFilterRef.current.filter(rawCoords.lat, rawCoords.lng, accuracy, Date.now());
     setCurrentPosition(newCoords);
 
     setPathCoordinates((prev) => {
       if (prev.length === 0) {
+        setStartPosition(newCoords);
         return [newCoords];
       }
 
       const last = prev[prev.length - 1];
       const distDelta = calculateDistance(last.lat, last.lng, newCoords.lat, newCoords.lng);
 
+      // 🛡️ ANTI-TELEPORT FILTER: If distance jumps > 2.0 km in a single update (e.g. from default HCM fallback to real user GPS in Phú Yên/Hà Nội...)
+      // This is an initial GPS fix jump -> Reset starting position to real location instead of adding 700+ km!
+      if (distDelta > 2.0) {
+        console.log(`[GPS Fix] Detected initial coordinate jump (${distDelta.toFixed(1)} km). Resetting start position to real GPS.`);
+        setStartPosition(newCoords);
+        setTotalDistance(0);
+        setCurrentSpeed(0);
+        setOriginAddress(`${newCoords.lat.toFixed(4)}°N, ${newCoords.lng.toFixed(4)}°E`);
+        return [newCoords];
+      }
+
       // Only count movement if displacement is > 10 meters (0.010 km) to eliminate GPS drift/jitter when standing still
       if (distDelta >= 0.010) {
         setTotalDistance((d) => +(d + distDelta).toFixed(3));
 
-        if (speedFromGps && speedFromGps > 0.8) {
+        if (speedFromGps && speedFromGps > 0.8 && speedFromGps < 35) {
           setCurrentSpeed(Math.round(speedFromGps * 3.6)); // m/s to km/h from real hardware GPS
         } else {
-          // Speed calculated from real movement delta (km / h)
-          const estimatedKmh = Math.round(distDelta * 1200); // realistic speed
-          setCurrentSpeed(Math.min(60, estimatedKmh));
+          // Speed calculated from real movement delta (km / h), capped at realistic motorbike speed (70 km/h)
+          const estimatedKmh = Math.round(distDelta * 1200);
+          setCurrentSpeed(Math.min(70, Math.max(0, estimatedKmh)));
         }
         return [...prev, newCoords];
       } else {
@@ -192,6 +255,7 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
   // Start / Check-in Route
   const handleStartTracking = () => {
     const startCoords = currentPosition || { lat: 10.7769, lng: 106.7009 };
+    kalmanFilterRef.current.reset();
     setStartPosition(startCoords);
     setEndPosition(null);
     setPathCoordinates([startCoords]);
@@ -199,25 +263,28 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     setSeconds(0);
     setCurrentSpeed(0);
     setIsTracking(true);
-    setDestinationAddress(`Đang di chuyển giao loa đến: ${deliveryAddress}`);
+    setDestinationAddress(deliveryAddress ? `Đang di chuyển giao loa đến: ${deliveryAddress}` : 'Đang di chuyển giao loa...');
 
     if (setToast) {
+      const targetName = customerName ? (customerName.split(' - ')[0] || customerName) : 'khách hàng';
       setToast({
         title: 'Đang bắt đầu',
-        desc: `Bắt đầu ghi nhận lộ trình GPS giao loa cho ${customerName.split(' - ')[0] || customerName}.`,
+        desc: `Bắt đầu ghi nhận lộ trình GPS giao loa cho ${targetName}.`,
         type: 'info'
       });
     }
 
-    // Start real GPS watch if available
+    // Start real GPS watch if available (100% High Accuracy Satellite Lock)
     if (navigator.geolocation) {
       watchIdRef.current = navigator.geolocation.watchPosition(
         (pos) => {
           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          handleNewPosition(coords, pos.coords.speed);
+          const acc = Math.round(pos.coords.accuracy || 3);
+          setGpsAccuracy(acc);
+          handleNewPosition(coords, pos.coords.speed, acc);
         },
         (err) => console.log('GPS watch error:', err),
-        { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
       );
     }
   };
@@ -291,15 +358,21 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
     const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
 
     if (onAddTripRecord) {
+      const tripTitle = customLocation
+        ? `Vị trí: ${customLocation}`
+        : customerName
+          ? `Giao Loa: ${customerName}`
+          : 'Chuyến giao loa';
+
       onAddTripRecord({
         id: Date.now(),
-        title: customLocation ? `Vị trí: ${customLocation}` : `Giao Loa: ${customerName}`,
+        title: tripTitle,
         subtitle: `${dateStr} • ${finalDist.toFixed(2)} km • ${selectedSpeaker?.name || 'Loa Kéo'}`,
         distanceKm: finalDist.toFixed(2),
         duration: formatTime(data.seconds > 0 ? data.seconds : 180),
         cost: totalCollectFromCustomer,
         speakerName: selectedSpeaker?.name || 'Loa Kéo',
-        customerName: customerName,
+        customerName: customerName || 'Khách lẻ',
         status: 'Hoàn thành',
         statusBadge: 'bg-slate-900 text-white',
         icon: 'speaker',
@@ -318,21 +391,22 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
 
     api.createRental({
       speakerId,
-      customerName: customerName.split(' - ')[0] || customerName,
-      customerPhone: customerName.split(' - ')[1] || '0900000000',
-      address: locationDisplay,
-      startLat: startPosToSave?.lat,
-      startLng: startPosToSave?.lng,
-      destLat: finalPos.lat,
-      destLng: finalPos.lng,
-      pathCoordinates: coordsToSave,
+      customerName: customerName ? (customerName.split(' - ')[0] || customerName) : 'Khách lẻ',
+      customerPhone: customerName && customerName.includes(' - ') ? (customerName.split(' - ')[1] || '0908123456') : '0908123456',
+      address: locationDisplay || 'Tuy Hòa, Phú Yên',
+      startLat: startPosToSave ? startPosToSave.lat : null,
+      startLng: startPosToSave ? startPosToSave.lng : null,
+      destLat: finalPos ? finalPos.lat : null,
+      destLng: finalPos ? finalPos.lng : null,
+      pathCoordinates: coordsToSave || [],
       durationHours: Math.max(1, Math.round((data.seconds || 0) / 3600)),
-      rentPrice: data.rentalFee || 350000,
-      shippingFee: data.shippingFee || 0,
-      totalAmount: totalCollectFromCustomer,
+      rentPrice: Math.round(Number(data.rentalFee) || 350000),
+      shippingFee: Math.round(Number(data.shippingFee) || 0),
+      totalAmount: Math.round(Number(totalCollectFromCustomer) || 350000),
       depositAmount: 500000,
+      depositStatus: 'Đã giữ cọc',
       note: customLocation ? `Vị trí: ${customLocation}` : `GPS: ${finalDist.toFixed(2)}km`
-    }).catch(err => console.warn('Rental save to API failed:', err.message));
+    }).catch((err) => console.warn('Rental save to API:', err.message));
 
     setShowLocationInputModal(false);
 
@@ -656,6 +730,8 @@ export default function TrackingView({ onOpenLogExpense, onAddTripRecord, onAddE
               selectedLayer={selectedLayer}
               recenterTrigger={recenterTrigger}
               showInternalControls={false}
+              gpsAccuracy={gpsAccuracy}
+              onSelectPosition={handleManualPositionSelect}
             />
           </div>
         </section>

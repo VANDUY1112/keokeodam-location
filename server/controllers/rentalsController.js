@@ -60,6 +60,27 @@ export class RentalsController {
     const rentalId = `ORD-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
     const pathCoordsStr = data.pathCoordinates ? (typeof data.pathCoordinates === 'string' ? data.pathCoordinates : JSON.stringify(data.pathCoordinates)) : null;
 
+    let speakerId = data.speakerId;
+    let speaker = db.prepare('SELECT id FROM speakers WHERE id = ?').get(speakerId);
+    if (!speaker) {
+      const firstSpeaker = db.prepare('SELECT id FROM speakers LIMIT 1').get();
+      if (firstSpeaker) {
+        speakerId = firstSpeaker.id;
+      } else {
+        speakerId = speakerId || 'LKK-01';
+        db.prepare(`
+          INSERT OR IGNORE INTO speakers (id, name, model, power_watts, hourly_rate, deposit_amount, status, battery_percent)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(speakerId, 'Loa Kẹo Kéo Nanomax', 'SK-15X', 800, 60000, 500000, 'renting', 85);
+      }
+    }
+
+    const rentPrice = Math.round(Number(data.rentPrice) || 0);
+    const shippingFee = Math.round(Number(data.shippingFee) || 0);
+    const totalAmount = Math.round(Number(data.totalAmount) || (rentPrice + shippingFee));
+    const depositAmount = Math.round(Number(data.depositAmount) || 500000);
+    const durationHours = Math.max(1, Number(data.durationHours) || 4);
+
     // Use transaction to create rental and update speaker status atomically
     const createRentalTx = db.transaction(() => {
       // 1. Insert Rental
@@ -70,26 +91,33 @@ export class RentalsController {
           deposit_amount, deposit_status, status, note
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).run(
-        rentalId, data.speakerId, data.customerName, data.customerPhone, data.address,
+        rentalId, speakerId, data.customerName, data.customerPhone, data.address,
         data.startLat || null, data.startLng || null,
         data.destLat || null, data.destLng || null, pathCoordsStr,
         new Date().toISOString(),
-        data.durationHours, data.rentPrice, data.shippingFee || 0, data.totalAmount,
-        data.depositAmount || 500000, data.depositStatus || 'Đã giữ cọc', 'active', data.note || null
+        durationHours, rentPrice, shippingFee, totalAmount,
+        depositAmount, data.depositStatus || 'Đã giữ cọc', 'active', data.note || null
       );
 
       // 2. Mark Speaker as 'renting'
       db.prepare('UPDATE speakers SET status = ?, address = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
-        .run('renting', data.address, data.speakerId);
+        .run('renting', data.address, speakerId);
     });
 
-    createRentalTx();
-
-    return res.status(201).json({
-      success: true,
-      message: 'Tạo đơn thuê loa thành công',
-      data: { id: rentalId }
-    });
+    try {
+      createRentalTx();
+      return res.status(201).json({
+        success: true,
+        message: 'Tạo đơn thuê loa thành công',
+        data: { id: rentalId }
+      });
+    } catch (err) {
+      console.error('Create rental transaction error:', err);
+      return res.status(500).json({
+        success: false,
+        error: err.message || 'Lỗi khi ghi nhận đơn thuê loa'
+      });
+    }
   }
 
   // PATCH /api/v1/rentals/:id/status

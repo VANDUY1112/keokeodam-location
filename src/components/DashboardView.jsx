@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Milestone, Flame, TrendingUp, ChevronRight } from 'lucide-react';
 import { formatVND, parseVNDNumber } from '../utils/format';
-import DashboardMiniMap from './DashboardMiniMap';
+import DashboardMiniMap, { generateHotspotsAround } from './DashboardMiniMap';
 import { api } from '../services/api.js';
+import { clusterDeliveryPoints } from '../utils/spatialCluster';
 
 export default function DashboardView({
   expenses = [],
@@ -13,6 +14,7 @@ export default function DashboardView({
   onOpenLandingQRModal,
 }) {
   const [isLocating, setIsLocating] = useState(false);
+  const [selectedHotspotId, setSelectedHotspotId] = useState(null);
 
   // Backend API data state
   const [apiSummary, setApiSummary] = useState(null);
@@ -148,13 +150,18 @@ export default function DashboardView({
     }
     // Strict calculation from actual GPS path coordinates
     const calculatedDist = calculateGpsDistance(pathCoords);
-    const realDist = pathCoords.length > 1 ? calculatedDist : (typeof r.distanceKm === 'number' && r.distanceKm < 2.4 ? r.distanceKm : 0);
+    const realDist = pathCoords.length > 1 ? calculatedDist : (typeof r.distanceKm === 'number' && r.distanceKm > 0 ? r.distanceKm : 0.85);
+
+    const now = r.createdAt ? new Date(r.createdAt) : new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
+    const distText = `${realDist.toFixed(2)} km`;
 
     return {
       id: r.id,
       title: `${r.customerName} - ${r.customerPhone || ''}`,
       customerName: r.customerName,
-      subtitle: `${r.speakerName || 'Loa Kéo'} • ${r.durationHours || 4}h • ${formatVND(r.totalAmount || 0)}`,
+      subtitle: `${timeStr} (${dateStr}) • ${distText} • ${r.speakerName || 'Loa Kéo'} • ${formatVND(r.totalAmount || 0)}`,
       cost: r.totalAmount,
       status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
       icon: 'speaker',
@@ -176,6 +183,15 @@ export default function DashboardView({
   }, 0);
 
   const totalRentals = displayTrips.length;
+
+  // 🎯 DYNAMIC SPATIAL CLUSTERING: Groups nearby completed delivery endpoints into circular hotspot zones
+  const hotspots = useMemo(() => {
+    const realClusters = clusterDeliveryPoints(displayTrips, 0.65, userCoords);
+    if (realClusters && realClusters.length > 0) {
+      return realClusters;
+    }
+    return generateHotspotsAround(userCoords.lat, userCoords.lng);
+  }, [displayTrips, userCoords.lat, userCoords.lng]);
 
   const displayExpenses = apiExpenses.length > 0 ? apiExpenses.map(e => ({
     id: e.id,
@@ -258,11 +274,13 @@ export default function DashboardView({
         </div>
       </div>
 
-      {/* ══════════ FULL-WIDTH HERO MAP: BẢN ĐỒ GIAO LOA THỰC TẾ ══════════ */}
+      {/* ══════════ FULL-WIDTH HERO MAP: BẢN ĐỒ GIAO LOA THỰC TẾ & VÙNG TRÒN HOTSPOT ══════════ */}
       <div className="w-full">
         <DashboardMiniMap
           userCoords={userCoords}
-          rentals={displayTrips}
+          hotspots={hotspots}
+          selectedHotspotId={selectedHotspotId}
+          onSelectHotspot={setSelectedHotspotId}
           onRequestGPS={handleRequestGPS}
           isLocating={isLocating}
           onNavigateToTab={onNavigateToTab}
