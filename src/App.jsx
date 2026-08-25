@@ -14,6 +14,7 @@ import AdminLoginPageView from './components/AdminLoginPageView';
 import { formatVND, parseVNDNumber } from './utils/format';
 import { api } from './services/api.js';
 import { supabase } from './services/supabase';
+import { offlineSync } from './services/offlineSync.js';
 
 export default function App() {
   // Global Active Tracking State for Dynamic Island
@@ -117,6 +118,52 @@ export default function App() {
   const [showVietQRModal, setShowVietQRModal] = useState(false);
   const [vietQRData, setVietQRData] = useState({ amount: 280000, note: 'LOCAHOME THUE LOA' });
   const [sessionRevokedData, setSessionRevokedData] = useState(null);
+  const [isOnline, setIsOnline] = useState(() => (typeof navigator !== 'undefined' ? navigator.onLine : true));
+  const [pendingSyncCount, setPendingSyncCount] = useState(() => offlineSync.getPendingCount());
+  const [syncBanner, setSyncBanner] = useState(null);
+
+  // 🛡️ Offline-First Network Listener & Auto-Sync Engine
+  useEffect(() => {
+    offlineSync.initAutoSync(api);
+
+    const handleOnline = () => {
+      setIsOnline(true);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setPendingSyncCount(offlineSync.getPendingCount());
+    };
+
+    const handleSynced = (e) => {
+      const detail = e.detail || {};
+      setPendingSyncCount(detail.remaining || 0);
+      setSyncBanner(`Đã đồng bộ ${detail.synced} đơn hàng lên máy chủ thành công!`);
+      setTimeout(() => setSyncBanner(null), 4000);
+      // Reload trips & reports if online
+      if (isAuthenticated) {
+        api.getRentals().catch(() => {});
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('kko_offline_synced', handleSynced);
+
+    const unsubscribe = offlineSync.subscribe((event, data) => {
+      if (event === 'QUEUED') {
+        setPendingSyncCount(data.count);
+      } else if (event === 'SYNC_COMPLETE') {
+        setPendingSyncCount(data.remaining);
+      }
+    });
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('kko_offline_synced', handleSynced);
+      unsubscribe();
+    };
+  }, [isAuthenticated]);
 
   // 🛡️ Single Active Session Heartbeat & Event Listener
   useEffect(() => {
@@ -1126,6 +1173,22 @@ export default function App() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ══════════ 🛡️ OFFLINE / AUTO-SYNC NETWORK STATUS PILL ══════════ */}
+      {!isOnline && (
+        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[999999] px-4 py-1.5 rounded-full bg-amber-500/95 text-slate-950 font-bold text-xs shadow-2xl backdrop-blur-md flex items-center gap-2 border border-amber-300 animate-in slide-in-from-top-4 duration-300 pointer-events-none select-none">
+          <span className="w-2 h-2 rounded-full bg-amber-950 animate-ping"></span>
+          <span className="material-symbols-outlined text-[16px]">cloud_off</span>
+          <span>Đang ngoại tuyến {pendingSyncCount > 0 ? `• Đã lưu tạm ${pendingSyncCount} đơn` : '• Đang lưu an toàn'}</span>
+        </div>
+      )}
+
+      {syncBanner && (
+        <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[999999] px-4 py-1.5 rounded-full bg-emerald-600/95 text-white font-bold text-xs shadow-2xl backdrop-blur-md flex items-center gap-2 border border-emerald-400 animate-in slide-in-from-top-4 duration-300 pointer-events-none select-none">
+          <span className="material-symbols-outlined text-[16px]">cloud_done</span>
+          <span>{syncBanner}</span>
         </div>
       )}
 

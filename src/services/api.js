@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { offlineSync } from './offlineSync.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (
   typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
@@ -253,7 +254,13 @@ class ApiService {
     }
   }
 
-  async createRental(data) {
+  async createRental(data, options = {}) {
+    // 🛡️ OFFLINE-FIRST: If device is offline, queue into outbox immediately
+    if (typeof navigator !== 'undefined' && !navigator.onLine && !options.skipOfflineQueue) {
+      const item = offlineSync.saveToOutbox('CREATE_RENTAL', data);
+      return { success: true, offline: true, data: { id: item.id } };
+    }
+
     try {
       return await this.request('/rentals', {
         method: 'POST',
@@ -261,8 +268,10 @@ class ApiService {
       });
     } catch (err) {
       const rentalId = `ORD-${Date.now().toString().slice(-6)}`;
+      let pushedToCloud = false;
+
       try {
-        if (supabase) {
+        if (supabase && navigator.onLine) {
           await supabase.from('rentals').insert({
             id: rentalId,
             speaker_id: data.speakerId || 'LKK-01',
@@ -280,29 +289,50 @@ class ApiService {
             total_amount: data.totalAmount,
             deposit_amount: data.depositAmount || 500000,
             deposit_status: data.depositStatus || 'Đã giữ cọc',
-            status: 'active',
+            status: data.status || 'completed',
             note: data.note
           });
+          pushedToCloud = true;
         }
       } catch (supabaseErr) {
-        // Silent catch for background offline sync
+        // Fallback to outbox
       }
-      return { success: true, data: { id: rentalId } };
+
+      if (!pushedToCloud && !options.skipOfflineQueue) {
+        offlineSync.saveToOutbox('CREATE_RENTAL', data);
+      }
+
+      return { success: true, data: { id: rentalId }, offline: !pushedToCloud };
     }
   }
 
-  async updateRentalStatus(id, status, depositStatus, note) {
+  async updateRentalStatus(id, status, depositStatus, note, options = {}) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine && !options.skipOfflineQueue) {
+      offlineSync.saveToOutbox('UPDATE_RENTAL', { id, status, depositStatus, note });
+      return { success: true, offline: true };
+    }
+
     try {
       return await this.request(`/rentals/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status, depositStatus, note })
       });
     } catch (err) {
-      const updates = { status, updated_at: new Date().toISOString() };
-      if (depositStatus) updates.deposit_status = depositStatus;
-      if (note) updates.note = note;
-      if (status === 'completed') updates.end_time = new Date().toISOString();
-      await supabase.from('rentals').update(updates).eq('id', id);
+      try {
+        if (supabase && navigator.onLine) {
+          const updates = { status, updated_at: new Date().toISOString() };
+          if (depositStatus) updates.deposit_status = depositStatus;
+          if (note) updates.note = note;
+          if (status === 'completed') updates.end_time = new Date().toISOString();
+          await supabase.from('rentals').update(updates).eq('id', id);
+        } else if (!options.skipOfflineQueue) {
+          offlineSync.saveToOutbox('UPDATE_RENTAL', { id, status, depositStatus, note });
+        }
+      } catch (e) {
+        if (!options.skipOfflineQueue) {
+          offlineSync.saveToOutbox('UPDATE_RENTAL', { id, status, depositStatus, note });
+        }
+      }
       return { success: true };
     }
   }
@@ -339,7 +369,12 @@ class ApiService {
     }
   }
 
-  async createExpense(data) {
+  async createExpense(data, options = {}) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine && !options.skipOfflineQueue) {
+      const item = offlineSync.saveToOutbox('CREATE_EXPENSE', data);
+      return { success: true, offline: true, data: { id: item.id } };
+    }
+
     try {
       return await this.request('/expenses', {
         method: 'POST',
@@ -347,16 +382,30 @@ class ApiService {
       });
     } catch (err) {
       const expenseId = `EXP-${Date.now().toString().slice(-6)}`;
-      await supabase.from('expenses').insert({
-        id: expenseId,
-        title: data.title,
-        amount: data.amount,
-        category: data.category,
-        subtitle: data.subtitle || 'Hôm nay',
-        icon: data.icon || 'receipt',
-        status: data.status || 'Đã duyệt'
-      });
-      return { success: true, data: { id: expenseId } };
+      let pushedToCloud = false;
+
+      try {
+        if (supabase && navigator.onLine) {
+          await supabase.from('expenses').insert({
+            id: expenseId,
+            title: data.title,
+            amount: data.amount,
+            category: data.category,
+            subtitle: data.subtitle || 'Hôm nay',
+            icon: data.icon || 'receipt',
+            status: data.status || 'Đã duyệt'
+          });
+          pushedToCloud = true;
+        }
+      } catch (e) {
+        // Fallback
+      }
+
+      if (!pushedToCloud && !options.skipOfflineQueue) {
+        offlineSync.saveToOutbox('CREATE_EXPENSE', data);
+      }
+
+      return { success: true, data: { id: expenseId }, offline: !pushedToCloud };
     }
   }
 
