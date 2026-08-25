@@ -281,7 +281,7 @@ export default function DashboardView({
               <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[36px] font-black leading-none tracking-tight">
                 {isLoadingApi ? '...' : totalRentals}
               </span>
-              <span className="text-slate-500 font-bold text-xs sm:text-sm">đơn</span>
+              <span className="text-slate-500 font-bold text-xs sm:text-sm">chuyến</span>
             </div>
 
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">

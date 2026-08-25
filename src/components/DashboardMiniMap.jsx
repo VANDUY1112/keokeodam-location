@@ -138,26 +138,25 @@ function createHotspotIcon(hotspot, isSelected) {
   });
 }
 
-function MapBoundsController({ userCoords, hotspots, selectedHotspot }) {
+function MapBoundsController({ userCoords, hotspots, selectedHotspot, recenterTrigger }) {
   const map = useMap();
+  const initialDoneRef = React.useRef(false);
+
+  // When clicking My Location recenter button -> ALWAYS smooth fly directly to userCoords right in the center!
+  useEffect(() => {
+    if (!map || !userCoords || !recenterTrigger) return;
+    map.flyTo([userCoords.lat, userCoords.lng], 15.5, { animate: true, duration: 0.7 });
+  }, [recenterTrigger, map, userCoords]);
+
   useEffect(() => {
     if (!map) return;
     if (selectedHotspot) {
       map.flyTo([selectedHotspot.lat, selectedHotspot.lng], 15, { duration: 0.8 });
-    } else if (userCoords) {
-      if (hotspots && hotspots.length > 1) {
-        const allPoints = [
-          [userCoords.lat, userCoords.lng],
-          ...hotspots.map((p) => [p.lat, p.lng]),
-        ];
-        const bounds = L.latLngBounds(allPoints);
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14.5, animate: false });
-      } else {
-        // Standard wide city overview zoom level (14.5)
-        map.setView([userCoords.lat, userCoords.lng], 14.5, { animate: false });
-      }
+    } else if (userCoords && !initialDoneRef.current) {
+      initialDoneRef.current = true;
+      map.setView([userCoords.lat, userCoords.lng], 15, { animate: false });
     }
-  }, [map, userCoords, hotspots, selectedHotspot]);
+  }, [map, userCoords, selectedHotspot]);
   return null;
 }
 
@@ -173,6 +172,7 @@ export default function DashboardMiniMap({
   const [tileMode, setTileMode] = useState('street'); // 'street' | 'satellite'
   const [isExpanded, setIsExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [recenterTrigger, setRecenterTrigger] = useState(0);
   const selectedHotspot = hotspots.find((h) => h.id === selectedHotspotId);
 
   const handleCloseFullscreen = () => {
@@ -294,6 +294,7 @@ export default function DashboardMiniMap({
             userCoords={userCoords}
             hotspots={hotspots}
             selectedHotspot={selectedHotspot}
+            recenterTrigger={recenterTrigger}
           />
 
           <TileLayer
@@ -408,6 +409,7 @@ export default function DashboardMiniMap({
             onClick={() => {
               if (onSelectHotspot) onSelectHotspot(null);
               if (onRequestGPS) onRequestGPS();
+              setRecenterTrigger((prev) => prev + 1);
             }}
             disabled={isLocating}
             className="w-11 h-11 rounded-2xl bg-white/95 hover:bg-white text-slate-900 shadow-xl border border-slate-200/90 flex items-center justify-center backdrop-blur-md active:scale-95 transition-all cursor-pointer group"
@@ -470,6 +472,7 @@ export default function DashboardMiniMap({
                     userCoords={userCoords}
                     hotspots={hotspots}
                     selectedHotspot={selectedHotspot}
+                    recenterTrigger={recenterTrigger}
                   />
 
                   <TileLayer
