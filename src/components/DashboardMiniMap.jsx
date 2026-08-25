@@ -277,7 +277,15 @@ export default function DashboardMiniMap({
           center={defaultCenter}
           zoom={14}
           zoomControl={false}
-          scrollWheelZoom={false}
+          scrollWheelZoom={true}
+          preferCanvas={true}
+          inertia={true}
+          inertiaDeceleration={2000}
+          inertiaMaxSpeed={3000}
+          easeLinearity={0.15}
+          zoomSnap={0.5}
+          zoomDelta={0.5}
+          wheelPxPerZoomLevel={100}
           attributionControl={false}
           className="w-full h-full z-0"
           style={{ minHeight: '100%', height: '100%', background: '#e2e8f0' }}
@@ -293,6 +301,9 @@ export default function DashboardMiniMap({
             maxZoom={22}
             maxNativeZoom={20}
             subdomains={['0', '1', '2', '3']}
+            keepBuffer={10}
+            updateWhenIdle={false}
+            updateWhenZooming={false}
           />
 
           {/* Connecting line from user to selected hotspot */}
@@ -443,6 +454,14 @@ export default function DashboardMiniMap({
                 zoom={15}
                 zoomControl={false}
                 scrollWheelZoom={true}
+                preferCanvas={true}
+                inertia={true}
+                inertiaDeceleration={2000}
+                inertiaMaxSpeed={3000}
+                easeLinearity={0.15}
+                zoomSnap={0.5}
+                zoomDelta={0.5}
+                wheelPxPerZoomLevel={100}
                 attributionControl={false}
                 className="w-full h-full z-0"
                 style={{ width: '100vw', height: '100vh' }}
@@ -458,6 +477,9 @@ export default function DashboardMiniMap({
                     maxZoom={22}
                     maxNativeZoom={20}
                     subdomains={['0', '1', '2', '3']}
+                    keepBuffer={12}
+                    updateWhenIdle={false}
+                    updateWhenZooming={false}
                   />
 
                   {/* Connecting line */}

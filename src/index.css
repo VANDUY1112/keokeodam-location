@@ -457,3 +457,28 @@
 .leaflet-neon-glow {
   filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.85));
 }
+
+/* ══════════ 🚀 60FPS GPU HARDWARE ACCELERATED MAP ENGINE ══════════ */
+.leaflet-container {
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+.leaflet-tile-container {
+  will-change: transform;
+}
+
+.leaflet-tile {
+  will-change: transform, opacity;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.leaflet-zoom-animated {
+  will-change: transform;
+}

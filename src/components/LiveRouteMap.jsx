@@ -303,16 +303,27 @@ export default function LiveRouteMap({
         zoom={18}
         zoomControl={false}
         scrollWheelZoom={true}
+        preferCanvas={true}
+        inertia={true}
+        inertiaDeceleration={2000}
+        inertiaMaxSpeed={3000}
+        easeLinearity={0.15}
+        zoomSnap={0.5}
+        zoomDelta={0.5}
+        wheelPxPerZoomLevel={100}
         className="w-full h-full min-h-[480px] z-0"
         attributionControl={false}
       >
-        {/* Active Map Tile Layer (Retina HD High Res) */}
+        {/* Active Map Tile Layer (Retina HD High Res with Tile Pre-caching) */}
         <TileLayer
           key={selectedLayer}
           url={activeLayerConfig.url}
           maxZoom={activeLayerConfig.maxZoom}
           maxNativeZoom={activeLayerConfig.maxNativeZoom}
           subdomains={activeLayerConfig.subdomains}
+          keepBuffer={10}
+          updateWhenIdle={false}
+          updateWhenZooming={false}
         />
 
         {/* Dynamic Route Polyline (3-Layer Neon Glow & Flowing Energy Path) */}
