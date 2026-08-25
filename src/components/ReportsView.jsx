@@ -200,13 +200,11 @@ export default function ReportsView({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-6 w-full">
         {/* Card 1: Total Revenue */}
         <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
               Tổng doanh thu
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-              <DollarSign className="w-5 h-5" />
-            </div>
+            <DollarSign className="w-6 h-6 text-slate-700 shrink-0" />
           </div>
 
           <div className="my-1">
@@ -228,13 +226,11 @@ export default function ReportsView({
 
         {/* Card 2: Total Rental Shifts */}
         <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
               Tổng ca cho thuê
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-              <Speaker className="w-5 h-5" />
-            </div>
+            <Speaker className="w-6 h-6 text-slate-700 shrink-0" />
           </div>
 
           <div className="flex items-baseline gap-1 my-1">
@@ -253,13 +249,11 @@ export default function ReportsView({
 
         {/* Card 3: Total Delivery Km */}
         <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
               Quãng đường ship
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-              <Milestone className="w-5 h-5" />
-            </div>
+            <Milestone className="w-6 h-6 text-slate-700 shrink-0" />
           </div>
 
           <div className="flex items-baseline gap-1 my-1">
@@ -281,13 +275,11 @@ export default function ReportsView({
 
         {/* Card 4: Average per Rental */}
         <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[140px] sm:min-h-[160px]">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             <span className="text-slate-900 font-bold text-sm sm:text-base leading-tight">
               Bình quân mỗi ca
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-              <Calendar className="w-5 h-5" />
-            </div>
+            <Calendar className="w-6 h-6 text-slate-700 shrink-0" />
           </div>
 
           <div className="my-1">

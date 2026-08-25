@@ -98,13 +98,29 @@ export function DashboardSkeleton() {
 export function HistorySkeleton() {
   return (
     <div className="w-full space-y-5 animate-in fade-in duration-300">
-      {/* Search and Tabs Skeleton */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="h-11 w-full sm:w-72 rounded-2xl skeleton-shimmer" />
-        <div className="flex gap-2 w-full sm:w-auto">
-          <div className="h-11 flex-1 sm:w-28 rounded-2xl skeleton-shimmer" />
-          <div className="h-11 flex-1 sm:w-28 rounded-2xl skeleton-shimmer" />
+      {/* 2 Top Stat Cards Skeleton */}
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 lg:gap-6 w-full">
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 lg:p-6 border border-slate-200 shadow-xs flex flex-col justify-between min-h-[105px] sm:min-h-[125px]">
+          <div className="h-5 w-28 sm:w-36 rounded-lg skeleton-shimmer" />
+          <div className="flex items-end justify-between gap-1.5 mt-3">
+            <div className="h-7 sm:h-9 w-16 sm:w-20 rounded-xl skeleton-shimmer" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg skeleton-shimmer shrink-0" />
+          </div>
         </div>
+
+        <div className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 lg:p-6 border border-slate-200 shadow-xs flex flex-col justify-between min-h-[105px] sm:min-h-[125px]">
+          <div className="h-5 w-28 sm:w-36 rounded-lg skeleton-shimmer" />
+          <div className="flex items-end justify-between gap-1.5 mt-3">
+            <div className="h-7 sm:h-9 w-16 sm:w-20 rounded-xl skeleton-shimmer" />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg skeleton-shimmer shrink-0" />
+          </div>
+        </div>
+      </div>
+
+      {/* Search and Action Header Skeleton */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="h-10 w-full sm:w-64 rounded-xl skeleton-shimmer" />
+        <div className="h-10 w-28 rounded-xl skeleton-shimmer self-end sm:self-auto" />
       </div>
 
       {/* Trip Cards List Skeleton (UNIFIED CONNECTED MATRIX) */}
@@ -114,20 +130,89 @@ export function HistorySkeleton() {
             key={i}
             className="bg-white p-3.5 sm:p-5 flex flex-col justify-between gap-2.5 sm:gap-3.5 relative overflow-hidden"
           >
-            <div className="flex items-center justify-between gap-2">
-              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md skeleton-shimmer shrink-0" />
-              <div className="h-5 w-14 sm:w-20 rounded-md skeleton-shimmer shrink-0" />
-            </div>
-            <div className="space-y-1.5 my-0.5">
-              <div className="h-3.5 w-3/4 rounded-lg skeleton-shimmer" />
-              <div className="h-2.5 w-full rounded-md skeleton-shimmer" />
+            <div className="space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <div className="h-4 w-1/2 rounded-md skeleton-shimmer" />
+                <div className="h-4 w-14 sm:w-16 rounded-md skeleton-shimmer shrink-0" />
+              </div>
+              <div className="h-3 w-16 rounded-md skeleton-shimmer" />
             </div>
             <div className="pt-2 border-t border-slate-100">
-              <div className="h-7 rounded-lg skeleton-shimmer" />
+              <div className="h-8 rounded-lg skeleton-shimmer" />
             </div>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * 🌟 Tracking Cockpit Skeleton Loader
+ */
+export function TrackingSkeleton() {
+  return (
+    <div className="flex flex-col lg:flex-row gap-6 items-start w-full animate-in fade-in duration-300">
+      <aside className="w-full lg:w-[380px] shrink-0 flex flex-col gap-5">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-xs min-h-[105px] sm:min-h-[125px]">
+            <div className="h-5 w-24 rounded-lg skeleton-shimmer" />
+            <div className="flex items-end justify-between gap-1.5 mt-3">
+              <div className="h-7 w-20 rounded-xl skeleton-shimmer" />
+              <div className="w-6 h-6 rounded-lg skeleton-shimmer shrink-0" />
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-xs min-h-[105px] sm:min-h-[125px]">
+            <div className="h-5 w-24 rounded-lg skeleton-shimmer" />
+            <div className="flex items-end justify-between gap-1.5 mt-3">
+              <div className="h-7 w-20 rounded-xl skeleton-shimmer" />
+              <div className="w-6 h-6 rounded-lg skeleton-shimmer shrink-0" />
+            </div>
+          </div>
+        </div>
+
+        <div className="h-12 w-full rounded-2xl skeleton-shimmer" />
+
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-xs min-h-[105px] sm:min-h-[125px]">
+          <div className="h-5 w-32 rounded-lg skeleton-shimmer" />
+          <div className="flex items-end justify-between gap-1.5 mt-3">
+            <div className="h-7 w-24 rounded-xl skeleton-shimmer" />
+            <div className="w-6 h-6 rounded-lg skeleton-shimmer shrink-0" />
+          </div>
+        </div>
+      </aside>
+
+      <section className="flex-1 w-full min-h-[500px] lg:min-h-[700px] bg-white rounded-3xl p-4 lg:p-6 border border-slate-200 shadow-xs flex flex-col">
+        <div className="h-6 w-48 rounded-xl skeleton-shimmer mb-4" />
+        <div className="flex-1 w-full rounded-2xl skeleton-shimmer" />
+      </section>
+    </div>
+  );
+}
+
+/**
+ * 🌟 Reports & Analytics View Skeleton Loader
+ */
+export function ReportsSkeleton() {
+  return (
+    <div className="w-full space-y-6 animate-in fade-in duration-300">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 lg:gap-6 w-full">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="col-span-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-xs min-h-[140px] sm:min-h-[160px]"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="h-5 w-24 rounded-lg skeleton-shimmer" />
+              <div className="w-6 h-6 rounded-md skeleton-shimmer shrink-0" />
+            </div>
+            <div className="h-8 w-28 rounded-xl skeleton-shimmer my-2" />
+            <div className="h-4 w-20 rounded-md skeleton-shimmer" />
+          </div>
+        ))}
+      </div>
+
+      <div className="h-72 w-full bg-white rounded-3xl p-6 border border-slate-200 shadow-xs skeleton-shimmer" />
     </div>
   );
 }

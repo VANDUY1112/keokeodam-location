@@ -644,38 +644,42 @@ export default function TrackingView({
           <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full">
             {/* Box 1: Thời gian đi */}
             <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
-              <div className="flex items-start justify-between gap-1.5">
-                <span className="text-slate-900 font-bold text-[15px] leading-snug">
+              <div>
+                <span className="text-slate-900 font-bold text-[15px] sm:text-[17px] leading-snug break-words block">
                   Thời gian đi
                 </span>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-                  <span className="material-symbols-outlined text-[18px] sm:text-[22px]">schedule</span>
-                </div>
               </div>
 
-              <div className="flex items-baseline gap-1 mt-2">
-                <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight tabular-nums">
+              <div className="flex items-end justify-between gap-1.5 mt-3">
+                <span className="font-display text-slate-900 text-2xl sm:text-3xl lg:text-[36px] font-black leading-none tracking-tight tabular-nums">
                   {formatTime(seconds)}
+                </span>
+
+                <span className="material-symbols-outlined text-[24px] sm:text-[28px] text-slate-700 shrink-0">
+                  schedule
                 </span>
               </div>
             </div>
 
             {/* Box 2: Tốc độ hiện tại */}
             <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
-              <div className="flex items-start justify-between gap-1.5">
-                <span className="text-slate-900 font-bold text-[15px] leading-snug">
+              <div>
+                <span className="text-slate-900 font-bold text-[15px] sm:text-[17px] leading-snug break-words block">
                   Tốc độ hiện tại
                 </span>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-                  <span className="material-symbols-outlined text-[18px] sm:text-[22px]">speed</span>
-                </div>
               </div>
 
-              <div className="flex items-baseline gap-1 mt-2">
-                <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight tabular-nums">
-                  {isSimulating ? simTelemetry.speed : currentAvgSpeed}
+              <div className="flex items-end justify-between gap-1.5 mt-3">
+                <div className="flex items-baseline gap-1">
+                  <span className="font-display text-slate-900 text-2xl sm:text-3xl lg:text-[36px] font-black leading-none tracking-tight tabular-nums">
+                    {isSimulating ? simTelemetry.speed : currentAvgSpeed}
+                  </span>
+                  <span className="text-slate-500 font-bold text-xs sm:text-sm">km/h</span>
+                </div>
+
+                <span className="material-symbols-outlined text-[24px] sm:text-[28px] text-slate-700 shrink-0">
+                  speed
                 </span>
-                <span className="text-slate-500 font-bold text-[13px] ml-0.5">km/h</span>
               </div>
             </div>
           </div>
@@ -754,19 +758,23 @@ export default function TrackingView({
 
           {/* Real-time Distance Box */}
           <div className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 flex flex-col justify-between border border-slate-200 shadow-[0_2px_12px_rgba(11,28,48,0.03)] hover:border-slate-300 transition-all min-h-[105px] sm:min-h-[125px]">
-            <div className="flex items-start justify-between gap-1.5">
-              <span className="text-slate-900 font-bold text-[15px] leading-snug">
+            <div>
+              <span className="text-slate-900 font-bold text-[15px] sm:text-[17px] leading-snug break-words block">
                 Tổng quãng đường
               </span>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shadow-xs shrink-0">
-                <span className="material-symbols-outlined text-[18px] sm:text-[22px]">route</span>
-              </div>
             </div>
-            <div className="flex items-baseline gap-1 mt-2">
-              <span className="font-display text-slate-900 text-xl sm:text-2xl lg:text-[32px] font-black leading-tight tracking-tight tabular-nums">
-                {totalDistance.toFixed(2)}
+
+            <div className="flex items-end justify-between gap-1.5 mt-3">
+              <div className="flex items-baseline gap-1">
+                <span className="font-display text-slate-900 text-2xl sm:text-3xl lg:text-[36px] font-black leading-none tracking-tight tabular-nums">
+                  {totalDistance.toFixed(2)}
+                </span>
+                <span className="text-slate-500 font-bold text-xs sm:text-sm">km</span>
+              </div>
+
+              <span className="material-symbols-outlined text-[24px] sm:text-[28px] text-slate-700 shrink-0">
+                route
               </span>
-              <span className="text-slate-500 font-bold text-[13px] ml-0.5">km</span>
             </div>
           </div>
 

@@ -230,9 +230,7 @@ export default function DashboardView({
               <span className="text-slate-500 font-bold text-xs sm:text-sm">km</span>
             </div>
 
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <Milestone className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
+            <Milestone className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700 shrink-0" />
           </div>
         </div>
 
@@ -256,11 +254,9 @@ export default function DashboardView({
               <span className="text-slate-500 font-bold text-xs sm:text-sm">km/h</span>
             </div>
 
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px]">
-                speed
-              </span>
-            </div>
+            <span className="material-symbols-outlined text-[24px] sm:text-[28px] text-slate-700 shrink-0">
+              speed
+            </span>
           </div>
         </div>
 
@@ -284,11 +280,11 @@ export default function DashboardView({
               <span className="text-slate-500 font-bold text-xs sm:text-sm">chuyến</span>
             </div>
 
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px]">
-                speaker
-              </span>
-            </div>
+            <img
+              src="/icons8-scooter-100.png"
+              alt="Thuê loa"
+              className="w-7 h-7 sm:w-8 sm:h-8 object-contain shrink-0"
+            />
           </div>
         </div>
       </div>
