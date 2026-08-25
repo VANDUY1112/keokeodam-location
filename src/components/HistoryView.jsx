@@ -39,6 +39,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
   const [selectedTripForMap, setSelectedTripForMap] = useState(null);
   const [isClosingMapModal, setIsClosingMapModal] = useState(false);
   const [isFullscreenMap, setIsFullscreenMap] = useState(false);
+  const [isClosingFullscreenMap, setIsClosingFullscreenMap] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleCloseMapModal = () => {
@@ -47,7 +48,16 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
       setSelectedTripForMap(null);
       setIsClosingMapModal(false);
       setIsFullscreenMap(false);
+      setIsClosingFullscreenMap(false);
     }, 200);
+  };
+
+  const handleCloseFullscreenMap = () => {
+    setIsClosingFullscreenMap(true);
+    setTimeout(() => {
+      setIsFullscreenMap(false);
+      setIsClosingFullscreenMap(false);
+    }, 280);
   };
 
   // Backend API rentals state
@@ -567,19 +577,33 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
       {/* ══════════ FULLSCREEN ROUTE MAP (IDENTICAL TO DASHBOARD OPTION) ══════════ */}
       {isFullscreenMap && selectedTripForMap &&
         createPortal(
-          <div className="fixed inset-0 z-[999999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300">
+          <div
+            className={`fixed inset-0 z-[999999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center transition-all duration-300 ${
+              isClosingFullscreenMap ? 'opacity-0 pointer-events-none' : 'opacity-100 animate-in fade-in duration-300'
+            }`}
+          >
             {/* Floating Close Button in Top Right with Slide & Scale Animation */}
             <button
               type="button"
-              onClick={() => setIsFullscreenMap(false)}
-              className="absolute top-4 right-4 z-[999999] w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 border border-white/20 hover:border-white/40"
+              onClick={handleCloseFullscreenMap}
+              className={`absolute top-4 right-4 z-[999999] w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 border border-white/20 hover:border-white/40 ${
+                isClosingFullscreenMap
+                  ? 'scale-75 opacity-0'
+                  : 'scale-100 opacity-100 animate-in zoom-in-75 slide-in-from-top-2 duration-300'
+              }`}
               title="Đóng toàn màn hình (Esc)"
             >
               <span className="material-symbols-outlined text-[24px]">close</span>
             </button>
 
             {/* Top-Left Floating Info Card */}
-            <div className="absolute top-4 left-4 z-[99999] bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex flex-col gap-0.5 max-w-[calc(100vw-80px)]">
+            <div
+              className={`absolute top-4 left-4 z-[99999] bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex flex-col gap-0.5 max-w-[calc(100vw-80px)] transition-all duration-300 ${
+                isClosingFullscreenMap
+                  ? 'scale-90 opacity-0 -translate-y-2'
+                  : 'scale-100 opacity-100 animate-in slide-in-from-top-2 duration-300'
+              }`}
+            >
               <h4 className="text-slate-900 font-extrabold text-sm sm:text-base leading-tight truncate">
                 {(selectedTripForMap.customerName || selectedTripForMap.title || '').replace(/^(Giao Loa|Vị trí):\s*/i, '') || `Đơn #${selectedTripForMap.id}`}
               </h4>
@@ -590,8 +614,14 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               </div>
             </div>
 
-            {/* Fullscreen Edge-to-Edge Map Canvas */}
-            <div className="w-full h-full relative bg-slate-900 overflow-hidden">
+            {/* Fullscreen Edge-to-Edge Map Canvas with zoom-out fade on close */}
+            <div
+              className={`w-full h-full relative bg-slate-900 overflow-hidden transition-all duration-300 ease-out transform ${
+                isClosingFullscreenMap
+                  ? 'scale-90 opacity-0 rounded-[40px]'
+                  : 'scale-100 opacity-100 rounded-none animate-in zoom-in-95 duration-300'
+              }`}
+            >
               <LiveRouteMap
                 startPosition={
                   selectedTripForMap.startPosition ||
