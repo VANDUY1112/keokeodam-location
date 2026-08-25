@@ -6,7 +6,6 @@ import SettingsView from './components/SettingsView';
 import CustomDropdown from './components/CustomDropdown';
 import MobileCurvedNavBar from './components/MobileCurvedNavBar';
 import VietQRModal from './components/VietQRModal';
-import DynamicIsland from './components/DynamicIsland';
 import LandingPageView from './components/LandingPageView';
 import LandingPageQRModal from './components/LandingPageQRModal';
 import UserLoginPageView from './components/UserLoginPageView';
@@ -1121,18 +1120,7 @@ export default function App() {
         }}
       />
 
-      {/* ═══════════════ FLOATING DYNAMIC ISLAND TRACKING PILL ═══════════════ */}
-      <DynamicIsland
-        isTracking={activeTracking.isTracking}
-        seconds={activeTracking.seconds}
-        distanceKm={activeTracking.distanceKm}
-        speedKmh={activeTracking.speedKmh}
-        activeTab={activeTab}
-        customerName={activeTracking.customerName}
-        speakerName={activeTracking.speakerName}
-        onNavigateToTracking={() => setActiveTab('tracking')}
-        onOpenVietQR={openVietQR}
-      />
+
 
       {/* ═══════════════ SINGLE ACTIVE SESSION REVOKED SECURITY MODAL ═══════════════ */}
       {sessionRevokedData && (
