@@ -38,7 +38,7 @@ const formatFullDateTime = (dateOrStr) => {
 export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTracking, onOpenVietQR }) {
   const [selectedTripForMap, setSelectedTripForMap] = useState(null);
   const [isClosingMapModal, setIsClosingMapModal] = useState(false);
-  const [isModalExpanded, setIsModalExpanded] = useState(false);
+  const [isFullscreenMap, setIsFullscreenMap] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleCloseMapModal = () => {
@@ -46,7 +46,7 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
     setTimeout(() => {
       setSelectedTripForMap(null);
       setIsClosingMapModal(false);
-      setIsModalExpanded(false);
+      setIsFullscreenMap(false);
     }, 200);
   };
 
@@ -444,17 +444,14 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               }`}
           >
             <div
-              className={`bg-white rounded-2xl sm:rounded-3xl ${isModalExpanded ? 'max-w-5xl h-[92vh]' : 'max-w-2xl max-h-[92vh]'} w-full p-4 sm:p-5 border border-slate-200 shadow-2xl space-y-3 relative z-10 flex flex-col my-auto overflow-hidden transition-all duration-300 ${isClosingMapModal ? 'animate-modal-close' : 'animate-modal-pop'
+              className={`bg-white rounded-2xl sm:rounded-3xl max-w-2xl max-h-[92vh] w-full p-4 sm:p-5 border border-slate-200 shadow-2xl space-y-3 relative z-10 flex flex-col my-auto overflow-hidden ${isClosingMapModal ? 'animate-modal-close' : 'animate-modal-pop'
                 }`}
             >
-              {/* Header */}
+              {/* Header: Clean title without icon */}
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 shrink-0">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="material-symbols-outlined text-[22px] text-slate-800 shrink-0">map</span>
-                  <h3 className="text-slate-900 font-bold text-base sm:text-lg leading-tight truncate">
-                    {(selectedTripForMap.customerName || selectedTripForMap.title || '').replace(/^(Giao Loa|Vị trí):\s*/i, '') || `Đơn #${selectedTripForMap.id}`}
-                  </h3>
-                </div>
+                <h3 className="text-slate-900 font-bold text-base sm:text-lg leading-tight truncate">
+                  {(selectedTripForMap.customerName || selectedTripForMap.title || '').replace(/^(Giao Loa|Vị trí):\s*/i, '') || `Đơn #${selectedTripForMap.id}`}
+                </h3>
               </div>
 
               {/* ══════════ 4 TRIP STATS (Thời gian bắt đầu, Thời gian kết thúc, Quãng đường đã đi, Tốc độ trung bình) ══════════ */}
@@ -521,19 +518,19 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               </div>
 
               {/* Interactive Map of this Trip */}
-              <div className={`flex-1 ${isModalExpanded ? 'min-h-[350px] sm:min-h-[480px] max-h-none' : 'min-h-[170px] sm:min-h-[240px] max-h-[220px] sm:max-h-[320px]'} w-full rounded-xl sm:rounded-2xl overflow-hidden border border-slate-200 relative shrink-0 transition-all duration-300`}>
+              <div className="flex-1 min-h-[180px] sm:min-h-[240px] max-h-[220px] sm:max-h-[320px] w-full rounded-xl sm:rounded-2xl overflow-hidden border border-slate-200 relative shrink-0">
                 {/* Floating Map Expand Button on top-right of map */}
                 <div className="absolute top-2.5 right-2.5 z-[1000]">
                   <button
                     type="button"
-                    onClick={() => setIsModalExpanded(prev => !prev)}
+                    onClick={() => setIsFullscreenMap(true)}
                     className="px-2.5 py-1 text-xs font-bold rounded-xl text-slate-800 bg-white/95 backdrop-blur-xs shadow-md border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
-                    title={isModalExpanded ? 'Thu nhỏ bản đồ' : 'Mở rộng bản đồ'}
+                    title="Mở rộng xem toàn màn hình"
                   >
                     <span className="material-symbols-outlined text-[16px] text-slate-700">
-                      {isModalExpanded ? 'close_fullscreen' : 'fullscreen'}
+                      fullscreen
                     </span>
-                    <span>{isModalExpanded ? 'Thu nhỏ' : 'Mở rộng'}</span>
+                    <span>Mở rộng</span>
                   </button>
                 </div>
                 <LiveRouteMap
@@ -562,6 +559,54 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
                   Đóng
                 </button>
               </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* ══════════ FULLSCREEN ROUTE MAP (IDENTICAL TO DASHBOARD OPTION) ══════════ */}
+      {isFullscreenMap && selectedTripForMap &&
+        createPortal(
+          <div className="fixed inset-0 z-[999999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300">
+            {/* Floating Close Button in Top Right with Slide & Scale Animation */}
+            <button
+              type="button"
+              onClick={() => setIsFullscreenMap(false)}
+              className="absolute top-4 right-4 z-[999999] w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 border border-white/20 hover:border-white/40"
+              title="Đóng toàn màn hình (Esc)"
+            >
+              <span className="material-symbols-outlined text-[24px]">close</span>
+            </button>
+
+            {/* Top-Left Floating Info Card */}
+            <div className="absolute top-4 left-4 z-[99999] bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex flex-col gap-0.5 max-w-[calc(100vw-80px)]">
+              <h4 className="text-slate-900 font-extrabold text-sm sm:text-base leading-tight truncate">
+                {(selectedTripForMap.customerName || selectedTripForMap.title || '').replace(/^(Giao Loa|Vị trí):\s*/i, '') || `Đơn #${selectedTripForMap.id}`}
+              </h4>
+              <div className="flex items-center gap-2.5 text-xs font-semibold text-slate-600">
+                <span>Quãng đường: <strong className="text-slate-900">{(parseFloat(selectedTripForMap.distanceKm) || 0).toFixed(2)} km</strong></span>
+                <span>•</span>
+                <span>Tốc độ: <strong className="text-slate-900">{String(selectedTripForMap.avgSpeed || '32.5').replace(/[^\d.]/g, '') || '32.5'} km/h</strong></span>
+              </div>
+            </div>
+
+            {/* Fullscreen Edge-to-Edge Map Canvas */}
+            <div className="w-full h-full relative bg-slate-900 overflow-hidden">
+              <LiveRouteMap
+                startPosition={
+                  selectedTripForMap.startPosition ||
+                  selectedTripForMap.pathCoordinates?.[0]
+                }
+                endPosition={
+                  selectedTripForMap.endPosition ||
+                  selectedTripForMap.pathCoordinates?.[selectedTripForMap.pathCoordinates?.length - 1]
+                }
+                pathCoordinates={selectedTripForMap.pathCoordinates || []}
+                isTracking={false}
+                originAddress={selectedTripForMap.origin || 'Điểm xuất phát đã lưu'}
+                destinationAddress={selectedTripForMap.destination || 'Điểm kết thúc'}
+                readOnly={true}
+              />
             </div>
           </div>,
           document.body

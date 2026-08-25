@@ -576,7 +576,7 @@ export default function App() {
   const navItems = [
     { id: 'dashboard', label: 'Tổng Quan', icon: 'dashboard' },
     { id: 'tracking', label: 'Thực Hiện', icon: 'two_wheeler' },
-    { id: 'history', label: 'Lịch Sử', icon: 'speaker' },
+    { id: 'history', label: 'Lịch Sử', icon: 'speaker', imageIcon: '/icons8-progress-100.png' },
     { id: 'settings', label: 'Cài Đặt', icon: 'settings' },
   ];
 
@@ -738,14 +738,22 @@ export default function App() {
                     : 'text-slate-600 hover:bg-surface-container-high hover:text-slate-900 font-semibold'
                 }`}
             >
-              <span className={`material-symbols-outlined text-[24px] transition-transform ${activeTab === item.id
-                  ? 'text-white'
-                  : item.highlight
-                    ? 'text-[#864d61]'
-                    : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-900'
-                }`}>
-                {item.icon}
-              </span>
+              {item.imageIcon ? (
+                <img
+                  src={item.imageIcon}
+                  alt={item.label}
+                  className={`w-6 h-6 object-contain transition-transform group-hover:scale-110 ${activeTab === item.id ? 'brightness-0 invert' : 'opacity-80 group-hover:opacity-100'}`}
+                />
+              ) : (
+                <span className={`material-symbols-outlined text-[24px] transition-transform ${activeTab === item.id
+                    ? 'text-white'
+                    : item.highlight
+                      ? 'text-[#864d61]'
+                      : 'text-slate-500 group-hover:scale-110 group-hover:text-slate-900'
+                  }`}>
+                  {item.icon}
+                </span>
+              )}
               <span className="text-[15px] lg:text-base">{item.label}</span>
             </button>
           ))}
@@ -798,10 +806,18 @@ export default function App() {
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
               >
-                <span className={`material-symbols-outlined text-[22px] ${activeTab === item.id ? 'text-white' : 'text-slate-500'
-                  }`}>
-                  {item.icon}
-                </span>
+                {item.imageIcon ? (
+                  <img
+                    src={item.imageIcon}
+                    alt={item.label}
+                    className={`w-5 h-5 object-contain ${activeTab === item.id ? 'brightness-0 invert' : 'opacity-80'}`}
+                  />
+                ) : (
+                  <span className={`material-symbols-outlined text-[22px] ${activeTab === item.id ? 'text-white' : 'text-slate-500'
+                    }`}>
+                    {item.icon}
+                  </span>
+                )}
                 <span>{item.label}</span>
               </button>
             ))}
@@ -814,7 +830,7 @@ export default function App() {
                 setShowLandingQRModal(true);
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-white hover:bg-rose-50 text-[#864d61] font-bold text-xs shadow-xs transition-all border border-rose-200 cursor-pointer active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg bg-white hover:bg-rose-50 text-[#864d61] font-bold text-xs shadow-xs transition-all border border-rose-200 cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px] text-rose-600">qr_code_2</span>
               <span>Mã QR</span>
@@ -825,7 +841,7 @@ export default function App() {
                 openVietQR(280000, 'LOCAHOME THUE LOA');
                 setMobileMenuOpen(false);
               }}
-              className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95"
+              className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px]">payments</span>
               <span>Tạo VietQR Thu Tiền</span>
@@ -877,42 +893,30 @@ export default function App() {
             <div className="relative" ref={profileMenuRef}>
               <div
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:bg-slate-100 py-1.5 px-3 sm:px-3.5 rounded-2xl transition-all group border border-slate-200 bg-white shadow-xs"
+                className="flex items-center gap-1 sm:gap-1.5 cursor-pointer py-1 px-1.5 transition-all group select-none active:scale-95"
               >
-                <span className="font-bold text-slate-800 text-xs sm:text-sm md:text-base truncate max-w-[120px] sm:max-w-[180px]">
+                <span className="font-bold text-slate-800 text-[15px] truncate max-w-[140px] sm:max-w-[200px]">
                   {userName}
                 </span>
-                <span className={`material-symbols-outlined text-[18px] sm:text-[20px] text-slate-500 transition-transform duration-200 shrink-0 ${showProfileMenu ? 'rotate-180 text-primary' : ''}`}>
+                <span className={`material-symbols-outlined text-[18px] text-slate-500 transition-transform duration-200 shrink-0 ${showProfileMenu ? 'rotate-180 text-slate-900' : 'group-hover:text-slate-900'}`}>
                   expand_more
                 </span>
               </div>
 
-              {/* Profile Dropdown Menu (Open & Close transition) */}
+              {/* Profile Dropdown Menu */}
               <div
-                className={`absolute right-0 top-full mt-2 w-72 bg-white border border-slate-200 rounded-3xl shadow-2xl p-3 z-50 flex flex-col space-y-3 transition-all duration-200 ease-out origin-top-right ${showProfileMenu
+                className={`absolute right-0 top-full mt-1.5 w-44 bg-white border border-slate-200 rounded-2xl shadow-xl p-1.5 z-50 transition-all duration-200 ease-out origin-top-right ${showProfileMenu
                     ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto visible'
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none invisible'
                   }`}
               >
-                <div className="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-center">
-                  <div className="font-extrabold text-base text-slate-900 truncate">{userName}</div>
-                </div>
-
-                <div className="pt-1 flex items-center justify-between gap-2">
-                  <button
-                    onClick={handleLogout}
-                    className="flex-1 py-2.5 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 border border-rose-200 cursor-pointer active:scale-95"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">logout</span>
-                    <span>Đăng Xuất</span>
-                  </button>
-                  <button
-                    onClick={() => setShowProfileMenu(false)}
-                    className="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
-                  >
-                    Đóng
-                  </button>
-                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full py-2.5 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-sm transition-all flex items-center justify-center gap-2 border border-rose-200 cursor-pointer active:scale-95 shadow-2xs"
+                >
+                  <span className="material-symbols-outlined text-[18px]">logout</span>
+                  <span>Đăng Xuất</span>
+                </button>
               </div>
             </div>
           </div>

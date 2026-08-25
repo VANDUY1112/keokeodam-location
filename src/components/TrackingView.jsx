@@ -745,11 +745,8 @@ export default function TrackingView({
               type="button"
               disabled={isRouteLoading}
               onClick={handleSimulationButtonClick}
-              className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-75"
+              className="w-full py-3.5 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-75"
             >
-              <span className="material-symbols-outlined text-[18px]">
-                {simStatus === 'completed' ? 'check_circle' : 'two_wheeler'}
-              </span>
               <span>
                 {simStatus === 'completed' ? 'Kết thúc' : 'Chạy mô phỏng lộ trình'}
               </span>

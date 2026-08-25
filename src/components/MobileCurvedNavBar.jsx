@@ -98,9 +98,6 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
                     : 'text-slate-400 group-hover:text-white stroke-[1.8]'
                 }`}
               />
-              {activeTab === 'dashboard' && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
-              )}
             </div>
             <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'dashboard' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Tổng Quan
@@ -124,9 +121,6 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
                     : 'text-slate-400 group-hover:text-white stroke-[1.8]'
                 }`}
               />
-              {activeTab === 'landing' && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
-              )}
             </div>
             <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'landing' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Trang Khách
@@ -145,17 +139,15 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
             title="Lịch Sử"
           >
             <div className={`relative transition-transform duration-200 ${activeTab === 'history' ? '-translate-y-1 scale-105' : ''}`}>
-              <History
-                size={23}
-                className={`transition-all duration-200 ${
+              <img
+                src="/icons8-progress-100.png"
+                alt="Lịch Sử"
+                className={`w-[22px] h-[22px] object-contain transition-all duration-200 ${
                   activeTab === 'history'
-                    ? 'text-white stroke-[2.8] drop-shadow-sm'
-                    : 'text-slate-400 group-hover:text-white stroke-[1.8]'
+                    ? 'brightness-0 invert drop-shadow-sm'
+                    : 'brightness-0 invert opacity-60 group-hover:opacity-100'
                 }`}
               />
-              {activeTab === 'history' && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
-              )}
             </div>
             <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'history' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Lịch Sử
@@ -179,9 +171,6 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
                     : 'text-slate-400 group-hover:text-white stroke-[1.8]'
                 }`}
               />
-              {activeTab === 'settings' && (
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white shadow-xs"></span>
-              )}
             </div>
             <span className={`text-[11px] sm:text-xs mt-1.5 leading-none transition-colors duration-200 ${activeTab === 'settings' ? 'font-bold text-white' : 'text-slate-400 font-medium'}`}>
               Cài Đặt
