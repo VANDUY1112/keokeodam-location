@@ -212,46 +212,63 @@ class ApiService {
 
   // ─── Rentals ───
   async getRentals(params = {}) {
+    const rentalsMap = new Map();
+
+    // 1. Try Backend API (Local SQLite or Render)
     try {
       const query = new URLSearchParams(params).toString();
-      return await this.request(`/rentals${query ? `?${query}` : ''}`);
-    } catch (err) {
-      const { data, error } = await supabase
-        .from('rentals')
-        .select('*, speakers(name, model)')
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        return {
-          success: true,
-          data: data.map(r => ({
-            id: r.id,
-            speakerId: r.speaker_id,
-            speakerName: r.speakers?.name || r.speaker_id,
-            customerName: r.customer_name,
-            customerPhone: r.customer_phone,
-            address: r.address,
-            startLat: r.start_lat,
-            startLng: r.start_lng,
-            destLat: r.dest_lat,
-            destLng: r.dest_lng,
-            pathCoordinates: r.path_coordinates ? (typeof r.path_coordinates === 'string' ? JSON.parse(r.path_coordinates) : r.path_coordinates) : [],
-            startTime: r.start_time,
-            endTime: r.end_time,
-            durationHours: r.duration_hours,
-            rentPrice: r.rent_price,
-            shippingFee: r.shipping_fee,
-            totalAmount: r.total_amount,
-            depositAmount: r.deposit_amount,
-            depositStatus: r.deposit_status,
-            status: r.status,
-            note: r.note,
-            createdAt: r.created_at
-          }))
-        };
+      const res = await this.request(`/rentals${query ? `?${query}` : ''}`);
+      if (res?.success && Array.isArray(res.data)) {
+        res.data.forEach(r => rentalsMap.set(String(r.id), r));
       }
-      return { success: true, data: [] };
+    } catch (e) {
+      // ignore
     }
+
+    // 2. Fetch from Supabase Cloud (Always merges for cross-device Mobile <-> Web sync)
+    try {
+      if (supabase && (typeof navigator === 'undefined' || navigator.onLine)) {
+        const { data, error } = await supabase
+          .from('rentals')
+          .select('*, speakers(name, model)')
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data)) {
+          data.forEach(r => {
+            const mapped = {
+              id: r.id,
+              speakerId: r.speaker_id,
+              speakerName: r.speakers?.name || r.speaker_id,
+              customerName: r.customer_name,
+              customerPhone: r.customer_phone,
+              address: r.address,
+              startLat: r.start_lat,
+              startLng: r.start_lng,
+              destLat: r.dest_lat,
+              destLng: r.dest_lng,
+              pathCoordinates: r.path_coordinates ? (typeof r.path_coordinates === 'string' ? JSON.parse(r.path_coordinates) : r.path_coordinates) : [],
+              startTime: r.start_time,
+              endTime: r.end_time,
+              durationHours: r.duration_hours,
+              rentPrice: r.rent_price,
+              shippingFee: r.shipping_fee,
+              totalAmount: r.total_amount,
+              depositAmount: r.deposit_amount,
+              depositStatus: r.deposit_status,
+              status: r.status,
+              note: r.note,
+              createdAt: r.created_at
+            };
+            rentalsMap.set(String(mapped.id), mapped);
+          });
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+
+    const merged = Array.from(rentalsMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return { success: true, data: merged };
   }
 
   async createRental(data, options = {}) {
@@ -261,49 +278,57 @@ class ApiService {
       return { success: true, offline: true, data: { id: item.id } };
     }
 
+    const rentalId = data.id || `ORD-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
+    let apiData = null;
+
+    // 1. Try Backend API
     try {
-      return await this.request('/rentals', {
+      const res = await this.request('/rentals', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify({ ...data, id: rentalId })
       });
+      if (res?.success) {
+        apiData = res.data;
+      }
     } catch (err) {
-      const rentalId = `ORD-${Date.now().toString().slice(-6)}`;
-      let pushedToCloud = false;
-
-      try {
-        if (supabase && navigator.onLine) {
-          await supabase.from('rentals').insert({
-            id: rentalId,
-            speaker_id: data.speakerId || 'LKK-01',
-            customer_name: data.customerName,
-            customer_phone: data.customerPhone,
-            address: data.address,
-            start_lat: data.startLat || (data.startPosition ? data.startPosition.lat : null),
-            start_lng: data.startLng || (data.startPosition ? data.startPosition.lng : null),
-            dest_lat: data.destLat || (data.endPosition ? data.endPosition.lat : null),
-            dest_lng: data.destLng || (data.endPosition ? data.endPosition.lng : null),
-            path_coordinates: data.pathCoordinates || null,
-            duration_hours: data.durationHours || 4,
-            rent_price: data.rentPrice,
-            shipping_fee: data.shippingFee || 0,
-            total_amount: data.totalAmount,
-            deposit_amount: data.depositAmount || 500000,
-            deposit_status: data.depositStatus || 'Đã giữ cọc',
-            status: data.status || 'completed',
-            note: data.note
-          });
-          pushedToCloud = true;
-        }
-      } catch (supabaseErr) {
-        // Fallback to outbox
-      }
-
-      if (!pushedToCloud && !options.skipOfflineQueue) {
-        offlineSync.saveToOutbox('CREATE_RENTAL', data);
-      }
-
-      return { success: true, data: { id: rentalId }, offline: !pushedToCloud };
+      // backend error
     }
+
+    // 2. Always Push to Supabase Cloud for Instant Cross-Device Sync (Mobile <-> Web)
+    let supabaseSuccess = false;
+    try {
+      if (supabase && (typeof navigator === 'undefined' || navigator.onLine)) {
+        const startPos = data.startPosition || (data.startLat && data.startLng ? { lat: data.startLat, lng: data.startLng } : null);
+        const endPos = data.endPosition || (data.destLat && data.destLng ? { lat: data.destLat, lng: data.destLng } : null);
+
+        await supabase.from('rentals').upsert({
+          id: apiData?.id || rentalId,
+          speaker_id: data.speakerId || 'LKK-01',
+          customer_name: data.customerName || 'Khách thuê',
+          customer_phone: data.customerPhone || '0908123456',
+          address: data.address || 'Tuy Hòa, Phú Yên',
+          dest_lat: endPos ? endPos.lat : null,
+          dest_lng: endPos ? endPos.lng : null,
+          duration_hours: data.durationHours || 4,
+          rent_price: Number(data.rentPrice) || 350000,
+          shipping_fee: Number(data.shippingFee) || 0,
+          total_amount: Number(data.totalAmount) || 350000,
+          deposit_amount: Number(data.depositAmount) || 500000,
+          deposit_status: data.depositStatus || 'Đã giữ cọc',
+          status: data.status || 'completed',
+          note: data.note || ''
+        });
+        supabaseSuccess = true;
+      }
+    } catch (supabaseErr) {
+      console.warn('Supabase cross-device sync notice:', supabaseErr.message);
+    }
+
+    if (!apiData && !supabaseSuccess && !options.skipOfflineQueue) {
+      offlineSync.saveToOutbox('CREATE_RENTAL', data);
+    }
+
+    return { success: true, data: apiData || { id: rentalId }, offline: !supabaseSuccess && !apiData };
   }
 
   async updateRentalStatus(id, status, depositStatus, note, options = {}) {
@@ -313,60 +338,77 @@ class ApiService {
     }
 
     try {
-      return await this.request(`/rentals/${id}/status`, {
+      await this.request(`/rentals/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status, depositStatus, note })
       });
     } catch (err) {
-      try {
-        if (supabase && navigator.onLine) {
-          const updates = { status, updated_at: new Date().toISOString() };
-          if (depositStatus) updates.deposit_status = depositStatus;
-          if (note) updates.note = note;
-          if (status === 'completed') updates.end_time = new Date().toISOString();
-          await supabase.from('rentals').update(updates).eq('id', id);
-        } else if (!options.skipOfflineQueue) {
-          offlineSync.saveToOutbox('UPDATE_RENTAL', { id, status, depositStatus, note });
-        }
-      } catch (e) {
-        if (!options.skipOfflineQueue) {
-          offlineSync.saveToOutbox('UPDATE_RENTAL', { id, status, depositStatus, note });
-        }
-      }
-      return { success: true };
+      // ignore
     }
+
+    try {
+      if (supabase && (typeof navigator === 'undefined' || navigator.onLine)) {
+        const updates = { status, updated_at: new Date().toISOString() };
+        if (depositStatus) updates.deposit_status = depositStatus;
+        if (note) updates.note = note;
+        if (status === 'completed') updates.end_time = new Date().toISOString();
+        await supabase.from('rentals').update(updates).eq('id', id);
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    return { success: true };
   }
 
   // ─── Expenses ───
   async getExpenses(params = {}) {
+    const expensesMap = new Map();
+
     try {
       const query = new URLSearchParams(params).toString();
-      return await this.request(`/expenses${query ? `?${query}` : ''}`);
+      const res = await this.request(`/expenses${query ? `?${query}` : ''}`);
+      if (res?.success && Array.isArray(res.data?.expenses)) {
+        res.data.expenses.forEach(e => expensesMap.set(String(e.id), e));
+      }
     } catch (err) {
-      const { data, error } = await supabase.from('expenses').select('*').order('created_at', { ascending: false });
-      if (!error && data) {
-        const totalSpent = data.filter(e => e.status === 'Đã duyệt').reduce((acc, e) => acc + (e.amount || 0), 0);
-        const pendingCount = data.filter(e => e.status === 'Chờ duyệt').length;
-        return {
-          success: true,
-          data: {
-            totalSpent,
-            pendingCount,
-            expenses: data.map(e => ({
+      // ignore
+    }
+
+    try {
+      if (supabase && (typeof navigator === 'undefined' || navigator.onLine)) {
+        const { data, error } = await supabase.from('expenses').select('*').order('created_at', { ascending: false });
+        if (!error && Array.isArray(data)) {
+          data.forEach(e => {
+            expensesMap.set(String(e.id), {
               id: e.id,
               title: e.title,
               amount: e.amount,
               category: e.category,
-              subtitle: e.subtitle,
-              icon: e.icon,
-              status: e.status,
+              subtitle: e.subtitle || 'Hôm nay',
+              icon: e.icon || 'receipt',
+              status: e.status || 'Đã duyệt',
               createdAt: e.created_at
-            }))
-          }
-        };
+            });
+          });
+        }
       }
-      return { success: true, data: { totalSpent: 0, pendingCount: 0, expenses: [] } };
+    } catch (e) {
+      // ignore
     }
+
+    const allExpenses = Array.from(expensesMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    const totalSpent = allExpenses.filter(e => e.status === 'Đã duyệt').reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
+    const pendingCount = allExpenses.filter(e => e.status === 'Chờ duyệt').length;
+
+    return {
+      success: true,
+      data: {
+        totalSpent,
+        pendingCount,
+        expenses: allExpenses
+      }
+    };
   }
 
   async createExpense(data, options = {}) {
@@ -375,38 +417,36 @@ class ApiService {
       return { success: true, offline: true, data: { id: item.id } };
     }
 
+    const expenseId = `EXP-${Date.now().toString().slice(-6)}`;
+    let apiSuccess = false;
+
     try {
-      return await this.request('/expenses', {
+      const res = await this.request('/expenses', {
         method: 'POST',
         body: JSON.stringify(data)
       });
+      if (res?.success) apiSuccess = true;
     } catch (err) {
-      const expenseId = `EXP-${Date.now().toString().slice(-6)}`;
-      let pushedToCloud = false;
-
-      try {
-        if (supabase && navigator.onLine) {
-          await supabase.from('expenses').insert({
-            id: expenseId,
-            title: data.title,
-            amount: data.amount,
-            category: data.category,
-            subtitle: data.subtitle || 'Hôm nay',
-            icon: data.icon || 'receipt',
-            status: data.status || 'Đã duyệt'
-          });
-          pushedToCloud = true;
-        }
-      } catch (e) {
-        // Fallback
-      }
-
-      if (!pushedToCloud && !options.skipOfflineQueue) {
-        offlineSync.saveToOutbox('CREATE_EXPENSE', data);
-      }
-
-      return { success: true, data: { id: expenseId }, offline: !pushedToCloud };
+      // ignore
     }
+
+    try {
+      if (supabase && (typeof navigator === 'undefined' || navigator.onLine)) {
+        await supabase.from('expenses').upsert({
+          id: expenseId,
+          title: data.title,
+          amount: data.amount,
+          category: data.category,
+          subtitle: data.subtitle || 'Hôm nay',
+          icon: data.icon || 'receipt',
+          status: data.status || 'Đã duyệt'
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    return { success: true, data: { id: expenseId } };
   }
 
   async approveExpense(id, status = 'Đã duyệt') {
