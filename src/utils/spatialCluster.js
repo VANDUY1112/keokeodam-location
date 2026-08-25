@@ -42,7 +42,7 @@ export function clusterDeliveryPoints(trips = [], maxRadiusKm = 0.65, userCoords
         id: t.id || `pt-${idx}`,
         lat,
         lng,
-        customerName: t.customerName || t.title?.replace('Giao Loa: ', '') || `Khách #${idx + 1}`,
+        customerName: (t.customerName && t.customerName !== 'Khách lẻ' ? t.customerName : null) || (t.address && t.address !== 'Tuy Hòa, Phú Yên' ? t.address : null) || t.title?.replace(/^(Vị trí:\s*|Giao Loa:\s*)/, '') || t.customerName || `Điểm #${idx + 1}`,
         address: t.address || t.destination || 'Điểm giao',
         cost: t.cost || t.totalAmount || 350000,
         speakerName: t.speakerName || 'Loa Kéo',

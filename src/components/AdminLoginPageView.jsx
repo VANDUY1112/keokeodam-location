@@ -64,14 +64,6 @@ export default function AdminLoginPageView({
           localStorage.removeItem('locahome_saved_email');
         }
 
-        if (setToast) {
-          setToast({
-            title: '🎉 Đăng Nhập Thành Công',
-            desc: `Xin chào Quản trị viên ${userData.fullName}!`,
-            type: 'success'
-          });
-        }
-
         setIsExiting(true);
         setTimeout(() => {
           if (onLoginSuccess) {

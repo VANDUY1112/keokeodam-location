@@ -354,6 +354,9 @@ export default function TrackingView({
     const finalPos = data.finalPos || { lat: 10.7769, lng: 106.7009 };
     const locationDisplay = customLocation ? customLocation : (deliveryAddress || 'Điểm giao khách hàng');
 
+    // 🎯 Ưu tiên tên vị trí/quán do shipper vừa nhập làm tên hiển thị chính
+    const primaryDisplayName = customLocation || customerName || 'Khách thuê';
+
     const now = new Date();
     const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
 
@@ -372,7 +375,7 @@ export default function TrackingView({
         duration: formatTime(data.seconds > 0 ? data.seconds : 180),
         cost: totalCollectFromCustomer,
         speakerName: selectedSpeaker?.name || 'Loa Kéo',
-        customerName: customerName || 'Khách lẻ',
+        customerName: primaryDisplayName,
         status: 'Hoàn thành',
         statusBadge: 'bg-slate-900 text-white',
         icon: 'speaker',
@@ -391,7 +394,7 @@ export default function TrackingView({
 
     api.createRental({
       speakerId,
-      customerName: customerName ? (customerName.split(' - ')[0] || customerName) : 'Khách lẻ',
+      customerName: primaryDisplayName,
       customerPhone: customerName && customerName.includes(' - ') ? (customerName.split(' - ')[1] || '0908123456') : '0908123456',
       address: locationDisplay || 'Tuy Hòa, Phú Yên',
       startLat: startPosToSave ? startPosToSave.lat : null,

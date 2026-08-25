@@ -97,14 +97,6 @@ export default function UserLoginPageView({
           points: 120
         };
 
-        if (setToast) {
-          setToast({
-            title: '🎉 Đăng Nhập Thành Công',
-            desc: `Chào mừng ${user.fullName || 'bạn'} trở lại!`,
-            type: 'success'
-          });
-        }
-
         setIsExiting(true);
         setTimeout(() => {
           if (onLoginSuccess) {
@@ -226,14 +218,6 @@ export default function UserLoginPageView({
         avatarUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
         provider: 'Facebook'
       };
-    }
-
-    if (setToast) {
-      setToast({
-        title: '🎉 Đăng Nhập Thành Công',
-        desc: `Chào mừng ${customerUser.fullName} đến với Dặm!`,
-        type: 'success'
-      });
     }
 
     setIsExiting(true);

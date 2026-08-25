@@ -234,7 +234,7 @@ export default function App() {
     };
 
     loadRealData();
-  }, []);
+  }, [isAuthenticated]);
 
   const openVietQR = (amount = 280000, note = 'LOCAHOME THUE LOA') => {
     setVietQRData({ amount, note });

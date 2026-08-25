@@ -61,33 +61,35 @@ function MapController({ position, startPosition, endPosition, pathCoordinates =
   return null;
 }
 
-// Custom Leaflet DivIcons
+// Custom Leaflet DivIcons with 3D drop-shadow & Pulse Waves
 const createStartIcon = () =>
   L.divIcon({
     className: 'custom-map-pin',
     html: `
-      <div class="relative flex items-center justify-center">
-        <div class="w-8 h-8 rounded-full bg-emerald-500 border-2 border-white shadow-lg flex items-center justify-center text-white font-bold">
-          <span class="material-symbols-outlined text-[18px]">trip_origin</span>
+      <div class="relative flex items-center justify-center select-none" style="width: 38px; height: 38px;">
+        <div class="absolute inset-0 rounded-full bg-emerald-500/25 animate-ping pointer-events-none" style="animation-duration: 2s;"></div>
+        <div class="relative z-10 w-8 h-8 rounded-full bg-emerald-500 border-2 border-white shadow-[0_4px_14px_rgba(16,185,129,0.55)] flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-[17px] font-bold">trip_origin</span>
         </div>
       </div>
     `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
   });
 
 const createEndIcon = () =>
   L.divIcon({
     className: 'custom-map-pin',
     html: `
-      <div class="relative flex items-center justify-center">
-        <div class="w-8 h-8 rounded-full bg-rose-500 border-2 border-white shadow-lg flex items-center justify-center text-white font-bold">
-          <span class="material-symbols-outlined text-[18px]">flag</span>
+      <div class="relative flex items-center justify-center select-none" style="width: 38px; height: 38px;">
+        <div class="absolute inset-0 rounded-full bg-rose-500/25 animate-ping pointer-events-none" style="animation-duration: 2.2s;"></div>
+        <div class="relative z-10 w-8 h-8 rounded-full bg-rose-600 border-2 border-white shadow-[0_4px_14px_rgba(225,29,72,0.55)] flex items-center justify-center text-white">
+          <span class="material-symbols-outlined text-[17px] font-bold">flag</span>
         </div>
       </div>
     `,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
   });
 
 // Calculate bearing (in degrees 0-360) between 2 points
@@ -313,30 +315,43 @@ export default function LiveRouteMap({
           subdomains={activeLayerConfig.subdomains}
         />
 
-        {/* Dynamic Route Polyline */}
+        {/* Dynamic Route Polyline (3-Layer Neon Glow & Flowing Energy Path) */}
         {polylinePositions.length > 1 && (
           <>
-            {/* Outer Glow Line */}
+            {/* Layer 1: Ambient Outer Glow Halo */}
             <Polyline
               positions={polylinePositions}
               pathOptions={{
                 color: '#06b6d4',
-                weight: 8,
-                opacity: 0.6,
+                weight: 12,
+                opacity: 0.35,
+                lineCap: 'round',
+                lineJoin: 'round',
+                className: 'leaflet-neon-glow',
+              }}
+            />
+            {/* Layer 2: Core Vibrant Electric Cyan Track */}
+            <Polyline
+              positions={polylinePositions}
+              pathOptions={{
+                color: '#0284c7',
+                weight: 6,
+                opacity: 0.95,
                 lineCap: 'round',
                 lineJoin: 'round',
               }}
             />
-            {/* Core Solid Bright Line */}
+            {/* Layer 3: Flowing Photon Energy Trail (Animated Ant-Path) */}
             <Polyline
               positions={polylinePositions}
               pathOptions={{
                 color: '#ffffff',
-                weight: 4,
+                weight: 3,
                 opacity: 1,
                 lineCap: 'round',
                 lineJoin: 'round',
-                dashArray: isTracking ? '2, 6' : undefined,
+                dashArray: '8, 14',
+                className: 'leaflet-ant-path',
               }}
             />
           </>

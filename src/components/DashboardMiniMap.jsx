@@ -204,62 +204,36 @@ export default function DashboardMiniMap({
 
   return (
     <div className="w-full flex flex-col gap-3.5 bg-surface-container-lowest rounded-3xl p-4 sm:p-6 border border-slate-200/90 shadow-[0_4px_24px_rgba(11,28,48,0.04)]">
-      {/* ══════════ 1. HEADER & FULL-LINE CONTROLS (NO WRAPPER BACKGROUND) ══════════ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* ══════════ 1. HEADER (CLEAN & SPACIOUS ON MOBILE) ══════════ */}
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-[16px] sm:text-xl lg:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
           Phân bố khu vực
         </h2>
 
-        {/* Full-line Controls without wrapper background */}
-        <div className="grid grid-cols-4 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-          {/* Tâm GPS Button */}
-          <button
-            onClick={() => onSelectHotspot && onSelectHotspot(null)}
-            className={`col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-xs border cursor-pointer ${selectedHotspotId === null
-              ? 'bg-slate-900 text-white border-slate-900 font-extrabold'
-              : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
-              }`}
-            title="Căn bản đồ về Tâm vị trí GPS của bạn"
-          >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${selectedHotspotId === null ? 'bg-white' : 'bg-slate-400'}`}></span>
-            <span className="truncate">Tâm</span>
-          </button>
-
-          {/* Lấy GPS Button */}
-          <button
-            onClick={onRequestGPS}
-            disabled={isLocating}
-            className="col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl text-slate-800 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
-            title="Lấy lại GPS vị trí bạn đang đứng"
-          >
-            <span className={`material-symbols-outlined text-[16px] text-slate-700 ${isLocating ? 'animate-spin' : ''}`}>
-              {isLocating ? 'sync' : 'my_location'}
-            </span>
-            <span className="truncate">{isLocating ? 'Đang tìm...' : 'Lấy GPS'}</span>
-          </button>
-
-          {/* Vệ tinh / Đường phố */}
+        {/* Top Action Buttons (Compact on Mobile, Never Cut Text) */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Vệ tinh / Đường phố Toggle */}
           <button
             onClick={() => setTileMode(tileMode === 'street' ? 'satellite' : 'street')}
-            className="col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+            className="px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
             title="Chuyển chế độ xem bản đồ"
           >
             <span className="material-symbols-outlined text-[16px] text-slate-700">
               {tileMode === 'street' ? 'satellite_alt' : 'map'}
             </span>
-            <span className="truncate">{tileMode === 'street' ? 'Vệ tinh' : 'Đường'}</span>
+            <span className="hidden sm:inline">{tileMode === 'street' ? 'Vệ tinh' : 'Đường'}</span>
           </button>
 
           {/* Mở rộng Toàn màn hình */}
           <button
             onClick={() => setIsExpanded(true)}
-            className="col-span-1 px-2.5 sm:px-3 py-2 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+            className="px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-xl text-slate-700 bg-white shadow-xs border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
             title="Mở rộng xem toàn màn hình"
           >
             <span className="material-symbols-outlined text-[16px] text-slate-700">
               fullscreen
             </span>
-            <span className="truncate">Mở rộng</span>
+            <span className="hidden sm:inline">Mở rộng</span>
           </button>
         </div>
       </div>
@@ -416,6 +390,23 @@ export default function DashboardMiniMap({
             );
           })}
         </MapContainer>
+
+        {/* Floating In-Map GPS Recenter Button */}
+        <div className="absolute bottom-3 right-3 z-[400] flex flex-col gap-2 pointer-events-auto">
+          <button
+            onClick={() => {
+              if (onSelectHotspot) onSelectHotspot(null);
+              if (onRequestGPS) onRequestGPS();
+            }}
+            disabled={isLocating}
+            className="w-11 h-11 rounded-2xl bg-white/95 hover:bg-white text-slate-900 shadow-xl border border-slate-200/90 flex items-center justify-center backdrop-blur-md active:scale-95 transition-all cursor-pointer group"
+            title="Căn giữa vị trí của bạn"
+          >
+            <span className={`material-symbols-outlined text-[22px] text-slate-800 group-hover:scale-110 transition-transform ${isLocating ? 'animate-spin' : ''}`}>
+              {isLocating ? 'sync' : 'my_location'}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* ══════════ 4. FULLSCREEN MAP MODAL (PORTAL TO BODY WITH SMOOTH ANIMATION) ══════════ */}

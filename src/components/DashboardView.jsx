@@ -157,10 +157,13 @@ export default function DashboardView({
     const dateStr = `${now.getDate()} Th${now.getMonth() + 1}`;
     const distText = `${realDist.toFixed(2)} km`;
 
+    const resolvedName = (r.customerName && r.customerName !== 'Khách lẻ' ? r.customerName : null) || (r.address && r.address !== 'Tuy Hòa, Phú Yên' ? r.address : null) || r.customerName || 'Khách thuê';
+    const displayTitle = r.customerPhone && r.customerPhone !== '0908123456' ? `${resolvedName} - ${r.customerPhone}` : resolvedName;
+
     return {
       id: r.id,
-      title: `${r.customerName} - ${r.customerPhone || ''}`,
-      customerName: r.customerName,
+      title: displayTitle,
+      customerName: resolvedName,
       subtitle: `${timeStr} (${dateStr}) • ${distText} • ${r.speakerName || 'Loa Kéo'} • ${formatVND(r.totalAmount || 0)}`,
       cost: r.totalAmount,
       status: r.status === 'cancelled' || r.status === 'Đã huỷ' ? 'Đã huỷ' : 'Hoàn thành',
