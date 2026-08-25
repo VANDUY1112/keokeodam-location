@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Navigation,
   BarChart3,
-  Sparkles,
+  Store,
   History,
   Settings,
 } from 'lucide-react';
@@ -116,7 +116,7 @@ export default function MobileCurvedNavBar({ activeTab, onSelectTab }) {
             title="Trang Khách"
           >
             <div className={`relative transition-transform duration-200 ${activeTab === 'landing' ? '-translate-y-1 scale-105' : ''}`}>
-              <Sparkles
+              <Store
                 size={23}
                 className={`transition-all duration-200 ${
                   activeTab === 'landing'

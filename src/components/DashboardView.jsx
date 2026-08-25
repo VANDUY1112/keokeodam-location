@@ -4,6 +4,7 @@ import { formatVND, parseVNDNumber, parseLocalDate } from '../utils/format';
 import DashboardMiniMap, { generateHotspotsAround } from './DashboardMiniMap';
 import { api } from '../services/api.js';
 import { clusterDeliveryPoints } from '../utils/spatialCluster';
+import { DashboardSkeleton } from './AppSkeletons';
 
 export default function DashboardView({
   expenses = [],
@@ -201,74 +202,93 @@ export default function DashboardView({
     icon: e.icon || 'receipt'
   })) : expenses;
 
+  if (isLoadingApi && displayTrips.length === 0) {
+    return <DashboardSkeleton />;
+  }
+
   return (
     <div className="flex flex-col w-full gap-6 lg:gap-8">
-      {/* ══════════ 3 TOP STAT CARDS ══════════ */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6 w-full">
+      {/* ══════════ 3 TOP STAT CARDS (2 BOXES 1 LINE ON MOBILE, 17PX TITLES & BOTTOM-RIGHT ICONS) ══════════ */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6 w-full">
         {/* Metric 1: Total Distance */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[120px] lg:min-h-[140px]">
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[110px] sm:min-h-[135px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between gap-2 z-10">
-            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
+          {/* Top Title - Full Width, wraps to next line if needed */}
+          <div className="z-10">
+            <span className="text-slate-900 font-bold text-[17px] leading-snug break-words block">
               Tổng quãng đường
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <Milestone className="w-5 h-5 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
-            </div>
           </div>
 
-          <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
-            <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              {isLoadingApi ? '...' : totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}
-            </span>
-            <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">km</span>
+          {/* Bottom Row: Number on left, Icon on right */}
+          <div className="flex items-end justify-between gap-1.5 z-10 mt-3">
+            <div className="flex items-baseline gap-1">
+              <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[36px] font-black leading-none tracking-tight">
+                {isLoadingApi ? '...' : totalDistanceNum.toLocaleString('vi-VN', { maximumFractionDigits: 1 })}
+              </span>
+              <span className="text-slate-500 font-bold text-xs sm:text-sm">km</span>
+            </div>
+
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
+              <Milestone className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
           </div>
         </div>
 
         {/* Metric 2: Avg Speed */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[120px] lg:min-h-[140px]">
+        <div className="col-span-1 bg-surface-container-lowest rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[110px] sm:min-h-[135px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between gap-2 z-10">
-            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
+          {/* Top Title - Full Width, wraps to next line if needed */}
+          <div className="z-10">
+            <span className="text-slate-900 font-bold text-[17px] leading-snug break-words block">
               Tốc độ trung bình
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
+          </div>
+
+          {/* Bottom Row: Number on left, Icon on right */}
+          <div className="flex items-end justify-between gap-1.5 z-10 mt-3">
+            <div className="flex items-baseline gap-1">
+              <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[36px] font-black leading-none tracking-tight">
+                {isLoadingApi ? '...' : (totalDistanceNum > 0 && totalRentals > 0 ? (totalDistanceNum / totalRentals).toFixed(1) : '0')}
+              </span>
+              <span className="text-slate-500 font-bold text-xs sm:text-sm">km/h</span>
+            </div>
+
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
+              <span className="material-symbols-outlined text-[20px] sm:text-[22px]">
                 speed
               </span>
             </div>
           </div>
-
-          <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
-            <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              {isLoadingApi ? '...' : (totalDistanceNum > 0 && totalRentals > 0 ? (totalDistanceNum / totalRentals).toFixed(1) : '0')}
-            </span>
-            <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">km/h</span>
-          </div>
         </div>
 
-        {/* Metric 3: Total Speaker Rentals */}
-        <div className="col-span-1 bg-surface-container-lowest rounded-2xl p-4 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200/90 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[120px] lg:min-h-[140px]">
+        {/* Metric 3: Total Speaker Rentals (Spans full line 2 on mobile) */}
+        <div className="col-span-2 md:col-span-1 bg-surface-container-lowest rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between border border-slate-200 shadow-[0_4px_20px_rgba(11,28,48,0.04)] hover:shadow-[0_8px_30px_rgba(11,28,48,0.08)] hover:border-slate-300 transition-all relative overflow-hidden group min-h-[110px] sm:min-h-[135px]">
           <div className="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full blur-xl group-hover:bg-primary/10 transition-colors duration-500"></div>
 
-          <div className="flex items-center justify-between gap-2 z-10">
-            <span className="text-slate-900 font-bold text-base sm:text-lg lg:text-xl leading-tight">
+          {/* Top Title - Full Width */}
+          <div className="z-10">
+            <span className="text-slate-900 font-bold text-[17px] leading-snug break-words block">
               Tổng loa được thuê
             </span>
-            <div className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-              <span className="material-symbols-outlined text-[20px] sm:text-[22px] lg:text-[26px]">
+          </div>
+
+          {/* Bottom Row: Number on left, Icon on right */}
+          <div className="flex items-end justify-between gap-1.5 z-10 mt-3">
+            <div className="flex items-baseline gap-1">
+              <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[36px] font-black leading-none tracking-tight">
+                {isLoadingApi ? '...' : totalRentals}
+              </span>
+              <span className="text-slate-500 font-bold text-xs sm:text-sm">đơn</span>
+            </div>
+
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200/90 text-slate-700 flex items-center justify-center shadow-2xs group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
+              <span className="material-symbols-outlined text-[20px] sm:text-[22px]">
                 speaker
               </span>
             </div>
-          </div>
-
-          <div className="flex items-baseline gap-1.5 sm:gap-2 z-10 my-1">
-            <span className="font-display text-on-surface text-2xl sm:text-3xl lg:text-[38px] font-extrabold leading-none tracking-tight">
-              {isLoadingApi ? '...' : totalRentals}
-            </span>
-            <span className="text-slate-500 font-bold text-sm sm:text-base lg:text-lg">đơn</span>
           </div>
         </div>
       </div>

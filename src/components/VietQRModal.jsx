@@ -266,19 +266,19 @@ export default function VietQRModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-0 sm:p-4 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs transition-opacity duration-200"
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-200"
         onClick={onClose}
       ></div>
 
-      {/* Modal Card */}
-      <div className="relative w-full max-w-[420px] bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xl z-10 flex flex-col gap-3.5 animate-popup-open my-auto max-h-[92vh] overflow-y-auto no-scrollbar">
+      {/* Modal Card - Full Screen on Mobile */}
+      <div className="relative w-full h-full min-h-[100dvh] sm:min-h-0 sm:h-auto sm:max-h-[92vh] sm:max-w-[420px] bg-white rounded-none sm:rounded-3xl p-4 sm:p-5 border-0 sm:border sm:border-slate-200/90 shadow-2xl z-10 flex flex-col gap-3.5 sm:my-auto overflow-y-auto no-scrollbar">
         
         {/* ══════════ SCREEN 1: SUCCESS CELEBRATION (AUTOMATIC DETECTED) ══════════ */}
         {isPaid ? (
-          <div className="flex flex-col items-center text-center py-4 space-y-3.5 animate-in zoom-in-95 duration-300">
+          <div className="flex flex-col items-center text-center py-4 space-y-3.5 animate-in zoom-in-95 duration-300 my-auto">
             {/* Animated Green Check Circle */}
             <div className="w-16 h-16 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 animate-bounce">
               <span className="material-symbols-outlined text-[36px]" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -344,13 +344,22 @@ export default function VietQRModal({
             {/* Header */}
             <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-2xs">
+                <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-2xs">
                   <span className="material-symbols-outlined text-[18px]">qr_code_2</span>
                 </div>
-                <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-tight">
+                <h3 className="font-bold text-slate-900 text-base leading-tight">
                   Mã VietQR Thu Tiền
                 </h3>
               </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors active:scale-95"
+                title="Đóng"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
             </div>
 
             {/* Amount Input & Quick Select Full Line Grid */}

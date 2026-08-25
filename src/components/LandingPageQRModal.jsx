@@ -94,7 +94,7 @@ export default function LandingPageQRModal({
               <span className="material-symbols-outlined text-[22px]">qr_code_2</span>
             </div>
             <div>
-              <h3 className="text-slate-900 font-bold text-base sm:text-lg leading-tight">Mã QR Quán</h3>
+              <h3 className="text-slate-900 font-bold text-base sm:text-lg leading-tight">Mã QR</h3>
             </div>
           </div>
         </div>

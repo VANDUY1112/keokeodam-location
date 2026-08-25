@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  User, 
-  MapPin, 
-  DollarSign, 
-  Navigation, 
-  Bell, 
-  Database, 
-  ShieldCheck, 
-  Check, 
-  RefreshCw, 
-  Download, 
-  Upload, 
+import {
+  User,
+  MapPin,
+  DollarSign,
+  Navigation,
+  Bell,
+  Database,
+  ShieldCheck,
+  Check,
+  RefreshCw,
+  Download,
+  Upload,
   Trash2,
   Smartphone,
   Store,
@@ -30,11 +30,11 @@ const DEFAULT_HOME_LOCATION = {
 
 
 
-export default function SettingsView({ 
-  userAvatar, 
-  setUserAvatar, 
-  userName, 
-  setUserName, 
+export default function SettingsView({
+  userAvatar,
+  setUserAvatar,
+  userName,
+  setUserName,
   setToast,
   onResetAllData
 }) {
@@ -71,28 +71,7 @@ export default function SettingsView({
     }
   });
 
-  // Bank Dropdown state & outside click handler
-  const [isBankDropdownOpen, setIsBankDropdownOpen] = useState(false);
-  const [bankSearchQuery, setBankSearchQuery] = useState('');
-  const bankDropdownRef = useRef(null);
-
-  const selectedBank = VIETNAM_BANKS.find((b) => b.id === bankId) || VIETNAM_BANKS[0];
-  const filteredBanks = VIETNAM_BANKS.filter(
-    (b) =>
-      b.shortName.toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
-      b.name.toLowerCase().includes(bankSearchQuery.toLowerCase()) ||
-      b.id.toLowerCase().includes(bankSearchQuery.toLowerCase())
-  );
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (bankDropdownRef.current && !bankDropdownRef.current.contains(e.target)) {
-        setIsBankDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  const selectedBank = VIETNAM_BANKS[0];
 
   // Pricing rules state
   const [baseHourlyRate, setBaseHourlyRate] = useState(() => localStorage.getItem('kko_base_hourly_rate') || '80000');
@@ -305,20 +284,10 @@ export default function SettingsView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Cài Đặt & Cấu Hình Hệ Thống
+            Cài đặt
           </h1>
-          <p className="text-slate-500 text-xs sm:text-sm lg:text-base mt-0.5 sm:mt-1">
-            Quản lý thông tin tài khoản, đơn giá cho thuê, vị trí kho nhà và thiết lập GPS
-          </p>
-        </div>
 
-        <button
-          onClick={handleSaveSettings}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs sm:text-sm hover:bg-slate-800 transition-all shadow-xs active:scale-95 whitespace-nowrap self-start sm:self-auto"
-        >
-          <Check className="w-4 h-4" />
-          <span>Lưu Cài Đặt</span>
-        </button>
+        </div>
       </div>
 
       <form onSubmit={handleSaveSettings} className="space-y-5 sm:space-y-6">
@@ -333,7 +302,7 @@ export default function SettingsView({
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                Tài Khoản Ngân Hàng Nhận Tiền VietQR
+                Tài khoản ngân hàng nhận tiền VietQR
               </h2>
               <p className="text-xs text-slate-500">
                 Cấu hình tài khoản nhận tiền chuyển khoản tự động chuẩn Napas 247
@@ -342,122 +311,40 @@ export default function SettingsView({
           </div>
 
           <div className="space-y-3.5">
-            {/* Row 1: Custom Animated Bank Dropdown */}
-            <div className="relative w-full" ref={bankDropdownRef}>
+            {/* Row 1: Dedicated BIDV Bank Card */}
+            <div className="w-full">
               <label className="block text-xs font-bold text-slate-600 mb-1">
                 Ngân Hàng Thụ Hưởng
               </label>
-              
-              {/* Dropdown Toggle Button */}
-              <button
-                type="button"
-                onClick={() => setIsBankDropdownOpen(!isBankDropdownOpen)}
-                className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border transition-all text-left flex items-center justify-between shadow-2xs group ${
-                  isBankDropdownOpen
-                    ? 'border-slate-900 ring-2 ring-slate-900/10 bg-white'
-                    : 'border-slate-200 hover:border-slate-300'
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-6 h-6 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
-                    {selectedBank?.shortName?.slice(0, 2) || 'NH'}
-                  </div>
-                  <div className="truncate">
-                    <span className="font-bold text-slate-900 text-xs sm:text-sm">
-                      {selectedBank?.shortName}
-                    </span>
-                    <span className="text-slate-500 text-[11px] ml-1.5 hidden sm:inline truncate">
-                      ({selectedBank?.name})
-                    </span>
-                  </div>
-                </div>
-                <span
-                  className={`material-symbols-outlined text-[18px] text-slate-400 group-hover:text-slate-700 transition-transform duration-200 shrink-0 ${
-                    isBankDropdownOpen ? 'rotate-180 text-slate-900' : ''
-                  }`}
-                >
-                  keyboard_arrow_down
-                </span>
-              </button>
 
-              {/* Animated Floating Menu */}
-              {isBankDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200/90 rounded-2xl shadow-xl z-50 p-2 space-y-1 max-h-64 overflow-y-auto no-scrollbar animate-popup-open sm:w-[320px]">
-                  {/* Search Bar inside dropdown */}
-                  <div className="px-2 py-1.5 border-b border-slate-100 mb-1 sticky top-0 bg-white">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Tìm tên ngân hàng..."
-                        value={bankSearchQuery}
-                        onChange={(e) => setBankSearchQuery(e.target.value)}
-                        className="w-full pl-7 pr-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-900 font-medium focus:outline-none focus:border-slate-900"
-                        autoFocus
-                      />
-                      <span className="material-symbols-outlined absolute left-1.5 top-1.5 text-slate-400 text-[16px]">
-                        search
-                      </span>
+              <div className="w-full px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between shadow-2xs gap-2">
+                <div className="flex items-center gap-3 min-w-0">
+                  <img
+                    src="/bidv.png"
+                    alt="BIDV"
+                    className="w-14 sm:w-16 h-8 sm:h-9 object-contain shrink-0"
+                  />
+                  <div className="truncate">
+                    <div className="font-bold text-slate-900 text-sm sm:text-base leading-tight">
+                      BIDV
+                    </div>
+                    <div className="text-slate-500 text-[11px] sm:text-xs truncate">
+                      Ngân hàng TMCP Đầu tư và Phát triển Việt Nam
                     </div>
                   </div>
-
-                  {/* Bank Option Items */}
-                  {filteredBanks.map((b) => {
-                    const isSelected = b.id === bankId;
-                    return (
-                      <button
-                        key={b.id}
-                        type="button"
-                        onClick={() => {
-                          setBankId(b.id);
-                          setIsBankDropdownOpen(false);
-                          setBankSearchQuery('');
-                        }}
-                        className={`w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl text-left transition-all ${
-                          isSelected
-                            ? 'bg-slate-900 text-white font-bold'
-                            : 'hover:bg-slate-100 text-slate-700 font-medium'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div
-                            className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 ${
-                              isSelected
-                                ? 'bg-white/20 text-white'
-                                : 'bg-slate-100 text-slate-800'
-                            }`}
-                          >
-                            {b.shortName.slice(0, 2)}
-                          </div>
-                          <div className="truncate">
-                            <div className="text-xs font-bold leading-tight truncate">
-                              {b.shortName}
-                            </div>
-                            <div
-                              className={`text-[10px] truncate ${
-                                isSelected ? 'text-slate-300' : 'text-slate-500'
-                              }`}
-                            >
-                              {b.name}
-                            </div>
-                          </div>
-                        </div>
-                        {isSelected && (
-                          <span className="material-symbols-outlined text-[16px] text-emerald-400 shrink-0">
-                            check
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
                 </div>
-              )}
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 text-[11px] font-bold shrink-0">
+                  <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                  <span>Chuẩn VietQR</span>
+                </div>
+              </div>
             </div>
 
             {/* Row 2: 2 Boxes 1 Line (Số TK & Tên Chủ TK) */}
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1">
-                  Số Tài Khoản
+                  Số tài khoản
                 </label>
                 <input
                   type="text"
@@ -470,7 +357,7 @@ export default function SettingsView({
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1">
-                  Tên Chủ Tài Khoản
+                  Tên chủ tài khoản
                 </label>
                 <input
                   type="text"

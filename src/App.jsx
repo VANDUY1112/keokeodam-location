@@ -833,7 +833,7 @@ export default function App() {
               className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-white hover:bg-rose-50 text-[#864d61] font-bold text-xs shadow-xs transition-all border border-rose-200 cursor-pointer active:scale-95"
             >
               <span className="material-symbols-outlined text-[18px] text-rose-600">qr_code_2</span>
-              <span>Mã QR Quán</span>
+              <span>Mã QR</span>
             </button>
 
             <button
@@ -873,10 +873,10 @@ export default function App() {
             <button
               onClick={() => setShowLandingQRModal(true)}
               className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-[#864d61] font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all border border-rose-200 cursor-pointer"
-              title="Mở mã QR quán / in bảng đặt bàn"
+              title="Mở mã QR đặt loa"
             >
               <span className="material-symbols-outlined text-[18px] text-rose-600">qr_code_2</span>
-              <span>Mã QR Quán</span>
+              <span>Mã QR</span>
             </button>
 
             {/* Quick VietQR Button (Desktop/Tablet only) */}

@@ -1221,6 +1221,21 @@ export default function LandingPageView({
 
             {/* Action CTAs */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Dashboard button for Admin account */}
+              {((currentUser && currentUser.role !== 'customer') || Boolean(localStorage.getItem('locahome_token'))) && (
+                <button
+                  onClick={(e) => {
+                    triggerParticleBurst(e.clientX, e.clientY);
+                    if (onNavigateToAdmin) onNavigateToAdmin();
+                  }}
+                  className="bg-slate-900 hover:bg-slate-800 text-white font-headline text-xs sm:text-sm px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-full flex items-center gap-1.5 justify-center cursor-pointer active:scale-95 transition-all shadow-md hover:scale-105 whitespace-nowrap shrink-0"
+                  title="Chuyển đến Bảng Điều Khiển Dashboard"
+                >
+                  <span className="material-symbols-outlined text-[16px] sm:text-[18px]">dashboard</span>
+                  <span>Dashboard</span>
+                </button>
+              )}
+
               <button
                 onClick={(e) => {
                   triggerParticleBurst(e.clientX, e.clientY);

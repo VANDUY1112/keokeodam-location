@@ -5,6 +5,7 @@ import LiveRouteMap from './LiveRouteMap';
 import Pagination from './Pagination';
 import { formatVND, parseLocalDate } from '../utils/format';
 import { api } from '../services/api.js';
+import { HistorySkeleton } from './AppSkeletons';
 
 export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTracking, onOpenVietQR }) {
   const [selectedTripForMap, setSelectedTripForMap] = useState(null);
@@ -164,6 +165,22 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
     const rawCost = typeof t.cost === 'number' ? t.cost : (parseFloat(String(t.cost || 0).replace(/[^\d]/g, '')) || 0);
     return acc + rawCost;
   }, 0);
+
+  if (isLoadingApi && mergedTrips.length === 0) {
+    return (
+      <div className="flex flex-col w-full gap-5 sm:gap-6 lg:gap-8 pb-24 lg:pb-8">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Lịch sử chuyến
+          </h1>
+          <p className="text-slate-500 text-xs sm:text-sm lg:text-base mt-0.5 sm:mt-1">
+            Nhật ký các đơn thuê loa đã bàn giao và đo đạc quãng đường GPS di chuyển
+          </p>
+        </div>
+        <HistorySkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full gap-5 sm:gap-6 lg:gap-8 pb-24 lg:pb-8">
