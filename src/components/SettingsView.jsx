@@ -341,9 +341,9 @@ export default function SettingsView({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            {/* Custom Animated Bank Dropdown */}
-            <div className="relative" ref={bankDropdownRef}>
+          <div className="space-y-3.5">
+            {/* Row 1: Custom Animated Bank Dropdown */}
+            <div className="relative w-full" ref={bankDropdownRef}>
               <label className="block text-xs font-bold text-slate-600 mb-1">
                 Ngân Hàng Thụ Hưởng
               </label>
@@ -453,30 +453,33 @@ export default function SettingsView({
               )}
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">
-                Số Tài Khoản Nhận Tiền
-              </label>
-              <input
-                type="text"
-                value={accountNo}
-                onChange={(e) => setAccountNo(e.target.value)}
-                placeholder="Ví dụ: 0908123456..."
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
-              />
-            </div>
+            {/* Row 2: 2 Boxes 1 Line (Số TK & Tên Chủ TK) */}
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  Số Tài Khoản
+                </label>
+                <input
+                  type="text"
+                  value={accountNo}
+                  onChange={(e) => setAccountNo(e.target.value)}
+                  placeholder="Ví dụ: 0908123456..."
+                  className="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-slate-900"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-600 mb-1">
-                Tên Chủ Tài Khoản (Không Dấu)
-              </label>
-              <input
-                type="text"
-                value={accountName}
-                onChange={(e) => setAccountName(e.target.value.toUpperCase())}
-                placeholder="Ví dụ: TRAN ANH TUAN..."
-                className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold uppercase focus:outline-none focus:ring-2 focus:ring-slate-900"
-              />
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1">
+                  Tên Chủ Tài Khoản
+                </label>
+                <input
+                  type="text"
+                  value={accountName}
+                  onChange={(e) => setAccountName(e.target.value.toUpperCase())}
+                  placeholder="Ví dụ: HO VAN DUY..."
+                  className="w-full px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 font-bold uppercase focus:outline-none focus:ring-2 focus:ring-slate-900"
+                />
+              </div>
             </div>
           </div>
         </div>
