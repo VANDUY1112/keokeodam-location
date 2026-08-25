@@ -85,6 +85,27 @@ export default function TrackingView({
   const [selectedLayer, setSelectedLayer] = useState('googleHybrid');
   const [showLayerMenu, setShowLayerMenu] = useState(false);
   const [recenterTrigger, setRecenterTrigger] = useState(0);
+  const [isMapExpanded, setIsMapExpanded] = useState(false);
+  const [isMapClosing, setIsMapClosing] = useState(false);
+
+  const handleCloseFullscreenMap = () => {
+    setIsMapClosing(true);
+    setTimeout(() => {
+      setIsMapExpanded(false);
+      setIsMapClosing(false);
+    }, 280);
+  };
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isMapExpanded && !isMapClosing) {
+        handleCloseFullscreenMap();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMapExpanded, isMapClosing]);
 
   // Backend speakers state
   const [apiSpeakers, setApiSpeakers] = useState([]);
@@ -672,6 +693,19 @@ export default function TrackingView({
                   })}
                 </div>
               </div>
+
+              {/* Nút Mở Rộng Toàn Màn Hình */}
+              <button
+                type="button"
+                onClick={() => setIsMapExpanded(true)}
+                className="flex items-center gap-1.5 h-9 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-semibold border border-slate-200 shadow-xs transition-all shrink-0 active:scale-95 cursor-pointer"
+                title="Mở rộng bản đồ toàn màn hình"
+              >
+                <span className="material-symbols-outlined text-[18px] text-slate-700">
+                  fullscreen
+                </span>
+                <span className="hidden sm:inline">Mở rộng</span>
+              </button>
             </div>
           </div>
 
@@ -801,6 +835,53 @@ export default function TrackingView({
                   </button>
                 </div>
               </form>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* ══════════ FULLSCREEN ROUTE MAP MODAL (PORTAL TO BODY) ══════════ */}
+      {isMapExpanded &&
+        createPortal(
+          <div
+            className={`fixed inset-0 z-[999999] bg-slate-950/95 backdrop-blur-md flex items-center justify-center transition-all duration-300 ${
+              isMapClosing ? 'opacity-0' : 'opacity-100 animate-in fade-in'
+            }`}
+          >
+            {/* Floating Close Button in Top Right */}
+            <button
+              type="button"
+              onClick={handleCloseFullscreenMap}
+              className={`absolute top-4 right-4 z-[99999] w-12 h-12 rounded-full bg-slate-900/90 hover:bg-slate-900 text-white shadow-[0_8px_30px_rgba(0,0,0,0.5)] backdrop-blur-md flex items-center justify-center cursor-pointer transition-all duration-300 active:scale-90 border border-white/20 hover:border-white/40 ${
+                isMapClosing
+                  ? 'scale-75 opacity-0'
+                  : 'scale-100 opacity-100 animate-in zoom-in-75 slide-in-from-top-2 duration-300'
+              }`}
+              title="Đóng toàn màn hình (Esc)"
+            >
+              <span className="material-symbols-outlined text-[24px]">close</span>
+            </button>
+
+            {/* Edge-to-Edge Fullscreen Live Route Map */}
+            <div
+              className={`w-full h-full relative bg-slate-900 overflow-hidden transition-all duration-300 ease-out transform ${
+                isMapClosing
+                  ? 'scale-90 opacity-0 rounded-[40px]'
+                  : 'scale-100 opacity-100 rounded-none animate-in zoom-in-95 duration-300'
+              }`}
+            >
+              <LiveRouteMap
+                currentPosition={currentPosition}
+                startPosition={startPosition}
+                endPosition={endPosition}
+                pathCoordinates={pathCoordinates}
+                isTracking={isTracking}
+                selectedLayer={selectedLayer}
+                recenterTrigger={recenterTrigger}
+                showInternalControls={false}
+                gpsAccuracy={gpsAccuracy}
+                onSelectPosition={handleManualPositionSelect}
+              />
             </div>
           </div>,
           document.body
