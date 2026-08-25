@@ -86,13 +86,10 @@ export default function HistoryView({ trips = [], onDeleteTrip, onNavigateToTrac
               duration: `${r.durationHours}h`,
               cost: r.totalAmount,
               speakerName: r.speakerName || 'Loa Kéo',
-              customerName: r.customerName,
-              status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
-              statusBadge: r.status === 'active'
-                ? 'bg-amber-50 text-amber-700 border-amber-200/60'
-                : r.status === 'completed'
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-red-50 text-red-700 border-red-200/60',
+              status: r.status === 'cancelled' || r.status === 'Đã huỷ' ? 'Đã huỷ' : 'Hoàn thành',
+              statusBadge: r.status === 'cancelled' || r.status === 'Đã huỷ'
+                ? 'bg-red-50 text-red-700 border-red-200/60'
+                : 'bg-slate-900 text-white border-slate-900',
               icon: 'speaker',
               address: r.address,
               destination: r.address || r.customerName,

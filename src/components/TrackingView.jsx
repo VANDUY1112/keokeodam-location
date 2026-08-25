@@ -405,6 +405,7 @@ export default function TrackingView({
       totalAmount: Math.round(Number(totalCollectFromCustomer) || 350000),
       depositAmount: 500000,
       depositStatus: 'Đã giữ cọc',
+      status: 'completed',
       note: customLocation ? `Vị trí: ${customLocation}` : `GPS: ${finalDist.toFixed(2)}km`
     }).catch((err) => console.warn('Rental save to API:', err.message));
 

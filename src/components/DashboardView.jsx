@@ -163,7 +163,7 @@ export default function DashboardView({
       customerName: r.customerName,
       subtitle: `${timeStr} (${dateStr}) • ${distText} • ${r.speakerName || 'Loa Kéo'} • ${formatVND(r.totalAmount || 0)}`,
       cost: r.totalAmount,
-      status: r.status === 'active' ? 'Đang thuê' : r.status === 'completed' ? 'Hoàn thành' : 'Đã huỷ',
+      status: r.status === 'cancelled' || r.status === 'Đã huỷ' ? 'Đã huỷ' : 'Hoàn thành',
       icon: 'speaker',
       destLat: r.destLat || r.lat,
       destLng: r.destLng || r.lng,
