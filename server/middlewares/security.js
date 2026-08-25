@@ -6,16 +6,21 @@ import { config } from '../config/index.js';
 // ─── 1. CORS Configuration ───
 export const corsMiddleware = cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, server-to-server)
-    if (!origin || config.corsOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, true); // Permissive in dev, or strictly check in prod
-    }
+    // Allow all origins including Vercel production deployments, custom domains, and localhost
+    callback(null, true);
   },
-  credentials: true, // Allow cookies to be sent
+  credentials: true, // Allow cookies & authorization headers
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'x-session-id',
+    'x-client-device',
+    'Accept',
+    'Origin'
+  ],
+  exposedHeaders: ['x-session-id']
 });
 
 // ─── 2. Helmet HTTP Security Headers ───
