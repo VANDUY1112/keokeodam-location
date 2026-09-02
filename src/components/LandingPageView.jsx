@@ -358,6 +358,7 @@ export function CuteAvatarPill({ name = "User", letter = "U", color = "pink", cl
 
 export default function LandingPageView({
   currentUser,
+  isAuthenticated,
   onLogout,
   onNavigateToAdmin,
   onNavigateToLogin,
@@ -1181,8 +1182,8 @@ export default function LandingPageView({
 
             {/* Action CTAs */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {/* Dashboard button for Admin account */}
-              {((currentUser && currentUser.role !== 'customer') || Boolean(localStorage.getItem('locahome_token'))) && (
+              {/* Dashboard button for Admin account only when logged in */}
+              {isAuthenticated && currentUser && currentUser.role !== 'customer' && (
                 <button
                   onClick={(e) => {
                     triggerParticleBurst(e.clientX, e.clientY);

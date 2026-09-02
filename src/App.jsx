@@ -38,12 +38,19 @@ export default function App() {
       if (pageParam === 'login' || pageParam === 'user-login' || pageParam === 'signin') {
         return 'user-login';
       }
-      if (['dashboard', 'tracking', 'history', 'settings'].includes(pageParam)) {
-        return pageParam;
-      }
-      // If a stored token exists, go to dashboard, otherwise default to landing page for guests/scanned users
+      // Check if logged-in user with staff/admin role exists
       const hasToken = localStorage.getItem('locahome_token');
-      return hasToken ? 'dashboard' : 'landing';
+      const hasUser = localStorage.getItem('locahome_current_user');
+      let isStaff = false;
+      try {
+        const u = hasUser ? JSON.parse(hasUser) : null;
+        if (u && u.role !== 'customer') isStaff = true;
+      } catch (e) {}
+
+      if (['dashboard', 'tracking', 'history', 'settings'].includes(pageParam)) {
+        return (hasToken && isStaff) ? pageParam : 'landing';
+      }
+      return (hasToken && isStaff) ? 'dashboard' : 'landing';
     } catch {
       return 'landing';
     }
@@ -644,8 +651,9 @@ export default function App() {
       <div className="min-h-screen bg-[#fdf7ff]">
         <LandingPageView
           currentUser={currentUser}
+          isAuthenticated={isAuthenticated}
           onLogout={handleLogout}
-          onNavigateToAdmin={() => isAuthenticated ? setActiveTab('dashboard') : setActiveTab('admin-login')}
+          onNavigateToAdmin={() => isAuthenticated && currentUser && currentUser.role !== 'customer' ? setActiveTab('dashboard') : setActiveTab('admin-login')}
           onNavigateToLogin={() => setActiveTab('user-login')}
           onOpenQRModal={() => setShowLandingQRModal(true)}
           onOpenVietQR={openVietQR}
@@ -706,6 +714,32 @@ export default function App() {
             )}
           </div>
         )}
+      </div>
+    );
+  }
+
+  // ═══════════════ VIEW 3: BẢO VỆ DASHBOARD - PHẢI CÓ TÀI KHOẢN MỚI ĐƯỢC VÀO ═══════════════
+  if (!isAuthenticated || !currentUser || currentUser.role === 'customer') {
+    return (
+      <div className="min-h-screen">
+        <AdminLoginPageView
+          onLoginSuccess={(user) => {
+            setIsAuthenticated(true);
+            setCurrentUser(user);
+            if (user.fullName) {
+              setUserName(user.fullName);
+              localStorage.setItem('expensely_user_name', user.fullName);
+            }
+            if (user.avatarUrl) {
+              setUserAvatar(user.avatarUrl);
+              localStorage.setItem('expensely_user_avatar', user.avatarUrl);
+            }
+            localStorage.setItem('locahome_current_user', JSON.stringify(user));
+            setActiveTab('dashboard');
+          }}
+          onNavigateToLanding={() => setActiveTab('landing')}
+          setToast={setToast}
+        />
       </div>
     );
   }
