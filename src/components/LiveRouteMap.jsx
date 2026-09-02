@@ -301,43 +301,40 @@ export default function LiveRouteMap({
           updateWhenZooming={false}
         />
 
-        {/* Dynamic Route Polyline (3-Layer Neon Glow & Flowing Energy Path) */}
+        {/* Dynamic Route Polyline (Google Maps Authentic Navigation Route Strip) */}
         {polylinePositions.length > 1 && (
           <>
-            {/* Layer 1: Ambient Outer Glow Halo */}
+            {/* Layer 1: Google Maps Deep Border Casing */}
             <Polyline
               positions={polylinePositions}
               pathOptions={{
-                color: '#06b6d4',
-                weight: 12,
-                opacity: 0.35,
-                lineCap: 'round',
-                lineJoin: 'round',
-                className: 'leaflet-neon-glow',
-              }}
-            />
-            {/* Layer 2: Core Vibrant Electric Cyan Track */}
-            <Polyline
-              positions={polylinePositions}
-              pathOptions={{
-                color: '#0284c7',
-                weight: 6,
-                opacity: 0.95,
-                lineCap: 'round',
-                lineJoin: 'round',
-              }}
-            />
-            {/* Layer 3: Flowing Photon Energy Trail (Animated Ant-Path) */}
-            <Polyline
-              positions={polylinePositions}
-              pathOptions={{
-                color: '#ffffff',
-                weight: 3,
+                color: '#1558d6',
+                weight: 9,
                 opacity: 1,
                 lineCap: 'round',
                 lineJoin: 'round',
-                dashArray: '8, 14',
-                className: 'leaflet-ant-path',
+              }}
+            />
+            {/* Layer 2: Google Maps Iconic Vibrant Royal Blue Route */}
+            <Polyline
+              positions={polylinePositions}
+              pathOptions={{
+                color: '#4285F4',
+                weight: 6,
+                opacity: 1,
+                lineCap: 'round',
+                lineJoin: 'round',
+              }}
+            />
+            {/* Layer 3: Inner Core Highlight Strip */}
+            <Polyline
+              positions={polylinePositions}
+              pathOptions={{
+                color: '#8ab4f8',
+                weight: 2,
+                opacity: 0.85,
+                lineCap: 'round',
+                lineJoin: 'round',
               }}
             />
           </>
