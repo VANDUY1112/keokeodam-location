@@ -496,16 +496,6 @@ export default function LandingPageView({
         { id: 'baitien', name: 'Bãi Tiên', location: 'Bãi Tiên Hoang Sơ • Đông Hòa', img: '/baitien.png', color: 'from-[#2f6a3f]/90' },
         { id: 'cauongcop', name: 'Cầu Gỗ Ông Cọp', location: 'Cầu Gỗ Ông Cọp • Tuy An', img: '/cau.png', color: 'from-amber-950/90' }
       ]
-    },
-    {
-      col1: [
-        { id: 'vucphun', name: 'Vực Phun', location: 'Vực Phun Kỳ Vĩ • Tây Hòa', img: '/vucphun.png', color: 'from-[#235a7c]/90' },
-        { id: 'vungro', name: 'Vịnh Vũng Rô', location: 'Vịnh Vũng Rô Hùng Vĩ • Đông Hòa', img: '/vungro.png', color: 'from-[#2f6a3f]/90' }
-      ],
-      col2: [
-        { id: 'baimon', name: 'Bãi Môn', location: 'Bãi Môn Cát Trắng • Đông Hòa', img: '/anh4.png', color: 'from-[#864d61]/90' },
-        { id: 'tuyhoa', name: 'Biển Tuy Hòa', location: 'Bãi Biển Tuy Hòa • Nắng Vàng', img: '/beach.png', color: 'from-[#235a7c]/90' }
-      ]
     }
   ];
 
@@ -1174,21 +1164,6 @@ export default function LandingPageView({
               </a>
 
               <a
-                href="#pricing"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveNav('pricing');
-                  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className={`font-headline text-xs sm:text-sm px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${activeNav === 'pricing'
-                  ? 'bg-[#864d61]/15 text-[#864d61] font-extrabold shadow-inner'
-                  : 'text-slate-600 hover:text-[#864d61] hover:bg-[#864d61]/8 font-bold'
-                  }`}
-              >
-                <span>Bảng Giá Loa</span>
-              </a>
-
-              <a
                 href="#vivu"
                 onClick={(e) => {
                   e.preventDefault();
@@ -1201,21 +1176,6 @@ export default function LandingPageView({
                   }`}
               >
                 <span>Vi vu</span>
-              </a>
-
-              <a
-                href="#faq"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActiveNav('faq');
-                  document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className={`font-headline text-xs sm:text-sm px-4 py-2 rounded-full transition-all duration-200 cursor-pointer ${activeNav === 'faq'
-                  ? 'bg-[#864d61]/15 text-[#864d61] font-extrabold shadow-inner'
-                  : 'text-slate-600 hover:text-[#864d61] hover:bg-[#864d61]/8 font-bold'
-                  }`}
-              >
-                <span>Hỏi Đáp</span>
               </a>
             </nav>
 
@@ -1334,10 +1294,7 @@ export default function LandingPageView({
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-6">
                 <button
-                  onClick={() => {
-                    const el = document.getElementById('speakers');
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={() => setShowBookingModal(true)}
                   className="bg-[#864d61] text-white font-headline text-sm sm:text-base px-7 py-3 sm:px-8 sm:py-3.5 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md hover:scale-105"
                 >
                   <span>Thuê loa ngay</span>
@@ -1345,7 +1302,7 @@ export default function LandingPageView({
 
                 <button
                   onClick={() => {
-                    const el = document.getElementById('sound-demo');
+                    const el = document.getElementById('vivu');
                     if (el) el.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="bg-[#b2f2bb] text-[#00210b] font-headline text-sm sm:text-base px-6 py-3 sm:px-7 sm:py-3.5 rounded-full clay-button-green flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md hover:scale-105"
@@ -2054,190 +2011,17 @@ export default function LandingPageView({
           )}
         </section>
 
-        {/* ═══════════════ SPEAKER FLEET & PRICING PACKAGES ═══════════════ */}
-        <section id="speakers" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 bg-[#ffd9e3] rounded-full text-[#864d61] text-xs font-bold uppercase tracking-wider mb-2">
-              <CuteSpeakerIcon className="w-4 h-4" />
-              <span>Bảng Giá Thuê Loa Siêu Xinh</span>
-            </div>
-            <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
-              Những dàn loa cho các nẫu
-            </h2>
-            <p className="text-[#514347] font-semibold text-sm sm:text-base mt-2">
-              Tất cả các gói đều bao gồm 2 micro không dây UHF cao cấp, pin dự phòng và hỗ trợ test âm thanh tận nơi!
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {speakerPackages.map((pkg) => (
-              <div
-                key={pkg.id}
-                className={`relative rounded-3xl sm:rounded-[2.5rem] bg-white p-3.5 sm:p-6 shadow-[0_10px_30px_rgba(134,77,97,0.08)] border-2 transition-all duration-300 hover:-translate-y-2 flex flex-col justify-between ${pkg.popular ? 'border-[#864d61] ring-2 sm:ring-4 ring-[#ffd9e3]/60' : 'border-[#e9ddff]'
-                  }`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#864d61] text-white text-[9px] sm:text-xs font-headline px-2.5 sm:px-4 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap">
-                    <CuteStarIcon filled={true} className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" />
-                    <span>Khuyên Dùng</span>
-                  </div>
-                )}
-
-                <div>
-                  <div className="flex items-center justify-between mb-2 sm:mb-3">
-                    <span className={`text-[9px] sm:text-[11px] font-bold px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border truncate max-w-[85px] sm:max-w-none ${pkg.badgeColor}`}>
-                      {pkg.badge}
-                    </span>
-                    <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#f3eaff] text-[#864d61] flex items-center justify-center border border-[#ffd9e3] shrink-0">
-                      <CuteSpeakerIcon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                    </div>
-                  </div>
-
-                  <h3 className="font-headline text-sm sm:text-xl text-[#201047] mb-1 line-clamp-1">{pkg.name}</h3>
-
-                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-1 my-2 sm:my-3">
-                    <div className="flex items-baseline gap-1">
-                      <span className="font-headline text-lg sm:text-3xl text-[#864d61]">
-                        {pkg.hourlyRate.toLocaleString('vi-VN')}₫
-                      </span>
-                      <span className="text-[10px] sm:text-xs font-bold text-slate-500">/ giờ</span>
-                    </div>
-                    <span className="text-[9px] sm:text-xs font-bold text-emerald-700 sm:ml-auto bg-emerald-50 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md sm:rounded-lg border border-emerald-200 w-fit">
-                      {pkg.dailyRate.toLocaleString('vi-VN')}₫/ngày
-                    </span>
-                  </div>
-
-                  {/* Specs Pill */}
-                  <div className="flex flex-wrap items-center gap-1 sm:gap-2 py-1 sm:py-2 px-1.5 sm:px-3 bg-[#fdf7ff] rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold text-slate-600 mb-3 sm:mb-4 border border-[#e9ddff]">
-                    <span className="flex items-center gap-0.5 sm:gap-1 text-amber-700">
-                      <CuteLightningIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {pkg.power}
-                    </span>
-                    <span className="text-slate-300 hidden sm:inline">•</span>
-                    <span className="flex items-center gap-0.5 sm:gap-1 text-emerald-700">
-                      <CuteBatteryIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                      {pkg.battery}
-                    </span>
-                  </div>
-
-                  {/* Features List */}
-                  <ul className="space-y-1 sm:space-y-2 text-[10px] sm:text-xs font-semibold text-[#514347] mb-3 sm:mb-6">
-                    {pkg.features.map((feat, idx) => (
-                      <li key={idx} className="flex items-start gap-1 sm:gap-2">
-                        <CuteCheckIcon className="w-3 h-3 sm:w-4 sm:h-4 shrink-0 mt-0.5" />
-                        <span className="line-clamp-2">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <button
-                  onClick={() => handleOpenRentSpeaker(pkg)}
-                  className={`w-full py-2 sm:py-3.5 rounded-xl sm:rounded-2xl font-headline text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center justify-center ${pkg.buttonBg}`}
-                >
-                  <span>Thuê Loa Này</span>
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ═══════════════ FAQ SECTION (CÂU HỎI THƯỜNG GẶP) ═══════════════ */}
-        <section id="faq" className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="font-headline text-xl sm:text-4xl text-[#864d61]">
-              Câu hỏi hằng ngày
-            </h2>
-
-          </div>
-
-          <div className="space-y-3.5">
-            {faqs.map((faq, idx) => {
-              const isOpen = openFaqIndex === idx;
-              return (
-                <div
-                  key={idx}
-                  className={`bg-white rounded-2xl border transition-all duration-300 overflow-hidden shadow-xs ${isOpen
-                    ? 'border-[#fab3ca] shadow-[0_8px_24px_rgba(134,77,97,0.1)] ring-2 ring-[#ffd9e3]/60 -translate-y-0.5'
-                    : 'border-[#e9ddff] hover:border-[#ffd9e3] hover:shadow-sm'
-                    }`}
-                >
-                  <button
-                    onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
-                    className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 font-headline text-base text-[#201047] hover:bg-[#fdf7ff] transition-colors group cursor-pointer"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-extrabold shrink-0 transition-colors ${isOpen ? 'bg-[#864d61] text-white' : 'bg-[#ffd9e3] text-[#864d61]'
-                        }`}>
-                        {idx + 1}
-                      </span>
-                      <span className="font-headline font-bold text-sm sm:text-base text-[#201047]">{faq.q}</span>
-                    </span>
-
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 shrink-0 ${isOpen
-                      ? 'bg-[#ffd9e3] text-[#864d61] rotate-180'
-                      : 'bg-[#fdf7ff] text-[#864d61] group-hover:bg-[#ffd9e3]/60'
-                      }`}>
-                      <svg className="w-4 h-4 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  </button>
-
-                  {/* Smooth Animated Height & Opacity Collapse Container */}
-                  <div
-                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                      }`}
-                  >
-                    <div className="overflow-hidden">
-                      <div className="px-5 pb-5 pt-2 text-sm font-semibold text-[#514347] leading-relaxed border-t border-[#ffd9e3]/40 bg-[#fdf7ff]/70">
-                        <div className="flex items-start gap-3">
-                          <CuteChatAnswerIcon className="w-5 h-5 shrink-0 mt-0.5" />
-                          <span>{faq.a}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
 
 
-
-        {/* ═══════════════ BOTTOM CTA BANNER ═══════════════ */}
-        <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 text-center">
-          <div className="bg-[#f8f1ff] rounded-[3.5rem] p-8 sm:p-14 shadow-[inset_0_4px_24px_rgba(255,255,255,0.9),0_8px_32px_rgba(134,77,97,0.08)] flex flex-col items-center border-[4px] border-white">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#ffb7ce] rounded-[2rem] flex items-center justify-center shadow-[inset_0_4px_8px_rgba(255,255,255,0.5),0_8px_16px_rgba(134,77,97,0.2)] mb-6 transform rotate-[-10deg] hover:rotate-0 transition-transform border-2 border-white">
-              <CuteMicIcon className="w-12 h-12" />
-            </div>
-
-            <h2 className="font-headline text-xl sm:text-4xl text-[#864d61] mb-2">
-              Chuẩn bị hết rồi thì đừng quên
-            </h2>
-
-            <p className="text-[#514347] font-semibold text-sm sm:text-base max-w-md mb-8">
-              Rủ bạn bè tụ tập, nhận ngay loa xịn và cùng nhau tạo nên những kỷ niệm thật vui nhộn nào!
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <a
-                href="tel:0368115592"
-                className="bg-[#864d61] text-white font-headline text-base sm:text-lg px-8 py-4 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
-                title="Mở ứng dụng điện thoại và tự soạn sẵn số 0368.115.592"
-              >
-                <span>Lưu số ngay</span>
-              </a>
-
-              <a
-                href="tel:0368115592"
-                className="bg-white text-[#201047] font-headline text-base sm:text-lg px-7 py-4 rounded-full border-2 border-[#864d61]/20 hover:bg-[#eee4ff] transition-all flex items-center gap-2 shadow-sm"
-              >
-                <span>Hotline: 0368.115.592</span>
-              </a>
-            </div>
-          </div>
+        {/* ═══════════════ BOTTOM CTA BUTTON ═══════════════ */}
+        <section className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center flex justify-center">
+          <a
+            href="tel:0368115592"
+            className="bg-[#864d61] text-white font-headline text-base sm:text-lg px-8 py-4 rounded-full clay-button-pink flex items-center justify-center cursor-pointer active:scale-95 transition-transform shadow-md hover:scale-105"
+            title="Mở ứng dụng điện thoại và tự soạn sẵn số 0368.115.592"
+          >
+            <span>Lưu số ngay</span>
+          </a>
         </section>
 
         {/* ═══════════════ SAFETY NOTICE SECTION (ĐÃ UỐNG RƯỢU BIA THÌ KHÔNG LÁI XE) ═══════════════ */}
