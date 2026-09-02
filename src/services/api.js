@@ -570,15 +570,13 @@ class ApiService {
   // ─── Customer Reviews & Owner Replies ───
   async getReviews(params = {}) {
     try {
-      const query = new URLSearchParams(params).toString();
-      return await this.request(`/reviews${query ? `?${query}` : ''}`);
-    } catch (err) {
+      // 1. Fetch directly from Supabase Cloud DB (Always persistent and global across all devices)
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         return {
           success: true,
           data: data.map(r => ({
@@ -603,60 +601,103 @@ class ApiService {
           }))
         };
       }
-      return { success: true, data: [] };
+    } catch (supaErr) {
+      console.warn('Supabase reviews fetch error:', supaErr);
     }
+
+    // 2. Fallback to API server if Supabase query failed
+    try {
+      const query = new URLSearchParams(params).toString();
+      const res = await this.request(`/reviews${query ? `?${query}` : ''}`);
+      if (res && res.data && (Array.isArray(res.data) ? res.data.length > 0 : res.data.reviews?.length > 0)) {
+        return res;
+      }
+    } catch (err) {
+      // ignore
+    }
+
+    return { success: true, data: [] };
   }
 
   async createReview(data) {
+    const reviewPayload = {
+      id: data.id || `REV-${Date.now()}`,
+      name: data.name,
+      role: data.role || 'Khách thuê loa',
+      rating: data.rating || 5,
+      category: data.category || 'karaoke',
+      comment: data.comment,
+      avatar_url: data.avatar,
+      avatar_letter: data.avatarLetter,
+      avatar_color: data.avatarColor || 'pink',
+      color_scheme: data.colorScheme || 'pink',
+      verified: true,
+      post_time_formatted: data.time
+    };
+
+    // Save to Supabase Cloud DB (Global for all devices)
     try {
-      return await this.request('/reviews', {
+      await supabase.from('reviews').upsert(reviewPayload);
+    } catch (e) {
+      console.warn('Supabase insert failed:', e);
+    }
+
+    // Also sync to Backend API if available
+    try {
+      await this.request('/reviews', {
         method: 'POST',
         body: JSON.stringify(data)
       });
     } catch (err) {
-      await supabase.from('reviews').insert({
-        id: data.id || `REV-${Date.now()}`,
-        name: data.name,
-        role: data.role || 'Khách thuê loa',
-        rating: data.rating || 5,
-        category: data.category || 'karaoke',
-        comment: data.comment,
-        avatar_url: data.avatar,
-        avatar_letter: data.avatarLetter,
-        avatar_color: data.avatarColor || 'pink',
-        color_scheme: data.colorScheme || 'pink',
-        verified: true,
-        post_time_formatted: data.time
-      });
-      return { success: true, message: 'Đăng đánh giá thành công' };
+      // ignore
     }
+
+    return { success: true, message: 'Đăng đánh giá thành công' };
   }
 
   async replyReview(id, replyText, ownerName = 'Kẹo Kéo Dặm') {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const formattedReplyTime = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
     try {
-      return await this.request(`/reviews/${id}/reply`, {
+      await supabase.from('reviews').update({
+        owner_reply: replyText,
+        owner_reply_by: ownerName,
+        owner_reply_at: formattedReplyTime
+      }).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase reply update failed:', e);
+    }
+
+    try {
+      await this.request(`/reviews/${id}/reply`, {
         method: 'PATCH',
         body: JSON.stringify({ replyText, ownerName })
       });
     } catch (err) {
-      await supabase.from('reviews').update({
-        owner_reply: replyText,
-        owner_reply_by: ownerName,
-        owner_reply_at: new Date().toISOString()
-      }).eq('id', id);
-      return { success: true };
+      // ignore
     }
+
+    return { success: true };
   }
 
   async deleteReview(id) {
     try {
-      return await this.request(`/reviews/${id}`, {
+      await supabase.from('reviews').delete().eq('id', id);
+    } catch (e) {
+      console.warn('Supabase delete failed:', e);
+    }
+
+    try {
+      await this.request(`/reviews/${id}`, {
         method: 'DELETE'
       });
     } catch (err) {
-      await supabase.from('reviews').delete().eq('id', id);
-      return { success: true };
+      // ignore
     }
+
+    return { success: true };
   }
 }
 

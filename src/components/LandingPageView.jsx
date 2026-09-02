@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api.js';
+import { supabase } from '../services/supabase.js';
 import LandingPageQRModal from './LandingPageQRModal';
 
 // ══════════════════════════════════════════════════════════
@@ -552,34 +553,51 @@ export default function LandingPageView({
     }));
   };
 
-  // Load reviews from backend API on mount
+  // Load reviews from Supabase Cloud / API on mount & subscribe to Realtime updates
   useEffect(() => {
+    let isMounted = true;
     const fetchReviewsFromBackend = async () => {
       try {
         setIsLoadingReviews(true);
         const res = await api.getReviews();
-        if (res && res.data) {
+        if (res && res.data && isMounted) {
           const list = Array.isArray(res.data) ? res.data : (res.data.reviews || []);
           if (list.length > 0) {
-            setReviewsList((prev) => {
-              const revMap = new Map();
-              list.forEach(r => revMap.set(String(r.id), r));
-              prev.forEach(r => revMap.set(String(r.id), r));
-              const merged = Array.from(revMap.values());
-              try {
-                localStorage.setItem('locahome_customer_reviews', JSON.stringify(merged));
-              } catch (e) { }
-              return merged;
-            });
+            setReviewsList(list);
+            try {
+              localStorage.setItem('locahome_customer_reviews', JSON.stringify(list));
+            } catch (e) { }
           }
         }
       } catch (err) {
         console.warn('Backend reviews offline or unavailable:', err.message);
       } finally {
-        setIsLoadingReviews(false);
+        if (isMounted) {
+          setIsLoadingReviews(false);
+        }
       }
     };
     fetchReviewsFromBackend();
+
+    // Supabase Realtime Subscription: Tự động đồng bộ ngay lập tức cho tất cả mọi thiết bị khi có review mới
+    let channel;
+    try {
+      channel = supabase
+        .channel('public-reviews-realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, () => {
+          fetchReviewsFromBackend();
+        })
+        .subscribe();
+    } catch (e) { }
+
+    return () => {
+      isMounted = false;
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (e) { }
+      }
+    };
   }, []);
 
   useEffect(() => {
